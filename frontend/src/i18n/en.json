@@ -1,0 +1,455 @@
+{
+  "global": {
+    "open": "Open",
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close",
+    "next": "Next",
+    "add": "Add",
+    "create": "Create",
+    "details": "Details",
+    "yes": "Yes",
+    "no": "No",
+    "info": "Info",
+    "name": "Name",
+    "display_name": "Display Name",
+    "value": "Value",
+    "options": "Options",
+    "clean": "Clean",
+    "search": "Search",
+    "account": "Account",
+    "user_management": "User Management",
+    "home": "Home",
+    "created_on": "Created On",
+    "owner": "Owner",
+    "shared": "Shared",
+    "permissions": "Permissions",
+    "n_of_m": "{0} of {1}",
+    "refresh": "Refresh",
+    "automatic_refresh_interval": "Automatic refresh interval",
+    "enter_refresh_interval_s": "Enter refresh interval in seconds (0 to disable)",
+    "rules": {
+      "required": "This field is required!"
+    }
+  },
+  "table": {
+    "no_data_label": "No data available",
+    "loading_label": "Loading...",
+    "rows_per_page_label": "Rows per page:"
+  },
+  "days_short": {
+    "mon": "mon",
+    "tue": "tue",
+    "wed": "wed",
+    "thu": "thu",
+    "fri": "fri",
+    "sat": "sat",
+    "sun": "sun"
+  },
+  "auth": {
+    "login": {
+      "label": "Login",
+      "login_btn": "Login",
+      "no_account": "Don't have an account?",
+      "sign_up": "Sign Up",
+      "toasts": {
+        "login_failed": "Login failed!",
+        "login_success": "Login successful!"
+      }
+    },
+    "register": {
+      "label": "Register",
+      "register_btn": "Register",
+      "have_account": "Already have an account?",
+      "login": "Log in",
+      "toasts": {
+        "register_failed": "Register failed!",
+        "register_success": "Register successful!"
+      }
+    },
+    "toasts": {
+      "logout_success": "Logout successful!"
+    },
+    "rules": {
+      "email_invalid": "Please enter a valid email address"
+    }
+  },
+  "account": {
+    "label": "Account",
+    "username": "Username",
+    "email": "E-mail",
+    "current_email": "Current email",
+    "new_email": "New email",
+    "password": "Password",
+    "current_password": "Current password",
+    "new_password": "New password",
+    "logout": "Logout",
+    "access": "Access",
+    "role": {
+      "label": "Role",
+      "admin": "Admin",
+      "user": "User"
+    },
+    "account_settings": "Account settings",
+    "update_email": "Update email",
+    "update_email_desc": "Update your account's email address.",
+    "update_email_other_desc": "Update account's email address.",
+    "update_password": "Update password",
+    "update_password_desc": "Update your account's password.",
+    "update_password_other_desc": "Update account's password.",
+    "change_role": "Change role",
+    "change_role_desc": "Change user's role.",
+    "toasts": {
+      "get_user_failed": "Loading user failed! | Loading users failed!",
+      "email_update_success": "Email updated!",
+      "email_update_failed": "Updating email failed!",
+      "password_change_success": "Password changed!",
+      "password_change_failed": "Changing password failed!",
+      "role_change_success": "Role changed!",
+      "role_change_failed": "Changing role failed!"
+    },
+    "rules": {
+      "password_current_wrong": "Current password is wrong!",
+      "email_invalid": "Please enter a valid email address"
+    }
+  },
+  "not_found": {
+    "nothing_here": "Oops. Nothing here...",
+    "go_home": "Go Home"
+  },
+  "device_template": {
+    "label": "Device Template | Device Templates",
+    "template_details": "Template details",
+    "delete_device_template": "Delete device template",
+    "delete_device_template_desc": "Are you sure you want to delete this device template?",
+    "toasts": {
+      "loading_failed": "Loading device template failed! | Loading devices templates failed!",
+      "create_failed": "Creating device template failed!",
+      "update_failed": "Updating device template failed!",
+      "create_success": "Device template created!",
+      "update_success": "Device template updated!",
+      "delete_success": "Device template deleted!",
+      "delete_failed": "Deleting device template failed!"
+    },
+    "rules": {
+      "decimal_min": "Decimal places must be greater than 0!"
+    }
+  },
+  "device": {
+    "label": "Device | Devices",
+    "device_info": "Device info",
+    "add_device": "Add device",
+    "edit_device": "Edit device",
+    "type": "Type",
+    "device_type": "Device type",
+    "version": "Version",
+    "access_token": "Access Token",
+    "access_token_copied": "Access token copied!",
+    "copy_access_token": "Copy access token",
+    "generate_access_token": "Generate access token",
+    "firmware": "Firmware",
+    "mac_address": "MAC Address",
+    "api_key": "API Key",
+    "device_info": "Device info",
+    "sensor": "Sensor",
+    "sensors": "Sensors",
+    "tag": "Tag",
+    "add_sensors": "Add sensors",
+    "add_sensor": "Add sensor",
+    "no_sensors": "No sensors available",
+    "unit": "Unit",
+    "response_time": "Response time",
+    "last_activity": "Last activity",
+    "status": "Status",
+    "decimal": "Decimal places",
+    "init_window": "Initialize 1min window",
+    "share_device": "Share device",
+    "shared_with": "Shared with",
+    "delete_device": "Delete device",
+    "delete_device_desc": "Are you sure you want to delete this device?",
+    "toasts": {
+      "loading_failed": "Loading device failed! | Loading devices failed!",
+      "create_failed": "Creating device failed!",
+      "update_failed": "Updating device failed!",
+      "create_success": "Device created!",
+      "update_success": "Device updated!",
+      "delete_success": "Device deleted!",
+      "delete_failed": "Deleting device failed!",
+      "tag": {
+        "delete_failed": "Deleting sensor failed!",
+        "create_failed": "Creating sensor failed!",
+        "update_failed": "Updating sensor failed!",
+        "add_tag_to_device_failed": "Adding sensor to device failed!"
+      },
+      "window": {
+        "init_failed": "1min window initialization failed!",
+        "init_success": "1min window initialized successfully!"
+      },
+      "share": {
+        "share_success": "Device shared successfully!",
+        "share_failed": "Sharing device failed!",
+        "already_shared": "Device is already shared with this user!",
+        "user_remove_success": "User removed from device!",
+        "user_remove_failed": "Removing user from device failed!",
+        "shared_users_load_failed": "Loading shared users failed!"
+      }
+    },
+    "rules": {
+      "decimal_min": "Decimal places must be greater than 0!"
+    }
+  },
+  "chart": {
+    "label": "Chart",
+    "export_csv": "Export CSV",
+    "maximum_values": "Maximum values",
+    "statistical_method": "Statistical method",
+    "statistical_methods": {
+      "mean": "Average (Mean)",
+      "median": "Median",
+      "mode": "Mode",
+      "min": "Minimum",
+      "max": "Maximum",
+      "standard_deviation": "Standard deviation",
+      "variance": "Variance",
+      "range": "Range",
+      "sum": "Sum",
+      "count": "Count",
+      "geometry_mean": "Geometric mean",
+      "harmonic_mean": "Harmonic mean"
+    },
+    "curve_type": "Interpolation",
+    "curve_options": {
+      "straight": "Straight",
+      "bezier": "Bézier curve"
+    },
+    "graph_type": "Graph type",
+    "graph_options": {
+      "lines": "Lines",
+      "markers": "Markers",
+      "lines_markers": "Lines and markers"
+    }
+  },
+  "time_range": {
+    "label": "Time range",
+    "custom": "Custom",
+    "from": "From",
+    "to": "To",
+    "now": "Now",
+    "predefined": {
+      "last_30min": "Last 30 minutes",
+      "last_1h": "Last hour",
+      "last_6h": "Last 6 hours",
+      "last_12h": "Last 12 hours",
+      "last_24h": "Last 24 hours",
+      "last_week": "Last week",
+      "last_month": "Last month"
+    }
+  },
+  "job": {
+    "label": "Job | Jobs",
+    "job_history": "Job history",
+    "job_status": "Job status",
+    "run_job": "Run job",
+    "no_running_job": "No running job",
+    "not_finished": "Not finished yet",
+    "step": "Step",
+    "step_of": "Step {0} of {1}",
+    "cycle": "Cycle | Cycles",
+    "job_cycle": "Job cycle",
+    "cycle_of": "Cycle {0} of {1}",
+    "paused": "Paused",
+    "stopping": "Stopping",
+    "repetitions": "Repetitions",
+    "schedule": "Schedule",
+    "scheduled_time": "Scheduled time",
+    "started_at": "Started at",
+    "finished_at": "Finished at",
+    "status": "Status",
+    "progress": "Progress",
+    "controls": {
+      "pause": "Pause",
+      "resume": "Resume",
+      "stop": "Stop",
+      "skip_step": "Skip step",
+      "skip_cycle": "Skip cycle"
+    },
+    "toasts": {
+      "stop_success": "Job stopped!",
+      "stop_failed": "Stopping job failed!",
+      "pause_success": "Job paused!",
+      "pause_failed": "Pausing job failed!",
+      "resume_success": "Job resumed!",
+      "resume_failed": "Resuming job failed!",
+      "skip_step_success": "Job step skipped!",
+      "skip_step_failed": "Skipping job step failed!",
+      "skip_cycle_success": "Job cycle skipped!",
+      "skip_cycle_failed": "Skipping job cycle failed!",
+      "start_success": "Job started!",
+      "start_failed": "Starting job failed!",
+      "load_failed": "Loading job failed!"
+    },
+    "rules": {
+      "repetitions_min": "Repetitions must be greater than 0!"
+    }
+  },
+  "recipe": {
+    "label": "Recipe | Recipes",
+    "create_recipe": "Create recipe",
+    "edit_recipe": "Edit recipe",
+    "delete_recipe": "Delete recipe",
+    "delete_recipe_desc": "Are you sure you want to delete this recipe?",
+    "subrecipe": "Subrecipe | Subrecipes",
+    "recipe_steps": "Recipe steps",
+    "no_subrecipes_added": "No subrecipes added to this recipe",
+    "no_commands_added": "No commands added to this recipe",
+    "available_steps": "Available steps",
+    "no_commands_for_device_type": "No commands available for this device type",
+    "no_subrecipes_for_device_type": "No subrecipes available for this device type",
+    "toasts": {
+      "load_failed": "Loading recipes failed!",
+      "create_success": "Recipe created!",
+      "create_failed": "Creating recipe failed!",
+      "update_success": "Recipe updated!",
+      "update_failed": "Updating recipe failed!",
+      "delete_success": "Recipe deleted!",
+      "delete_failed": "Deleting recipe failed!"
+    }
+  },
+  "command": {
+    "label": "Command | Commands",
+    "create_command": "Create command",
+    "edit_command": "Edit command",
+    "delete_command": "Delete command",
+    "delete_command_desc": "Are you sure you want to delete this command?",
+    "parameters": "Parameters",
+    "add_parameter": "Add parameter",
+    "toasts": {
+      "load_failed": "Loading commands failed!",
+      "create_success": "Command created!",
+      "create_failed": "Creating command failed!",
+      "update_success": "Command updated!",
+      "update_failed": "Updating command failed!",
+      "delete_success": "Command deleted!",
+      "delete_failed": "Deleting command failed!"
+    }
+  },
+  "collection": {
+    "label": "Device Collection | Device Collections",
+    "create_collection": "Create Collection",
+    "delete_collection": "Delete Collection",
+    "delete_collection_desc": "Are you sure you want to delete this collection?",
+    "edit_collection": "Edit collection",
+    "toasts": {
+      "load_failed": "Loading collections failed!",
+      "create_success": "Collection created!",
+      "create_failed": "Creating collection failed!",
+      "update_success": "Collection updated!",
+      "update_failed": "Updating collection failed!",
+      "delete_success": "Collection deleted!",
+      "delete_failed": "Deleting collection failed!"
+    }
+  },
+  "module": {
+    "label": "Module | Modules",
+    "create_module": "Create module",
+    "delete_module": "Delete Module",
+    "delete_module_desc": "Are you sure you want to delete this module?",
+    "edit_module": "Edit module",
+    "remove_device_from_module": "Remove device from module",
+    "remove_device_from_module_desc": "Are you sure you want to remove {0} from {1}?",
+    "toasts": {
+      "load_failed": "Loading modules failed!",
+      "create_success": "Module created!",
+      "create_failed": "Creating module failed!",
+      "update_success": "Module updated!",
+      "update_failed": "Updating module failed!",
+      "delete_success": "Module deleted!",
+      "delete_failed": "Deleting module failed!",
+      "add_device_to_module_success": "Device added to module!",
+      "add_device_to_module_failed": "Adding device to module failed!"
+    }
+  },
+  "scenario": {
+    "label": "Scenario | Scenarios",
+    "all": "All",
+    "active": "Active",
+    "activity": "Activity",
+    "mute": "Mute",
+    "mute_time": "Mute time (min)",
+    "activated": "ACTIVATED",
+    "deactivated": "DEACTIVATED",
+    "create_scenario": "Create scenario",
+    "delete_scenario": "Delete scenario",
+    "delete_scenario_desc": "Are you sure you want to delete this scenario?",
+    "edit_scenario": "Edit scenario",
+    "conditions_label": "Conditions",
+    "toasts": {
+      "load_failed": "Scenario loading failed!",
+      "create_success": "Scenario created!",
+      "create_failed": "Scenario creation failed!",
+      "update_success": "Scenario updated!",
+      "update_failed": "Scenario update failed!",
+      "delete_success": "Scenario deleted!",
+      "delete_failed": "Scenario delete failed!"
+    },
+    "scenario_type_options": {
+      "option1": "All",
+      "option2": "Active"
+    },
+    "rules_type_options": {
+      "option1": "Graphical mode",
+      "option2": "Pseudocode",
+      "option3": "Programmer mode(JSON)"
+    },
+    "day_options": {
+      "option1": "Monday",
+      "option2": "Tuesday",
+      "option3": "Wednesday",
+      "option4": "Thursday",
+      "option5": "Friday",
+      "option6": "Saturday",
+      "option7": "Sunday"
+    },
+    "form": {
+      "muted_until": "Muted  until (minutes):",
+      "scenario_active": "Scenario is deactivated:",
+      "scenario_triggered": "Scenario has been triggered:",
+      "set_muted_until": "Scenario mute time setting (minutes)",
+      "activation_hours": "Scenario activation hours",
+      "activation_days": "Active scenario days",
+      "choose_all_hours": "Select all time ranges",
+      "choose_all_days": "Select all days",
+      "add_conditions": "Add conditions",
+      "remove_conditions": "Remove conditions"
+    },
+    "insert_pseudocode": "Insert pseudocode here...",
+    "hint_pseudocode": "Don't forget to check the correct syntax!",
+    "json_pseudocode": "Insert JSON conditions here...",
+    "json_conditions": "Conditions (JSON format)",
+    "conditions": {
+      "constant": "Constant",
+      "insert_constant": "Insert constant",
+      "value": "Value",
+      "choose_value": "Choose value",
+      "operand": "Operand",
+      "operator": "Logical operator",
+      "insert_notification": "Insert notification message",
+      "job": "Job (Management role)",
+      "duration": "DURATION",
+      "no_action": "No action",
+      "condition": "Condition"
+    }
+  },
+  "notification": {
+    "label": "Notification | Notifications",
+    "number": "Number",
+    "level": "Level",
+    "toasts": {
+      "load_failed": "Notifications loading failed!",
+      "processing_successful": "The processing of the notification was successful.",
+      "proccessing_failed": "Processing of the notification was unsuccessful."
+    }
+  }
+}

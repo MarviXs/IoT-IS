@@ -1,0 +1,48 @@
+services:
+  backend:
+    image: iot-is-backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - 5001:8080
+  fronted:
+    image: iot-is-frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - 5000:80
+  pg:
+    image: postgres:16-alpine3.20
+    restart: always
+    shm_size: 1024mb
+    environment:
+      POSTGRES_USER: is
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: is_sdg
+    ports:
+      - 5432:5432
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    command: ["postgres", "-c", "synchronous_commit=off", "-c", "max_connections=200"]
+  timescaledb:
+    image: timescale/timescaledb-ha:pg16.3-ts2.15.3
+    restart: always
+    shm_size: 2048mb
+    environment:
+      POSTGRES_USER: is
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: is_sdg
+    ports:
+      - 5433:5432
+    volumes:
+      - timescaledb_data:/home/postgres/pgdata/data
+    command: ["postgres", "-c", "synchronous_commit=off", "-c", "max_connections=300"]
+
+volumes:
+  pgdata:
+  pgadmin_data:
+  timescaledb_data:

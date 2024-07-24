@@ -1,0 +1,433 @@
+{
+  "global": {
+    "open": "Otvoriť",
+    "edit": "Upraviť",
+    "delete": "Vymazať",
+    "save": "Uložiť",
+    "cancel": "Zrušiť",
+    "close": "Zavrieť",
+    "next": "Ďalej",
+    "add": "Pridať",
+    "create": "Vytvoriť",
+    "details": "Detaily",
+    "yes": "Áno",
+    "no": "Nie",
+    "info": "Informácie",
+    "name": "Názov",
+    "value": "Hodnota",
+    "options": "Možnosti",
+    "clean": "Vyčistiť",
+    "search": "Hľadať",
+    "account": "Účet",
+    "user_management": "Správa používateľov",
+    "home": "Domov",
+    "created_on": "Vytvorené",
+    "owner": "Vlastník",
+    "shared": "Zdieľané",
+    "permissions": "Oprávnenia",
+    "n_of_m": "{0} z {1}",
+    "refresh": "Obnoviť",
+    "automatic_refresh_interval": "Automatický interval obnovy",
+    "enter_refresh_interval_s": "Zadajte interval obnovy v sekundách (0 pre vypnutie)",
+    "rules": {
+      "required": "Toto pole je povinné!"
+    }
+  },
+  "table": {
+    "no_data_label": "Žiadne dostupné dáta",
+    "loading_label": "Načítavanie...",
+    "rows_per_page_label": "Záznamov na stránke:"
+  },
+  "days_short": {
+    "mon": "po",
+    "tue": "ut",
+    "wed": "st",
+    "thu": "št",
+    "fri": "pi",
+    "sat": "so",
+    "sun": "ne"
+  },
+  "auth": {
+    "login": {
+      "label": "Prihlásenie",
+      "login_btn": "Prihlásiť sa",
+      "no_account": "Ešte nemáte účet?",
+      "sign_up": "Zaregistrujte sa",
+      "toasts": {
+        "login_failed": "Prihlásenie zlyhalo!",
+        "login_success": "Prihlásenie prebehlo úspešne!"
+      }
+    },
+    "register": {
+      "label": "Registrácia",
+      "register_btn": "Zaregistrovať sa",
+      "have_account": "Už máte účet?",
+      "login": "Prihláste sa",
+      "toasts": {
+        "register_failed": "Registrácia zlyhala!",
+        "register_success": "Registrácia prebehla úspešne!"
+      }
+    },
+    "toasts": {
+      "logout_success": "Odhlásenie prebehlo úspešne!"
+    },
+    "rules": {
+      "email_invalid": "Prosím, zadajte platnú emailovú adresu"
+    }
+  },
+  "account": {
+    "label": "Účet",
+    "username": "Používateľské meno",
+    "email": "E-mail",
+    "current_email": "Aktuálny e-mail",
+    "new_email": "Nový e-mail",
+    "password": "Heslo",
+    "current_password": "Aktuálne heslo",
+    "new_password": "Nové heslo",
+    "logout": "Odhlásiť sa",
+    "access": "Prístup",
+    "role": {
+      "label": "Rola",
+      "admin": "Admin",
+      "user": "Používateľ"
+    },
+    "account_settings": "Nastavenia účtu",
+    "update_email": "Aktualizovať e-mail",
+    "update_email_desc": "Aktualizujte e-mailovú adresu vášho účtu.",
+    "update_email_other_desc": "Aktualizujte e-mailovú adresu účtu.",
+    "update_password": "Aktualizovať heslo",
+    "update_password_desc": "Aktualizujte heslo vášho účtu.",
+    "update_password_other_desc": "Aktualizujte heslo účtu.",
+    "change_role": "Zmeniť rolu",
+    "change_role_desc": "Zmeniť rolu používateľa.",
+    "toasts": {
+      "get_user_failed": "Načítanie používateľa zlyhalo! | Načítanie používateľov zlyhalo!",
+      "email_update_success": "E-mail bol aktualizovaný!",
+      "email_update_failed": "Aktualizácia e-mailu zlyhala!",
+      "password_change_success": "Heslo bolo zmenené!",
+      "password_change_failed": "Zmena hesla zlyhala!",
+      "role_change_success": "Rola bola zmenená!",
+      "role_change_failed": "Zmena roly zlyhala!"
+    },
+    "rules": {
+      "password_current_wrong": "Aktuálne heslo je nesprávne!",
+      "email_invalid": "Prosím, zadajte platnú e-mailovú adresu"
+    }
+  },
+  "not_found": {
+    "nothing_here": "Oops. Tu nie je nič...",
+    "go_home": "Ísť domov"
+  },
+  "device": {
+    "label": "Zariadenie | Zariadenia",
+    "device_info": "Informácie o zariadení",
+    "add_device": "Pridať zariadenie",
+    "type": "Typ",
+    "device_type": "Typ zariadenia",
+    "version": "Verzia",
+    "firmware": "Firmware",
+    "mac_address": "MAC adresa",
+    "api_key": "API kľúč",
+    "device_info": "Informácie o zariadení",
+    "sensors": "Snímače",
+    "tag": "Značka",
+    "add_sensors": "Pridať snímače",
+    "add_sensor": "Pridať snímač",
+    "no_sensors": "Žiadne dostupné snímače",
+    "unit": "Jednotka",
+    "response_time": "Odozva",
+    "last_activity": "Posledná aktivita",
+    "status": "Stav",
+    "decimal": "Počet desatinných miest",
+    "init_window": "Inicializovať 1min okno",
+    "share_device": "Zdieľať zariadenie",
+    "shared_with": "Zdieľané s",
+    "delete_device": "Vymazať zariadenie",
+    "delete_device_desc": "Ste si istý, že chcete vymazať toto zariadenie?",
+    "toasts": {
+      "loading_failed": "Načítanie zariadenia zlyhalo! | Načítanie zariadení zlyhalo!",
+      "create_failed": "Vytvorenie zariadenia zlyhalo!",
+      "update_failed": "Aktualizácia zariadenia zlyhala!",
+      "create_success": "Zariadenie bolo vytvorené!",
+      "update_success": "Zariadenie bolo aktualizované!",
+      "delete_success": "Zariadenie bolo vymazané!",
+      "delete_failed": "Vymazanie zariadenia zlyhalo!",
+      "tag": {
+        "delete_failed": "Vymazanie snímača zlyhalo!",
+        "create_failed": "Vytvorenie snímača zlyhalo!",
+        "update_failed": "Aktualizácia snímača zlyhala!",
+        "add_tag_to_device_failed": "Pridanie snímača k zariadeniu zlyhalo!"
+      },
+      "window": {
+        "init_failed": "Inicializácia 1min okna zlyhala!",
+        "init_success": "1min okno úspešne inicializované!"
+      },
+      "share": {
+        "share_success": "Zariadenie bolo úspešne zdieľané!",
+        "share_failed": "Zdieľanie zariadenia zlyhalo!",
+        "already_shared": "Zariadenie je už zdieľané s týmto používateľom!",
+        "user_remove_success": "Používateľ bol odstránený zo zariadenia!",
+        "user_remove_failed": "Odstránenie používateľa zo zariadenia zlyhalo!",
+        "shared_users_load_failed": "Načítanie používateľov zlyhalo!"
+      }
+    },
+    "rules": {
+      "decimal_min": "Desatinné miesta musia byť väčšie ako 0!"
+    }
+  },
+  "chart": {
+    "label": "Graf",
+    "export_csv": "Exportovať CSV",
+    "maximum_values": "Maximum hodnôt",
+    "statistical_method": "Štatistická funkcia",
+    "statistical_methods": {
+      "mean": "Priemer (Mean)",
+      "median": "Medián",
+      "mode": "Modus",
+      "min": "Minimum",
+      "max": "Maximum",
+      "standard_deviation": "Štandardná odchýlka",
+      "variance": "Variabilita",
+      "range": "Rozsah",
+      "sum": "Súčet",
+      "count": "Počet",
+      "geometry_mean": "Geometrický priemer",
+      "harmonic_mean": "Harmonický priemer"
+    },
+    "curve_type": "Druh interpolácie",
+    "curve_options": {
+      "straight": "Priama",
+      "smooth": "Hladká",
+      "monotone_cubic": "Monotónna Kubická",
+      "stepline": "Schodovitá"
+    },
+    "graph_type": "Zobrazenie grafu",
+    "graph_options": {
+      "lines": "Čiary",
+      "markers": "Body",
+      "lines_markers": "Čiary a body"
+    }
+  },
+
+  "time_range": {
+    "label": "Časový rozsah",
+    "custom": "Vlastný",
+    "from": "Od",
+    "to": "Do",
+    "now": "Teraz",
+    "predefined": {
+      "last_30min": "Posledných 30 minút",
+      "last_1h": "Posledná hodina",
+      "last_6h": "Posledných 6 hodín",
+      "last_12h": "Posledných 12 hodín",
+      "last_24h": "Posledných 24 hodín",
+      "last_week": "Posledný týždeň",
+      "last_month": "Posledný mesiac"
+    }
+  },
+  "job": {
+    "label": "Úloha | Úlohy",
+    "job_history": "História úloh",
+    "job_status": "Stav úlohy",
+    "run_job": "Spustiť úlohu",
+    "no_running_job": "Žiadna bežiaca úloha",
+    "not_finished": "Prebieha",
+    "step": "Krok",
+    "step_of": "Krok {0} z {1}",
+    "cycle": "Cyklus | Cykly",
+    "job_cycle": "Cyklus úlohy",
+    "cycle_of": "Cyklus {0} z {1}",
+    "paused": "Pozastavené",
+    "stopping": "Zastavuje sa",
+    "repetitions": "Počet opakovaní",
+    "schedule": "Naplánovanie",
+    "scheduled_time": "Naplánovaný čas",
+    "started_at": "Začiatok",
+    "finished_at": "Ukončenie",
+    "status": "Stav",
+    "progress": "Priebeh",
+    "controls": {
+      "pause": "Pozastaviť",
+      "resume": "Pokračovať",
+      "stop": "Ukončiť",
+      "skip_step": "Ďalší krok",
+      "skip_cycle": "Ďalší cyklus"
+    },
+    "toasts": {
+      "stop_success": "Úloha bola zastavená!",
+      "stop_failed": "Zastavenie úlohy zlyhalo!",
+      "pause_success": "Úloha bola pozastavená!",
+      "pause_failed": "Pozastavenie úlohy zlyhalo!",
+      "resume_success": "Úloha bola znovu spustená!",
+      "resume_failed": "Pokračovanie úlohy zlyhalo!",
+      "skip_step_success": "Krok úlohy bol preskočený!",
+      "skip_step_failed": "Preskočenie kroku úlohy zlyhalo!",
+      "skip_cycle_success": "Cyklus úlohy preskočený!",
+      "skip_cycle_failed": "Preskočenie cyklu úlohy zlyhalo!",
+      "start_success": "Úloha bola spustená!",
+      "start_failed": "Spustenie úlohy zlyhalo!",
+      "load_failed": "Načítanie úlohy zlyhalo!"
+    },
+    "rules": {
+      "repetitions_min": "Počet opakovaní musí byť väčší ako 0!"
+    }
+  },
+  "recipe": {
+    "label": "Recept | Recepty",
+    "create_recipe": "Vytvoriť recept",
+    "edit_recipe": "Upraviť recept",
+    "delete_recipe": "Vymazať recept",
+    "delete_recipe_desc": "Ste si istý, že chcete vymazať tento recept?",
+    "subrecipe": "Podrecept | Podrecepty",
+    "recipe_steps": "Kroky receptu",
+    "no_subrecipes_added": "Žiadne pridané podrecepty",
+    "no_commands_added": "Žiadne pridané príkazy",
+    "available_steps": "Dostupné kroky",
+    "no_commands_for_device_type": "Žiadne dostupné príkazy pre tento typ zariadenia",
+    "no_subrecipes_for_device_type": "Žiadne dostupné podrecepty pre tento typ zariadenia",
+    "toasts": {
+      "load_failed": "Načítanie receptov zlyhalo!",
+      "create_success": "Recept bol vytvorený!",
+      "create_failed": "Vytvorenie receptu zlyhalo!",
+      "update_success": "Recept aktualizovaný!",
+      "update_failed": "Aktualizácia receptu zlyhala!",
+      "delete_success": "Recept bol vymazaný!",
+      "delete_failed": "Vymazanie receptu zlyhalo!"
+    }
+  },
+  "command": {
+    "label": "Príkaz | Príkazy",
+    "create_command": "Vytvoriť príkaz",
+    "edit_command": "Upraviť príkaz",
+    "delete_command": "Vymazať príkaz",
+    "delete_command_desc": "Ste si istý, že chcete vymazať tento príkaz?",
+    "parameters": "Parametre",
+    "add_parameter": "Pridať parameter",
+    "toasts": {
+      "load_failed": "Načítanie príkazov zlyhalo!",
+      "create_success": "Príkaz bol vytvorený!",
+      "create_failed": "Vytvorenie príkazu zlyhalo!",
+      "update_success": "Príkaz bol aktualizovaný!",
+      "update_failed": "Aktualizácia príkazu zlyhala!",
+      "delete_success": "Príkaz bol vymazaný!",
+      "delete_failed": "Vymazanie príkazu zlyhalo!"
+    }
+  },
+  "collection": {
+    "label": "Kolekcia | Kolekcie",
+    "create_collection": "Vytvoriť kolekciu",
+    "delete_collection": "Vymazať kolekciu",
+    "delete_collection_desc": "Ste si istý, že chcete vymazať túto kolekciu?",
+    "edit_collection": "Upraviť kolekciu",
+    "toasts": {
+      "load_failed": "Načítanie kolekcií zlyhalo!",
+      "create_success": "Kolekcia bola vytvorená!",
+      "create_failed": "Vytvorenie kolekcie zlyhalo!",
+      "update_success": "Kolekcia bola aktualizovaná!",
+      "update_failed": "Aktualizácia kolekcie zlyhala!",
+      "delete_success": "Kolekcia bola vymazaná!",
+      "delete_failed": "Vymazanie kolekcie zlyhalo!"
+    }
+  },
+  "module": {
+    "label": "Modul | Moduly",
+    "create_module": "Vytvoriť modul",
+    "delete_module": "Vymazať modul",
+    "delete_module_desc": "Ste si istý, že chcete vymazať tento modul?",
+    "edit_module": "Upraviť modul",
+    "remove_device_from_module": "Odstrániť zariadenie z modulu",
+    "remove_device_from_module_desc": "Ste si istý, že chcete odstrániť {0} z {1}?",
+    "toasts": {
+      "load_failed": "Načítanie modulov zlyhalo!",
+      "create_success": "Modul bol vytvorený!",
+      "create_failed": "Vytvorenie modulu zlyhalo!",
+      "update_success": "Modul bol aktualizovaný!",
+      "update_failed": "Aktualizácia modulu zlyhala!",
+      "delete_success": "Modul bol vymazaný!",
+      "delete_failed": "Vymazanie modulu zlyhalo!",
+      "add_device_to_module_success": "Zariadenie bolo pridané do modulu!",
+      "add_device_to_module_failed": "Pridanie zariadenia do modulu zlyhalo!"
+    }
+  },
+  "scenario": {
+    "label": "Scenár | Scenáre",
+    "all": "Všetky",
+    "active": "Aktívne",
+    "activity": "Aktivita",
+    "activated": "AKTIVOVANÉ",
+    "deactivated": "DEAKTIVOVANÉ",
+    "mute": "Stlmenie",
+    "mute_time": "Doba stlmenia (min)",
+    "create_scenario": "Vytvoriť scenár",
+    "delete_scenario": "Vymazať scenár",
+    "delete_scenario_desc": "Ste si istí, že chcete vymazať tento scenár?",
+    "edit_scenario": "Upraviť scenár",
+    "conditions_label": "Podmienky",
+    "toasts": {
+      "load_failed": "Načítanie scenárov zlyhalo!",
+      "create_success": "Scenár bol vytvorený!",
+      "create_failed": "Vytvorenie scenáru zlyhalo!",
+      "update_success": "Scenár bol aktualizovaný!",
+      "update_failed": "Aktualizácia scenáru zlyhala!",
+      "delete_success": "Scenár bol vymazaný!",
+      "delete_failed": "Vymazanie scenáru zlyhalo!"
+    },
+    "scenario_type_options": {
+      "option1": "Všetky",
+      "option2": "Aktívne"
+    },
+    "rules_type_options": {
+      "option1": "Grafický mód",
+      "option2": "Pseudokód",
+      "option3": "Programátorský mód(JSON)"
+    },
+    "day_options": {
+      "option1": "Pondelok",
+      "option2": "Utorok",
+      "option3": "Streda",
+      "option4": "Štvrtok",
+      "option5": "Piatok",
+      "option6": "Sobota",
+      "option7": "Nedeľa"
+    },
+    "form": {
+      "muted_until": "Stlmenie na (minúty):",
+      "scenario_active": "Scenár je deaktivovaný:",
+      "scenario_triggered": "Scenár bol už spustený:",
+      "set_muted_until": "Nastavenie doby stlmenia scenáru (minúty)",
+      "activation_hours": "Aktivačné hodiny scenáru",
+      "activation_days": "Aktívne dni scenáru",
+      "choose_all_hours": "Vybrať všetky časové rozmedzia",
+      "choose_all_days": "Vybrať všetky dni",
+      "add_conditions": "Pridať podmienky",
+      "remove_conditions": "Vymazať podmienky"
+    },
+    "insert_pseudocode": "Tu vložte pseudokód...",
+    "hint_pseudocode": "Nezabudnite skontrolovať správnu syntax!",
+    "json_pseudocode": "Tu vložte podmienky v tvare JSON...",
+    "json_conditions": "Podmienky (formát JSON)",
+    "conditions": {
+      "constant": "Konštanta",
+      "insert_constant": "Vlož konštantu",
+      "value": "Hodnota",
+      "choose_value": "Vyber hodnotu",
+      "operand": "Operand",
+      "operator": "Logický operátor",
+      "insert_notification": "Vlož správu notifikácie",
+      "job": "Job (Riadiaca úloha)",
+      "duration": "TRVANIE",
+      "no_action": "Žiadna akcia",
+      "condition": "Podmienka"
+    }
+  },
+  "notification": {
+    "label": "Notifikácia | Notifikácie",
+    "number": "Počet",
+    "level": "Úroveň",
+    "toasts": {
+      "load_failed": "Načítanie notifikácií zlyhalo!",
+      "processing_successful": "Spracovanie notifikácie bolo úspešné.",
+      "proccessing_failed": "Spracovanie notifikácie bolo neúspešné."
+    }
+  }
+}
