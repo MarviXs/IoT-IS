@@ -95,7 +95,7 @@ async function updateRecipe() {
   }
 
   toast.success(t('recipe.toasts.update_success'));
-  router.push(`/device-templates/${templateId}/edit/recipes`);
+  router.push(`/device-templates/${templateId}/recipes`);
 }
 
 const deviceTemplate = ref<DeviceTemplateResponse>();

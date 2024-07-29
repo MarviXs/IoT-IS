@@ -25,16 +25,19 @@ a {
 }
 
 .main-padding {
+  padding: 3.5rem 7rem;
+
   body.screen--xs & {
     padding: 1rem 1.5rem;
   }
+
   body.screen--sm & {
     padding: 2.5rem 4rem;
   }
+
   body.screen--md & {
     padding: 3rem 5rem;
   }
-  padding: 3.5rem 7rem;
 }
 
 .main-text {

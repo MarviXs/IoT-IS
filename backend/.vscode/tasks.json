@@ -1,0 +1,65 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Watch API",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "watch",
+        "run",
+        "${workspaceFolder}/src/Api/Api.csproj",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile",
+      "options": {
+        "cwd": "${workspaceFolder}/src/Api"
+      }
+    },
+    {
+      "label": "Watch DataPoint Service",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "watch",
+        "run",
+        "${workspaceFolder}/src/DataPointBatchProcessingService/DataPointBatchProcessingService.csproj",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile",
+      "options": {
+        "cwd": "${workspaceFolder}/src/DataPointBatchProcessingService"
+      }
+    },
+    {
+      "label": "migrate-database-pg",
+      "type": "shell",
+      "command": "dotnet",
+      "args": ["ef", "database", "update", "--context", "AppDbContext"],
+      "options": {
+        "cwd": "${workspaceFolder}/src/Api"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "migrate-database-timescale",
+      "type": "shell",
+      "command": "dotnet",
+      "args": ["ef", "database", "update", "--context", "TimeScaleDbContext"],
+      "options": {
+        "cwd": "${workspaceFolder}/src/Api"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    }
+  ]
+}

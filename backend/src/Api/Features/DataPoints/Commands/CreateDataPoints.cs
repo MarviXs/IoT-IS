@@ -3,7 +3,6 @@ using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
-using Fei.Is.Api.Features.DataPoints.Services;
 using FluentResults;
 using FluentValidation;
 using MediatR;

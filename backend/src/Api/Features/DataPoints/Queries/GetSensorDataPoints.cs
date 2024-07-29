@@ -212,5 +212,5 @@ public static class GetSensorDataPoints
         }
     }
 
-    public record Response(DateTimeOffset TimeStamp, double? Value);
+    public record Response(DateTimeOffset Ts, double? Value);
 }

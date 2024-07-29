@@ -16,7 +16,7 @@
         :label="t('job.label', 2)"
         :icon="mdiListStatus"
       />
-      <AutoRefreshButton v-model="refreshInterval" :loading="isLoadingDevice" @on-refresh="refreshDevice" />
+      <!-- <AutoRefreshButton v-model="refreshInterval" :loading="isLoadingDevice" @on-refresh="refreshDevice" /> -->
       <q-btn
         v-if="authStore.isAdmin"
         class="shadow"
@@ -30,23 +30,19 @@
       />
     </template>
     <template v-if="device" #default>
-      <div class="q-mb-lg">
-        <device-info-card :device="device" class="shadow container full-height"></device-info-card>
-      </div>
-      <div class="row q-col-gutter-x-xl q-col-gutter-y-xl justify-between">
-        <!-- <div class="col-12 col-md-12 col-lg-12 col-xl-8">
-          <CurrentJobCard
-            ref="currentJobCard"
-            class="shadow container q-pa-lg full-height"
-            :device="device"
-          ></CurrentJobCard>
-        </div> -->
-        <div class="col-12 col-md-12 col-lg-12 col-xl-4">
+      <div class="row q-col-gutter-x-lg q-col-gutter-y-lg justify-between">
+        <div class="col-12 col-xl-4">
+          <DeviceInfoCard :device="device" class="shadow container"></DeviceInfoCard>
+        </div>
+        <div class="col-12 col-lg-6 col-xl-5">
+          <CurrentJobCard ref="currentJobCard" class="shadow bg-white" :device-id="device.id"></CurrentJobCard>
+        </div>
+        <div class="col-12 col-lg-6 col-xl-3">
           <SensorSelectionTree
             v-if="sensorTree"
             v-model:tickedNodes="tickedNodes"
             :sensors-tree="sensorTree"
-            class="shadow container q-pa-lg full-height"
+            class="shadow container"
           >
           </SensorSelectionTree>
         </div>

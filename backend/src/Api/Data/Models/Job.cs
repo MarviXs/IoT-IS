@@ -4,6 +4,7 @@ public class Job : BaseModel
 {
     public Guid DeviceId { get; set; }
     public Device? Device { get; set; }
+    public List<JobCommand> Commands { get; set; } = [];
     public JobStatus? Status { get; set; }
     public required string Name { get; set; }
     public int NoOfCmds { get; set; } = 0;

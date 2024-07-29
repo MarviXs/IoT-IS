@@ -68,7 +68,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, ref, reactive, onMounted, PropType, shallowRef, watch, watchEffect } from 'vue';
+import { ref, reactive, onMounted, PropType, shallowRef, watch, watchEffect } from 'vue';
 import ChartTimeRangeSelect from '@/components/datapoints/ChartTimeRangeSelect.vue';
 import { TimeRange } from '@/models/TimeRange';
 import { graphColors, transparentize } from '@/utils/colors';
@@ -221,7 +221,7 @@ function updateChartData() {
       hidden: !tickedNodes.value.includes(key),
       data:
         dataPoints.get(key)?.map((dataPoint) => ({
-          x: dataPoint.timeStamp,
+          x: dataPoint.ts,
           y: roundNumber(dataPoint.value, sensor.accuracyDecimals ?? 2),
         })) ?? [],
       backgroundColor: transparentize(graphColors[index], 0.5),
@@ -229,6 +229,7 @@ function updateChartData() {
       cubicInterpolationMode: graphOptions.value.interpolationMethod === 'bezier' ? 'monotone' : 'default',
       showLine: graphOptions.value.lineStyle === 'lines' || graphOptions.value.lineStyle === 'linesmarkers',
       borderWidth: graphOptions.value.lineWidth,
+      borderJoinStyle: 'round',
       pointStyle: graphOptions.value.lineStyle === 'lines' ? false : 'circle',
       pointRadius: graphOptions.value.markerSize,
       pointHoverRadius: graphOptions.value.markerSize + 2,

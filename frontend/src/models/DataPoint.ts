@@ -1,5 +1,5 @@
 interface DataPoint {
-  timeStamp: string;
+  ts: string;
   value?: number | null;
 }
 

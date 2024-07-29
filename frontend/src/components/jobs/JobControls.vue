@@ -1,6 +1,6 @@
 <template>
   <div class="row q-col-gutter-sm items-center justify-center">
-    <div v-if="!runningJob.paused" class="col-12 col-sm-3">
+    <div v-if="!job.paused" class="col-12 col-sm-3">
       <JobControlButton
         :label="t('job.controls.pause')"
         color="grey-color"
@@ -23,7 +23,7 @@
         :label="t('job.controls.skip_step')"
         color="green-9"
         :icon="mdiSkipNext"
-        :loading="skipStepLoading"
+        :loading="skippingStep"
         @click="skipStep"
       ></JobControlButton>
     </div>
@@ -32,7 +32,7 @@
         :label="t('job.controls.skip_cycle')"
         color="primary"
         :icon="mdiSkipForward"
-        :loading="skipCycleLoading"
+        :loading="skippingCycle"
         @click="skipCycle"
       ></JobControlButton>
     </div>
@@ -42,7 +42,7 @@
         color="red"
         :icon="mdiStop"
         :loading="stoppingJob"
-        :disable="runningJob.toCancel == true"
+        :disable="job.toCancel == true"
         @click="stopJob"
       ></JobControlButton>
     </div>
@@ -51,18 +51,17 @@
 
 <script setup lang="ts">
 import { toast } from 'vue3-toastify';
-import { JobStatusEnum } from '@/models/JobStatusEnum';
-import { Job } from '@/models/Job';
-import { PropType, ref, Ref } from 'vue';
-import jobService from '@/services/JobService';
+import { PropType, ref } from 'vue';
+import JobService from '@/api/services/JobService';
 import JobControlButton from './JobControlButton.vue';
 import { handleError } from '@/utils/error-handler';
 import { useI18n } from 'vue-i18n';
 import { mdiPause, mdiPlay, mdiSkipNext, mdiSkipForward, mdiStop } from '@quasar/extras/mdi-v6';
+import { ActiveJobResponse } from '@/api/types/Job';
 
 const props = defineProps({
-  runningJob: {
-    type: Object as PropType<Job>,
+  job: {
+    type: Object as PropType<ActiveJobResponse>,
     required: true,
   },
 });
@@ -70,64 +69,78 @@ const emit = defineEmits(['action-performed']);
 
 const { t } = useI18n();
 
-//Job actions
-async function performJobAction(
-  action: { (jobId: string): Promise<Job> },
-  successMessage: string,
-  errorMessage: string,
-  loadingRef: Ref<boolean>,
-) {
-  if (!props.runningJob) return;
-  try {
-    loadingRef.value = true;
-    await action(props.runningJob.uid);
-    toast.success(successMessage);
-    emit('action-performed');
-  } catch (e) {
-    handleError(e, errorMessage);
-  } finally {
-    loadingRef.value = false;
-  }
-}
-
 const stoppingJob = ref(false);
 async function stopJob() {
-  await performJobAction(jobService.cancelJob, t('job.toasts.stop_success'), t('job.toasts.stop_failed'), stoppingJob);
+  stoppingJob.value = true;
+  const { data, error } = await JobService.cancelJob(props.job.id);
+  stoppingJob.value = false;
+
+  if (error) {
+    handleError(error, t('job.toasts.stop_failed'));
+    return;
+  }
+
+  toast.success(t('job.toasts.stop_success'));
+  emit('action-performed');
 }
 
 const pausingJob = ref(false);
 async function pauseJob() {
-  await performJobAction(jobService.pauseJob, t('job.toasts.pause_success'), t('job.toasts.pause_failed'), pausingJob);
+  pausingJob.value = true;
+  const { data, error } = await JobService.pauseJob(props.job.id);
+  pausingJob.value = false;
+
+  if (error) {
+    handleError(error, t('job.toasts.pause_failed'));
+    return;
+  }
+
+  toast.success(t('job.toasts.pause_success'));
+  emit('action-performed');
 }
 
 const resumingJob = ref(false);
 async function resumeJob() {
-  await performJobAction(
-    jobService.continueJob,
-    t('job.toasts.resume_success'),
-    t('job.toasts.resume_failed'),
-    resumingJob,
-  );
+  resumingJob.value = true;
+  const { data, error } = await JobService.continueJob(props.job.id);
+  resumingJob.value = false;
+
+  if (error) {
+    handleError(error, t('job.toasts.resume_failed'));
+    return;
+  }
+
+  toast.success(t('job.toasts.resume_success'));
+  emit('action-performed');
 }
 
-const skipStepLoading = ref(false);
+const skippingStep = ref(false);
 async function skipStep() {
-  await performJobAction(
-    jobService.skipStep,
-    t('job.toasts.skip_step_success'),
-    t('job.toasts.skip_step_failed'),
-    skipStepLoading,
-  );
+  skippingStep.value = true;
+  const { data, error } = await JobService.skipStep(props.job.id);
+  skippingStep.value = false;
+
+  if (error) {
+    handleError(error, t('job.toasts.skip_step_failed'));
+    return;
+  }
+
+  toast.success(t('job.toasts.skip_step_success'));
+  emit('action-performed');
 }
 
-const skipCycleLoading = ref(false);
+const skippingCycle = ref(false);
 async function skipCycle() {
-  await performJobAction(
-    jobService.skipCycle,
-    t('job.toasts.skip_cycle_success'),
-    t('job.toasts.skip_cycle_failed'),
-    skipCycleLoading,
-  );
+  skippingCycle.value = true;
+  const { data, error } = await JobService.skipCycle(props.job.id);
+  skippingCycle.value = false;
+
+  if (error) {
+    handleError(error, t('job.toasts.skip_cycle_failed'));
+    return;
+  }
+
+  toast.success(t('job.toasts.skip_cycle_success'));
+  emit('action-performed');
 }
 </script>
-src/models/JobStatusEnum

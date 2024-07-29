@@ -173,6 +173,43 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.ToTable("Jobs");
                 });
 
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.JobCommand", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("JobId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("integer");
+
+                    b.Property<List<double>>("Params")
+                        .IsRequired()
+                        .HasColumnType("double precision[]");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("JobId");
+
+                    b.ToTable("JobCommands");
+                });
+
             modelBuilder.Entity("Fei.Is.Api.Data.Models.JobStatus", b =>
                 {
                     b.Property<Guid>("Id")
@@ -597,6 +634,17 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.Navigation("Device");
                 });
 
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.JobCommand", b =>
+                {
+                    b.HasOne("Fei.Is.Api.Data.Models.Job", "Job")
+                        .WithMany("Commands")
+                        .HasForeignKey("JobId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Job");
+                });
+
             modelBuilder.Entity("Fei.Is.Api.Data.Models.JobStatus", b =>
                 {
                     b.HasOne("Fei.Is.Api.Data.Models.Job", "Job")
@@ -740,6 +788,8 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.Job", b =>
                 {
+                    b.Navigation("Commands");
+
                     b.Navigation("Status");
                 });
 

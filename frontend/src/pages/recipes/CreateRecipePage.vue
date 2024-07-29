@@ -89,7 +89,7 @@ async function createRecipe() {
   }
 
   toast.success(t('recipe.toasts.create_success'));
-  router.push(`/device-templates/${templateId}/edit/recipes`);
+  router.push(`/device-templates/${templateId}/recipes`);
 }
 
 const deviceTemplate = ref<DeviceTemplateResponse>();

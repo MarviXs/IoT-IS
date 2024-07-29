@@ -3,10 +3,13 @@ using Carter;
 using Fei.Is.Api.Common.OpenAPI;
 using Fei.Is.Api.Extensions;
 using Fei.Is.Api.Features.Auth;
-using Fei.Is.Api.Features.DataPoints.Services;
+using Fei.Is.Api.Features.DataPoints.Commands;
+using Fei.Is.Api.MqttClient;
+using Fei.Is.Api.Redis;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Json;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Fei.Is.Api;
 
@@ -23,7 +26,13 @@ public class Startup(IConfiguration configuration)
         services.ConfigureProblemDetails();
         services.AddCarter();
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Startup>());
-
+        services.AddGrpc(options =>
+        {
+            options.EnableDetailedErrors = true;
+            options.MaxReceiveMessageSize = null;
+            options.MaxSendMessageSize = null;
+        });
+        
         // Auth
         services.AddAuthentication();
         services.AddAuthorizationBuilder().SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
@@ -39,15 +48,15 @@ public class Startup(IConfiguration configuration)
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen(options =>
         {
-            options.CustomSchemaIds(type => type.FullName.Replace("+", "."));
+            options.CustomSchemaIds(type => type.FullName?.Replace("+", "."));
             options.SupportNonNullableReferenceTypes();
             options.SchemaFilter<RequiredNotNullableSchemaFilter>();
         });
 
         // Add services
         services.AddScoped<TokenService>();
-        services.AddSingleton<DataPointsBatchService>();
-        services.AddHostedService(serviceProvider => serviceProvider.GetRequiredService<DataPointsBatchService>());
+        services.AddSingleton<RedisService>();
+        services.AddHostedService<MqttClientService>();
 
         // Add validators
         services.AddValidatorsFromAssemblyContaining<Startup>(ServiceLifetime.Scoped);
@@ -78,7 +87,7 @@ public class Startup(IConfiguration configuration)
 
         app.UseEndpoints(endpoints =>
         {
-            endpoints.MapControllers();
+            endpoints.MapGrpcService<StoreDataPointsGrpc>().AllowAnonymous();
             endpoints.MapCarter();
         });
     }

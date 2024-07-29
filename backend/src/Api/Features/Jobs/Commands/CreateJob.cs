@@ -73,14 +73,23 @@ public static class CreateJob
             {
                 return Result.Fail(new NotFoundError());
             }
+            if (device.OwnerId != message.User.GetUserId())
+            {
+                return Result.Fail(new ForbiddenError());
+            }
 
-            var recipe = await context.Recipes.FirstOrDefaultAsync(recipe => recipe.Id == message.Request.RecipeId, cancellationToken);
+            var recipe = await context
+                .Recipes.AsNoTracking()
+                .Include(r => r.Steps.OrderBy(s => s.Order))
+                .ThenInclude(s => s.Command)
+                .Include(r => r.Steps.OrderBy(s => s.Order))
+                .ThenInclude(s => s.Subrecipe)
+                .FirstOrDefaultAsync(r => r.Id == message.Request.RecipeId, cancellationToken);
             if (recipe == null)
             {
                 return Result.Fail(new NotFoundError());
             }
 
-            // TODO: Add commands from recipe to job
             var job = new Job
             {
                 Device = device,
@@ -90,18 +99,79 @@ public static class CreateJob
             await context.Jobs.AddAsync(job, cancellationToken);
             await context.SaveChangesAsync(cancellationToken);
 
+            //unpack recipe steps
+            var commands = new List<JobCommand>();
+            foreach (var step in recipe.Steps.OrderBy(s => s.Order))
+            {
+                var stepCommands = await UnpackRecipeStep(step, job.Id, 0, 20, cancellationToken);
+                commands.AddRange(stepCommands);
+            }
+            for(int i = 0; i < commands.Count; i++)
+            {
+                commands[i].Order = i;
+            }
+            job.NoOfCmds = commands.Count;
+
+            await context.JobCommands.AddRangeAsync(commands, cancellationToken);
+            await context.SaveChangesAsync(cancellationToken);
+
             var jobStatus = new JobStatus
             {
                 JobId = job.Id,
                 Job = job,
                 RetCode = JobStatusEnum.JOB_PENDING,
                 Code = JobStatusEnum.JOB_PENDING,
-                TotalSteps = recipe.Steps.Count
+                CurrentStep = 1,
+                CurrentCycle = 1,
+                TotalSteps = commands.Count
             };
             await context.JobStatuses.AddAsync(jobStatus, cancellationToken);
             await context.SaveChangesAsync(cancellationToken);
 
             return Result.Ok(job.Id);
+        }
+
+        private async Task<List<JobCommand>> UnpackRecipeStep(RecipeStep step, Guid jobId, int currentDepth, int maxDepth, CancellationToken cancellationToken)
+        {
+            var commands = new List<JobCommand>();
+
+            if (currentDepth >= maxDepth)
+                return commands;
+
+            if (step.IsCommand)
+            {
+                var command = new JobCommand
+                {
+                    JobId = jobId,
+                    DisplayName = step.Command!.DisplayName,
+                    Name = step.Command.Name,
+                    Order = step.Order,
+                    Params = step.Command.Params
+                };
+                commands.Add(command);
+            }
+
+            if (step.IsSubRecipe)
+            {
+                var subrecipe = await context
+                    .Recipes.AsNoTracking()
+                    .Include(r => r.Steps.OrderBy(s => s.Order))
+                    .ThenInclude(s => s.Command)
+                    .Include(r => r.Steps.OrderBy(s => s.Order))
+                    .ThenInclude(s => s.Subrecipe)
+                    .FirstOrDefaultAsync(r => r.Id == step.SubrecipeId, cancellationToken);
+
+                if (subrecipe != null)
+                {
+                    foreach (var subStep in subrecipe.Steps.OrderBy(s => s.Order))
+                    {
+                        var subCommands = await UnpackRecipeStep(subStep, jobId, currentDepth + 1, maxDepth, cancellationToken);
+                        commands.AddRange(subCommands);
+                    }
+                }
+            }
+
+            return commands;
         }
     }
 

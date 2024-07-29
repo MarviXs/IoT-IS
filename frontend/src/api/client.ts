@@ -13,11 +13,11 @@ const authMiddleware: Middleware = {
 
     return request;
   },
+
   async onResponse({ request, response, options }) {
     if (response.status === 204 || response.headers.get('content-length') === '0') {
       return response;
     }
-
     const clonedResponse = response.clone();
     let data;
 
@@ -28,7 +28,7 @@ const authMiddleware: Middleware = {
       return response;
     }
 
-    if (data.status === 403 && data.body?.detail === 'Invalid refresh token') {
+    if (data.status === 403 && data.detail === 'Invalid refresh token') {
       const authStore = useAuthStore();
       authStore.logout();
     }

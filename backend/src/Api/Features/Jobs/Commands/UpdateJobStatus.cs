@@ -4,7 +4,6 @@ using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
-using Fei.Is.Api.Features.DataPoints.Services;
 using FluentResults;
 using FluentValidation;
 using MediatR;
@@ -64,7 +63,7 @@ public static class UpdateJobStatus
 
     public record Command(Request Request, Guid DeviceId, Guid JobId) : IRequest<Result<Guid>>;
 
-    public sealed class Handler(AppDbContext appContext, DataPointsBatchService dataPointsBatchService, IValidator<Command> validator)
+    public sealed class Handler(AppDbContext appContext, IValidator<Command> validator)
         : IRequestHandler<Command, Result<Guid>>
     {
         public async Task<Result<Guid>> Handle(Command message, CancellationToken cancellationToken)
@@ -134,11 +133,8 @@ public static class UpdateJobStatus
                         Value = dataPoint.Value
                     }
             );
-
-            foreach (var dataPoint in dataPointsEntities)
-            {
-                dataPointsBatchService.Enqueue(dataPoint);
-            }
+            
+            // TODO: Redis stream
         }
     }
 

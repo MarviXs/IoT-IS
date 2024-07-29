@@ -13,7 +13,7 @@ public class AppDbContext : IdentityDbContext<User>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        
+
         modelBuilder.ApplyConfiguration(new RoleConfiguration());
         modelBuilder.ApplyConfiguration(new RecipeConfiguration());
         modelBuilder.ApplyConfiguration(new RecipeStepConfiguration());
@@ -30,6 +30,7 @@ public class AppDbContext : IdentityDbContext<User>
     public DbSet<Recipe> Recipes { get; set; }
     public DbSet<RecipeStep> RecipeSteps { get; set; }
     public DbSet<Command> Commands { get; set; }
+    public DbSet<JobCommand> JobCommands { get; set; }
 
     public override int SaveChanges()
     {

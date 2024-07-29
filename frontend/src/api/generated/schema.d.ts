@@ -215,6 +215,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/devices/{deviceId}/jobs/active": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get the active job on a device */
+        get: operations["GetActiveJob"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/devices/{deviceId}/jobs": {
         parameters: {
             query?: never;
@@ -467,7 +484,7 @@ export interface components {
         "Fei.Is.Api.Features.DataPoints.Queries.GetSensorDataPoints.DownsampleMethod": "Asap" | "Lttb";
         "Fei.Is.Api.Features.DataPoints.Queries.GetSensorDataPoints.Response": {
             /** Format: date-time */
-            timeStamp: string;
+            ts: string;
             /** Format: double */
             value?: number | null;
         };
@@ -562,6 +579,25 @@ export interface components {
             /** Format: int32 */
             currentCycle: number;
             data: components["schemas"]["Fei.Is.Api.Features.Jobs.Commands.UpdateJobStatus.DataPointRequest"][];
+        };
+        "Fei.Is.Api.Features.Jobs.Queries.GetActiveJob.Response": {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            /** Format: int32 */
+            noOfCmds: number;
+            /** Format: int32 */
+            noOfReps: number;
+            /** Format: int32 */
+            currentStep: number;
+            /** Format: int32 */
+            currentCycle: number;
+            currentCommand: string;
+            toCancel: boolean;
+            paused: boolean;
+            /** Format: double */
+            progress: number;
+            status: components["schemas"]["Fei.Is.Api.Data.Enums.JobStatusEnum"];
         };
         "Fei.Is.Api.Features.Jobs.Queries.GetJobsOnDevice.JobStatusResponse": {
             retCode: components["schemas"]["Fei.Is.Api.Data.Enums.JobStatusEnum"];
@@ -1389,6 +1425,35 @@ export interface operations {
                 content: {
                     "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
                 };
+            };
+        };
+    };
+    GetActiveJob: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                deviceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.Jobs.Queries.GetActiveJob.Response"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

@@ -1,12 +1,15 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS builder
+
+# Support for GRPC
+RUN apk add --no-cache libc6-compat
+
 WORKDIR /app
-COPY src/Api/*.csproj ./
+COPY *.csproj ./
 RUN dotnet restore
-COPY src/Api/ ./
+COPY . .
 RUN dotnet publish -c Release -o out --no-restore
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS runtime
 WORKDIR /app
 COPY --from=builder /app/out .
-EXPOSE 80
-CMD [ "dotnet", "Api.dll" ]
+CMD [ "dotnet", "DataPointBatchProcessingService.dll" ]
