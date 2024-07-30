@@ -80,7 +80,7 @@ public class Worker(RedisService redis, StoreDataService.StoreDataServiceClient 
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Error processing datapoints messages (STORE DATA)");
+                logger.LogError(ex, "Error processing datapoints messages: {ExceptionMessage}", ex.Message);
                 await Task.Delay(ProcessingSpeed, stoppingToken);
             }
         }

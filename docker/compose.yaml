@@ -1,43 +1,22 @@
 name: iot-is
 services:
-  frontend:
-    restart: unless-stopped
-    image: iot-is-frontend
-    ports:
-      - 9000:9000
-    develop:
-      watch:
-        - path: ../frontend
-          action: sync
-          target: /app
-          ignore:
-            - node_modules/
-        - path: ../frontend/package.json
-          action: rebuild
-          target: /app/package.json
-    build:
-      context: ../frontend
-      args:
-        - BUILD_ENV=development
-        - VITE_API_URL=${API_URL}
+  # frontend:
+  #   restart: unless-stopped
+  #   image: iot-is-frontend
+  #   ports:
+  #     - 9000:9000
+  #   build:
+  #     context: ../frontend
+  #     args:
+  #       - VITE_API_URL=${API_URL}
   backend:
     image: iot-is-backend
     build:
       context: ../backend/src/Api
       dockerfile: Dockerfile
-      args:
-        - BUILD_ENV=development
     restart: unless-stopped
-    develop:
-      watch:
-        - path: ../backend/src/Api
-          action: sync
-          target: /app
-          ignore:
-            - bin/
-            - obj/
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Production
     ports:
       - 5097:5097
       - 5096:5096
@@ -46,22 +25,12 @@ services:
     build:
       context: ../backend/src/DataPointBatchProcessingService
       dockerfile: Dockerfile
-      args:
-        - BUILD_ENV=development
     restart: unless-stopped
-    develop:
-      watch:
-        - path: ../backend/src/DataPointBatchProcessingService
-          action: sync
-          target: /app
-          ignore:
-            - bin/
-            - obj/
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Production
   pg:
     image: postgres:16-alpine3.20
-    restart: always
+    restart: unless-stopped
     shm_size: 1024mb
     environment:
       POSTGRES_USER: is
@@ -75,7 +44,7 @@ services:
       ["postgres", "-c", "synchronous_commit=off", "-c", "max_connections=200"]
   timescaledb:
     image: timescale/timescaledb-ha:pg16.3-ts2.15.3
-    restart: always
+    restart: unless-stopped
     shm_size: 2048mb
     environment:
       POSTGRES_USER: is

@@ -1,32 +1,36 @@
-ARG BUILD_ENV=development
-
 # Stage 1: Build the application
 FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS builder
-# Support for GRPC
+
+# Install dotnet-ef tool
+RUN dotnet tool install --global dotnet-ef
+ENV PATH="$PATH:/root/.dotnet/tools"
+
+# Install dependencies
 RUN apk add --no-cache libc6-compat
+
+# Set the working directory
 WORKDIR /app
+
+# Copy csproj and restore dependencies as a distinct layer
 COPY *.csproj ./
 RUN dotnet restore
+
+# Copy the rest of the application code
 COPY . .
-RUN dotnet publish -c Release -o out --no-restore
 
-# Stage 2: Development stage
-FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS development
-RUN apk add --no-cache libc6-compat
-WORKDIR /app
-COPY . ./
-RUN dotnet restore
-RUN dotnet new tool-manifest
-RUN dotnet tool install --local dotnet-ef --version 8.*
-ENTRYPOINT ["dotnet", "watch", "run", "--non-interactive"]
+# Publish the application and create migration bundles
+RUN dotnet publish -c Release -o out --no-restore \
+    && dotnet ef migrations bundle --context AppDbContext --output out/appMigration \
+    && dotnet ef migrations bundle --context TimeScaleDbContext --output out/timescaleMigration
 
-# Stage 3: Production stage
+# Stage 2: Production stage
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS production
+
+# Set the working directory
 WORKDIR /app
+
+# Copy the built application from the builder stage
 COPY --from=builder /app/out .
-RUN dotnet new tool-manifest
-RUN dotnet tool install --local dotnet-ef --version 8.*
+
+# Set the entry point
 ENTRYPOINT ["dotnet", "Api.dll"]
-
-
-FROM ${BUILD_ENV} AS final

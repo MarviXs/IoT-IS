@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package IoT;
+
+message DataPoint {
+    string Tag = 1;
+    double Value = 2;
+    optional int64 Ts = 3;
+}
