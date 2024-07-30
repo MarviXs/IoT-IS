@@ -42,7 +42,7 @@ public class Worker(RedisService redis, StoreDataService.StoreDataServiceClient 
 
                 messages = [.. messages, .. autoClaimResult.ClaimedEntries];
 
-                if (messages.Any())
+                if (messages.Length != 0)
                 {
                     var dataPoints = new List<DataPoint>();
 

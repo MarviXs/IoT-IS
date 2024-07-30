@@ -22,6 +22,7 @@ public class Startup(IConfiguration configuration)
         // Add services to the container.
         services.ConfigurePostgresContext(Configuration);
         services.ConfigureTimescaleContext(Configuration);
+        services.AddCors();
         services.AddControllers();
         services.ConfigureProblemDetails();
         services.AddCarter();
@@ -32,7 +33,7 @@ public class Startup(IConfiguration configuration)
             options.MaxReceiveMessageSize = null;
             options.MaxSendMessageSize = null;
         });
-        
+
         // Auth
         services.AddAuthentication();
         services.AddAuthorizationBuilder().SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
@@ -70,6 +71,9 @@ public class Startup(IConfiguration configuration)
             app.UseSwaggerUI();
             app.UseDeveloperExceptionPage();
         }
+
+        // TODO: Remove this in production
+        app.UseCors(x => x.AllowAnyMethod().AllowAnyHeader().SetIsOriginAllowed(origin => true).AllowCredentials());
 
         app.UseStatusCodePages();
 

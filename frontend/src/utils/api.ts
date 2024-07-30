@@ -43,7 +43,7 @@ function onRequest(context: FetchContext) {
 }
 
 const api = ofetch.create({
-  baseURL: process.env.API_URL || '/api',
+  baseURL: process.env.VITE_API_URL || '/api',
   onResponseError,
   onRequest,
   retryStatusCodes: [401],

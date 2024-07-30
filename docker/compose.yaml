@@ -1,28 +1,64 @@
 name: iot-is
 services:
+  frontend:
+    restart: unless-stopped
+    image: iot-is-frontend
+    ports:
+      - 9000:9000
+    develop:
+      watch:
+        - path: ../frontend
+          action: sync
+          target: /app
+          ignore:
+            - node_modules/
+        - path: ../frontend/package.json
+          action: rebuild
+          target: /app/package.json
+    build:
+      context: ../frontend
+      args:
+        - BUILD_ENV=development
+        - VITE_API_URL=${API_URL}
   backend:
     image: iot-is-backend
     build:
       context: ../backend/src/Api
       dockerfile: Dockerfile
-    restart: always
+      args:
+        - BUILD_ENV=development
+    restart: unless-stopped
+    develop:
+      watch:
+        - path: ../backend/src/Api
+          action: sync
+          target: /app
+          ignore:
+            - bin/
+            - obj/
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
     ports:
-      - 8000:8080
-      - 8001:5001
+      - 5097:5097
+      - 5096:5096
   datapoint-background-service:
     image: iot-is-datapoint-background-service
     build:
       context: ../backend/src/DataPointBatchProcessingService
       dockerfile: Dockerfile
-    restart: always
-  # fronted:
-  #   image: iot-is-frontend
-  #   build:
-  #     context: ./frontend
-  #     dockerfile: Dockerfile
-  #   restart: always
-  #   ports:
-  #     - 5000:80
+      args:
+        - BUILD_ENV=development
+    restart: unless-stopped
+    develop:
+      watch:
+        - path: ../backend/src/DataPointBatchProcessingService
+          action: sync
+          target: /app
+          ignore:
+            - bin/
+            - obj/
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
   pg:
     image: postgres:16-alpine3.20
     restart: always
@@ -52,7 +88,7 @@ services:
     command:
       ["postgres", "-c", "synchronous_commit=off", "-c", "max_connections=300"]
   emqx:
-    restart: always
+    restart: unless-stopped
     environment:
       EMQX_NAME: is_emqx
       EMQX_HOST: ${EMQX_HOST}
@@ -68,12 +104,12 @@ services:
       - ./emqx/etc/acl.conf:/opt/emqx/etc/acl.conf
   redis:
     image: redis/redis-stack:7.2.0-v11
-    restart: always
+    restart: unless-stopped
     ports:
       - "6379:6379"
   redis-insight:
     image: redis/redisinsight:latest
-    restart: always
+    restart: unless-stopped
     ports:
       - "5540:5540"
 volumes:

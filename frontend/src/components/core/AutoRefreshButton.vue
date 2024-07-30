@@ -1,17 +1,8 @@
 <template>
   <div>
     <q-btn-group unelevated class="shadow col-grow col-md-auto">
-      <q-btn
-        color="accent"
-        unelevated
-        outline
-        no-caps
-        class="col-grow col-md-auto bg-white"
-        :loading="loading"
-        @click="emit('onRefresh')"
-      >
+      <q-btn unelevated no-caps class="col-grow col-md-auto bg-white" :loading="loading" @click="emit('onRefresh')">
         <q-icon :name="mdiRefresh" class="text-btn-grey" />
-        <div class="q-ml-sm text-btn-grey">{{ t('global.refresh') }}</div>
       </q-btn>
       <q-btn color="accent" unelevated :icon="mdiCog" @click="refreshDialogOpen = true" />
     </q-btn-group>

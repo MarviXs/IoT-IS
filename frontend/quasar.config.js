@@ -64,7 +64,7 @@ export default configure((/* ctx */) => {
       // publicPath: '/',
       // analyze: true,
       env: {
-        API_URL: process.env.API_URL,
+        VITE_API_URL: process.env.VITE_API_URL,
       },
       // rawDefine: {}
       // ignorePublicFolder: true,
@@ -215,16 +215,6 @@ export default configure((/* ctx */) => {
 
       // extendBexScriptsConf (esbuildConf) {}
       // extendBexManifestJson (json) {}
-    },
-    devServer: {
-      proxy: {
-        // proxy all requests starting with /api to jsonplaceholder
-        '/api': {
-          target: 'http://localhost:5097',
-          changeOrigin: true,
-        },
-      },
-      open: true,
     },
   };
 });

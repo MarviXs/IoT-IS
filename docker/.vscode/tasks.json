@@ -1,0 +1,11 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Docker compose up development",
+      "type": "shell",
+      "command": "docker compose -f compose.yaml up --build --watch",
+      "problemMatcher": []
+    }
+  ]
+}

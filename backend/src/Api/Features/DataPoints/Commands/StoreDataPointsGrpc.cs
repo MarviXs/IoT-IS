@@ -11,6 +11,6 @@ public class StoreDataPointsGrpc(ILogger<StoreDataPointsGrpc> logger) : StoreDat
         logger.LogInformation("Storing data points");
         Console.WriteLine("Storing data points");
 
-        return Task.FromResult(new StoreDataResponse { Success = true });
+        return Task.FromResult(new StoreDataResponse { Success = false });
     }
 }

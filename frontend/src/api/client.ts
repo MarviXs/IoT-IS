@@ -36,7 +36,7 @@ const authMiddleware: Middleware = {
 };
 
 const client = createClient<paths>({
-  baseUrl: process.env.API_URL || '/api',
+  baseUrl: process.env.VITE_API_URL || 'http://localhost:5097/',
   fetch: async (input: Request) => {
     // Read the body of the request
     const originalBody = input.body ? await input.text() : null;
