@@ -15,7 +15,7 @@ namespace Fei.Is.Api.Features.Jobs.Commands;
 
 public static class CreateJob
 {
-    public record Request(Guid RecipeId, int NoOfReps);
+    public record Request(Guid RecipeId, int Cycles);
 
     public sealed class Endpoint : ICarterModule
     {
@@ -94,38 +94,28 @@ public static class CreateJob
             {
                 Device = device,
                 Name = recipe.Name,
-                NoOfReps = message.Request.NoOfReps
+                CurrentStep = 1,
+                CurrentCycle = 1,
+                TotalCycles = message.Request.Cycles,
+                Status = JobStatusEnum.JOB_PENDING
             };
             await context.Jobs.AddAsync(job, cancellationToken);
             await context.SaveChangesAsync(cancellationToken);
 
-            //unpack recipe steps
+            // Unpack recipe steps with cycles
             var commands = new List<JobCommand>();
             foreach (var step in recipe.Steps.OrderBy(s => s.Order))
             {
                 var stepCommands = await UnpackRecipeStep(step, job.Id, 0, 20, cancellationToken);
                 commands.AddRange(stepCommands);
             }
-            for(int i = 0; i < commands.Count; i++)
+            for (int i = 0; i < commands.Count; i++)
             {
                 commands[i].Order = i;
             }
-            job.NoOfCmds = commands.Count;
+            job.TotalSteps = commands.Count;
 
             await context.JobCommands.AddRangeAsync(commands, cancellationToken);
-            await context.SaveChangesAsync(cancellationToken);
-
-            var jobStatus = new JobStatus
-            {
-                JobId = job.Id,
-                Job = job,
-                RetCode = JobStatusEnum.JOB_PENDING,
-                Code = JobStatusEnum.JOB_PENDING,
-                CurrentStep = 1,
-                CurrentCycle = 1,
-                TotalSteps = commands.Count
-            };
-            await context.JobStatuses.AddAsync(jobStatus, cancellationToken);
             await context.SaveChangesAsync(cancellationToken);
 
             return Result.Ok(job.Id);
@@ -138,35 +128,39 @@ public static class CreateJob
             if (currentDepth >= maxDepth)
                 return commands;
 
-            if (step.IsCommand)
+            for (int cycle = 0; cycle < step.Cycles; cycle++)
             {
-                var command = new JobCommand
+                if (step.IsCommand)
                 {
-                    JobId = jobId,
-                    DisplayName = step.Command!.DisplayName,
-                    Name = step.Command.Name,
-                    Order = step.Order,
-                    Params = step.Command.Params
-                };
-                commands.Add(command);
-            }
-
-            if (step.IsSubRecipe)
-            {
-                var subrecipe = await context
-                    .Recipes.AsNoTracking()
-                    .Include(r => r.Steps.OrderBy(s => s.Order))
-                    .ThenInclude(s => s.Command)
-                    .Include(r => r.Steps.OrderBy(s => s.Order))
-                    .ThenInclude(s => s.Subrecipe)
-                    .FirstOrDefaultAsync(r => r.Id == step.SubrecipeId, cancellationToken);
-
-                if (subrecipe != null)
-                {
-                    foreach (var subStep in subrecipe.Steps.OrderBy(s => s.Order))
+                    var command = new JobCommand
                     {
-                        var subCommands = await UnpackRecipeStep(subStep, jobId, currentDepth + 1, maxDepth, cancellationToken);
-                        commands.AddRange(subCommands);
+                        OriginalCommandId = step.Command!.Id,
+                        JobId = jobId,
+                        DisplayName = step.Command!.DisplayName,
+                        Name = step.Command.Name,
+                        Order = step.Order,
+                        Params = step.Command.Params
+                    };
+                    commands.Add(command);
+                }
+
+                if (step.IsSubRecipe)
+                {
+                    var subrecipe = await context
+                        .Recipes.AsNoTracking()
+                        .Include(r => r.Steps.OrderBy(s => s.Order))
+                        .ThenInclude(s => s.Command)
+                        .Include(r => r.Steps.OrderBy(s => s.Order))
+                        .ThenInclude(s => s.Subrecipe)
+                        .FirstOrDefaultAsync(r => r.Id == step.SubrecipeId, cancellationToken);
+
+                    if (subrecipe != null)
+                    {
+                        foreach (var subStep in subrecipe.Steps.OrderBy(s => s.Order))
+                        {
+                            var subCommands = await UnpackRecipeStep(subStep, jobId, currentDepth + 1, maxDepth, cancellationToken);
+                            commands.AddRange(subCommands);
+                        }
                     }
                 }
             }
@@ -180,7 +174,7 @@ public static class CreateJob
         public Validator()
         {
             RuleFor(x => x.Request.RecipeId).NotEmpty();
-            RuleFor(x => x.Request.NoOfReps).GreaterThan(0);
+            RuleFor(x => x.Request.Cycles).GreaterThan(0);
         }
     }
 }

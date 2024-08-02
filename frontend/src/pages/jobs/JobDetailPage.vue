@@ -1,31 +1,27 @@
 <template>
   <PageLayout
-    v-if="job.data"
-    :title="job.data.name"
+    v-if="job"
+    :breadcrumbs="breadcrumbs"
+    :title="job.name"
     :previous-title="t('job.label', 2)"
-    :previous-route="`/devices/${job.data.deviceId}`"
+    :previous-route="`/devices/${job.deviceId}`"
   >
     <template #description>
       <q-badge class="q-pa-xs q-ml-sm" color="primary">
         <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
-        {{ t('job.job_cycle') }}: {{ job?.data.status.currentCycle ?? 1 }}/{{ job?.data.noOfReps }}
+        {{ t('job.job_cycle') }}: {{ job?.currentCycle ?? 1 }}/{{ job?.totalCycles }}
       </q-badge>
-      <job-status-badges v-if="job" class="q-ml-sm" :job="job.data"></job-status-badges>
+      <job-status-badges v-if="job" class="q-ml-sm" :job-status="job.status" :paused="job.paused"></job-status-badges>
     </template>
     <template #actions>
-      <AutoRefreshButton v-model="refreshInterval" :loading="job.isLoading" @on-refresh="job.refresh" />
-      <job-controls
-        v-if="job && authStore.isAdmin"
-        class="col-grow"
-        :running-job="job.data"
-        @action-performed="job.refresh"
-      />
+      <AutoRefreshButton v-model="refreshInterval" :loading="isLoadingJob" @on-refresh="getJob" />
+      <JobControls class="col-grow" :job-id="job.id" :paused="job.paused" @action-performed="getJob" />
     </template>
     <template #default>
       <q-table
-        :rows="steps"
+        :rows="job.commands"
         :columns="columns"
-        :loading="job.isLoading"
+        :loading="isLoadingJob"
         flat
         :rows-per-page-options="[0]"
         class="shadow"
@@ -42,36 +38,22 @@
         <template #body-cell-progress="props">
           <q-td auto-width :props="props">
             <div style="min-height: 45px" class="row items-center justify-center">
-              <div
-                v-if="currentStep >= props.row.step && currentStep < props.row.step + props.row.cycles"
-                class="row items-center justify-center"
-              >
-                <q-circular-progress
-                  size="32px"
-                  :thickness="0.15"
-                  color="primary"
-                  show-value
-                  :indeterminate="!job?.data.paused && job?.data.currentStatus == JobStatusEnum.JOB_PROCESSING"
-                >
-                  <div class="current-step-progress">
-                    <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
-                    {{ currentStepCycle }}/{{ props.row.cycles }}
-                  </div>
-                </q-circular-progress>
+              <div v-if="props.row.progress == 'CommandProcessing'" class="row items-center justify-center">
+                <q-circular-progress size="20px" :thickness="0.25" color="primary" indeterminate> </q-circular-progress>
               </div>
-              <q-icon v-else-if="props.row.step < currentStep" :name="mdiCheck" size="28px" color="green"></q-icon>
+              <q-icon
+                v-else-if="props.row.progress == 'CommandDone'"
+                :name="mdiCheck"
+                size="28px"
+                color="green"
+              ></q-icon>
               <q-icon v-else :name="mdiCheck" size="28px" color="grey"></q-icon>
             </div>
           </q-td>
         </template>
         <template #body-cell-step="props">
           <q-td auto-width :props="props">
-            {{ props.row.step }}
-          </q-td>
-        </template>
-        <template #body-cell-cycles="props">
-          <q-td auto-width :props="props">
-            {{ props.row.cycles }}
+            {{ props.row.order }}
           </q-td>
         </template>
       </q-table>
@@ -81,103 +63,88 @@
 
 <script setup lang="ts">
 import { QTableProps } from 'quasar';
-import { computed, reactive } from 'vue';
+import { computed, ref } from 'vue';
 import { useRoute } from 'vue-router';
-import jobService from '@/services/JobService';
+import JobService from '@/api/services/JobService';
 import JobControls from '@/components/jobs/JobControls.vue';
-import { JobStatusEnum } from '@/models/JobStatusEnum';
 import JobStatusBadges from '@/components/jobs/JobStatusBadges.vue';
-import { useAuthStore } from '@/stores/auth-store';
 import { useI18n } from 'vue-i18n';
 import { mdiCheck, mdiListStatus } from '@quasar/extras/mdi-v6';
 import PageLayout from '@/layouts/PageLayout.vue';
-import { useAsyncData } from '@/composables/useAsyncData';
-import { useJobStore } from '@/stores/job-store';
 import { useStorage } from '@vueuse/core';
 import AutoRefreshButton from '@/components/core/AutoRefreshButton.vue';
+import { JobResponse } from '@/api/types/Job';
+import { handleError } from '@/utils/error-handler';
+import DeviceService from '@/api/services/DeviceService';
+import { DeviceResponse } from '@/api/types/Device';
 
 const { t } = useI18n();
 
 const route = useRoute();
-const authStore = useAuthStore();
-const jobStore = useJobStore();
 
 const refreshInterval = useStorage('JobDetailRefreshInterval', 30);
-const job = reactive(
-  useAsyncData(() => jobService.getJobById(route.params.id.toString()), t('job.toasts.load_failed')),
-);
-job.data = jobStore.getJobById(route.params.id.toString());
 
-const currentStep = computed(() => {
-  if (!job.data || !job.data.status || !job.data.status.currentStep) return 1;
-  return job.data.status.currentStep;
-});
+const job = ref<JobResponse>();
+const jobId = route.params.id as string;
+const isLoadingJob = ref(false);
 
-const currentStepCycle = computed(() => {
-  if (!job.data?.status || !steps.value.length) return 1;
-
-  const currentStepIndex = steps.value.findIndex(
-    (step) => currentStep.value > step.step && currentStep.value < step.step + step.cycles,
-  );
-
-  if (currentStepIndex === -1) return 1;
-
-  const currentStepObj = steps.value[currentStepIndex];
-  return currentStep.value - currentStepObj.step + 1;
-});
-
-const steps = computed(() => {
-  if (!job.data || !job.data.commands || job.data.commands.length === 0) return [];
-
-  const groupedCommands = [];
-  let lastCommandId = job.data.commands[0].id;
-  let cycleCount = 1;
-  let step = 1;
-
-  for (let i = 1; i < job.data.commands.length; i++) {
-    const command = job.data.commands[i];
-    if (command.id !== lastCommandId) {
-      groupedCommands.push({
-        step: step,
-        name: job.data.commands[i - 1].name,
-        cycles: cycleCount,
-      });
-      step += cycleCount;
-      lastCommandId = command.id;
-      cycleCount = 1;
-    } else {
-      cycleCount++;
+// If from device detail page, we have the device id
+const deviceId = route.query.device as string;
+const device = ref<DeviceResponse>();
+async function getDevice() {
+  if (deviceId) {
+    const { data, error } = await DeviceService.getDevice(deviceId);
+    if (error) {
+      handleError(error, "Couldn't fetch device");
+      return;
     }
+    device.value = data;
+  }
+}
+getDevice();
+
+async function getJob() {
+  isLoadingJob.value = true;
+  const { data, error } = await JobService.getJob(jobId);
+  isLoadingJob.value = false;
+
+  if (error) {
+    handleError(error, "Couldn't fetch job details");
+    return;
   }
 
-  groupedCommands.push({
-    step: step,
-    name: job.data.commands[job.data.commands.length - 1].name,
-    cycles: cycleCount,
-  });
+  job.value = data;
+}
+getJob();
 
-  return groupedCommands;
+// Breadcrumbs, device if available otherwise jobs
+const breadcrumbs = computed(() => {
+  if (deviceId) {
+    return [
+      { label: t('device.label', 2), to: '/devices' },
+      { label: device.value?.name, to: `/devices/${deviceId}` },
+      { label: t('job.label', 2), to: `/devices/${deviceId}/jobs` },
+      { label: job.value?.name, to: `/jobs/${jobId}` },
+    ];
+  }
+  return [
+    { label: t('job.label', 2), to: '/jobs' },
+    { label: job.value?.name, to: `/jobs/${jobId}` },
+  ];
 });
 
 const columns = computed<QTableProps['columns']>(() => [
   {
+    name: 'step',
+    label: t('job.step'),
+    field: 'order',
+    sortable: false,
+    align: 'center',
+  },
+  {
     name: 'progress',
     label: t('job.progress'),
     field: '',
-    sortable: false,
-    align: 'center',
-  },
-  {
-    name: 'step',
-    label: t('job.step'),
-    field: 'step',
-    sortable: false,
-    align: 'center',
-  },
-  {
-    name: 'cycles',
-    label: t('job.cycle', 2),
-    field: 'cycles',
     sortable: false,
     align: 'center',
   },

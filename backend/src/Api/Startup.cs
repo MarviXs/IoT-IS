@@ -3,13 +3,10 @@ using Carter;
 using Fei.Is.Api.Common.OpenAPI;
 using Fei.Is.Api.Extensions;
 using Fei.Is.Api.Features.Auth;
-using Fei.Is.Api.Features.DataPoints.Commands;
-using Fei.Is.Api.MqttClient;
 using Fei.Is.Api.Redis;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Json;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Fei.Is.Api;
 
@@ -27,12 +24,6 @@ public class Startup(IConfiguration configuration)
         services.ConfigureProblemDetails();
         services.AddCarter();
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Startup>());
-        services.AddGrpc(options =>
-        {
-            options.EnableDetailedErrors = true;
-            options.MaxReceiveMessageSize = null;
-            options.MaxSendMessageSize = null;
-        });
 
         // Auth
         services.AddAuthentication();
@@ -57,7 +48,7 @@ public class Startup(IConfiguration configuration)
         // Add services
         services.AddScoped<TokenService>();
         services.AddSingleton<RedisService>();
-        services.AddHostedService<MqttClientService>();
+        // services.AddHostedService<MqttClientService>();
 
         // Add validators
         services.AddValidatorsFromAssemblyContaining<Startup>(ServiceLifetime.Scoped);
@@ -91,7 +82,6 @@ public class Startup(IConfiguration configuration)
 
         app.UseEndpoints(endpoints =>
         {
-            endpoints.MapGrpcService<StoreDataPointsGrpc>().AllowAnonymous();
             endpoints.MapCarter();
         });
     }

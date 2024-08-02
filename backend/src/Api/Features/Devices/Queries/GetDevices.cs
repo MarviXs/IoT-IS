@@ -7,19 +7,22 @@ using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
 using MediatR;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fei.Is.Api.Features.Devices.Queries;
 
 public static class GetDevices
 {
+    public class QueryParameters : SearchParameters { }
+
     public sealed class Endpoint : ICarterModule
     {
         public void AddRoutes(IEndpointRouteBuilder app)
         {
             app.MapGet(
                     "devices",
-                    async (IMediator mediator, ClaimsPrincipal user, [AsParameters] QueryParameters parameters) =>
+                    async Task<Ok<PagedList<Response>>>(IMediator mediator, ClaimsPrincipal user, [AsParameters] QueryParameters parameters) =>
                     {
                         var query = new Query(user, parameters);
                         var result = await mediator.Send(query);
@@ -34,11 +37,6 @@ public static class GetDevices
                     return o;
                 });
         }
-    }
-
-    public class QueryParameters : SearchParameters
-    {
-        public new string? SortBy { get; set; }
     }
 
     public record Query(ClaimsPrincipal User, QueryParameters Parameters) : IRequest<PagedList<Response>>;

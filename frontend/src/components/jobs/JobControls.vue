@@ -1,6 +1,6 @@
 <template>
   <div class="row q-col-gutter-sm items-center justify-center">
-    <div v-if="!job.paused" class="col-12 col-sm-3">
+    <div v-if="!paused" class="col-12 col-sm-3">
       <JobControlButton
         :label="t('job.controls.pause')"
         color="grey-color"
@@ -42,7 +42,6 @@
         color="red"
         :icon="mdiStop"
         :loading="stoppingJob"
-        :disable="job.toCancel == true"
         @click="stopJob"
       ></JobControlButton>
     </div>
@@ -57,11 +56,15 @@ import JobControlButton from './JobControlButton.vue';
 import { handleError } from '@/utils/error-handler';
 import { useI18n } from 'vue-i18n';
 import { mdiPause, mdiPlay, mdiSkipNext, mdiSkipForward, mdiStop } from '@quasar/extras/mdi-v6';
-import { ActiveJobResponse } from '@/api/types/Job';
+import { ActiveJobResponse, JobResponse } from '@/api/types/Job';
 
 const props = defineProps({
-  job: {
-    type: Object as PropType<ActiveJobResponse>,
+  jobId: {
+    type: String,
+    required: true,
+  },
+  paused: {
+    type: Boolean,
     required: true,
   },
 });
@@ -72,7 +75,7 @@ const { t } = useI18n();
 const stoppingJob = ref(false);
 async function stopJob() {
   stoppingJob.value = true;
-  const { data, error } = await JobService.cancelJob(props.job.id);
+  const { data, error } = await JobService.cancelJob(props.jobId);
   stoppingJob.value = false;
 
   if (error) {
@@ -87,7 +90,7 @@ async function stopJob() {
 const pausingJob = ref(false);
 async function pauseJob() {
   pausingJob.value = true;
-  const { data, error } = await JobService.pauseJob(props.job.id);
+  const { data, error } = await JobService.pauseJob(props.jobId);
   pausingJob.value = false;
 
   if (error) {
@@ -102,7 +105,7 @@ async function pauseJob() {
 const resumingJob = ref(false);
 async function resumeJob() {
   resumingJob.value = true;
-  const { data, error } = await JobService.continueJob(props.job.id);
+  const { data, error } = await JobService.continueJob(props.jobId);
   resumingJob.value = false;
 
   if (error) {
@@ -117,7 +120,7 @@ async function resumeJob() {
 const skippingStep = ref(false);
 async function skipStep() {
   skippingStep.value = true;
-  const { data, error } = await JobService.skipStep(props.job.id);
+  const { data, error } = await JobService.skipStep(props.jobId);
   skippingStep.value = false;
 
   if (error) {
@@ -132,7 +135,7 @@ async function skipStep() {
 const skippingCycle = ref(false);
 async function skipCycle() {
   skippingCycle.value = true;
-  const { data, error } = await JobService.skipCycle(props.job.id);
+  const { data, error } = await JobService.skipCycle(props.jobId);
   skippingCycle.value = false;
 
   if (error) {

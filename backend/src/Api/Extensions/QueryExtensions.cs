@@ -17,4 +17,16 @@ public static class QueryExtensions
 
         return query.OrderBy($"{sortBy} {sortDirection}");
     }
+
+    public static IQueryable<T> Sort<T, TKey>(this IQueryable<T> source, Func<T, TKey> selector, bool? descending)
+    {
+        if (!descending ?? false)
+        {
+            return (IQueryable<T>)source.OrderBy(selector);
+        }
+        else
+        {
+            return (IQueryable<T>)source.OrderByDescending(selector);
+        }
+    }
 }

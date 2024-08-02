@@ -23,6 +23,5 @@ public class RedisService : IDisposable
     public void Dispose()
     {
         Connection.Dispose();
-        GC.SuppressFinalize(this);
     }
 }

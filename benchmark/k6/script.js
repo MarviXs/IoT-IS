@@ -6,7 +6,6 @@ tests Mqtt with a 100 messages per connection.
 */
 
 import { check } from "k6";
-import protobuf from "./protobuf/protobuf.js";
 
 const mqtt = require("k6/x/mqtt");
 
@@ -21,7 +20,7 @@ let rnd = Math.random() * rnd_count;
 let connectTimeout = 2000;
 
 // publish timeout (ms)
-let publishTimeout = 100;
+let publishTimeout = 10000;
 
 // connection close timeout (ms)
 let closeTimeout = 2000;

@@ -17,7 +17,6 @@ public class AppDbContext : IdentityDbContext<User>
         modelBuilder.ApplyConfiguration(new RoleConfiguration());
         modelBuilder.ApplyConfiguration(new RecipeConfiguration());
         modelBuilder.ApplyConfiguration(new RecipeStepConfiguration());
-        modelBuilder.ApplyConfiguration(new JobStatusConfiguration());
         modelBuilder.ApplyConfiguration(new DeviceTemplateConfiguration());
     }
 
@@ -26,7 +25,6 @@ public class AppDbContext : IdentityDbContext<User>
     public DbSet<Device> Devices { get; set; }
     public DbSet<Sensor> Sensors { get; set; }
     public DbSet<Job> Jobs { get; set; }
-    public DbSet<JobStatus> JobStatuses { get; set; }
     public DbSet<Recipe> Recipes { get; set; }
     public DbSet<RecipeStep> RecipeSteps { get; set; }
     public DbSet<Command> Commands { get; set; }

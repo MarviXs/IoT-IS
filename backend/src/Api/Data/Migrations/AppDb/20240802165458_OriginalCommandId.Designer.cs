@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Fei.Is.Api.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Fei.Is.Api.Data.Migrations.AppDb
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240802165458_OriginalCommandId")]
+    partial class OriginalCommandId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -138,12 +141,6 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("CurrentCycle")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("CurrentStep")
-                        .HasColumnType("integer");
-
                     b.Property<Guid>("DeviceId")
                         .HasColumnType("uuid");
 
@@ -154,20 +151,20 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("NoOfCmds")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("NoOfReps")
+                        .HasColumnType("integer");
+
                     b.Property<bool>("Paused")
                         .HasColumnType("boolean");
 
                     b.Property<DateTime?>("StartedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("TotalCycles")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("TotalSteps")
-                        .HasColumnType("integer");
+                    b.Property<bool>("ToCancel")
+                        .HasColumnType("boolean");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -217,6 +214,46 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.HasIndex("JobId");
 
                     b.ToTable("JobCommands");
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.JobStatus", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Code")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("CurrentCycle")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CurrentStep")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("JobId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("RetCode")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TotalSteps")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("JobId")
+                        .IsUnique();
+
+                    b.ToTable("JobStatuses");
+
+                    b.HasAnnotation("Npgsql:StorageParameter:fillfactor", 70);
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.Recipe", b =>
@@ -614,6 +651,17 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.Navigation("Job");
                 });
 
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.JobStatus", b =>
+                {
+                    b.HasOne("Fei.Is.Api.Data.Models.Job", "Job")
+                        .WithOne("Status")
+                        .HasForeignKey("Fei.Is.Api.Data.Models.JobStatus", "JobId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Job");
+                });
+
             modelBuilder.Entity("Fei.Is.Api.Data.Models.Recipe", b =>
                 {
                     b.HasOne("Fei.Is.Api.Data.Models.DeviceTemplate", "DeviceTemplate")
@@ -747,6 +795,8 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
             modelBuilder.Entity("Fei.Is.Api.Data.Models.Job", b =>
                 {
                     b.Navigation("Commands");
+
+                    b.Navigation("Status");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.Recipe", b =>

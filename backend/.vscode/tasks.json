@@ -5,20 +5,10 @@
       "label": "Watch API",
       "type": "process",
       "command": "dotnet",
-      "args": ["watch", "run", "--non-interactive"],
+      "args": ["watch", "run"],
       "problemMatcher": "$msCompile",
       "options": {
         "cwd": "${workspaceFolder}/src/Api"
-      }
-    },
-    {
-      "label": "Watch DataPoint Service",
-      "type": "process",
-      "command": "dotnet",
-      "args": ["watch", "run", "--non-interactive"],
-      "problemMatcher": "$msCompile",
-      "options": {
-        "cwd": "${workspaceFolder}/src/DataPointBatchProcessingService"
       }
     },
     {

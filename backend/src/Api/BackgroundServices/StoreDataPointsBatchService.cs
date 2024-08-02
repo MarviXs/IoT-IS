@@ -1,23 +1,23 @@
-using Fei.Is.DataPointBatchProcessingService.Protos;
-using Fei.Is.DataPointBatchProcessingService.Services;
+using Fei.Is.Api.Data.Contexts;
+using Fei.Is.Api.Data.Models;
+using Fei.Is.Api.Redis;
 using StackExchange.Redis;
 
-namespace Fei.Is.DataPointBatchProcessingService;
+namespace Fei.Is.Api.BackgroundServices;
 
-public class Worker(RedisService redis, StoreDataService.StoreDataServiceClient client, ILogger<Worker> logger) : BackgroundService
+public class StoreDataPointsBatchService(RedisService redis, TimeScaleDbContext timescale, ILogger<StoreDataPointsBatchService> logger)
+    : BackgroundService
 {
     private const string StreamName = "datapoints";
     private const string GroupName = "store_data";
-    private const int BatchSize = 5000;
     private const int ProcessingSpeed = 250;
-    private const int MaxPendingTimeUnclaimed = 10000;
+    private const int MaxPendingTimeUnclaimed = 30000;
 
     static Dictionary<string, string> ParseResult(StreamEntry entry) => entry.Values.ToDictionary(x => x.Name.ToString(), x => x.Value.ToString());
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         string consumerName = Guid.NewGuid().ToString();
-        logger.LogInformation("Worker started with consumer name: {ConsumerName}", consumerName);
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -30,14 +30,7 @@ public class Worker(RedisService redis, StoreDataService.StoreDataServiceClient 
                 }
 
                 // Claim pending messages
-                var autoClaimResult = await redis.Db.StreamAutoClaimAsync(
-                    StreamName,
-                    GroupName,
-                    consumerName,
-                    MaxPendingTimeUnclaimed,
-                    "0-0",
-                    BatchSize
-                );
+                var autoClaimResult = await redis.Db.StreamAutoClaimAsync(StreamName, GroupName, consumerName, MaxPendingTimeUnclaimed, "0-0", 5000);
                 var messages = await redis.Db.StreamReadGroupAsync(StreamName, GroupName, consumerName, ">");
 
                 messages = [.. messages, .. autoClaimResult.ClaimedEntries];
@@ -54,9 +47,9 @@ public class Worker(RedisService redis, StoreDataService.StoreDataServiceClient 
                             dataPoints.Add(
                                 new DataPoint
                                 {
-                                    DeviceId = parsed["device_id"],
+                                    DeviceId = Guid.Parse(parsed["device_id"]),
                                     SensorTag = parsed["sensor_tag"],
-                                    Timestamp = long.Parse(parsed["timestamp"]),
+                                    TimeStamp = DateTimeOffset.FromUnixTimeMilliseconds(long.Parse(parsed["timestamp"])),
                                     Value = double.Parse(parsed["value"])
                                 }
                             );
@@ -67,11 +60,9 @@ public class Worker(RedisService redis, StoreDataService.StoreDataServiceClient 
                         }
                     }
 
-                    if (dataPoints.Any())
+                    if (dataPoints.Count != 0)
                     {
-                        // Send grpc request to store data
-                        var request = new StoreDataRequest { DataPoints = { dataPoints } };
-                        var response = await client.StoreDataAsync(request, cancellationToken: stoppingToken);
+                        await timescale.DataPoints.BulkInsertAsync(dataPoints);
                         var messageIds = messages.Select(m => m.Id).ToArray();
                         await redis.Db.StreamAcknowledgeAsync(StreamName, GroupName, messageIds);
                     }

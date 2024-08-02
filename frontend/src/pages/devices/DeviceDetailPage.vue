@@ -65,7 +65,6 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router';
 import DeviceInfoCard from '@/components/devices/DeviceInfoCard.vue';
-import DataPointChart2 from '@/components/datapoints/DataPointChart2.vue';
 import DataPointChartJS from '@/components/datapoints/DataPointChartJS.vue';
 import { SensorNode } from '@/models/SensorNode';
 import { computed, ref } from 'vue';

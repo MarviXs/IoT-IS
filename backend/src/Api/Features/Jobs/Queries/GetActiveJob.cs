@@ -5,6 +5,7 @@ using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
+using Fei.Is.Api.Features.Jobs.Extensions;
 using FluentResults;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -68,36 +69,34 @@ public static class GetActiveJob
             var activeJob = await context
                 .Jobs.AsNoTracking()
                 .Where(j => j.DeviceId == request.DeviceId)
-                .Include(j => j.Status)
                 .Include(j => j.Commands.OrderBy(c => c.Order))
-                .Where(
-                    j =>
-                        j.Status!.Code == JobStatusEnum.JOB_PROCESSING
-                        || j.Status.Code == JobStatusEnum.JOB_IDLE
-                        || j.Status.Code == JobStatusEnum.JOB_PENDING
-                        || j.Status.Code == JobStatusEnum.JOB_PAUSED
-                        || j.Status.Code == JobStatusEnum.JOB_CANCELED
+                .Where(j =>
+                    j.Status == JobStatusEnum.JOB_PROCESSING
+                    || j.Status == JobStatusEnum.JOB_IDLE
+                    || j.Status == JobStatusEnum.JOB_PENDING
+                    || j.Status == JobStatusEnum.JOB_PAUSED
+                    || j.Status == JobStatusEnum.JOB_CANCELED
                 )
-                .SingleOrDefaultAsync(cancellationToken);
+                .FirstOrDefaultAsync(cancellationToken);
 
             if (activeJob == null)
             {
                 return Result.Fail(new NotFoundError());
             }
 
-            var currentCommand = activeJob.Commands.ElementAtOrDefault((activeJob.Status?.CurrentStep ?? 1) - 1)?.Name ?? string.Empty;
+            var currentCommand = activeJob.Commands.ElementAtOrDefault(activeJob.CurrentStep - 1)?.Name ?? string.Empty;
             var response = new Response(
                 activeJob.Id,
+                activeJob.DeviceId,
                 activeJob.Name,
-                activeJob.NoOfCmds,
-                activeJob.NoOfReps,
-                activeJob.Status!.CurrentStep,
-                activeJob.Status.CurrentCycle,
+                activeJob.TotalSteps,
+                activeJob.TotalCycles,
+                activeJob.CurrentStep,
+                activeJob.CurrentCycle,
                 currentCommand,
-                activeJob.ToCancel,
                 activeJob.Paused,
                 activeJob.GetProgress(),
-                activeJob.Status.Code
+                activeJob.Status
             );
 
             return Result.Ok(response);
@@ -106,13 +105,13 @@ public static class GetActiveJob
 
     public record Response(
         Guid Id,
+        Guid DeviceId,
         string Name,
-        int NoOfCmds,
-        int NoOfReps,
+        int TotalSteps,
+        int TotalCycles,
         int CurrentStep,
         int CurrentCycle,
         string CurrentCommand,
-        bool ToCancel,
         bool Paused,
         double Progress,
         JobStatusEnum Status

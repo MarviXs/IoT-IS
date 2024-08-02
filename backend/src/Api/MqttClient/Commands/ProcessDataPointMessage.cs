@@ -6,7 +6,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using ProtoBuf;
 
-namespace Fei.Is.Api.Features.MqttClient.Commands;
+namespace Fei.Is.Api.MqttClient.Commands;
 
 public static class ProcessDataPointMessage
 {
@@ -58,10 +58,10 @@ public static class ProcessDataPointMessage
             }
 
             // For testing
-            var base64Decoded = Convert.FromBase64String(Encoding.UTF8.GetString(message.Payload));
-            var datapoint = Serializer.Deserialize<DataPoint>(base64Decoded.AsMemory());
+            // var base64Decoded = Convert.FromBase64String(Encoding.UTF8.GetString(message.Payload));
+            // var datapoint = Serializer.Deserialize<DataPoint>(base64Decoded.AsMemory());
 
-            // var datapoint = Serializer.Deserialize<DataPoint>(message.Payload.AsMemory());
+            var datapoint = Serializer.Deserialize<DataPoint>(message.Payload.AsMemory());
 
             // Push to redis stream
             var redisResult = await redis.Db.StreamAddAsync(

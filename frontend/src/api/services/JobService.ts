@@ -1,9 +1,17 @@
 import { client } from '@/api/client';
-import { StartJobRequest } from '../types/Job';
+import { JobsQueryParams, StartJobRequest } from '../types/Job';
 
 class JobService {
   async getActiveJob(deviceId: string) {
     return await client.GET('/devices/{deviceId}/jobs/active', { params: { path: { deviceId } } });
+  }
+
+  async getJob(jobId: string) {
+    return await client.GET('/jobs/{jobId}', { params: { path: { jobId } } });
+  }
+
+  async getJobs(queryParams?: JobsQueryParams) {
+    return await client.GET('/jobs', { params: { query: queryParams } });
   }
 
   async startJob(deviceId: string, body: StartJobRequest) {

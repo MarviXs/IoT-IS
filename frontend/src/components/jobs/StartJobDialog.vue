@@ -11,7 +11,7 @@
       <RecipeSelect v-model="selectedRecipe" />
       <q-input
         ref="repetitionsRef"
-        v-model="jobToRun.noOfReps"
+        v-model="jobToRun.cycles"
         :label="t('job.repetitions')"
         type="number"
         lazy-rules
@@ -46,7 +46,7 @@ const emit = defineEmits(['jobStarted']);
 const { t } = useI18n();
 
 const jobToRun = ref<StartJobRequest>({
-  noOfReps: 1,
+  cycles: 1,
   recipeId: '',
 });
 const selectedRecipe = ref<RecipeSelectData>();
@@ -68,7 +68,7 @@ async function runJob() {
     return;
   }
 
-  jobToRun.value = { noOfReps: 1, recipeId: '' };
+  jobToRun.value = { cycles: 1, recipeId: '' };
 
   isDialogOpen.value = false;
   toast.success(t('job.toasts.start_success'));

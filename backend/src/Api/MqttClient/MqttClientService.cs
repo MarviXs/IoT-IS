@@ -1,4 +1,4 @@
-using Fei.Is.Api.Features.MqttClient.Commands;
+using Fei.Is.Api.MqttClient.Commands;
 using MediatR;
 using MQTTnet;
 using MQTTnet.Client;
@@ -42,6 +42,8 @@ public class MqttClientService : IHostedService
 
     public async Task ProcessMessageAsync(MqttApplicationMessageReceivedEventArgs args)
     {
+        args.AutoAcknowledge = false;
+
         _ = Task.Run(async () =>
         {
             try
@@ -57,22 +59,23 @@ public class MqttClientService : IHostedService
                     var command = new ProcessDataPointMessage.Command(topicParts[1], args.ApplicationMessage.PayloadSegment);
                     await mediator.Send(command);
                 }
-            }
+            } 
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error processing MQTT message");
             }
         });
+        
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         await _mqttClient.StartAsync(_mqttOptions);
 
-        await _mqttClient.SubscribeAsync("$SYS/brokers/+/clients/+/connected");
-        await _mqttClient.SubscribeAsync("$SYS/brokers/+/clients/+/disconnected");
+        await _mqttClient.SubscribeAsync("$SYS/brokers/+/clients/+/connected", MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce);
+        await _mqttClient.SubscribeAsync("$SYS/brokers/+/clients/+/disconnected", MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce);
 
-        await _mqttClient.SubscribeAsync("$queue/devices/+/data");
+        await _mqttClient.SubscribeAsync("$queue/devices/+/data", MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce);
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)

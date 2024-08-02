@@ -1,0 +1,75 @@
+authentication = [
+  {
+    backend = http
+    body {
+      accessToken = "${username}"
+    }
+    enable = true
+    headers {Content-Type = "application/json", X-Request-Source = EMQX}
+    mechanism = password_based
+    method = post
+    url = "http://backend:5097/auth/device"
+  },
+  {
+    backend = built_in_database
+    mechanism = password_based
+    password_hash_algorithm {name = sha256, salt_position = suffix}
+    user_id_type = username
+  }
+]
+authorization {
+  deny_action = ignore
+  no_match = deny
+  sources = [
+    {
+      enable = true
+      path = "etc/acl.conf"
+      type = file
+    }
+  ]
+}
+cluster {discovery_strategy = manual, name = emqxcl}
+dashboard {
+  listeners {
+    http {bind = 18083}
+  }
+}
+mqtt {
+  await_rel_timeout = "300s"
+  client_attrs_init = []
+  exclusive_subscription = false
+  idle_timeout = "15s"
+  ignore_loop_deliver = false
+  keepalive_multiplier = 1.5
+  max_awaiting_rel = 100
+  max_clientid_len = 65535
+  max_inflight = 10000
+  max_mqueue_len = 100000
+  max_packet_size = "1MB"
+  max_qos_allowed = 2
+  max_subscriptions = infinity
+  max_topic_alias = 65535
+  max_topic_levels = 128
+  message_expiry_interval = infinity
+  mqueue_default_priority = lowest
+  mqueue_priorities = disabled
+  mqueue_store_qos0 = true
+  peer_cert_as_clientid = disabled
+  peer_cert_as_username = disabled
+  response_information = ""
+  retain_available = true
+  retry_interval = "30s"
+  server_keepalive = disabled
+  session_expiry_interval = "2h"
+  shared_subscription = true
+  shared_subscription_strategy = round_robin
+  strict_mode = false
+  upgrade_qos = false
+  use_username_as_clientid = false
+  wildcard_subscription = true
+}
+node {
+  cookie = emqxsecretcookie
+  data_dir = data
+  name = "emqx@127.0.0.1"
+}

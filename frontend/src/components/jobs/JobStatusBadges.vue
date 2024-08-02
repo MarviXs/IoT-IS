@@ -1,12 +1,9 @@
 <template>
   <div class="row">
-    <q-badge :color="jobStatusColors[job.status]" class="q-pa-xs">
-      {{ props.job.status }}
+    <q-badge :color="jobStatusColors[jobStatus]" class="q-pa-xs">
+      {{ props.jobStatus }}
     </q-badge>
-    <q-badge v-if="props.job.toCancel" color="red" class="q-pa-xs q-ml-sm">
-      {{ t('job.stopping').toUpperCase() }}
-    </q-badge>
-    <q-badge v-if="props.job.paused" color="accent" class="q-pa-xs q-ml-sm">
+    <q-badge v-if="paused" color="accent" class="q-pa-xs q-ml-sm">
       {{ t('job.paused').toUpperCase() }}
     </q-badge>
   </div>
@@ -16,12 +13,16 @@
 import { jobStatusColors } from '@/utils/job-status-look';
 import { PropType } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { ActiveJobResponse } from '@/api/types/Job';
+import { JobStatusEnum } from '@/api/types/Job';
 
 const props = defineProps({
-  job: {
-    type: Object as PropType<ActiveJobResponse>,
+  jobStatus: {
+    type: Object as PropType<JobStatusEnum>,
     required: true,
+  },
+  paused: {
+    type: Boolean,
+    default: false,
   },
 });
 

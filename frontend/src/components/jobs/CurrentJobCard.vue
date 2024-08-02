@@ -10,7 +10,7 @@
           size="14px"
           :icon="mdiOpenInNew"
           color="grey-color"
-          :to="`/jobs/${activeJob.id}`"
+          :to="`/jobs/${activeJob.id}?device=${activeJob.deviceId}`"
           flat
           round
           ><q-tooltip :offset="[0, 4]">{{ t('global.details') }}</q-tooltip>
@@ -34,20 +34,25 @@
                 {{ activeJob.progress.toFixed(0) }}%
               </q-circular-progress>
               <div class="column q-ml-sm q-gutter-y-xs justify-center q-my-md items-start">
-                <JobStatusBadges :job="activeJob" />
+                <JobStatusBadges :job-status="activeJob.status" :paused="activeJob.paused" />
                 <div class="text-weight-medium">
                   {{ activeJob.name }}
                 </div>
                 <div>
-                  {{ t('job.step_of', [activeJob.currentStep ?? 1, activeJob.noOfCmds]) }}
+                  {{ t('job.step_of', [activeJob.currentStep ?? 1, activeJob.totalSteps]) }}
                   <span v-if="activeJob.currentCommand">({{ activeJob.currentCommand }})</span>
                 </div>
                 <div>
-                  {{ t('job.cycle_of', [activeJob.currentCycle ?? 1, activeJob.noOfReps]) }}
+                  {{ t('job.cycle_of', [activeJob.currentCycle ?? 1, activeJob.totalCycles]) }}
                 </div>
               </div>
             </div>
-            <JobControls class="col-grow" :job="activeJob" @action-performed="getActiveJob" />
+            <JobControls
+              class="col-grow"
+              :job-id="activeJob.id"
+              :paused="activeJob.paused"
+              @action-performed="getActiveJob"
+            />
           </div>
           <div v-else class="column items-center justify-center col-grow">
             <div class="q-mb-sm">{{ t('job.no_running_job') }}</div>
