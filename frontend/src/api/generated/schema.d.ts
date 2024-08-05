@@ -274,7 +274,8 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        put?: never;
+        /** Update a device collection */
+        put: operations["UpdateDeviceCollection"];
         post?: never;
         /** Delete a device collection */
         delete: operations["DeleteDeviceCollection"];
@@ -629,6 +630,19 @@ export interface components {
             name: string;
             /** Format: uuid */
             collectionParentId?: string | null;
+        };
+        "Fei.Is.Api.Features.DeviceCollections.Commands.CreateDeviceCollection.Response": {
+            /** Format: uuid */
+            id: string;
+            name: string;
+        };
+        "Fei.Is.Api.Features.DeviceCollections.Commands.UpdateDeviceCollection.Request": {
+            name: string;
+        };
+        "Fei.Is.Api.Features.DeviceCollections.Commands.UpdateDeviceCollection.Response": {
+            /** Format: uuid */
+            id: string;
+            name: string;
         };
         "Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionById.Response": {
             /** Format: uuid */
@@ -1637,7 +1651,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": string;
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.DeviceCollections.Commands.CreateDeviceCollection.Response"];
                 };
             };
             /** @description Bad Request */
@@ -1669,6 +1683,41 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+        };
+    };
+    UpdateDeviceCollection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.DeviceCollections.Commands.UpdateDeviceCollection.Request"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.DeviceCollections.Commands.UpdateDeviceCollection.Response"];
+                };
             };
             /** @description Bad Request */
             400: {

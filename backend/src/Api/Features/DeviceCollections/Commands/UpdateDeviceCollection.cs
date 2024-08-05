@@ -11,19 +11,19 @@ using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fei.Is.Api.Features.DeviceCollections.Commands;
 
-public static class CreateDeviceCollection
+public static class UpdateDeviceCollection
 {
-    public record Request(string Name, Guid? CollectionParentId);
+    public record Request(string Name);
 
     public sealed class Endpoint : ICarterModule
     {
         public void AddRoutes(IEndpointRouteBuilder app)
         {
-            app.MapPost(
-                    "device-collections",
-                    async Task<Results<Created<Response>, ValidationProblem>> (IMediator mediator, ClaimsPrincipal user, Request request) =>
+            app.MapPut(
+                    "device-collections/{id:guid}",
+                    async Task<Results<Ok<Response>, ValidationProblem>> (IMediator mediator, ClaimsPrincipal user, Request request, Guid id) =>
                     {
-                        var command = new Command(request, user);
+                        var command = new Command(request, id, user);
 
                         var result = await mediator.Send(command);
 
@@ -31,21 +31,21 @@ public static class CreateDeviceCollection
                         {
                             return TypedResults.ValidationProblem(result.ToValidationErrors());
                         }
-
-                        return TypedResults.Created(result.Value.Id.ToString(), result.Value);
+                        
+                        return TypedResults.Ok(result.Value);
                     }
                 )
-                .WithName(nameof(CreateDeviceCollection))
+                .WithName(nameof(UpdateDeviceCollection))
                 .WithTags(nameof(DeviceCollection))
                 .WithOpenApi(o =>
                 {
-                    o.Summary = "Create a device collection";
+                    o.Summary = "Update a device collection";
                     return o;
                 });
         }
     }
 
-    public record Command(Request Request, ClaimsPrincipal User) : IRequest<Result<Response>>;
+    public record Command(Request Request, Guid CollectionId, ClaimsPrincipal User) : IRequest<Result<Response>>;
 
     public sealed class Handler(AppDbContext context, IValidator<Command> validator) : IRequestHandler<Command, Result<Response>>
     {
@@ -57,32 +57,17 @@ public static class CreateDeviceCollection
                 return Result.Fail(new ValidationError(result));
             }
 
-            var deviceCollection = new DeviceCollection
+            var collection = await context.DeviceCollections.FindAsync([message.CollectionId], cancellationToken: cancellationToken);
+            if (collection == null)
             {
-                Name = message.Request.Name,
-                OwnerId = message.User.GetUserId(),
-                IsRoot = true
-            };
-
-            if (message.Request.CollectionParentId.HasValue)
-            {
-                deviceCollection.IsRoot = false;
-                var parentCollection = await context.DeviceCollections.FindAsync(
-                    [message.Request.CollectionParentId],
-                    cancellationToken: cancellationToken
-                );
-                if (parentCollection == null)
-                {
-                    return Result.Fail(new NotFoundError());
-                }
-
-                deviceCollection.SubItems.Add(new CollectionItem { CollectionParent = parentCollection });
+                return Result.Fail(new NotFoundError());
             }
 
-            await context.DeviceCollections.AddAsync(deviceCollection, cancellationToken);
+            collection.Name = message.Request.Name;
+
             await context.SaveChangesAsync(cancellationToken);
 
-            return Result.Ok(new Response(deviceCollection.Id, deviceCollection.Name));
+            return Result.Ok(new Response(collection.Id, collection.Name));
         }
     }
 

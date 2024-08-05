@@ -9,7 +9,7 @@
         size="15px"
         :label="t('collection.create_collection')"
         :icon="mdiPlus"
-        @click="isCreateCollectionDialogOpen = true"
+        @click="openCreateCollectionDialog('')"
       />
     </template>
     <template #default>
@@ -48,16 +48,43 @@
                   <q-icon color="grey-color" class="q-ml-xs q-mr-xs" size="1.6rem" :name="mdiMemory" />
                   <span>{{ treeProp.node.name }}</span>
                   <q-space></q-space>
-                  <q-btn :icon="mdiChartLine" flat color="grey-color" round @click.stop="console.log('add')" />
-                  <q-btn :icon="mdiPencil" flat color="grey-color" round @click.stop="console.log('add')" />
+                  <q-btn
+                    :icon="mdiChartLine"
+                    flat
+                    color="grey-color"
+                    round
+                    :to="`/devices/${treeProp.node.id}`"
+                    @click.stop
+                  />
                   <q-btn :icon="mdiTrashCan" flat color="grey-color" round @click.stop="console.log('add')" />
                 </template>
                 <template v-else>
-                  <q-btn dense :icon="mdiPlus" flat color="grey-color" round @click.stop="console.log('add')" />
+                  <q-btn :icon="mdiPlus" color="grey-color" dense flat round @click.stop>
+                    <q-menu>
+                      <q-list>
+                        <q-item v-close-popup clickable @click="console.log('add')">
+                          <div class="row items-center q-gutter-sm">
+                            <div>Add Device</div>
+                          </div>
+                        </q-item>
+                        <q-item v-close-popup clickable @click="openCreateCollectionDialog(treeProp.node.id)">
+                          <div class="row items-center q-gutter-sm">
+                            <div>Add Subcollection</div>
+                          </div>
+                        </q-item>
+                      </q-list>
+                    </q-menu>
+                  </q-btn>
                   <span>{{ treeProp.node.name }}</span>
                   <q-space></q-space>
                   <q-btn :icon="mdiChartLine" flat color="grey-color" round @click.stop="console.log('add')" />
-                  <q-btn :icon="mdiPencil" flat color="grey-color" round @click.stop="console.log('add')" />
+                  <q-btn
+                    :icon="mdiPencil"
+                    flat
+                    color="grey-color"
+                    round
+                    @click.stop="openUpdateCollectionDialog(treeProp.node.id)"
+                  />
                   <q-btn
                     :icon="mdiTrashCan"
                     flat
@@ -73,7 +100,16 @@
       </q-table>
     </template>
   </PageLayout>
-  <CreateCollectionDialog v-model="isCreateCollectionDialogOpen" @on-create="addCollectionToParent" />
+  <CreateCollectionDialog
+    v-model="isCreateCollectionDialogOpen"
+    :collection-parent-id="createCollectionParentId"
+    @on-create="addCollectionToParent"
+  />
+  <UpdateCollectionDialog
+    v-model="isUpdateCollectionDialogOpen"
+    :collection-id="updateCollectionId"
+    @on-update="handleCollectionUpdated"
+  />
   <DeleteCollectionDialog
     v-model="isDeleteCollectionDialogOpen"
     :collection-id="deleteCollectionId"
@@ -88,14 +124,18 @@ import { useI18n } from 'vue-i18n';
 import { mdiChartLine, mdiHubspot, mdiMemory, mdiPencil, mdiPlus, mdiTrashCan } from '@quasar/extras/mdi-v7';
 import PageLayout from '@/layouts/PageLayout.vue';
 import { PaginationClient, PaginationTable } from '@/models/Pagination';
-import { DeviceCollectionQueryParams } from '@/api/types/DeviceCollection';
+import {
+  CreateCollectionResponse,
+  DeviceCollectionQueryParams,
+  UpdateCollectionResponse,
+} from '@/api/types/DeviceCollection';
 import DeviceCollectionService from '@/api/services/DeviceCollectionService';
 import { handleError } from '@/utils/error-handler';
 import CreateCollectionDialog from '@/components/collections/CreateCollectionDialog.vue';
 import DeleteCollectionDialog from '@/components/collections/DeleteCollectionDialog.vue';
+import UpdateCollectionDialog from '@/components/collections/UpdateCollectionDialog.vue';
 
 const { t } = useI18n();
-const isCreateCollectionDialogOpen = ref(false);
 
 const pagination = ref<PaginationClient>({
   sortBy: 'name',
@@ -182,15 +222,57 @@ async function lazyLoadCollection({
   done(items);
 }
 
+// Create collection
+const isCreateCollectionDialogOpen = ref(false);
+const createCollectionParentId = ref('');
+function openCreateCollectionDialog(collectionId: string) {
+  createCollectionParentId.value = collectionId;
+  isCreateCollectionDialogOpen.value = true;
+}
+async function addCollectionToParent(collection: CreateCollectionResponse, parentId: string) {
+  const parent = findItem(parentId, collections.value, false);
+
+  if (parent) {
+    parent.items.push({
+      id: collection.id,
+      name: collection.name,
+      items: [],
+      lazy: false,
+    });
+  } else {
+    collections.value.push({
+      id: collection.id,
+      name: collection.name,
+      items: [],
+      lazy: false,
+    });
+  }
+}
+
+// Update collection
+const isUpdateCollectionDialogOpen = ref(false);
+const updateCollectionId = ref('');
+function openUpdateCollectionDialog(collectionId: string) {
+  updateCollectionId.value = collectionId;
+  isUpdateCollectionDialogOpen.value = true;
+}
+async function handleCollectionUpdated(collection: UpdateCollectionResponse) {
+  const item = findItem(collection.id, collections.value, false);
+  if (item) {
+    item.name = collection.name;
+  }
+}
+
+// Delete collection
 const isDeleteCollectionDialogOpen = ref(false);
 const deleteCollectionId = ref('');
 function openDeleteCollectionDialog(collectionId: string) {
   deleteCollectionId.value = collectionId;
   isDeleteCollectionDialogOpen.value = true;
 }
-
 async function handleCollectionDeleted(collectionId: string) {
   const parent = findItem(collectionId, collections.value, true);
+  console.log(parent);
   if (parent) {
     parent.items = parent.items.filter((item) => item.id !== collectionId);
   } else {
@@ -198,34 +280,27 @@ async function handleCollectionDeleted(collectionId: string) {
   }
 }
 
-async function addCollectionToParent(collectionId: string) {
-  const { data, error } = await DeviceCollectionService.getCollection(collectionId, 0);
-  const parent = findItem(collectionId, collections.value);
-  if (error) {
-    return;
-  }
-  if (parent) {
-    parent.items.push({
-      id: data.id,
-      name: data.name,
-      items: [],
-      lazy: true,
-    });
-  } else {
-    collections.value.push({
-      id: data.id,
-      name: data.name,
-      items: [],
-      lazy: true,
-    });
-  }
-}
-
 const findItem = (id: string, items: CollectionNode[], findParent = false): CollectionNode | null => {
   for (const item of items) {
-    if (item.id === id) return findParent ? null : item;
-    const found = findItem(id, item.items, findParent);
-    if (found) return findParent ? item : found;
+    if (findParent) {
+      if (item.items.some((child) => child.id === id)) {
+        return item;
+      } else {
+        const parent = findItem(id, item.items, true);
+        if (parent) {
+          return parent;
+        }
+      }
+    } else {
+      if (item.id === id) {
+        return item;
+      } else {
+        const found = findItem(id, item.items, false);
+        if (found) {
+          return found;
+        }
+      }
+    }
   }
   return null;
 };

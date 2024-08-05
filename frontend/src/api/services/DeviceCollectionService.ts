@@ -1,5 +1,9 @@
 import { client } from '@/api/client';
-import { CreateCollectionRequest, DeviceCollectionQueryParams } from '../types/DeviceCollection';
+import {
+  CreateCollectionRequest,
+  DeviceCollectionQueryParams,
+  UpdateCollectionRequest,
+} from '../types/DeviceCollection';
 
 class DeviceCollectionService {
   async getCollections(queryParams: DeviceCollectionQueryParams) {
@@ -14,6 +18,10 @@ class DeviceCollectionService {
 
   async createCollection(data: CreateCollectionRequest) {
     return await client.POST('/device-collections', { body: data });
+  }
+
+  async updateCollection(id: string, data: UpdateCollectionRequest) {
+    return await client.PUT('/device-collections/{id}', { params: { path: { id: id } }, body: data });
   }
 
   async deleteCollection(id: string) {
