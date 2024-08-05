@@ -39,7 +39,7 @@
 import DevicesTable from '@/components/devices/DevicesTable.vue';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth-store';
-import { mdiPlus } from '@quasar/extras/mdi-v6';
+import { mdiPlus } from '@quasar/extras/mdi-v7';
 import PageLayout from '@/layouts/PageLayout.vue';
 import { ref } from 'vue';
 import SearchBar from '@/components/core/SearchBar.vue';
@@ -72,13 +72,13 @@ async function onRequest(props: { pagination: PaginationClient }) {
   await getDevices(props.pagination);
 }
 
-async function getDevices(paginationReq: PaginationTable) {
+async function getDevices(paginationTable: PaginationTable) {
   const paginationQuery: DevicesQueryParams = {
-    SortBy: paginationReq.sortBy,
-    Descending: paginationReq.descending,
+    SortBy: paginationTable.sortBy,
+    Descending: paginationTable.descending,
     SearchTerm: filter.value,
-    PageNumber: paginationReq.page,
-    PageSize: paginationReq.rowsPerPage,
+    PageNumber: paginationTable.page,
+    PageSize: paginationTable.rowsPerPage,
   };
 
   isLoadingDevices.value = true;
@@ -92,10 +92,10 @@ async function getDevices(paginationReq: PaginationTable) {
 
   devicesPaginated.value = data;
   pagination.value.rowsNumber = data.totalCount ?? 0;
-  pagination.value.sortBy = paginationReq.sortBy;
-  pagination.value.descending = paginationReq.descending;
-  pagination.value.page = paginationReq.page;
-  pagination.value.rowsPerPage = paginationReq.rowsPerPage;
+  pagination.value.sortBy = paginationTable.sortBy;
+  pagination.value.descending = paginationTable.descending;
+  pagination.value.page = data.currentPage;
+  pagination.value.rowsPerPage = data.pageSize;
 }
 getDevices(pagination.value);
 

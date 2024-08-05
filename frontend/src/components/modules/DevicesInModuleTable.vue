@@ -128,7 +128,7 @@ import { Device, getDeviceStatus, getLastJobStatus } from '@/models/Device';
 import { Module } from '@/models/Module';
 import { useAuthStore } from '@/stores/auth-store';
 import { useI18n } from 'vue-i18n';
-import { mdiCellphoneLink, mdiOpenInNew, mdiPencil, mdiPlus, mdiTrashCanOutline } from '@quasar/extras/mdi-v6';
+import { mdiCellphoneLink, mdiOpenInNew, mdiPencil, mdiPlus, mdiTrashCanOutline } from '@quasar/extras/mdi-v7';
 import JobStatusIcon from '../jobs/JobStatusIcon.vue';
 import StatusDot from '@/components/devices/StatusDot.vue';
 import { formatTimeToDistance, formatToLocalTime } from '@/utils/date-utils';

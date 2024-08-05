@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Text.Json.Serialization;
 using Carter;
 using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
@@ -110,6 +111,7 @@ public static class GetJobById
         }
     }
 
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum CommandProgress
     {
         CommandPending = 0,

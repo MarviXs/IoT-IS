@@ -156,7 +156,7 @@ import {
   mdiPencil,
   mdiPlus,
   mdiTrashCanOutline,
-} from '@quasar/extras/mdi-v6';
+} from '@quasar/extras/mdi-v7';
 
 const collection = defineModel<Collection>({ required: true });
 const emit = defineEmits(['onUpdate']);

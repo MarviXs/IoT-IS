@@ -203,12 +203,81 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get all devices */
+        /** Get paginated devices */
         get: operations["GetDevices"];
         put?: never;
         /** Create a device */
         post: operations["CreateDevice"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/device-collections/{collectionId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a device collection */
+        get: operations["GetDeviceCollectionById"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/device-collections": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get paginated device collections */
+        get: operations["GetDeviceCollections"];
+        put?: never;
+        /** Create a device collection */
+        post: operations["CreateDeviceCollection"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/device-collections/{collectionId}/devices/{deviceId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add a device to a device collection */
+        post: operations["AddDeviceToDeviceCollection"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/device-collections/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete a device collection */
+        delete: operations["DeleteDeviceCollection"];
         options?: never;
         head?: never;
         patch?: never;
@@ -418,6 +487,19 @@ export interface components {
             readonly hasNext: boolean;
             items: components["schemas"]["Fei.Is.Api.Features.Commands.Queries.GetCommands.Response"][];
         };
+        "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollections.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+            /** Format: int32 */
+            currentPage: number;
+            /** Format: int32 */
+            totalPages: number;
+            /** Format: int32 */
+            pageSize: number;
+            /** Format: int32 */
+            totalCount: number;
+            readonly hasPrevious: boolean;
+            readonly hasNext: boolean;
+            items: components["schemas"]["Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollections.Response"][];
+        };
         "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.DeviceTemplates.Queries.GetDeviceTemplates.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
             /** Format: int32 */
             currentPage: number;
@@ -543,6 +625,31 @@ export interface components {
         };
         /** @enum {string} */
         "Fei.Is.Api.Features.DataPoints.Queries.GetSensorDataPoints.TimeBucketMethod": FeiIsApiFeaturesDataPointsQueriesGetSensorDataPointsTimeBucketMethod;
+        "Fei.Is.Api.Features.DeviceCollections.Commands.CreateDeviceCollection.Request": {
+            name: string;
+            /** Format: uuid */
+            collectionParentId?: string | null;
+        };
+        "Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionById.Response": {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            items: components["schemas"]["Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionById.SubItemResponse"][];
+        };
+        "Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionById.SubItemResponse": {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            items: components["schemas"]["Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionById.SubItemResponse"][];
+            type: components["schemas"]["Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionById.SubItemTypes"];
+        };
+        /** @enum {string} */
+        "Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionById.SubItemTypes": FeiIsApiFeaturesDeviceCollectionsQueriesGetDeviceCollectionByIdSubItemTypes;
+        "Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollections.Response": {
+            /** Format: uuid */
+            id: string;
+            name: string;
+        };
         "Fei.Is.Api.Features.DeviceTemplates.Commands.CreateDeviceTemplate.Request": {
             name: string;
             modelId: string;
@@ -635,10 +742,7 @@ export interface components {
             progress: number;
             status: components["schemas"]["Fei.Is.Api.Data.Enums.JobStatusEnum"];
         };
-        /**
-         * Format: int32
-         * @enum {integer}
-         */
+        /** @enum {string} */
         "Fei.Is.Api.Features.Jobs.Queries.GetJobById.CommandProgress": FeiIsApiFeaturesJobsQueriesGetJobByIdCommandProgress;
         "Fei.Is.Api.Features.Jobs.Queries.GetJobById.CommandResponse": {
             /** Format: int32 */
@@ -1457,6 +1561,153 @@ export interface operations {
             };
         };
     };
+    GetDeviceCollectionById: {
+        parameters: {
+            query?: {
+                MaxDepth?: number;
+            };
+            header?: never;
+            path: {
+                collectionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionById.Response"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GetDeviceCollections: {
+        parameters: {
+            query?: {
+                SortBy?: string;
+                Descending?: boolean;
+                SearchTerm?: string;
+                PageNumber?: number;
+                PageSize?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollections.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"];
+                };
+            };
+        };
+    };
+    CreateDeviceCollection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.DeviceCollections.Commands.CreateDeviceCollection.Request"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+        };
+    };
+    AddDeviceToDeviceCollection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                collectionId: string;
+                deviceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+        };
+    };
+    DeleteDeviceCollection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     GetDeviceTemplates: {
         parameters: {
             query?: {
@@ -2099,8 +2350,12 @@ export enum FeiIsApiFeaturesDataPointsQueriesGetSensorDataPointsTimeBucketMethod
     StdDev = "StdDev",
     Sum = "Sum"
 }
+export enum FeiIsApiFeaturesDeviceCollectionsQueriesGetDeviceCollectionByIdSubItemTypes {
+    Device = "Device",
+    SubCollection = "SubCollection"
+}
 export enum FeiIsApiFeaturesJobsQueriesGetJobByIdCommandProgress {
-    Value0 = 0,
-    Value1 = 1,
-    Value2 = 2
+    CommandPending = "CommandPending",
+    CommandProcessing = "CommandProcessing",
+    CommandDone = "CommandDone"
 }

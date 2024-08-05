@@ -25,7 +25,7 @@
 import { QTableProps } from 'quasar';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { mdiPlus } from '@quasar/extras/mdi-v6';
+import { mdiPlus } from '@quasar/extras/mdi-v7';
 import CommandService from '@/api/services/CommandService';
 import { CommandListResponse } from '@/models/Command';
 import { RecipeResponse } from '@/api/types/Recipe';

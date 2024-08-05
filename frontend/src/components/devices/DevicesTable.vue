@@ -52,11 +52,6 @@
 
       <template #body-cell-actions="propsActions">
         <q-td auto-width :props="propsActions">
-          <q-btn :icon="mdiOpenInNew" color="grey-color" flat round :to="`/devices/${propsActions.row.id}`"
-            ><q-tooltip content-style="font-size: 11px" :offset="[0, 4]">
-              {{ t('global.open') }}
-            </q-tooltip>
-          </q-btn>
           <q-btn
             v-if="authStore.isAdmin"
             :icon="mdiPencil"
@@ -70,7 +65,7 @@
           </q-btn>
           <q-btn
             v-if="authStore.isAdmin"
-            :icon="mdiTrashCanOutline"
+            :icon="mdiTrashCan"
             color="grey-color"
             flat
             round
@@ -124,7 +119,14 @@ import { QTableProps } from 'quasar';
 import { PropType, computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth-store';
-import { mdiCellphoneLink, mdiDotsVertical, mdiOpenInNew, mdiPencil, mdiTrashCanOutline } from '@quasar/extras/mdi-v6';
+import {
+  mdiCellphoneLink,
+  mdiDotsVertical,
+  mdiOpenInNew,
+  mdiPencil,
+  mdiTrashCan,
+  mdiTrashCanOutline,
+} from '@quasar/extras/mdi-v7';
 import DeleteDeviceDialog from '@/components/devices/DeleteDeviceDialog.vue';
 import { formatTimeToDistance, formatToLocalTime } from '@/utils/date-utils';
 import { PaginationClient } from '@/models/Pagination';

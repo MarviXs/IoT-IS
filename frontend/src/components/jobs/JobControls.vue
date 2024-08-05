@@ -55,7 +55,7 @@ import JobService from '@/api/services/JobService';
 import JobControlButton from './JobControlButton.vue';
 import { handleError } from '@/utils/error-handler';
 import { useI18n } from 'vue-i18n';
-import { mdiPause, mdiPlay, mdiSkipNext, mdiSkipForward, mdiStop } from '@quasar/extras/mdi-v6';
+import { mdiPause, mdiPlay, mdiSkipNext, mdiSkipForward, mdiStop } from '@quasar/extras/mdi-v7';
 import { ActiveJobResponse, JobResponse } from '@/api/types/Job';
 
 const props = defineProps({

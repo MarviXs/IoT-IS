@@ -30,7 +30,7 @@
 </template>
 
 <script setup lang="ts">
-import { mdiChevronRight } from '@quasar/extras/mdi-v6';
+import { mdiChevronRight } from '@quasar/extras/mdi-v7';
 import { computed, PropType } from 'vue';
 
 interface BreadCrumb {

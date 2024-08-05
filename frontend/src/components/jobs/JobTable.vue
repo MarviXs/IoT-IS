@@ -55,7 +55,7 @@
 import { QTableProps } from 'quasar';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { mdiListStatus, mdiOpenInNew } from '@quasar/extras/mdi-v6';
+import { mdiListStatus, mdiOpenInNew } from '@quasar/extras/mdi-v7';
 import { RouterLink } from 'vue-router';
 import JobStatusIcon from '@/components/jobs/JobStatusIcon.vue';
 import { JobsQueryParams, JobsResponse } from '@/api/types/Job';
@@ -87,15 +87,15 @@ async function onRequest(props: { pagination: PaginationTable }) {
   await getJobs(props.pagination);
 }
 
-async function getJobs(paginationReq: PaginationTable) {
+async function getJobs(paginationTable: PaginationTable) {
   isLoadingJobs.value = true;
 
   const query: JobsQueryParams = {
-    SortBy: paginationReq.sortBy,
-    Descending: paginationReq.descending,
+    SortBy: paginationTable.sortBy,
+    Descending: paginationTable.descending,
     SearchTerm: '',
-    PageNumber: paginationReq.page,
-    PageSize: paginationReq.rowsPerPage,
+    PageNumber: paginationTable.page,
+    PageSize: paginationTable.rowsPerPage,
   };
 
   if (props.deviceId) {
@@ -110,10 +110,10 @@ async function getJobs(paginationReq: PaginationTable) {
   }
   jobs.value = data;
   pagination.value.rowsNumber = data.totalCount ?? 0;
-  pagination.value.sortBy = paginationReq.sortBy;
-  pagination.value.descending = paginationReq.descending;
-  pagination.value.page = paginationReq.page;
-  pagination.value.rowsPerPage = paginationReq.rowsPerPage;
+  pagination.value.sortBy = paginationTable.sortBy;
+  pagination.value.descending = paginationTable.descending;
+  pagination.value.page = data.currentPage;
+  pagination.value.rowsPerPage = data.pageSize;
 }
 getJobs(pagination.value);
 

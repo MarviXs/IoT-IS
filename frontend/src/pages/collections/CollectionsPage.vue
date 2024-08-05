@@ -153,7 +153,7 @@ import {
   mdiPencil,
   mdiPlus,
   mdiTrashCanOutline,
-} from '@quasar/extras/mdi-v6';
+} from '@quasar/extras/mdi-v7';
 import PageLayout from '@/layouts/PageLayout.vue';
 import { useCollectionStore } from '@/stores/collection-store';
 import SearchBar from '@/components/core/SearchBar.vue';

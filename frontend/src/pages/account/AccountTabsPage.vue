@@ -18,7 +18,7 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import { mdiAccount } from '@quasar/extras/mdi-v6';
+import { mdiAccount } from '@quasar/extras/mdi-v7';
 import PageLayout from '@/layouts/PageLayout.vue';
 
 const { t } = useI18n();

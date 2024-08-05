@@ -50,7 +50,7 @@
 import { QTableProps } from 'quasar';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { mdiPlus } from '@quasar/extras/mdi-v6';
+import { mdiPlus } from '@quasar/extras/mdi-v7';
 import { RecipeResponse, RecipesQueryParams, RecipesResponse } from '@/api/types/Recipe';
 import { subrecipeToNodes, lazyLoadSubrecipe } from '@/utils/subrecipe-nodes';
 import { PaginationClient, PaginationTable } from '@/models/Pagination';

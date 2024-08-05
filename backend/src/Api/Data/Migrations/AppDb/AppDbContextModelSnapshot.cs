@@ -23,6 +23,38 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.CollectionItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CollectionParentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("DeviceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("SubCollectionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CollectionParentId");
+
+                    b.HasIndex("DeviceId");
+
+                    b.HasIndex("SubCollectionId");
+
+                    b.ToTable("CollectionItems");
+                });
+
             modelBuilder.Entity("Fei.Is.Api.Data.Models.Command", b =>
                 {
                     b.Property<Guid>("Id")
@@ -89,11 +121,44 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasKey("Id");
 
+                    b.HasIndex("AccessToken")
+                        .IsUnique();
+
                     b.HasIndex("DeviceTemplateId");
 
                     b.HasIndex("OwnerId");
 
                     b.ToTable("Devices");
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.DeviceCollection", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsRoot")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("OwnerId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerId");
+
+                    b.ToTable("DeviceCollections");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.DeviceTemplate", b =>
@@ -552,6 +617,31 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.CollectionItem", b =>
+                {
+                    b.HasOne("Fei.Is.Api.Data.Models.DeviceCollection", "CollectionParent")
+                        .WithMany("Items")
+                        .HasForeignKey("CollectionParentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Fei.Is.Api.Data.Models.Device", "Device")
+                        .WithMany("CollectionItems")
+                        .HasForeignKey("DeviceId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Fei.Is.Api.Data.Models.DeviceCollection", "SubCollection")
+                        .WithMany("SubItems")
+                        .HasForeignKey("SubCollectionId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("CollectionParent");
+
+                    b.Navigation("Device");
+
+                    b.Navigation("SubCollection");
+                });
+
             modelBuilder.Entity("Fei.Is.Api.Data.Models.Command", b =>
                 {
                     b.HasOne("Fei.Is.Api.Data.Models.DeviceTemplate", "DeviceTemplate")
@@ -577,6 +667,17 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                         .IsRequired();
 
                     b.Navigation("DeviceTemplate");
+
+                    b.Navigation("Owner");
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.DeviceCollection", b =>
+                {
+                    b.HasOne("Fei.Is.Api.Data.Models.User", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Owner");
                 });
@@ -730,7 +831,16 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.Device", b =>
                 {
+                    b.Navigation("CollectionItems");
+
                     b.Navigation("Jobs");
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.DeviceCollection", b =>
+                {
+                    b.Navigation("Items");
+
+                    b.Navigation("SubItems");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.DeviceTemplate", b =>

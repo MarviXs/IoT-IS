@@ -113,7 +113,7 @@
 import { QTableProps } from 'quasar';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { mdiClose, mdiDrag, mdiCodeTags, mdiBookMultipleOutline } from '@quasar/extras/mdi-v6';
+import { mdiClose, mdiDrag, mdiCodeTags, mdiBookMultipleOutline } from '@quasar/extras/mdi-v7';
 import { VueDraggable } from 'vue-draggable-plus';
 import { RecipeStep } from '@/api/types/RecipeStep';
 import { RecipeResponse } from '@/api/types/Recipe';

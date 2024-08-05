@@ -9,7 +9,7 @@ import {
   mdiCogSyncOutline,
   mdiPauseCircleOutline,
   mdiTimerSand,
-} from '@quasar/extras/mdi-v6';
+} from '@quasar/extras/mdi-v7';
 
 const jobStatusIcon: Record<JobStatusEnum, string> = {
   [JobStatusEnum.JOB_FREE]: mdiCheckboxBlankCircleOutline,

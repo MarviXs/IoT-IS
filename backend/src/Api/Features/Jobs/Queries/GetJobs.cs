@@ -8,6 +8,7 @@ using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
 using FluentResults;
 using FluentValidation;
+using Humanizer;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
@@ -77,7 +78,7 @@ public static class GetJobsOnDevice
             {
                 query = query.Sort(j => j.Device!.Name, message.queryParameters.Descending);
             }
-            else if (message.queryParameters.SortBy == nameof(Job.Status))
+            else if (message.queryParameters.SortBy != null)
             {
                 query = query.Sort(message.queryParameters.SortBy ?? nameof(Job.StartedAt), message.queryParameters.Descending);
             }

@@ -54,8 +54,8 @@
             :icon="mdiBellRingOutline"
           /> -->
           <side-menu-button to="/device-templates" :label="t('device_template.label', 2)" :icon="mdiContentCopy" />
-          <side-menu-button to="/devices" :label="t('device.label', 2)" :icon="mdiCellphoneLink" />
-          <side-menu-button to="/collections" :label="t('collection.label', 2)" :icon="mdiHubspot" />
+          <side-menu-button to="/devices" :label="t('device.label', 2)" :icon="mdiMemory" />
+          <side-menu-button to="/collections" :label="t('collection.label', 2)" :icon="mdiFileTreeOutline" />
           <!-- <side-menu-button
             to="/company"
             label="Team"
@@ -91,16 +91,14 @@ import {
   mdiAccountCircle,
   mdiLogout,
   mdiAccountOutline,
-  mdiCellphoneLink,
-  mdiHubspot,
+  mdiFolderOutline,
   mdiListStatus,
-  mdiVariable,
-  mdiBookMultipleOutline,
-  mdiCodeTags,
   mdiAccountGroup,
-  mdiBellRingOutline,
   mdiContentCopy,
-} from '@quasar/extras/mdi-v6';
+  mdiMemory,
+  mdiFileTree,
+  mdiFileTreeOutline,
+} from '@quasar/extras/mdi-v7';
 import { toast } from 'vue3-toastify';
 
 const { t } = useI18n();

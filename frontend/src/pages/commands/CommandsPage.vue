@@ -84,8 +84,8 @@
 import { QTableProps } from 'quasar';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { mdiCodeTags, mdiPencil, mdiTrashCanOutline } from '@quasar/extras/mdi-v6';
-import { mdiPlus } from '@quasar/extras/mdi-v6';
+import { mdiCodeTags, mdiPencil, mdiTrashCanOutline } from '@quasar/extras/mdi-v7';
+import { mdiPlus } from '@quasar/extras/mdi-v7';
 import CreateCommandDialog from '@/components/commands/CreateCommandDialog.vue';
 import EditCommandDialog from '@/components/commands/EditCommandDialog.vue';
 import DeleteCommandDialog from '@/components/commands/DeleteCommandDialog.vue';
@@ -115,14 +115,14 @@ const pagination = ref<PaginationClient>({
 const commandsPaginated = ref<CommandsResponse>();
 const commands = computed(() => commandsPaginated.value?.items ?? []);
 const isLoadingCommands = ref(false);
-async function getCommands(paginationReq: PaginationTable) {
+async function getCommands(paginationTable: PaginationTable) {
   const paginationQuery: CommandsQueryParams = {
     DeviceTemplateId: deviceTemplateId,
-    SortBy: paginationReq.sortBy,
-    Descending: paginationReq.descending,
+    SortBy: paginationTable.sortBy,
+    Descending: paginationTable.descending,
     SearchTerm: filter.value,
-    PageNumber: paginationReq.page,
-    PageSize: paginationReq.rowsPerPage,
+    PageNumber: paginationTable.page,
+    PageSize: paginationTable.rowsPerPage,
   };
 
   isLoadingCommands.value = true;
@@ -136,10 +136,10 @@ async function getCommands(paginationReq: PaginationTable) {
 
   commandsPaginated.value = data;
   pagination.value.rowsNumber = data.totalCount ?? 0;
-  pagination.value.sortBy = paginationReq.sortBy;
-  pagination.value.descending = paginationReq.descending;
-  pagination.value.page = paginationReq.page;
-  pagination.value.rowsPerPage = paginationReq.rowsPerPage;
+  pagination.value.sortBy = paginationTable.sortBy;
+  pagination.value.descending = paginationTable.descending;
+  pagination.value.page = data.currentPage;
+  pagination.value.rowsPerPage = data.pageSize;
 }
 getCommands(pagination.value);
 

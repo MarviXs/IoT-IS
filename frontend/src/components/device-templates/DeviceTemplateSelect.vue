@@ -1,15 +1,15 @@
 <template>
   <q-select
-    v-model="selectedTemplate"
+    v-model="selected"
     :label="t('device_template.label')"
-    :options="templateOptions"
-    :loading="loadingTemplates"
+    :options="options"
+    :loading="isLoading"
     use-input
     option-label="name"
     option-value="id"
     :input-debounce="400"
     @filter="filterFn"
-    @virtual-scroll="getTemplatesOnScroll"
+    @virtual-scroll="onScroll"
   />
 </template>
 
@@ -28,30 +28,37 @@ export interface DeviceTemplateSelectData {
 
 const { t } = useI18n();
 
-const selectedTemplate = defineModel<DeviceTemplateSelectData>({ required: false });
+const selected = defineModel<DeviceTemplateSelectData>({ required: false });
 
-const deviceTemplates = ref<DeviceTemplatesResponse['items']>([]);
-const loadingTemplates = ref(false);
-const templateFilter = ref('');
-const templateNextPage = ref(1);
-const templateLastPage = ref(1);
+const items = ref<DeviceTemplatesResponse['items']>([]);
+const isLoading = ref(false);
+const filter = ref('');
+const nextPage = ref(1);
+const lastPage = ref(1);
 
-async function getTemplatesOnScroll({ to, ref }: { to: number; ref: QSelect | null }) {
-  const lastIndex = (deviceTemplates.value.length ?? 0) - 1;
+const options = computed(() => {
+  return items.value?.map((i) => ({
+    name: i.name,
+    id: i.id,
+  }));
+});
 
-  if (loadingTemplates.value || templateNextPage.value > templateLastPage.value || lastIndex != to) return;
+async function onScroll({ to, ref }: { to: number; ref: QSelect | null }) {
+  const lastIndex = (items.value.length ?? 0) - 1;
+
+  if (isLoading.value || nextPage.value > lastPage.value || lastIndex != to) return;
 
   const paginationQuery: DeviceTemplatesQueryParams = {
     SortBy: 'name',
     Descending: false,
-    SearchTerm: templateFilter.value,
-    PageNumber: templateNextPage.value,
+    SearchTerm: filter.value,
+    PageNumber: nextPage.value,
     PageSize: 50,
   };
 
-  loadingTemplates.value = true;
+  isLoading.value = true;
   const { data, error } = await DeviceTemplateService.getDeviceTemplates(paginationQuery);
-  loadingTemplates.value = false;
+  isLoading.value = false;
 
   if (error) {
     handleError(error, 'Loading templates failed');
@@ -59,44 +66,33 @@ async function getTemplatesOnScroll({ to, ref }: { to: number; ref: QSelect | nu
   }
 
   if (data) {
-    deviceTemplates.value = [...(deviceTemplates.value ?? []), ...(data.items ?? [])];
+    items.value = [...(items.value ?? []), ...(data.items ?? [])];
   }
 
-  templateNextPage.value++;
-  templateLastPage.value = data.totalPages ?? 1;
+  nextPage.value++;
+  lastPage.value = data.totalPages ?? 1;
 
   if (ref) {
     await nextTick();
     ref.refresh();
   }
 }
-getTemplatesOnScroll({ to: -1, ref: null });
+onScroll({ to: -1, ref: null });
 
 async function filterFn(
   val: string,
   doneFn: (callbackFn: () => void, afterFn?: ((ref: QSelect) => void) | undefined) => void,
 ) {
-  if (val === templateFilter.value) {
-    doneFn(() => {
-      console.log('doneFn');
-    });
+  if (val === filter.value) {
+    doneFn(() => {});
     return;
   }
 
-  templateFilter.value = val;
-  templateNextPage.value = 1;
-  templateLastPage.value = 1;
-  deviceTemplates.value = [];
-  await getTemplatesOnScroll({ to: -1, ref: null });
-  doneFn(() => {
-    console.log('doneFn');
-  });
+  filter.value = val;
+  nextPage.value = 1;
+  lastPage.value = 1;
+  items.value = [];
+  await onScroll({ to: -1, ref: null });
+  doneFn(() => {});
 }
-
-const templateOptions = computed(() => {
-  return deviceTemplates.value?.map((template) => ({
-    name: template.name,
-    id: template.id,
-  }));
-});
 </script>

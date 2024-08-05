@@ -18,6 +18,8 @@ public class AppDbContext : IdentityDbContext<User>
         modelBuilder.ApplyConfiguration(new RecipeConfiguration());
         modelBuilder.ApplyConfiguration(new RecipeStepConfiguration());
         modelBuilder.ApplyConfiguration(new DeviceTemplateConfiguration());
+        modelBuilder.ApplyConfiguration(new DeviceConfiguration());
+        modelBuilder.ApplyConfiguration(new CollectionItemConfiguration());
     }
 
     public DbSet<RefreshToken> RefreshTokens { get; set; }
@@ -29,6 +31,8 @@ public class AppDbContext : IdentityDbContext<User>
     public DbSet<RecipeStep> RecipeSteps { get; set; }
     public DbSet<Command> Commands { get; set; }
     public DbSet<JobCommand> JobCommands { get; set; }
+    public DbSet<DeviceCollection> DeviceCollections { get; set; }
+    public DbSet<CollectionItem> CollectionItems { get; set; }
 
     public override int SaveChanges()
     {

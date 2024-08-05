@@ -36,7 +36,7 @@
 </template>
 
 <script setup lang="ts">
-import { mdiCalendar, mdiClock } from '@quasar/extras/mdi-v6';
+import { mdiCalendar, mdiClock } from '@quasar/extras/mdi-v7';
 import { format } from 'date-fns';
 import { useI18n } from 'vue-i18n';
 

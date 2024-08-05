@@ -69,7 +69,7 @@ import JobService from '@/api/services/JobService';
 import JobControls from '@/components/jobs/JobControls.vue';
 import JobStatusBadges from '@/components/jobs/JobStatusBadges.vue';
 import { useI18n } from 'vue-i18n';
-import { mdiCheck, mdiListStatus } from '@quasar/extras/mdi-v6';
+import { mdiCheck, mdiListStatus } from '@quasar/extras/mdi-v7';
 import PageLayout from '@/layouts/PageLayout.vue';
 import { useStorage } from '@vueuse/core';
 import AutoRefreshButton from '@/components/core/AutoRefreshButton.vue';

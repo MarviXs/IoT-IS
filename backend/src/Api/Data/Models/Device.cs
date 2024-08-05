@@ -13,4 +13,5 @@ public class Device : BaseModel
     public required string AccessToken { get; set; }
     
     public ICollection<Job> Jobs { get; set; } = [];
+    public ICollection<CollectionItem> CollectionItems { get; set; } = [];
 }

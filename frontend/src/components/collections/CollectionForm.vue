@@ -5,10 +5,13 @@
 </template>
 
 <script setup lang="ts">
-import { CollectionInput } from '@/models/Collection';
 import { useI18n } from 'vue-i18n';
 
-const collection = defineModel<CollectionInput>({ required: true });
+export interface CollectionData {
+  name: string;
+}
+
+const collection = defineModel<CollectionData>({ required: true });
 
 const { t } = useI18n();
 </script>

@@ -22,7 +22,7 @@ public static class GetDevices
         {
             app.MapGet(
                     "devices",
-                    async Task<Ok<PagedList<Response>>>(IMediator mediator, ClaimsPrincipal user, [AsParameters] QueryParameters parameters) =>
+                    async Task<Ok<PagedList<Response>>> (IMediator mediator, ClaimsPrincipal user, [AsParameters] QueryParameters parameters) =>
                     {
                         var query = new Query(user, parameters);
                         var result = await mediator.Send(query);
@@ -33,7 +33,7 @@ public static class GetDevices
                 .WithTags(nameof(Device))
                 .WithOpenApi(o =>
                 {
-                    o.Summary = "Get all devices";
+                    o.Summary = "Get paginated devices";
                     return o;
                 });
         }

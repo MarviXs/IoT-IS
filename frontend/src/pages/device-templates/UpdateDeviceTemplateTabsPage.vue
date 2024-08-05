@@ -45,7 +45,7 @@ import { UpdateDeviceTemplateRequest } from '@/api/types/DeviceTemplate';
 import DeviceTemplateService from '@/api/services/DeviceTemplateService';
 import { useRoute } from 'vue-router';
 import { handleError } from '@/utils/error-handler';
-import { mdiCodeTags, mdiContentCopy, mdiBookMultipleOutline } from '@quasar/extras/mdi-v6';
+import { mdiCodeTags, mdiContentCopy, mdiBookMultipleOutline } from '@quasar/extras/mdi-v7';
 
 const { t } = useI18n();
 const route = useRoute();

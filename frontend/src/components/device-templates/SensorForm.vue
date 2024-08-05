@@ -44,7 +44,7 @@
 </template>
 
 <script setup lang="ts">
-import { mdiTrashCanOutline } from '@quasar/extras/mdi-v6';
+import { mdiTrashCanOutline } from '@quasar/extras/mdi-v7';
 import { QInput } from 'quasar';
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';

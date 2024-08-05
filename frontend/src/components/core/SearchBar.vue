@@ -8,7 +8,7 @@
 </template>
 
 <script setup lang="ts">
-import { mdiMagnify, mdiClose } from '@quasar/extras/mdi-v6';
+import { mdiMagnify, mdiClose } from '@quasar/extras/mdi-v7';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();

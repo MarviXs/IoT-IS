@@ -55,7 +55,7 @@ import { toast } from 'vue3-toastify';
 import { QInput } from 'quasar';
 import { isFormValid } from '@/utils/form-validation';
 import { useI18n } from 'vue-i18n';
-import { mdiEyeOff, mdiEye } from '@quasar/extras/mdi-v6';
+import { mdiEyeOff, mdiEye } from '@quasar/extras/mdi-v7';
 
 const props = defineProps({
   user: {

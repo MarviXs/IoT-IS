@@ -50,7 +50,7 @@ import { ref, computed } from 'vue';
 import { PropType } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { DeviceResponse } from '@/api/types/Device';
-import { mdiEye } from '@quasar/extras/mdi-v6';
+import { mdiEye } from '@quasar/extras/mdi-v7';
 
 const props = defineProps({
   device: {

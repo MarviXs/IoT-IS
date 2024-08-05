@@ -30,7 +30,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { mdiCog, mdiRefresh } from '@quasar/extras/mdi-v6';
+import { mdiCog, mdiRefresh } from '@quasar/extras/mdi-v7';
 import { useI18n } from 'vue-i18n';
 import DialogCommon from './DialogCommon.vue';
 import { useInterval } from '@/composables/useInterval';

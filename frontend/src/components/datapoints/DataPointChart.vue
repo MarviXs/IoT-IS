@@ -82,7 +82,7 @@ import { graphColors } from '@/utils/colors';
 import { now, useStorage } from '@vueuse/core';
 import { useI18n } from 'vue-i18n';
 import DialogCommon from '../core/DialogCommon.vue';
-import { mdiRefresh } from '@quasar/extras/mdi-v6';
+import { mdiRefresh } from '@quasar/extras/mdi-v7';
 import GraphOptionsForm, { GraphOptions } from './GraphOptionsForm.vue';
 import { Sensor } from '@/api/types/Sensor';
 import { GetDataPointsQuery } from '@/api/types/DataPoint';

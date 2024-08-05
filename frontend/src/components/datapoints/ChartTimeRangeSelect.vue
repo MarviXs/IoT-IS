@@ -56,7 +56,7 @@ import { format, subSeconds } from 'date-fns';
 import { computed, ref } from 'vue';
 import { PredefinedTimeRange } from '@/models/TimeRange';
 import { useI18n } from 'vue-i18n';
-import { mdiClockOutline } from '@quasar/extras/mdi-v6';
+import { mdiClockOutline } from '@quasar/extras/mdi-v7';
 import DateTimeInput from './DateTimeInput.vue';
 
 const emit = defineEmits(['update:modelValue']);

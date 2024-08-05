@@ -69,7 +69,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth-store';
-import { mdiPlus, mdiCodeTags, mdiPencil, mdiTrashCanOutline } from '@quasar/extras/mdi-v6';
+import { mdiPlus, mdiCodeTags, mdiPencil, mdiTrashCanOutline } from '@quasar/extras/mdi-v7';
 import PageLayout from '@/layouts/PageLayout.vue';
 import { computed, ref } from 'vue';
 import SearchBar from '@/components/core/SearchBar.vue';
@@ -100,13 +100,13 @@ const deleteDialogOpen = ref(false);
 
 const deleteTemplateId = ref<string>();
 
-async function getTemplates(paginationReq: PaginationTable) {
+async function getTemplates(paginationTable: PaginationTable) {
   const paginationQuery: DeviceTemplatesQueryParams = {
-    SortBy: paginationReq.sortBy,
-    Descending: paginationReq.descending,
+    SortBy: paginationTable.sortBy,
+    Descending: paginationTable.descending,
     SearchTerm: filter.value,
-    PageNumber: paginationReq.page,
-    PageSize: paginationReq.rowsPerPage,
+    PageNumber: paginationTable.page,
+    PageSize: paginationTable.rowsPerPage,
   };
 
   loadingTemplates.value = true;
@@ -119,10 +119,10 @@ async function getTemplates(paginationReq: PaginationTable) {
   }
 
   templatesPaginated.value = data;
-  pagination.value.sortBy = paginationReq.sortBy;
-  pagination.value.descending = paginationReq.descending;
-  pagination.value.page = paginationReq.page;
-  pagination.value.rowsPerPage = paginationReq.rowsPerPage;
+  pagination.value.sortBy = paginationTable.sortBy;
+  pagination.value.descending = paginationTable.descending;
+  pagination.value.page = data.currentPage;
+  pagination.value.rowsPerPage = data.pageSize;
   pagination.value.rowsNumber = data.totalCount ?? 0;
 }
 getTemplates(pagination.value);

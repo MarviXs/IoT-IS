@@ -32,7 +32,7 @@ import { QTableProps } from 'quasar';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { format } from 'date-fns';
-import { mdiAccountGroup, mdiPencil } from '@quasar/extras/mdi-v6';
+import { mdiAccountGroup, mdiPencil } from '@quasar/extras/mdi-v7';
 import PageLayout from '@/layouts/PageLayout.vue';
 import { useAsyncData } from '@/composables/useAsyncData';
 import SearchBar from '@/components/core/SearchBar.vue';

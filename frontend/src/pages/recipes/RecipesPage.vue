@@ -85,8 +85,8 @@
 import { QTableProps } from 'quasar';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { mdiBookOutline, mdiPencil, mdiTrashCanOutline } from '@quasar/extras/mdi-v6';
-import { mdiPlus } from '@quasar/extras/mdi-v6';
+import { mdiBookOutline, mdiPencil, mdiTrashCanOutline } from '@quasar/extras/mdi-v7';
+import { mdiPlus } from '@quasar/extras/mdi-v7';
 import DeleteRecipeDialog from '@/components/recipes/DeleteRecipeDialog.vue';
 import SearchBar from '@/components/core/SearchBar.vue';
 import { useAuthStore } from '@/stores/auth-store';
@@ -114,14 +114,14 @@ const pagination = ref<PaginationClient>({
 const recipesPaginated = ref<RecipesResponse>();
 const recipes = computed(() => recipesPaginated.value?.items ?? []);
 const isLoadingRecipes = ref(false);
-async function getRecipes(paginationReq: PaginationTable) {
+async function getRecipes(paginationTable: PaginationTable) {
   const paginationQuery: RecipesQueryParams = {
     DeviceTemplateId: deviceTemplateId,
-    SortBy: paginationReq.sortBy,
-    Descending: paginationReq.descending,
+    SortBy: paginationTable.sortBy,
+    Descending: paginationTable.descending,
     SearchTerm: filter.value,
-    PageNumber: paginationReq.page,
-    PageSize: paginationReq.rowsPerPage,
+    PageNumber: paginationTable.page,
+    PageSize: paginationTable.rowsPerPage,
   };
 
   isLoadingRecipes.value = true;
@@ -135,10 +135,10 @@ async function getRecipes(paginationReq: PaginationTable) {
 
   recipesPaginated.value = data;
   pagination.value.rowsNumber = data.totalCount ?? 0;
-  pagination.value.sortBy = paginationReq.sortBy;
-  pagination.value.descending = paginationReq.descending;
-  pagination.value.page = paginationReq.page;
-  pagination.value.rowsPerPage = paginationReq.rowsPerPage;
+  pagination.value.sortBy = paginationTable.sortBy;
+  pagination.value.descending = paginationTable.descending;
+  pagination.value.page = data.currentPage;
+  pagination.value.rowsPerPage = data.pageSize;
 }
 getRecipes(pagination.value);
 

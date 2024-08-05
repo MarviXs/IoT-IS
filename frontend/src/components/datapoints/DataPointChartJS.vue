@@ -75,7 +75,7 @@ import { graphColors, transparentize } from '@/utils/colors';
 import { useStorage } from '@vueuse/core';
 import { useI18n } from 'vue-i18n';
 import DialogCommon from '../core/DialogCommon.vue';
-import { mdiRefresh } from '@quasar/extras/mdi-v6';
+import { mdiRefresh } from '@quasar/extras/mdi-v7';
 import GraphOptionsForm, { GraphOptions } from './GraphOptionsForm.vue';
 import { GetDataPointsQuery } from '@/api/types/DataPoint';
 import { DataPoint } from '@/models/DataPoint';

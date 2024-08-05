@@ -71,7 +71,7 @@ public static class GetRecipeById
             return Result.Ok(response);
         }
 
-        private async Task<RecipeStepResponse[]> LoadStepsRecursive(
+        private async Task<List<RecipeStepResponse>> LoadStepsRecursive(
             IEnumerable<RecipeStep> steps,
             int currentDepth,
             int maxDepth,
@@ -84,46 +84,42 @@ public static class GetRecipeById
             var stepResponses = new List<RecipeStepResponse>();
             foreach (var step in steps.OrderBy(s => s.Order))
             {
-                var commandResponse =
-                    step.Command != null
-                        ? new CommandResponse(step.Command.Id, step.Command.DisplayName, step.Command.Name, step.Command.Params)
-                        : null;
-                var subrecipeResponse = await GetSubrecipeResponseAsync(step, currentDepth, maxDepth, cancellationToken);
+                CommandResponse? commandResponse = null;
+                if (step.Command != null)
+                {
+                    commandResponse = new CommandResponse(step.Command.Id, step.Command.DisplayName, step.Command.Name, step.Command.Params);
+                }
+
+                SubrecipeResponse? subrecipeResponse = null;
+                if (step.Subrecipe != null)
+                {
+                    var subSteps = await context
+                        .Recipes.Where(r => r.Id == step.SubrecipeId)
+                        .SelectMany(r => r.Steps)
+                        .Include(s => s.Command)
+                        .Include(s => s.Subrecipe)
+                        .OrderBy(s => s.Order)
+                        .ToListAsync(cancellationToken);
+
+                    subrecipeResponse = new SubrecipeResponse(
+                        step.Subrecipe.Id,
+                        step.Subrecipe.Name,
+                        await LoadStepsRecursive(subSteps, currentDepth + 1, maxDepth, cancellationToken)
+                    );
+                }
 
                 stepResponses.Add(new RecipeStepResponse(step.Id, commandResponse, subrecipeResponse, step.Cycles, step.Order));
             }
 
-            return [.. stepResponses];
-        }
-
-        private async Task<SubrecipeResponse?> GetSubrecipeResponseAsync(
-            RecipeStep step,
-            int currentDepth,
-            int maxDepth,
-            CancellationToken cancellationToken
-        )
-        {
-            if (step.Subrecipe == null)
-                return null;
-
-            var subSteps = await context
-                .Recipes.Where(r => r.Id == step.SubrecipeId)
-                .SelectMany(r => r.Steps)
-                .Include(s => s.Command)
-                .Include(s => s.Subrecipe)
-                .OrderBy(s => s.Order)
-                .ToListAsync(cancellationToken);
-
-            var subrecipeSteps = await LoadStepsRecursive(subSteps, currentDepth + 1, maxDepth, cancellationToken);
-            return new SubrecipeResponse(step.Subrecipe.Id, step.Subrecipe.Name, subrecipeSteps);
+            return stepResponses;
         }
     }
 
     public record CommandResponse(Guid Id, string DisplayName, string Name, List<double> Params);
 
-    public record SubrecipeResponse(Guid Id, string Name, RecipeStepResponse[] Steps);
+    public record SubrecipeResponse(Guid Id, string Name, List<RecipeStepResponse> Steps);
 
     public record RecipeStepResponse(Guid Id, CommandResponse? Command, SubrecipeResponse? Subrecipe, int Cycles, int Order);
 
-    public record Response(Guid Id, string Name, RecipeStepResponse[] Steps);
+    public record Response(Guid Id, string Name, List<RecipeStepResponse> Steps);
 }

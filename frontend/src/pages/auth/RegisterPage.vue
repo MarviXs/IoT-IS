@@ -68,7 +68,7 @@ import { handleError } from '@/utils/error-handler';
 import { isFormValid } from '@/utils/form-validation';
 import LanguageSelect from '@/components/core/LanguageSelect.vue';
 import { useI18n } from 'vue-i18n';
-import { mdiEmail, mdiEye, mdiEyeOff, mdiLock } from '@quasar/extras/mdi-v6';
+import { mdiEmail, mdiEye, mdiEyeOff, mdiLock } from '@quasar/extras/mdi-v7';
 import GoogleLoginBtn from '@/components/account/GoogleLoginBtn.vue';
 import { RegisterRequest } from '@/api/types/Auth';
 

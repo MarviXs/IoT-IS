@@ -48,7 +48,7 @@ import { toast } from 'vue3-toastify';
 import DeviceService from '@/api/services/DeviceService';
 import { User } from '@/models/User';
 import { useI18n } from 'vue-i18n';
-import { mdiClose } from '@quasar/extras/mdi-v6';
+import { mdiClose } from '@quasar/extras/mdi-v7';
 
 const isDialogOpen = defineModel<boolean>();
 const props = defineProps({

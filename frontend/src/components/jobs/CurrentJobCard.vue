@@ -79,7 +79,7 @@ import StartJobDialog from '@/components/jobs/StartJobDialog.vue';
 import JobControls from './JobControls.vue';
 import JobStatusBadges from './JobStatusBadges.vue';
 import { useI18n } from 'vue-i18n';
-import { mdiOpenInNew } from '@quasar/extras/mdi-v6';
+import { mdiOpenInNew } from '@quasar/extras/mdi-v7';
 import JobService from '@/api/services/JobService';
 import { ActiveJobResponse } from '@/api/types/Job';
 import { handleError } from '@/utils/error-handler';

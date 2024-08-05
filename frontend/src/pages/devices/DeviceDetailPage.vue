@@ -74,7 +74,7 @@ import SensorSelectionTree from '@/components/datapoints/SensorSelectionTree.vue
 import CurrentJobCard from '@/components/jobs/CurrentJobCard.vue';
 import { useAuthStore } from '@/stores/auth-store';
 import { useI18n } from 'vue-i18n';
-import { mdiListStatus, mdiPencil } from '@quasar/extras/mdi-v6';
+import { mdiListStatus, mdiPencil } from '@quasar/extras/mdi-v7';
 import PageLayout from '@/layouts/PageLayout.vue';
 import { useStorage } from '@vueuse/core';
 import AutoRefreshButton from '@/components/core/AutoRefreshButton.vue';
