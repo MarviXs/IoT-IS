@@ -9,7 +9,6 @@
         @on-refresh="getDevices(pagination)"
       />
       <q-btn
-        v-if="authStore.isAdmin"
         class="shadow col-grow col-lg-auto"
         color="primary"
         unelevated

@@ -15,7 +15,7 @@ namespace Fei.Is.Api.Features.DeviceTemplates.Commands;
 
 public static class UpdateDeviceTemplate
 {
-    public record Request(string Name, string ModelId);
+    public record Request(string Name);
 
     public sealed class Endpoint : ICarterModule
     {
@@ -83,7 +83,6 @@ public static class UpdateDeviceTemplate
             }
 
             deviceTemplate.Name = message.Request.Name;
-            deviceTemplate.ModelId = message.Request.ModelId;
 
             try
             {
@@ -98,14 +97,13 @@ public static class UpdateDeviceTemplate
         }
     }
 
-    public record UpdateDeviceTemplateResponse(Guid Id, string Name, string ModelId);
+    public record UpdateDeviceTemplateResponse(Guid Id, string Name);
 
     public sealed class Validator : AbstractValidator<Command>
     {
         public Validator()
         {
             RuleFor(x => x.Request.Name).NotEmpty();
-            RuleFor(x => x.Request.ModelId).NotEmpty();
         }
     }
 }

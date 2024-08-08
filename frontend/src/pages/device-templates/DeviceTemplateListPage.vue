@@ -3,7 +3,6 @@
     <template #actions>
       <SearchBar v-model="filter" class="col-grow col-lg-auto" />
       <q-btn
-        v-if="authStore.isAdmin"
         class="shadow col-grow col-lg-auto"
         color="primary"
         unelevated
@@ -137,14 +136,6 @@ const columns = computed<QTableProps['columns']>(() => [
     name: 'name',
     label: t('global.name'),
     field: 'name',
-    sortable: true,
-    align: 'left',
-  },
-
-  {
-    name: 'modelId',
-    label: 'Model ID',
-    field: 'modelId',
     sortable: true,
     align: 'left',
   },

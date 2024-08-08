@@ -4,13 +4,14 @@
       <template #header>
         <div class="text-weight-medium text-subtitle1 flex items-center">{{ t('device.sensors') }}</div>
       </template>
-      <div v-if="sensorsTree.children" class="column q-gutter-y-sm q-px-lg q-pb-md q-pt-md">
+      <div v-if="sensorsTree.items" class="column q-gutter-y-sm q-px-lg q-pb-md q-pt-md">
         <q-tree
           v-model:ticked="tickedNodes"
           v-model:expanded="expanded"
-          :nodes="sensorsTree.children"
+          :nodes="[sensorsTree]"
           node-key="id"
           label-key="name"
+          children-key="items"
           tick-strategy="leaf"
           :no-nodes-label="t('device.no_sensors')"
           default-expand-all
@@ -18,13 +19,17 @@
         >
           <template #default-header="prop">
             <div
-              v-if="prop.node.dataPointTag"
+              v-if="prop.node.type == 'Sensor'"
               class="text-weight-medium text-primary cursor-pointer"
               @click="prop.ticked = !prop.ticked"
               @mousedown.prevent
             >
               <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
-              {{ prop.node.name }} ({{ prop.node.dataPointTag.unit }})
+              {{ prop.node.name }} ({{ prop.node.sensor.unit }})
+            </div>
+            <div v-else-if="prop.node.type == 'Device'" class="flex items-center">
+              <q-icon color="grey-color" class="q-ml-xs q-mr-xs" size="1.5rem" :name="mdiMemory" />
+              {{ prop.node.name }}
             </div>
             <div v-else>
               {{ prop.node.name }}
@@ -42,12 +47,14 @@ import { extractNodeKeys } from '@/utils/sensor-nodes';
 import { computed } from 'vue';
 import { PropType, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { mdiMemory } from '@quasar/extras/mdi-v7';
 
 const tickedNodes = defineModel<string[]>('tickedNodes');
 const props = defineProps({
   sensorsTree: {
     type: Object as PropType<SensorNode>,
-    required: true,
+    required: false,
+    default: () => ({}) as SensorNode,
   },
 });
 
@@ -56,7 +63,7 @@ const { t } = useI18n();
 const expanded = ref<string[]>(extractNodeKeys(props.sensorsTree));
 
 const noChildren = computed(() => {
-  return props.sensorsTree.children?.every((node) => node.sensor) ?? false;
+  return props.sensorsTree.items?.every((node) => node.sensor) ?? false;
 });
 </script>
 

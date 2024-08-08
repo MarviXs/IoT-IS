@@ -27,7 +27,10 @@ public class Startup(IConfiguration configuration)
 
         // Auth
         services.AddAuthentication();
-        services.AddAuthorizationBuilder().SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
+        services
+            .AddAuthorizationBuilder()
+            .SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build())
+            .AddPolicy("Admin", policy => policy.RequireRole("Admin"));
         services.ConfigureIdentity();
         services.ConfigureJWT(Configuration);
 

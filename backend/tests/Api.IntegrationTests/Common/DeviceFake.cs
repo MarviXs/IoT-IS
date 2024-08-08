@@ -6,7 +6,7 @@ namespace Fei.Is.Api.IntegrationTests.Common;
 
 public class DeviceFake : Faker<Device>
 {
-    public DeviceFake(string ownerId, Guid deviceTemplateId)
+    public DeviceFake(Guid ownerId, Guid deviceTemplateId)
     {
         RuleFor(x => x.OwnerId, f => ownerId);
         RuleFor(x => x.DeviceTemplateId, f => deviceTemplateId);

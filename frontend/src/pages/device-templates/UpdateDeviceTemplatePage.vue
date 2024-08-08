@@ -38,7 +38,6 @@ async function getDeviceTemplate() {
 
   templateData.value = {
     name: data.name,
-    modelId: data.modelId,
   };
 }
 getDeviceTemplate();

@@ -51,7 +51,7 @@ public static class Register
 
     public record Command(string Email, string Password) : IRequest<Result>;
 
-    public class RegisterHandler(UserManager<User> userManager, IValidator<Command> validator) : IRequestHandler<Command, Result>
+    public class RegisterHandler(UserManager<ApplicationUser> userManager, IValidator<Command> validator) : IRequestHandler<Command, Result>
     {
         public async Task<Result> Handle(Command message, CancellationToken cancellationToken)
         {
@@ -61,7 +61,12 @@ public static class Register
                 return Result.Fail(new ValidationError(result));
             }
 
-            var user = new User { Email = message.Email, UserName = message.Email };
+            var user = new ApplicationUser
+            {
+                Email = message.Email,
+                UserName = message.Email,
+                RegistrationDate = DateTimeOffset.UtcNow
+            };
 
             var existingUser = await userManager.FindByEmailAsync(message.Email);
             if (existingUser != null)
@@ -72,8 +77,7 @@ public static class Register
             var identityResult = await userManager.CreateAsync(user, message.Password);
             if (!identityResult.Succeeded)
             {
-                var errors = identityResult.Errors.GroupBy(x => x.Code).ToDictionary(x => x.Key, x => x.Select(y => y.Description).ToArray());
-                return Result.Fail(new ValidationError(errors));
+                return Result.Fail(new ValidationError(identityResult));
             }
 
             // TODO: Remove in production

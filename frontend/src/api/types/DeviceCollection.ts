@@ -8,6 +8,9 @@ export type DeviceCollectionsResponse =
 export type DeviceCollectionResponse =
   paths['/device-collections/{collectionId}']['get']['responses']['200']['content']['application/json'];
 
+export type DeviceCollectionWithSensorsResponse =
+  paths['/device-collections/{collectionId}/sensors']['get']['responses']['200']['content']['application/json'];
+
 export type CreateCollectionRequest =
   paths['/device-collections']['post']['requestBody']['content']['application/json'];
 

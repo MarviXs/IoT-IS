@@ -53,7 +53,7 @@ public static class Login
 
     public record Command(string Email, string Password) : IRequest<Result<Response>>;
 
-    public sealed class Handler(UserManager<User> userManager, TokenService tokenService, IValidator<Command> validator)
+    public sealed class Handler(UserManager<ApplicationUser> userManager, TokenService tokenService, IValidator<Command> validator)
         : IRequestHandler<Command, Result<Response>>
     {
         public async Task<Result<Response>> Handle(Command message, CancellationToken cancellationToken)

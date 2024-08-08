@@ -11,18 +11,18 @@ namespace Fei.Is.Api.Features.Auth;
 public class TokenService
 {
     private readonly AppDbContext _context;
-    private readonly UserManager<User> _userManager;
+    private readonly UserManager<ApplicationUser> _userManager;
 
     private readonly IConfiguration _configuration;
 
-    public TokenService(AppDbContext context, UserManager<User> userManager, IConfiguration configuration)
+    public TokenService(AppDbContext context, UserManager<ApplicationUser> userManager, IConfiguration configuration)
     {
         _context = context;
         _userManager = userManager;
         _configuration = configuration;
     }
 
-    public async Task<string> CreateAccessToken(User user)
+    public async Task<string> CreateAccessToken(ApplicationUser user)
     {
         var signingCredentials = GetSigningCredentials();
         var claims = await GetClaims(user);
@@ -30,7 +30,7 @@ public class TokenService
         return new JwtSecurityTokenHandler().WriteToken(tokenOptions);
     }
 
-    public async Task<string> CreateRefreshToken(User user)
+    public async Task<string> CreateRefreshToken(ApplicationUser user)
     {
         var refreshToken = new RefreshToken
         {
@@ -86,9 +86,9 @@ public class TokenService
         return new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
     }
 
-    private async Task<List<Claim>> GetClaims(User user)
+    private async Task<List<Claim>> GetClaims(ApplicationUser user)
     {
-        var claims = new List<Claim> { new(ClaimTypes.NameIdentifier, user.Id), new(ClaimTypes.Email, user.Email) };
+        var claims = new List<Claim> { new(ClaimTypes.NameIdentifier, user.Id.ToString()), new(ClaimTypes.Email, user.Email) };
         var roles = await _userManager.GetRolesAsync(user);
         foreach (var role in roles)
         {

@@ -1,4 +1,4 @@
-import type { paths, FeiIsApiDataEnumsJobStatusEnum } from '@/api/generated/schema.d.ts';
+import type { paths } from '@/api/generated/schema.d.ts';
 
 export type ActiveJobResponse =
   paths['/devices/{deviceId}/jobs/active']['get']['responses']['200']['content']['application/json'];
@@ -9,5 +9,3 @@ export type JobsQueryParams = paths['/jobs']['get']['parameters']['query'];
 
 export type JobResponse = paths['/jobs/{jobId}']['get']['responses']['200']['content']['application/json'];
 export type JobsResponse = paths['/jobs']['get']['responses']['200']['content']['application/json'];
-
-export type JobStatusEnum = FeiIsApiDataEnumsJobStatusEnum;

@@ -61,7 +61,7 @@ public static class UpdateSensor
 
     public record Command(Request SensorRequest, ClaimsPrincipal User, Guid SensorId) : IRequest<Result>;
 
-    public class UpdateSensorHandler(AppDbContext context, IValidator<Command> validator) : IRequestHandler<Command, Result>
+    public class Handler(AppDbContext context, IValidator<Command> validator) : IRequestHandler<Command, Result>
     {
         public async Task<Result> Handle(Command message, CancellationToken cancellationToken)
         {

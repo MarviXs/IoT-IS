@@ -20,7 +20,7 @@ import { useI18n } from 'vue-i18n';
 import DialogCommon from '@/components/core/DialogCommon.vue';
 import { CreateDeviceRequest } from '@/api/types/Device';
 import DeviceForm from '@/components/devices/DeviceForm.vue';
-import { Device } from '@/components/devices/DeviceForm.vue';
+import { DeviceFormData } from '@/components/devices/DeviceForm.vue';
 import DeviceService from '@/api/services/DeviceService';
 
 const isDialogOpen = defineModel<boolean>();
@@ -29,7 +29,11 @@ const emit = defineEmits(['onCreate']);
 const { t } = useI18n();
 
 const creatingDevice = ref(false);
-const device = ref<Device>({});
+const device = ref<DeviceFormData>({
+  name: '',
+  accessToken: '',
+  deviceTemplate: undefined,
+});
 const deviceForm = ref();
 
 async function createDevice() {

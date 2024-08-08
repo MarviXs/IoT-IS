@@ -2,8 +2,8 @@
 
 public class Device : BaseModel
 {
-    public string OwnerId { get; set; } = null!;
-    public User? Owner { get; set; } = null!;
+    public Guid OwnerId { get; set; } = Guid.Empty;
+    public ApplicationUser? Owner { get; set; } = null!;
 
     public Guid? DeviceTemplateId { get; set; }
     public DeviceTemplate? DeviceTemplate { get; set; }

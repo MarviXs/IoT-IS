@@ -1,10 +1,19 @@
 <template>
-  <PageLayout :title="t('global.user_management')">
+  <PageLayout :breadcrumbs="[{ label: t('global.account') }]">
     <template #actions>
-      <SearchBar v-model="filter" />
+      <SearchBar v-model="filter" class="col-grow col-lg-auto" />
     </template>
     <template #default>
-      <q-table :rows="filteredUsers" :columns="columns" :loading="isLoading" flat :rows-per-page-options="[10, 20, 50]">
+      <q-table
+        v-model:pagination="pagination"
+        :rows="usersPaginated?.items ?? []"
+        :columns="columns"
+        :loading="isLoading"
+        flat
+        binary-state-sort
+        :rows-per-page-options="[10, 20, 50]"
+        @request="(requestProp) => getUsers(requestProp.pagination)"
+      >
         <template #no-data="{ message }">
           <div class="full-width column flex-center q-pa-lg nothing-found-text">
             <q-icon :name="mdiAccountGroup" class="q-mb-md" size="50px"></q-icon>
@@ -13,7 +22,7 @@
         </template>
         <template #body-cell-actions="props">
           <q-td auto-width :props="props">
-            <q-btn :to="`/user-management/${props.row.uid}`" :icon="mdiPencil" color="grey-color" flat round
+            <q-btn :to="`/user-management/${props.row.id}`" :icon="mdiPencil" color="grey-color" flat round
               ><q-tooltip content-style="font-size: 11px" :offset="[0, 4]">
                 {{ t('global.edit') }}
               </q-tooltip>
@@ -26,78 +35,89 @@
 </template>
 
 <script setup lang="ts">
-import { GrantedAuthority } from '@/models/User';
-import AuthService from '@/services/AuthService';
 import { QTableProps } from 'quasar';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { format } from 'date-fns';
 import { mdiAccountGroup, mdiPencil } from '@quasar/extras/mdi-v7';
 import PageLayout from '@/layouts/PageLayout.vue';
-import { useAsyncData } from '@/composables/useAsyncData';
 import SearchBar from '@/components/core/SearchBar.vue';
+import { PaginationClient, PaginationTable } from '@/models/Pagination';
+import { UsersQueryParams, UsersResponse } from '@/api/types/UserManagementTypes';
+import UserManagementService from '@/api/services/UserManagementService';
+import { handleError } from '@/utils/error-handler';
+import { watchDebounced } from '@vueuse/core';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
-const { data, isLoading } = useAsyncData(() => AuthService.getUsers(), t('account.toasts.get_user_failed', 2));
 const filter = ref('');
 
-const filteredUsers = computed(() => {
-  if (!filter.value) {
-    return data.value;
-  }
-  return (
-    data.value?.filter(
-      (user) =>
-        user.name?.toLowerCase().includes(filter.value.toLowerCase()) ||
-        user.mail?.toLowerCase().includes(filter.value.toLowerCase()),
-    ) ?? []
-  );
+const pagination = ref<PaginationClient>({
+  sortBy: 'email',
+  descending: false,
+  page: 1,
+  rowsPerPage: 10,
+  rowsNumber: 0,
 });
+const usersPaginated = ref<UsersResponse>();
+const isLoading = ref(false);
+
+async function getUsers(paginationTable: PaginationTable) {
+  const paginationQuery: UsersQueryParams = {
+    SortBy: paginationTable.sortBy,
+    Descending: paginationTable.descending,
+    SearchTerm: filter.value,
+    PageNumber: paginationTable.page,
+    PageSize: paginationTable.rowsPerPage,
+  };
+
+  isLoading.value = true;
+  const { data, error } = await UserManagementService.getUsers(paginationQuery);
+  isLoading.value = false;
+
+  if (error) {
+    handleError(error, 'Loading recipes failed');
+    return;
+  }
+
+  usersPaginated.value = data;
+  pagination.value.rowsNumber = data.totalCount ?? 0;
+  pagination.value.sortBy = paginationTable.sortBy;
+  pagination.value.descending = paginationTable.descending;
+  pagination.value.page = data.currentPage;
+  pagination.value.rowsPerPage = data.pageSize;
+}
+getUsers(pagination.value);
+
+watchDebounced(filter, () => getUsers(pagination.value), { debounce: 400 });
 
 const columns = computed<QTableProps['columns']>(() => [
   {
-    name: 'Username',
-    label: t('account.username'),
-    field: 'name',
-    sortable: true,
-    align: 'left',
-  },
-  {
     name: 'email',
     label: 'E-mail',
-    field: 'mail',
+    field: 'email',
     sortable: true,
     align: 'left',
   },
   {
-    name: 'Created on',
-    label: t('global.created_on'),
-    field: 'createdAt',
-    sortable: true,
+    name: 'roles',
+    label: 'Role',
+    field: 'roles',
+    sortable: false,
     align: 'left',
     format(val) {
-      return format(new Date(val), 'dd. MM. yyyy');
+      if (!val || val.length === 0) return 'User';
+      return val.join(', ');
     },
   },
-  {
-    name: 'access',
-    label: t('account.access'),
-    field: 'authorities',
-    align: 'center',
-    sortable: false,
-    format(val) {
-      if (!val) return t('account.role.user');
 
-      const authorities = val.map((authority: GrantedAuthority) => authority.authority);
-      const roles: string[] = [];
-      if (authorities.includes('admin')) {
-        roles.push(t('account.role.admin'));
-      }
-      if (authorities.includes('user')) {
-        roles.push(t('account.role.user'));
-      }
-      return roles.join(', ');
+  {
+    name: 'registrationDate',
+    label: 'Registration date',
+    field: 'registrationDate',
+    sortable: true,
+    align: 'right',
+    format(val) {
+      return new Date(val).toLocaleDateString(locale.value);
     },
   },
   {

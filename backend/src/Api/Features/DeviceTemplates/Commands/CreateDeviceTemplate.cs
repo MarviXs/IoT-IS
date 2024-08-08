@@ -14,7 +14,7 @@ namespace Fei.Is.Api.Features.DeviceTemplates.Commands;
 
 public static class CreateDeviceTemplate
 {
-    public record Request(string Name, string ModelId);
+    public record Request(string Name);
 
     public sealed class Endpoint : ICarterModule
     {
@@ -57,21 +57,11 @@ public static class CreateDeviceTemplate
             {
                 return Result.Fail(new ValidationError(result));
             }
-
-            var existingTemplate = await context.DeviceTemplates.FirstOrDefaultAsync(
-                template => template.OwnerId == message.User.GetUserId() && template.ModelId == message.Request.ModelId,
-                cancellationToken
-            );
-            if (existingTemplate != null)
-            {
-                return Result.Fail(new ValidationError("ModelId", "Template with this model already exists"));
-            }
-
+            
             var template = new DeviceTemplate
             {
                 OwnerId = message.User.GetUserId(),
                 Name = message.Request.Name,
-                ModelId = message.Request.ModelId
             };
 
             await context.DeviceTemplates.AddAsync(template, cancellationToken);
@@ -86,7 +76,6 @@ public static class CreateDeviceTemplate
         public Validator()
         {
             RuleFor(x => x.Request.Name).NotEmpty();
-            RuleFor(x => x.Request.ModelId).NotEmpty();
         }
     }
 }

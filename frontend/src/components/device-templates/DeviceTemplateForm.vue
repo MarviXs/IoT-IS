@@ -11,7 +11,6 @@
               class="col-12"
               :label="t('global.name')"
             />
-            <q-input ref="modelIdRef" v-model="template.modelId" class="col-12" label="Model ID" />
           </div>
           <q-card-actions align="left" class="text-primary q-mt-sm q-px-none">
             <q-btn
@@ -70,7 +69,6 @@ import { matSensors } from '@quasar/extras/material-icons';
 
 export type DeviceTemplateFormData = {
   name: string;
-  modelId: string;
 };
 
 const { t } = useI18n();
@@ -94,14 +92,14 @@ const formStep = ref(1);
 
 function goToStep(step: number) {
   if (formStep.value == 1) {
-    const firstStepForm = [nameRef.value, modelIdRef.value];
+    const firstStepForm = [nameRef.value];
     if (!isFormValid(firstStepForm)) return;
   }
   formStep.value = step;
 }
 
 async function submitForm() {
-  const firstStepForm = [nameRef.value, modelIdRef.value];
+  const firstStepForm = [nameRef.value];
   const firstStepValid = isFormValid(firstStepForm);
 
   const allSensorsValid = sensorFormRef.value.map((form) => form.validate()).every((isValid: boolean) => isValid);
@@ -135,7 +133,6 @@ function deleteSensor(index: number) {
 
 // Input validation
 const nameRef = ref<QInput>();
-const modelIdRef = ref<QInput>();
 
 const sensorFormRef = ref<(typeof SensorForm)[]>([]);
 

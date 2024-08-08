@@ -18,7 +18,6 @@
       />
       <!-- <AutoRefreshButton v-model="refreshInterval" :loading="isLoadingDevice" @on-refresh="refreshDevice" /> -->
       <q-btn
-        v-if="authStore.isAdmin"
         class="shadow"
         color="primary"
         unelevated
@@ -65,11 +64,10 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router';
 import DeviceInfoCard from '@/components/devices/DeviceInfoCard.vue';
-import DataPointChartJS from '@/components/datapoints/DataPointChartJS.vue';
-import { SensorNode } from '@/models/SensorNode';
+import DataPointChartJS, { SensorData } from '@/components/datapoints/DataPointChartJS.vue';
 import { computed, ref } from 'vue';
 import DeviceService from '@/api/services/DeviceService';
-import { deviceToSensorNode, extractNodeKeys } from '@/utils/sensor-nodes';
+import { deviceToTreeNode, extractNodeKeys } from '@/utils/sensor-nodes';
 import SensorSelectionTree from '@/components/datapoints/SensorSelectionTree.vue';
 import CurrentJobCard from '@/components/jobs/CurrentJobCard.vue';
 import { useAuthStore } from '@/stores/auth-store';
@@ -77,12 +75,10 @@ import { useI18n } from 'vue-i18n';
 import { mdiListStatus, mdiPencil } from '@quasar/extras/mdi-v7';
 import PageLayout from '@/layouts/PageLayout.vue';
 import { useStorage } from '@vueuse/core';
-import AutoRefreshButton from '@/components/core/AutoRefreshButton.vue';
-import { toast } from 'vue3-toastify';
 import { handleError } from '@/utils/error-handler';
 import { DeviceResponse } from '@/api/types/Device';
 import EditDeviceDialog from '@/components/devices/EditDeviceDialog.vue';
-import { SensorData } from '@/components/datapoints/DataPointChart.vue';
+import { SensorNode } from '@/models/SensorNode';
 
 const { t } = useI18n();
 
@@ -127,7 +123,7 @@ async function getDevice() {
   device.value = data;
 
   if (!tickedNodes.value || !sensorTree.value) {
-    sensorTree.value = deviceToSensorNode(device.value);
+    sensorTree.value = deviceToTreeNode(device.value);
     tickedNodes.value = extractNodeKeys(sensorTree.value);
   }
 }

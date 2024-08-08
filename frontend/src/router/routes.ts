@@ -93,16 +93,11 @@ const routes: RouteRecordRaw[] = [
 
       {
         path: '/collections',
-        component: () => import('pages/collections/CollectionsPageNext.vue'),
+        component: () => import('pages/collections/CollectionsPage.vue'),
       },
       {
         path: '/collections/:id/',
         component: () => import('pages/collections/CollectionDetailPage.vue'),
-      },
-
-      {
-        path: '/modules/:id/',
-        component: () => import('pages/modules/ModuleDetailPage.vue'),
       },
     ],
   },

@@ -12,7 +12,7 @@
     "test": "echo \"No test specified\" && exit 0",
     "dev": "quasar dev",
     "build": "quasar build",
-    "generate-openapi-schema": "npx openapi-typescript http://localhost:5097/swagger/v1/swagger.json -o ./src/api/generated/schema.d.ts --properties-required-by-default --enum",
+    "generate-openapi-schema": "npx openapi-typescript http://localhost:5097/swagger/v1/swagger.json -o ./src/api/generated/schema.d.ts --properties-required-by-default",
     "check-updates": "ncu -i"
   },
   "dependencies": {

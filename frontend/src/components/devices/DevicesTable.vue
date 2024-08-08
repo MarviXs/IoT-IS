@@ -52,31 +52,21 @@
 
       <template #body-cell-actions="propsActions">
         <q-td auto-width :props="propsActions">
-          <q-btn
-            v-if="authStore.isAdmin"
-            :icon="mdiPencil"
-            color="grey-color"
-            flat
-            round
-            @click.stop="openUpdateDialog(propsActions.row.id)"
+          <q-btn :icon="mdiPencil" color="grey-color" flat round @click.stop="openUpdateDialog(propsActions.row.id)"
             ><q-tooltip content-style="font-size: 11px" :offset="[0, 4]">
               {{ t('global.edit') }}
             </q-tooltip>
           </q-btn>
-          <q-btn
-            v-if="authStore.isAdmin"
-            :icon="mdiTrashCan"
-            color="grey-color"
-            flat
-            round
-            @click.stop="openDeleteDialog(propsActions.row.id)"
-            ><q-tooltip content-style="font-size: 11px" :offset="[0, 4]">
-              {{ t('global.delete') }}
-            </q-tooltip>
-          </q-btn>
-          <q-btn v-if="authStore.isAdmin" :icon="mdiDotsVertical" color="grey-color" flat round>
+          <q-btn :icon="mdiDotsVertical" color="grey-color" flat round>
             <q-menu anchor="bottom right" self="top right">
               <q-list>
+                <q-item v-close-popup clickable @click.stop="openDeleteDialog(propsActions.row.id)">
+                  <div class="row items-center q-gutter-sm">
+                    <q-icon color="grey-9" size="24px" :name="mdiTrashCan" />
+                    <div>{{ t('global.delete') }}</div>
+                  </div>
+                </q-item>
+
                 <!-- <q-item
                   v-close-popup
                   clickable

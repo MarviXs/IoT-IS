@@ -4,6 +4,91 @@
  */
 
 export interface paths {
+    "/admin/users/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get user by ID */
+        get: operations["GetUserById"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get all registered users */
+        get: operations["GetUsers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/users/{id}/email": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Update user email */
+        put: operations["UpdateUserEmail"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/users/{id}/password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Update user password */
+        put: operations["UpdateUserPassword"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/users/{id}/role": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Update user role */
+        put: operations["UpdateUserRole"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/device": {
         parameters: {
             query?: never;
@@ -249,6 +334,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/device-collections/{collectionId}/sensors": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a device collection with sensors */
+        get: operations["GetDeviceCollectionWithSensors"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/device-collections/{collectionId}/devices/{deviceId}": {
         parameters: {
             query?: never;
@@ -260,7 +362,8 @@ export interface paths {
         put?: never;
         /** Add a device to a device collection */
         post: operations["AddDeviceToDeviceCollection"];
-        delete?: never;
+        /** Remove device from device collection */
+        delete: operations["RemoveDeviceFromDeviceCollection"];
         options?: never;
         head?: never;
         patch?: never;
@@ -553,8 +656,23 @@ export interface components {
             readonly hasNext: boolean;
             items: components["schemas"]["Fei.Is.Api.Features.Recipes.Queries.GetRecipes.Response"][];
         };
+        "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.UserManagement.Queries.GetUsers.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+            /** Format: int32 */
+            currentPage: number;
+            /** Format: int32 */
+            totalPages: number;
+            /** Format: int32 */
+            pageSize: number;
+            /** Format: int32 */
+            totalCount: number;
+            readonly hasPrevious: boolean;
+            readonly hasNext: boolean;
+            items: components["schemas"]["Fei.Is.Api.Features.UserManagement.Queries.GetUsers.Response"][];
+        };
         /** @enum {string} */
-        "Fei.Is.Api.Data.Enums.JobStatusEnum": FeiIsApiDataEnumsJobStatusEnum;
+        "Fei.Is.Api.Data.Enums.JobStatusEnum": "JOB_FREE" | "JOB_IDLE" | "JOB_PENDING" | "JOB_PROCESSING" | "JOB_DONE" | "JOB_ERR" | "JOB_PAUSED" | "JOB_CANCELED" | "JOB_STATUS_MAX";
+        /** @enum {string} */
+        "Fei.Is.Api.Data.Enums.Role": "Admin" | "User";
         "Fei.Is.Api.Features.Auth.Commands.AuthDevice.Endpoint.Request": {
             accessToken: string;
         };
@@ -617,7 +735,7 @@ export interface components {
             timeStamp?: number | null;
         };
         /** @enum {string} */
-        "Fei.Is.Api.Features.DataPoints.Queries.GetSensorDataPoints.DownsampleMethod": FeiIsApiFeaturesDataPointsQueriesGetSensorDataPointsDownsampleMethod;
+        "Fei.Is.Api.Features.DataPoints.Queries.GetSensorDataPoints.DownsampleMethod": "Asap" | "Lttb";
         "Fei.Is.Api.Features.DataPoints.Queries.GetSensorDataPoints.Response": {
             /** Format: date-time */
             ts: string;
@@ -625,7 +743,7 @@ export interface components {
             value?: number | null;
         };
         /** @enum {string} */
-        "Fei.Is.Api.Features.DataPoints.Queries.GetSensorDataPoints.TimeBucketMethod": FeiIsApiFeaturesDataPointsQueriesGetSensorDataPointsTimeBucketMethod;
+        "Fei.Is.Api.Features.DataPoints.Queries.GetSensorDataPoints.TimeBucketMethod": "Average" | "Max" | "Min" | "StdDev" | "Sum";
         "Fei.Is.Api.Features.DeviceCollections.Commands.CreateDeviceCollection.Request": {
             name: string;
             /** Format: uuid */
@@ -658,7 +776,26 @@ export interface components {
             type: components["schemas"]["Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionById.SubItemTypes"];
         };
         /** @enum {string} */
-        "Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionById.SubItemTypes": FeiIsApiFeaturesDeviceCollectionsQueriesGetDeviceCollectionByIdSubItemTypes;
+        "Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionById.SubItemTypes": "Device" | "SubCollection";
+        "Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionWithSensors.Response": {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            items: components["schemas"]["Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionWithSensors.Response"][];
+            type: components["schemas"]["Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionWithSensors.SubItemTypes"];
+            sensor: components["schemas"]["Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionWithSensors.SensorResponse"];
+        };
+        "Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionWithSensors.SensorResponse": {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            unit: string;
+            tag: string;
+            /** Format: int32 */
+            accuracyDecimals?: number | null;
+        };
+        /** @enum {string} */
+        "Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionWithSensors.SubItemTypes": "Device" | "SubCollection" | "Sensor";
         "Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollections.Response": {
             /** Format: uuid */
             id: string;
@@ -666,23 +803,19 @@ export interface components {
         };
         "Fei.Is.Api.Features.DeviceTemplates.Commands.CreateDeviceTemplate.Request": {
             name: string;
-            modelId: string;
         };
         "Fei.Is.Api.Features.DeviceTemplates.Commands.UpdateDeviceTemplate.Request": {
             name: string;
-            modelId: string;
         };
         "Fei.Is.Api.Features.DeviceTemplates.Queries.GetDeviceTemplateById.Response": {
             /** Format: uuid */
             id: string;
             name: string;
-            modelId: string;
         };
         "Fei.Is.Api.Features.DeviceTemplates.Queries.GetDeviceTemplates.Response": {
             /** Format: uuid */
             id: string;
             name: string;
-            modelId: string;
             /** Format: date-time */
             updatedAt: string;
         };
@@ -757,7 +890,7 @@ export interface components {
             status: components["schemas"]["Fei.Is.Api.Data.Enums.JobStatusEnum"];
         };
         /** @enum {string} */
-        "Fei.Is.Api.Features.Jobs.Queries.GetJobById.CommandProgress": FeiIsApiFeaturesJobsQueriesGetJobByIdCommandProgress;
+        "Fei.Is.Api.Features.Jobs.Queries.GetJobById.CommandProgress": "CommandPending" | "CommandProcessing" | "CommandDone";
         "Fei.Is.Api.Features.Jobs.Queries.GetJobById.CommandResponse": {
             /** Format: int32 */
             order: number;
@@ -910,6 +1043,31 @@ export interface components {
             /** Format: int32 */
             accuracyDecimals?: number | null;
         };
+        "Fei.Is.Api.Features.UserManagement.Commands.UpdateUserEmail.Request": {
+            email: string;
+        };
+        "Fei.Is.Api.Features.UserManagement.Commands.UpdateUserPassword.Request": {
+            password: string;
+        };
+        "Fei.Is.Api.Features.UserManagement.Commands.UpdateUserRole.Request": {
+            role: components["schemas"]["Fei.Is.Api.Data.Enums.Role"];
+        };
+        "Fei.Is.Api.Features.UserManagement.Queries.GetUserById.Response": {
+            /** Format: uuid */
+            id: string;
+            email: string;
+            /** Format: date-time */
+            registrationDate: string;
+            roles: string[];
+        };
+        "Fei.Is.Api.Features.UserManagement.Queries.GetUsers.Response": {
+            /** Format: uuid */
+            id: string;
+            email: string;
+            /** Format: date-time */
+            registrationDate: string;
+            roles: string[];
+        };
         "Microsoft.AspNetCore.Http.HttpValidationProblemDetails": {
             type?: string | null;
             title?: string | null;
@@ -940,6 +1098,188 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    GetUserById: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.UserManagement.Queries.GetUserById.Response"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GetUsers: {
+        parameters: {
+            query?: {
+                SortBy?: string;
+                Descending?: boolean;
+                SearchTerm?: string;
+                PageNumber?: number;
+                PageSize?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.UserManagement.Queries.GetUsers.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UpdateUserEmail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.UserManagement.Commands.UpdateUserEmail.Request"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UpdateUserPassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.UserManagement.Commands.UpdateUserPassword.Request"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UpdateUserRole: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.UserManagement.Commands.UpdateUserRole.Request"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     AuthDevice: {
         parameters: {
             query?: never;
@@ -1665,6 +2005,35 @@ export interface operations {
             };
         };
     };
+    GetDeviceCollectionWithSensors: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                collectionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionWithSensors.Response"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     AddDeviceToDeviceCollection: {
         parameters: {
             query?: never;
@@ -1679,6 +2048,36 @@ export interface operations {
         responses: {
             /** @description OK */
             200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+        };
+    };
+    RemoveDeviceFromDeviceCollection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                collectionId: string;
+                deviceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2376,35 +2775,4 @@ export interface operations {
             };
         };
     };
-}
-export enum FeiIsApiDataEnumsJobStatusEnum {
-    JOB_FREE = "JOB_FREE",
-    JOB_IDLE = "JOB_IDLE",
-    JOB_PENDING = "JOB_PENDING",
-    JOB_PROCESSING = "JOB_PROCESSING",
-    JOB_DONE = "JOB_DONE",
-    JOB_ERR = "JOB_ERR",
-    JOB_PAUSED = "JOB_PAUSED",
-    JOB_CANCELED = "JOB_CANCELED",
-    JOB_STATUS_MAX = "JOB_STATUS_MAX"
-}
-export enum FeiIsApiFeaturesDataPointsQueriesGetSensorDataPointsDownsampleMethod {
-    Asap = "Asap",
-    Lttb = "Lttb"
-}
-export enum FeiIsApiFeaturesDataPointsQueriesGetSensorDataPointsTimeBucketMethod {
-    Average = "Average",
-    Max = "Max",
-    Min = "Min",
-    StdDev = "StdDev",
-    Sum = "Sum"
-}
-export enum FeiIsApiFeaturesDeviceCollectionsQueriesGetDeviceCollectionByIdSubItemTypes {
-    Device = "Device",
-    SubCollection = "SubCollection"
-}
-export enum FeiIsApiFeaturesJobsQueriesGetJobByIdCommandProgress {
-    CommandPending = "CommandPending",
-    CommandProcessing = "CommandProcessing",
-    CommandDone = "CommandDone"
 }

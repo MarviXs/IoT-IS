@@ -1,10 +1,10 @@
 <template>
   <q-card class="shadow q-pa-lg">
-    <q-input v-model="currentMail" :label="t('account.current_email')" readonly disable></q-input>
+    <q-input :model-value="currentMail" :label="t('account.current_email')" readonly disable></q-input>
     <q-form ref="qform" autocomplete="off">
       <q-input
         ref="mailRef"
-        v-model="newEmail"
+        v-model="mail"
         autocomplete="off"
         :label="t('account.new_email')"
         type="email"
@@ -17,39 +17,35 @@
         unelevated
         type="submit"
         :label="t('global.save')"
-        :loading="changingEmail"
+        :loading="loading"
         no-caps
-        @click.prevent="updateEmail"
+        @click.prevent="onSubmit"
       ></q-btn>
     </q-form>
   </q-card>
 </template>
 
 <script setup lang="ts">
-import { PropType, ref, watch } from 'vue';
-import { handleError } from '@/utils/error-handler';
-import AuthService from '@/services/AuthService';
-import { User, UserUpdate } from '@/models/User';
-import { toast } from 'vue3-toastify';
+import { ref } from 'vue';
 import { QForm, QInput } from 'quasar';
-import { isFormValid } from '@/utils/form-validation';
 import { useI18n } from 'vue-i18n';
 
-const props = defineProps({
-  user: {
-    type: Object as PropType<User>,
+defineProps({
+  currentMail: {
+    type: String,
     required: true,
   },
+  loading: {
+    type: Boolean,
+    required: false,
+  },
 });
-const emit = defineEmits(['update']);
+const emit = defineEmits(['onSubmit']);
+const mail = defineModel({ type: String, default: '' });
 
 const { t } = useI18n();
 
-const mailRef = ref<QInput>();
 const qform = ref<QForm>();
-const currentMail = ref(props.user.mail);
-const newEmail = ref('');
-const changingEmail = ref(false);
 
 const mailRules = [
   (val: string) => (val && val.length > 0) || t('global.rules.required'),
@@ -59,32 +55,10 @@ const mailRules = [
   },
 ];
 
-async function updateEmail() {
-  if (!isFormValid([mailRef.value])) {
-    return;
-  }
+async function onSubmit() {
+  const valid = qform.value?.validate();
+  if (!valid) return;
 
-  const updateUser: UserUpdate = {
-    mail: newEmail.value,
-  };
-
-  try {
-    changingEmail.value = true;
-    await AuthService.updateUser(updateUser, props.user.uid);
-    toast.success(t('account.toasts.email_update_success'));
-    newEmail.value = '';
-    qform.value?.reset();
-    emit('update');
-  } catch (err) {
-    handleError(err, t('account.toasts.email_update_failed'));
-  } finally {
-    changingEmail.value = false;
-  }
+  emit('onSubmit', mail.value);
 }
-
-watch(
-  () => props.user,
-  () => (currentMail.value = props.user.mail),
-  { immediate: true },
-);
 </script>

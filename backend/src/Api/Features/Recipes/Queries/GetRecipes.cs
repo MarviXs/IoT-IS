@@ -78,12 +78,12 @@ public static class GetRecipes
                 .Include(d => d.DeviceTemplate)
                 .Where(d => d.DeviceTemplate!.OwnerId == message.User.GetUserId())
                 .Where(d => d.Name.ToLower().Contains(StringUtils.Normalized(queryParameters.SearchTerm)))
-                .Where(d => queryParameters.DeviceTemplateId == null || d.DeviceTemplateId == queryParameters.DeviceTemplateId)
-                .Sort(queryParameters.SortBy ?? nameof(Recipe.UpdatedAt), queryParameters.Descending);
+                .Where(d => queryParameters.DeviceTemplateId == null || d.DeviceTemplateId == queryParameters.DeviceTemplateId);
 
             var totalCount = await query.CountAsync(cancellationToken);
 
             var recipes = await query
+                .Sort(queryParameters.SortBy ?? nameof(Recipe.UpdatedAt), queryParameters.Descending)
                 .Paginate(queryParameters)
                 .Select(recipe => new Response(recipe.Id, recipe.Name, recipe.UpdatedAt))
                 .ToListAsync(cancellationToken);

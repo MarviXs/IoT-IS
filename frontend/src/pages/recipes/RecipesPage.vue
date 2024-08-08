@@ -4,7 +4,6 @@
     <q-space />
     <SearchBar v-model="filter" />
     <q-btn
-      v-if="authStore.isAdmin"
       class="shadow"
       color="primary"
       :icon="mdiPlus"
@@ -48,7 +47,6 @@
       <template #body-cell-actions="props">
         <q-td auto-width :props="props">
           <q-btn
-            v-if="authStore.isAdmin"
             :to="`/device-templates/${deviceTemplateId}/recipes/${props.row.id}/edit`"
             :icon="mdiPencil"
             color="grey-color"
@@ -58,13 +56,7 @@
               {{ t('global.edit') }}
             </q-tooltip>
           </q-btn>
-          <q-btn
-            v-if="authStore.isAdmin"
-            :icon="mdiTrashCanOutline"
-            color="grey-color"
-            flat
-            round
-            @click.stop="openDeleteDialog(props.row.id)"
+          <q-btn :icon="mdiTrashCanOutline" color="grey-color" flat round @click.stop="openDeleteDialog(props.row.id)"
             ><q-tooltip content-style="font-size: 11px" :offset="[0, 4]">
               {{ t('global.delete') }}
             </q-tooltip>

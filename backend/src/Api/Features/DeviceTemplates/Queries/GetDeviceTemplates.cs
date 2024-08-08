@@ -75,21 +75,20 @@ public static class GetDeviceTemplates
 
             var templates = await query
                 .Paginate(templateParameters)
-                .Select(template => new Response(template.Id, template.Name, template.ModelId, template.UpdatedAt))
+                .Select(template => new Response(template.Id, template.Name, template.UpdatedAt))
                 .ToListAsync(cancellationToken);
 
             return Result.Ok(templates.ToPagedList(totalCount, templateParameters.PageNumber, templateParameters.PageSize));
         }
     }
 
-    public record Response(Guid Id, string Name, string ModelId, DateTime UpdatedAt);
+    public record Response(Guid Id, string Name, DateTime UpdatedAt);
 
     public sealed class ParametersValidator : AbstractValidator<QueryParameters>
     {
         private static readonly string[] ValidSortByFields =
         [
             nameof(DeviceTemplate.Name),
-            nameof(DeviceTemplate.ModelId),
             nameof(DeviceTemplate.CreatedAt),
             nameof(DeviceTemplate.UpdatedAt)
         ];

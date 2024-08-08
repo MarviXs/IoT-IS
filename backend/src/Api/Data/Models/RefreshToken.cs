@@ -7,8 +7,8 @@ public class RefreshToken
 {
     public Guid Id { get; set; }
     public required Guid Token { get; set; }
-    public required string UserId { get; set; }
-    public User? User { get; set; }
+    public required Guid UserId { get; set; }
+    public ApplicationUser? User { get; set; }
     public long ExpiresAt { get; set; }
     public bool IsExpired => ExpiresAt <= DateTimeOffset.UtcNow.ToUnixTimeSeconds();
     public long CreatedAt { get; set; }

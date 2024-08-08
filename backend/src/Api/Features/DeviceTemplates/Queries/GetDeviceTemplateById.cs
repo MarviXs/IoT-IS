@@ -65,11 +65,11 @@ public static class GetDeviceTemplateById
                 return Result.Fail(new ForbiddenError());
             }
 
-            var response = new Response(template.Id, template.Name, template.ModelId);
+            var response = new Response(template.Id, template.Name);
 
             return Result.Ok(response);
         }
     }
 
-    public record Response(Guid Id, string Name, string ModelId);
+    public record Response(Guid Id, string Name);
 }

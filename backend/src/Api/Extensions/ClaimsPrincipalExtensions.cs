@@ -4,7 +4,7 @@ namespace Fei.Is.Api.Extensions;
 
 public static class ClaimsPrincipalExtensions
 {
-    public static string GetUserId(this ClaimsPrincipal claims)
+    public static Guid GetUserId(this ClaimsPrincipal claims)
     {
         var userId = claims.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -13,7 +13,14 @@ public static class ClaimsPrincipalExtensions
             throw new InvalidOperationException("User ID claim is missing.");
         }
 
-        return userId;
+        try
+        {
+            return Guid.Parse(userId);
+        }
+        catch (FormatException)
+        {
+            throw new InvalidOperationException("User ID claim is not a valid GUID.");
+        }
     }
 
     public static string GetEmail(this ClaimsPrincipal claims)

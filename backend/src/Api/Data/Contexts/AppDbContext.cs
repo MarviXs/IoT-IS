@@ -1,11 +1,22 @@
 ﻿using Fei.Is.Api.Data.Configuration;
 using Fei.Is.Api.Data.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fei.Is.Api.Data.Contexts;
 
-public class AppDbContext : IdentityDbContext<User>
+public class AppDbContext
+    : IdentityDbContext<
+        ApplicationUser,
+        ApplicationRole,
+        Guid,
+        IdentityUserClaim<Guid>,
+        ApplicationUserRole,
+        IdentityUserLogin<Guid>,
+        IdentityRoleClaim<Guid>,
+        IdentityUserToken<Guid>
+    >
 {
     public AppDbContext(DbContextOptions<AppDbContext> options)
         : base(options) { }
@@ -14,7 +25,8 @@ public class AppDbContext : IdentityDbContext<User>
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.ApplyConfiguration(new RoleConfiguration());
+        modelBuilder.ApplyConfiguration(new ApplicationUserConfiguration());
+        modelBuilder.ApplyConfiguration(new ApplicationRoleConfiguration());
         modelBuilder.ApplyConfiguration(new RecipeConfiguration());
         modelBuilder.ApplyConfiguration(new RecipeStepConfiguration());
         modelBuilder.ApplyConfiguration(new DeviceTemplateConfiguration());

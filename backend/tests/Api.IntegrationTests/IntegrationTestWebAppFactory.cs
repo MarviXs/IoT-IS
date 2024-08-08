@@ -18,7 +18,7 @@ namespace Fei.Is.Api.IntegrationTests;
 
 public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
-    public string DefaultUserId { get; set; } = "admin1";
+    public Guid DefaultUserId { get; set; } =  Guid.Parse("00000000-0000-0000-0000-000000000001");
     private Respawner? _respawner;
 
     private readonly PostgreSqlContainer _appDbContainer = new PostgreSqlBuilder()
@@ -86,8 +86,8 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
 
     private async Task SeedDB(IServiceScope scope)
     {
-        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
-        var testUser = new User
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        var testUser = new ApplicationUser
         {
             Id = DefaultUserId,
             UserName = "admin@test.com",
@@ -96,9 +96,9 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
         await userManager.CreateAsync(testUser, "password");
         await userManager.AddClaimAsync(testUser, new Claim(ClaimTypes.Role, "Admin"));
 
-        var testUser2 = new User
+        var testUser2 = new ApplicationUser
         {
-            Id = "admin2",
+            Id = Guid.Parse("00000000-0000-0000-0000-000000000002"),
             UserName = "admin2@test.com",
             Email = "admin2@test.com",
         };

@@ -16,6 +16,12 @@ class DeviceCollectionService {
     });
   }
 
+  async getCollectionWithSensors(id: string, maxDepth?: number) {
+    return await client.GET('/device-collections/{collectionId}/sensors', {
+      params: { path: { collectionId: id }, query: { MaxDepth: maxDepth } },
+    });
+  }
+
   async createCollection(data: CreateCollectionRequest) {
     return await client.POST('/device-collections', { body: data });
   }
@@ -26,6 +32,18 @@ class DeviceCollectionService {
 
   async deleteCollection(id: string) {
     return await client.DELETE('/device-collections/{id}', { params: { path: { id: id } } });
+  }
+
+  async addDeviceToCollection(collectionId: string, deviceId: string) {
+    return await client.POST('/device-collections/{collectionId}/devices/{deviceId}', {
+      params: { path: { collectionId, deviceId } },
+    });
+  }
+
+  async removeDeviceFromCollection(collectionId: string, deviceId: string) {
+    return await client.DELETE('/device-collections/{collectionId}/devices/{deviceId}', {
+      params: { path: { collectionId, deviceId } },
+    });
   }
 }
 

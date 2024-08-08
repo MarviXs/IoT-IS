@@ -26,7 +26,7 @@ public static class ServiceExtensions
     public static void ConfigureIdentity(this IServiceCollection services)
     {
         var builder = services
-            .AddIdentity<User, IdentityRole>(o =>
+            .AddIdentity<ApplicationUser, ApplicationRole>(o =>
             {
                 // Password settings.
                 o.Password.RequireDigit = false;

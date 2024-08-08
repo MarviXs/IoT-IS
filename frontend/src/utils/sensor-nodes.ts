@@ -1,65 +1,74 @@
 import { DeviceResponse } from '@/api/types/Device';
+import { DeviceCollectionWithSensorsResponse } from '@/api/types/DeviceCollection';
+import { SensorData } from '@/components/datapoints/DataPointChartJS.vue';
 import { SensorNode } from '@/models/SensorNode';
 
 function getSensorUniqueId(deviceId: string, tag: string) {
   return `${deviceId}-${tag}`;
 }
 
-function deviceToSensorNode(device: DeviceResponse): SensorNode {
+function deviceToTreeNode(device: DeviceResponse): SensorNode {
   return {
     id: device.id,
     name: device.name,
-    children:
+    type: 'Device',
+    items:
       device.deviceTemplate?.sensors?.map((sensor) => ({
         id: getSensorUniqueId(device.id, sensor.tag),
         name: sensor.name,
+        type: 'Sensor',
         sensor: sensor,
-        children: [],
+        items: [],
       })) ?? [],
   };
 }
 
-// function moduleToDataPointTagNode(module: Module): DataPointTagNode {
-//   return {
-//     uid: module.uid,
-//     name: module.name,
-//     children: module.devices?.map(deviceToDataPointTagNode) ?? [],
-//   };
-// }
-
-// function collectionToDataPointTagNode(coll: Collection): DataPointTagNode {
-//   return {
-//     uid: coll.uid,
-//     name: coll.name,
-//     children: coll.modules?.map(moduleToDataPointTagNode) ?? [],
-//   };
-// }
-
-// function nodeToDataPointTags(node: DataPointTagNode, seenUids = new Set()) {
-//   if (!node) return [];
-
-//   const { dataPointTag, children } = node;
-//   const tags = [];
-
-//   if (dataPointTag && !seenUids.has(dataPointTag.uid)) {
-//     seenUids.add(dataPointTag.uid);
-//     tags.push(dataPointTag);
-//   }
-
-//   if (children) {
-//     children.forEach((child) => {
-//       tags.push(...nodeToDataPointTags(child, seenUids));
-//     });
-//   }
-
-//   return tags;
-// }
-
-function extractNodeKeys(node: SensorNode): string[] {
-  if (!node.children) {
-    return [node.id ?? ''];
-  }
-  return [node.id ?? '', ...node.children.flatMap(extractNodeKeys)];
+function collectionToTreeNode(coll: DeviceCollectionWithSensorsResponse): SensorNode {
+  return {
+    id: coll.id,
+    name: coll.name,
+    type: coll.type,
+    items: coll.items.map((item) => {
+      if (item.type === 'Sensor') {
+        return {
+          id: getSensorUniqueId(coll.id, item.sensor.tag),
+          name: item.sensor.name,
+          type: 'Sensor',
+          sensor: item.sensor,
+          items: [],
+        };
+      }
+      return collectionToTreeNode(item);
+    }),
+  };
 }
 
-export { deviceToSensorNode, extractNodeKeys };
+function treeNodeToSensors(node: SensorNode): SensorData[] {
+  if (!node.items) {
+    return [];
+  }
+  return node.items.flatMap((item) => {
+    if (item.type === 'Sensor') {
+      return [
+        {
+          id: item.id,
+          deviceId: node.id ?? '',
+          tag: item.sensor?.tag ?? '',
+          name: item.name,
+          unit: item.sensor?.unit,
+          accuracyDecimals: item.sensor?.accuracyDecimals,
+        },
+      ];
+    }
+    return treeNodeToSensors(item);
+  });
+}
+
+function extractNodeKeys(node: SensorNode): string[] {
+  if (!node.items) {
+    return [node.id ?? ''];
+  }
+  return [node.id ?? '', ...node.items.flatMap(extractNodeKeys)];
+}
+
+export { deviceToTreeNode, collectionToTreeNode, treeNodeToSensors, extractNodeKeys };
