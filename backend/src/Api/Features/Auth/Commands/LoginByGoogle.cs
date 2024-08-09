@@ -5,25 +5,28 @@ using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
 using FluentResults;
 using FluentValidation;
+using Google.Apis.Auth;
+using Google.Apis.Auth.OAuth2;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
+using static Google.Apis.Auth.GoogleJsonWebSignature;
 
 namespace Fei.Is.Api.Features.Auth.Commands;
 
-public static class Login
+public static class LoginByGoogle
 {
-    public record Request(string Email, string Password);
+    public record Request(string GoogleToken);
 
     public sealed class Endpoint : ICarterModule
     {
         public void AddRoutes(IEndpointRouteBuilder app)
         {
             app.MapPost(
-                    "auth/login",
+                    "auth/google",
                     async Task<Results<Ok<Response>, UnauthorizedHttpResult, BadRequest, ValidationProblem>> (IMediator mediator, Request request) =>
                     {
-                        var loginCommand = new Command(request.Email, request.Password);
+                        var loginCommand = new Command(request.GoogleToken);
                         var result = await mediator.Send(loginCommand);
 
                         if (result.HasError<ValidationError>())
@@ -40,18 +43,18 @@ public static class Login
                     }
                 )
                 .AllowAnonymous()
-                .WithName(nameof(Login))
+                .WithName(nameof(LoginByGoogle))
                 .WithTags("Auth")
                 .WithOpenApi(o =>
                 {
                     o.Summary = "Login";
-                    o.Description = "Login with an email and password";
+                    o.Description = "Login with Google";
                     return o;
                 });
         }
     }
 
-    public record Command(string Email, string Password) : IRequest<Result<Response>>;
+    public record Command(string GoogleToken) : IRequest<Result<Response>>;
 
     public sealed class Handler(UserManager<ApplicationUser> userManager, TokenService tokenService, IValidator<Command> validator)
         : IRequestHandler<Command, Result<Response>>
@@ -64,17 +67,23 @@ public static class Login
                 return Result.Fail(new ValidationError(result));
             }
 
-            var user = await userManager.FindByEmailAsync(message.Email);
-            if (user == null)
-            {
-                return Result.Fail(new NotFoundError());
-            }
+            Payload payload = await ValidateAsync(message.GoogleToken);
+            var user = await userManager.FindByEmailAsync(payload.Email);
 
-            var passwordValid = await userManager.CheckPasswordAsync(user, message.Password);
-
-            if (!passwordValid)
+            if (user == null) // Register user if not exists
             {
-                return Result.Fail(new LoginFailedError());
+                user = new ApplicationUser
+                {
+                    Email = payload.Email,
+                    UserName = payload.Email,
+                    RegistrationDate = DateTimeOffset.UtcNow
+                };
+
+                var createResult = await userManager.CreateAsync(user);
+                if (!createResult.Succeeded)
+                {
+                    return Result.Fail(new ValidationError(createResult));
+                }
             }
 
             var accessToken = await tokenService.CreateAccessToken(user);
@@ -90,8 +99,7 @@ public static class Login
     {
         public Validator()
         {
-            RuleFor(x => x.Email).NotEmpty().EmailAddress().WithMessage("Invalid email address");
-            RuleFor(x => x.Password).NotEmpty().WithMessage("Password is required");
+            RuleFor(x => x.GoogleToken).NotEmpty().WithMessage("GoogleToken is required");
         }
     }
 }

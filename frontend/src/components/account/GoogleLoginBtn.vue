@@ -20,15 +20,16 @@ const authStore = useAuthStore();
 const router = useRouter();
 
 async function login(response: { credential: string }) {
-  try {
-    loading.value = true;
-    await authStore.loginByGoogle(response.credential);
-    toast.success(t('auth.login.toasts.login_success'));
-    router.push('/');
-  } catch (error) {
+  loading.value = true;
+  const { data, error } = await authStore.loginByGoogle(response.credential);
+  loading.value = false;
+
+  if (error) {
     handleError(error, t('auth.login.toasts.login_failed'));
-  } finally {
-    loading.value = false;
+    return;
   }
+
+  toast.success(t('auth.login.toasts.login_success'));
+  router.push('/');
 }
 </script>

@@ -126,6 +126,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/google": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Login
+         * @description Login with Google
+         */
+        post: operations["LoginByGoogle"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/refresh": {
         parameters: {
             query?: never;
@@ -731,6 +751,13 @@ export interface components {
             password: string;
         };
         "Fei.Is.Api.Features.Auth.Commands.Login.Response": {
+            accessToken: string;
+            refreshToken: string;
+        };
+        "Fei.Is.Api.Features.Auth.Commands.LoginByGoogle.Request": {
+            googleToken: string;
+        };
+        "Fei.Is.Api.Features.Auth.Commands.LoginByGoogle.Response": {
             accessToken: string;
             refreshToken: string;
         };
@@ -1372,6 +1399,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Fei.Is.Api.Features.Auth.Commands.Login.Response"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+        };
+    };
+    LoginByGoogle: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.Auth.Commands.LoginByGoogle.Request"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.Auth.Commands.LoginByGoogle.Response"];
                 };
             };
             /** @description Bad Request */

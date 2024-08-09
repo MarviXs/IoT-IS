@@ -1,0 +1,8 @@
+name: iot-is-utils
+services:
+  redis-insight: # use host.docker.internal as host in redis-insight
+    image: redis/redisinsight:latest
+    restart: unless-stopped
+    network_mode: "bridge"
+    ports:
+      - "5540:5540"

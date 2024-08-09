@@ -85,8 +85,7 @@ public static class CreateDevice
     {
         public Validator()
         {
-            RuleFor(r => r.User).NotEmpty();
-            RuleFor(r => r.Request.Name).NotEmpty();
+            RuleFor(r => r.Request.Name).NotEmpty().WithMessage("Name is required");
         }
     }
 }

@@ -89,8 +89,8 @@ public static class UpdatePassword
     {
         public Validator()
         {
-            RuleFor(command => command.Request.OldPassword).NotEmpty();
-            RuleFor(command => command.Request.NewPassword).NotEmpty();
+            RuleFor(command => command.Request.OldPassword).NotEmpty().WithMessage("Current password is required");
+            RuleFor(command => command.Request.NewPassword).NotEmpty().WithMessage("New password is required");
         }
     }
 }

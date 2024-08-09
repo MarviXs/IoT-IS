@@ -173,8 +173,8 @@ public static class CreateJob
     {
         public Validator()
         {
-            RuleFor(x => x.Request.RecipeId).NotEmpty();
-            RuleFor(x => x.Request.Cycles).GreaterThan(0);
+            RuleFor(x => x.Request.RecipeId).NotEmpty().WithMessage("Recipe ID is required");
+            RuleFor(x => x.Request.Cycles).GreaterThan(0).WithMessage("Cycles must be greater than 0");
         }
     }
 }

@@ -100,9 +100,9 @@ public static class CreateSensor
     {
         public Validator()
         {
-            RuleFor(command => command.Request.Tag).NotEmpty().MaximumLength(50);
-            RuleFor(command => command.Request.Name).NotEmpty().MaximumLength(50);
-            RuleFor(command => command.Request.Unit).MaximumLength(50);
+            RuleFor(command => command.Request.Tag).NotEmpty().MaximumLength(50).WithMessage("Tag is required and must be at most 50 characters long");
+            RuleFor(command => command.Request.Name).NotEmpty().MaximumLength(50).WithMessage("Name is required and must be at most 50 characters long");
+            RuleFor(command => command.Request.Unit).MaximumLength(50).WithMessage("Unit must be at most 50 characters long");
         }
     }
 }

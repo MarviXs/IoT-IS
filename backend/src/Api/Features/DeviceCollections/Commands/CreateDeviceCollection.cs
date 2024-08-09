@@ -92,7 +92,7 @@ public static class CreateDeviceCollection
     {
         public Validator()
         {
-            RuleFor(command => command.Request.Name).NotEmpty();
+            RuleFor(command => command.Request.Name).NotEmpty().WithMessage("Name is required");
         }
     }
 }

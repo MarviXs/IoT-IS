@@ -8,6 +8,7 @@ import { Role } from '@/models/Role';
 import { useStoreRouter } from '@/composables/useStoreRouter';
 import { JwtPayload } from '@/models/Tokens';
 import { LoginRequest } from '@/api/types/Auth';
+import { toast } from 'vue3-toastify';
 
 export const useAuthStore = defineStore('authStore', () => {
   const router = useStoreRouter();
@@ -29,10 +30,15 @@ export const useAuthStore = defineStore('authStore', () => {
   }
 
   async function loginByGoogle(token: string) {
-    // clearJwt();
-    // const res = await AuthService.loginByGoogle(token);
-    // accessToken.value = res;
-    // refreshToken.value = res;
+    clearJwt();
+    const { data, error } = await AuthService.loginByGoogle(token);
+
+    if (data) {
+      accessToken.value = data.accessToken;
+      refreshToken.value = data.refreshToken;
+    }
+
+    return { data, error };
   }
 
   async function refreshAccessToken() {

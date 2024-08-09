@@ -91,7 +91,7 @@ public static class UpdateEmail
     {
         public Validator()
         {
-            RuleFor(command => command.Request.NewEmail).NotEmpty().EmailAddress();
+            RuleFor(command => command.Request.NewEmail).NotEmpty().EmailAddress().WithMessage("Invalid email address");
         }
     }
 }

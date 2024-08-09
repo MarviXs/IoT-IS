@@ -80,8 +80,8 @@ public static class CreateRecipe
     {
         public Validator()
         {
-            RuleFor(x => x.Request.Name).NotEmpty();
-            RuleFor(x => x.Request.DeviceTemplateId).NotEmpty();
+            RuleFor(x => x.Request.Name).NotEmpty().WithMessage("Name is required");
+            RuleFor(x => x.Request.DeviceTemplateId).NotEmpty().WithMessage("Device template ID is required");
         }
     }
 }

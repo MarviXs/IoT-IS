@@ -6,6 +6,10 @@ class AuthService {
     return await client.POST('/auth/login', { body });
   }
 
+  async loginByGoogle(token: string) {
+    return await client.POST('/auth/google', { body: { googleToken: token } });
+  }
+
   async refreshToken(refreshToken: string) {
     return await client.POST('/auth/refresh', { body: { refreshToken: refreshToken } });
   }

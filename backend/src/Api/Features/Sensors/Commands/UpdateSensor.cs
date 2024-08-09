@@ -99,9 +99,15 @@ public static class UpdateSensor
     {
         public Validator()
         {
-            RuleFor(command => command.SensorRequest.Tag).NotEmpty().MaximumLength(50);
-            RuleFor(command => command.SensorRequest.Name).NotEmpty().MaximumLength(50);
-            RuleFor(command => command.SensorRequest.Unit).MaximumLength(50);
+            RuleFor(command => command.SensorRequest.Tag)
+                .NotEmpty()
+                .MaximumLength(50)
+                .WithMessage("Tag is required and must be at most 50 characters long");
+            RuleFor(command => command.SensorRequest.Name)
+                .NotEmpty()
+                .MaximumLength(50)
+                .WithMessage("Name is required and must be at most 50 characters long");
+            RuleFor(command => command.SensorRequest.Unit).MaximumLength(50).WithMessage("Unit must be at most 50 characters long");
         }
     }
 }

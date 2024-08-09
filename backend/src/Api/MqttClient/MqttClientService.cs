@@ -26,9 +26,13 @@ public class MqttClientService : IHostedService
         var clientId = Guid.NewGuid().ToString();
 
         var connectionString = configuration.GetConnectionString("MqttConnection");
+
+        var username = configuration.GetSection("MqttConnection:Username").Value;
+        var password = configuration.GetSection("MqttConnection:Password").Value;
+
         var clientOptions = new MqttClientOptionsBuilder()
             .WithClientId("Backend-" + clientId)
-            .WithCredentials("backend", "YdA#zY+ti2V£N46Q0si0Id")
+            .WithCredentials(username, password)
             .WithTcpServer(connectionString)
             .WithProtocolVersion(MqttProtocolVersion.V500)
             .Build();
@@ -59,13 +63,12 @@ public class MqttClientService : IHostedService
                     var command = new ProcessDataPointMessage.Command(topicParts[1], args.ApplicationMessage.PayloadSegment);
                     await mediator.Send(command);
                 }
-            } 
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error processing MQTT message");
             }
         });
-        
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)

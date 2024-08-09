@@ -81,7 +81,7 @@ public static class UpdateCommand
     {
         public Validator()
         {
-            RuleFor(x => x.Request.Name).NotEmpty();
+            RuleFor(x => x.Request.Name).NotEmpty().WithMessage("Name is required");
         }
     }
 }

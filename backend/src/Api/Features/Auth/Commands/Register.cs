@@ -94,8 +94,8 @@ public static class Register
     {
         public Validator()
         {
-            RuleFor(x => x.Email).NotEmpty().EmailAddress();
-            RuleFor(x => x.Password).NotEmpty();
+            RuleFor(x => x.Email).NotEmpty().EmailAddress().WithMessage("Invalid email address");
+            RuleFor(x => x.Password).NotEmpty().WithMessage("Password is required");
         }
     }
 }
