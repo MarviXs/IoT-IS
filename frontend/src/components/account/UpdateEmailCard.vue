@@ -9,6 +9,7 @@
         :label="t('account.new_email')"
         type="email"
         :rules="mailRules"
+        lazy-rules
       ></q-input>
       <q-btn
         class="float-right q-mt-lg"

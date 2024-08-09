@@ -1,7 +1,6 @@
 using System.Security.Claims;
 using Carter;
 using Fei.Is.Api.Common.Errors;
-using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
 using FluentResults;
@@ -10,18 +9,18 @@ using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 
-namespace Fei.Is.Api.Features.UserManagement.Commands;
+namespace Fei.Is.Api.Features.AdminUserManagement.Commands;
 
-public static class UpdateUserRole
+public static class UpdateUserEmail
 {
-    public record Request(Role Role);
+    public record Request(string Email);
 
     public sealed class Endpoint : ICarterModule
     {
         public void AddRoutes(IEndpointRouteBuilder app)
         {
             app.MapPut(
-                    "admin/users/{id:guid}/role",
+                    "admin/users/{id:guid}/email",
                     async Task<Results<Ok, NotFound, ValidationProblem, ForbidHttpResult>> (
                         IMediator mediator,
                         ClaimsPrincipal user,
@@ -50,11 +49,11 @@ public static class UpdateUserRole
                     }
                 )
                 .RequireAuthorization("Admin")
-                .WithName(nameof(UpdateUserRole))
+                .WithName(nameof(UpdateUserEmail))
                 .WithTags(nameof(ApplicationUser))
                 .WithOpenApi(o =>
                 {
-                    o.Summary = "Update user role";
+                    o.Summary = "Update user email";
                     return o;
                 });
         }
@@ -78,12 +77,13 @@ public static class UpdateUserRole
                 return Result.Fail(new NotFoundError());
             }
 
-            var roles = await userManager.GetRolesAsync(user);
-            await userManager.RemoveFromRolesAsync(user, roles);
+            user.Email = message.Request.Email;
 
-            if (message.Request.Role != Role.User)
+            var resultUpdate = await userManager.UpdateAsync(user);
+
+            if (!resultUpdate.Succeeded)
             {
-                await userManager.AddToRoleAsync(user, message.Request.Role.ToString());
+                return Result.Fail(new ValidationError(resultUpdate));
             }
 
             return Result.Ok();
@@ -94,7 +94,7 @@ public static class UpdateUserRole
     {
         public Validator()
         {
-            RuleFor(command => command.Request.Role).IsInEnum();
+            RuleFor(command => command.Request.Email).EmailAddress();
         }
     }
 }

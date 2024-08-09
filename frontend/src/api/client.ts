@@ -53,12 +53,8 @@ const client = createClient<paths>({
         const authStore = useAuthStore();
 
         if (authStore.refreshToken) {
-          const res = await client.POST('/auth/refresh', {
-            body: { refreshToken: authStore.refreshToken },
-          });
-
-          if (res.data && res.data.accessToken) {
-            authStore.accessToken = res.data.accessToken;
+          const accessToken = await authStore.refreshAccessToken();
+          if (accessToken) {
             const retriedHeaders = new Headers(request.headers);
             retriedHeaders.set('Authorization', `Bearer ${authStore.accessToken}`);
             const retriedRequest = new Request(request, {

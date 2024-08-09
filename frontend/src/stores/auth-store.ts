@@ -35,6 +35,15 @@ export const useAuthStore = defineStore('authStore', () => {
     // refreshToken.value = res;
   }
 
+  async function refreshAccessToken() {
+    const res = await AuthService.refreshToken(refreshToken.value);
+    if (res.data) {
+      accessToken.value = res.data.accessToken;
+      return res.data.accessToken;
+    }
+    return null;
+  }
+
   function clearJwt() {
     accessToken.value = '';
     refreshToken.value = '';
@@ -89,5 +98,6 @@ export const useAuthStore = defineStore('authStore', () => {
     isAdmin,
     clearJwt,
     loginByGoogle,
+    refreshAccessToken,
   };
 });

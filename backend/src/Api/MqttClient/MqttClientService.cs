@@ -23,9 +23,11 @@ public class MqttClientService : IHostedService
         var factory = new MqttFactory();
         _mqttClient = factory.CreateManagedMqttClient();
 
+        var clientId = Guid.NewGuid().ToString();
+
         var connectionString = configuration.GetConnectionString("MqttConnection");
         var clientOptions = new MqttClientOptionsBuilder()
-            .WithClientId("Backend")
+            .WithClientId("Backend-" + clientId)
             .WithCredentials("backend", "YdA#zY+ti2V£N46Q0si0Id")
             .WithTcpServer(connectionString)
             .WithProtocolVersion(MqttProtocolVersion.V500)
@@ -42,8 +44,6 @@ public class MqttClientService : IHostedService
 
     public async Task ProcessMessageAsync(MqttApplicationMessageReceivedEventArgs args)
     {
-        args.AutoAcknowledge = false;
-
         _ = Task.Run(async () =>
         {
             try

@@ -1,7 +1,6 @@
 using System.Security.Claims;
 using Carter;
 using Fei.Is.Api.Common.Errors;
-using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
 using FluentResults;
@@ -10,7 +9,7 @@ using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 
-namespace Fei.Is.Api.Features.UserManagement.Commands;
+namespace Fei.Is.Api.Features.AdminUserManagement.Commands;
 
 public static class UpdateUserPassword
 {

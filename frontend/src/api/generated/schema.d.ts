@@ -166,6 +166,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/email": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Update user e-mail */
+        put: operations["UpdateEmail"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Update user password */
+        put: operations["UpdatePassword"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/commands/{id}": {
         parameters: {
             query?: never;
@@ -673,6 +707,15 @@ export interface components {
         "Fei.Is.Api.Data.Enums.JobStatusEnum": "JOB_FREE" | "JOB_IDLE" | "JOB_PENDING" | "JOB_PROCESSING" | "JOB_DONE" | "JOB_ERR" | "JOB_PAUSED" | "JOB_CANCELED" | "JOB_STATUS_MAX";
         /** @enum {string} */
         "Fei.Is.Api.Data.Enums.Role": "Admin" | "User";
+        "Fei.Is.Api.Features.AdminUserManagement.Commands.UpdateUserEmail.Request": {
+            email: string;
+        };
+        "Fei.Is.Api.Features.AdminUserManagement.Commands.UpdateUserPassword.Request": {
+            password: string;
+        };
+        "Fei.Is.Api.Features.AdminUserManagement.Commands.UpdateUserRole.Request": {
+            role: components["schemas"]["Fei.Is.Api.Data.Enums.Role"];
+        };
         "Fei.Is.Api.Features.Auth.Commands.AuthDevice.Endpoint.Request": {
             accessToken: string;
         };
@@ -700,6 +743,13 @@ export interface components {
         "Fei.Is.Api.Features.Auth.Commands.Register.Endpoint.Request": {
             email: string;
             password: string;
+        };
+        "Fei.Is.Api.Features.Auth.Commands.UpdateEmail.Request": {
+            newEmail: string;
+        };
+        "Fei.Is.Api.Features.Auth.Commands.UpdatePassword.Request": {
+            oldPassword: string;
+            newPassword: string;
         };
         "Fei.Is.Api.Features.Commands.Commands.CreateCommand.Request": {
             displayName: string;
@@ -1043,15 +1093,6 @@ export interface components {
             /** Format: int32 */
             accuracyDecimals?: number | null;
         };
-        "Fei.Is.Api.Features.UserManagement.Commands.UpdateUserEmail.Request": {
-            email: string;
-        };
-        "Fei.Is.Api.Features.UserManagement.Commands.UpdateUserPassword.Request": {
-            password: string;
-        };
-        "Fei.Is.Api.Features.UserManagement.Commands.UpdateUserRole.Request": {
-            role: components["schemas"]["Fei.Is.Api.Data.Enums.Role"];
-        };
         "Fei.Is.Api.Features.UserManagement.Queries.GetUserById.Response": {
             /** Format: uuid */
             id: string;
@@ -1171,7 +1212,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["Fei.Is.Api.Features.UserManagement.Commands.UpdateUserEmail.Request"];
+                "application/json": components["schemas"]["Fei.Is.Api.Features.AdminUserManagement.Commands.UpdateUserEmail.Request"];
             };
         };
         responses: {
@@ -1211,7 +1252,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["Fei.Is.Api.Features.UserManagement.Commands.UpdateUserPassword.Request"];
+                "application/json": components["schemas"]["Fei.Is.Api.Features.AdminUserManagement.Commands.UpdateUserPassword.Request"];
             };
         };
         responses: {
@@ -1251,7 +1292,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["Fei.Is.Api.Features.UserManagement.Commands.UpdateUserRole.Request"];
+                "application/json": components["schemas"]["Fei.Is.Api.Features.AdminUserManagement.Commands.UpdateUserRole.Request"];
             };
         };
         responses: {
@@ -1408,6 +1449,82 @@ export interface operations {
             };
             /** @description Conflict */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UpdateEmail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.Auth.Commands.UpdateEmail.Request"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UpdatePassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.Auth.Commands.UpdatePassword.Request"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

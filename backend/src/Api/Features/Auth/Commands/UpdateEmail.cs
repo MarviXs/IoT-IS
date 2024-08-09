@@ -1,7 +1,6 @@
 using System.Security.Claims;
 using Carter;
 using Fei.Is.Api.Common.Errors;
-using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
 using FluentResults;
@@ -10,26 +9,25 @@ using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 
-namespace Fei.Is.Api.Features.UserManagement.Commands;
+namespace Fei.Is.Api.Features.Auth.Commands;
 
-public static class UpdateUserEmail
+public static class UpdateEmail
 {
-    public record Request(string Email);
+    public record Request(string NewEmail);
 
     public sealed class Endpoint : ICarterModule
     {
         public void AddRoutes(IEndpointRouteBuilder app)
         {
             app.MapPut(
-                    "admin/users/{id:guid}/email",
+                    "auth/email",
                     async Task<Results<Ok, NotFound, ValidationProblem, ForbidHttpResult>> (
                         IMediator mediator,
                         ClaimsPrincipal user,
-                        Request request,
-                        Guid id
+                        Request request
                     ) =>
                     {
-                        var command = new Command(request, id);
+                        var command = new Command(request, user);
 
                         var result = await mediator.Send(command);
 
@@ -49,18 +47,17 @@ public static class UpdateUserEmail
                         return TypedResults.Ok();
                     }
                 )
-                .RequireAuthorization("Admin")
-                .WithName(nameof(UpdateUserEmail))
-                .WithTags(nameof(ApplicationUser))
+                .WithName(nameof(UpdateEmail))
+                .WithTags(nameof(Auth))
                 .WithOpenApi(o =>
                 {
-                    o.Summary = "Update user email";
+                    o.Summary = "Update user e-mail";
                     return o;
                 });
         }
     }
 
-    public record Command(Request Request, Guid UserId) : IRequest<Result>;
+    public record Command(Request Request, ClaimsPrincipal User) : IRequest<Result>;
 
     public class Handler(UserManager<ApplicationUser> userManager, IValidator<Command> validator) : IRequestHandler<Command, Result>
     {
@@ -72,20 +69,19 @@ public static class UpdateUserEmail
                 return Result.Fail(new ValidationError(result));
             }
 
-            var user = await userManager.FindByIdAsync(message.UserId.ToString());
+            var user = await userManager.FindByIdAsync(message.User.GetUserId().ToString());
             if (user == null)
             {
                 return Result.Fail(new NotFoundError());
             }
 
-            user.Email = message.Request.Email;
-
-            var resultUpdate = await userManager.UpdateAsync(user);
-
-            if (!resultUpdate.Succeeded)
+            user.Email = message.Request.NewEmail;
+            var identityResult = await userManager.UpdateAsync(user);
+            if (!identityResult.Succeeded)
             {
-                return Result.Fail(new ValidationError(resultUpdate));
+                return Result.Fail(new ValidationError(identityResult));
             }
+
 
             return Result.Ok();
         }
@@ -95,7 +91,7 @@ public static class UpdateUserEmail
     {
         public Validator()
         {
-            RuleFor(command => command.Request.Email).EmailAddress();
+            RuleFor(command => command.Request.NewEmail).NotEmpty().EmailAddress();
         }
     }
 }
