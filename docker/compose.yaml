@@ -24,6 +24,7 @@ services:
       - MqttSettings__Host=${EMQX_HOST}
       - MqttSettings__Username=${EMQX_USERNAME}
       - MqttSettings__Password=${EMQX_PASSWORD}
+      - RedisSettings__Password=${REDIS_PASSWORD}
     ports:
       - 5097:5097
       - 5096:5096
@@ -69,6 +70,7 @@ services:
       ]
   emqx:
     image: emqx/emqx:5.7.2
+    network_mode: "bridge"
     restart: unless-stopped
     ports:
       - "1883:1883" # MQTT
@@ -86,11 +88,6 @@ services:
     command: [ "redis-server", "--requirepass", "${REDIS_PASSWORD}" ]
     ports:
       - "6379:6379"
-  redis-insight:
-    image: redis/redisinsight:latest
-    restart: unless-stopped
-    ports:
-      - "5540:5540"
 volumes:
   pgdata:
   timescaledb_data:

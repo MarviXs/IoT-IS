@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Fei.Is.Api.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Fei.Is.Api.Data.Migrations.AppDb
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240825184859_RootCollection")]
+    partial class RootCollection
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -176,36 +179,6 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.HasIndex("SubCollectionId");
 
                     b.ToTable("CollectionItems");
-                });
-
-            modelBuilder.Entity("Fei.Is.Api.Data.Models.CollectionShare", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("CollectionId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("Permission")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CollectionId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("CollectionShare");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.Command", b =>
@@ -699,25 +672,6 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.Navigation("SubCollection");
                 });
 
-            modelBuilder.Entity("Fei.Is.Api.Data.Models.CollectionShare", b =>
-                {
-                    b.HasOne("Fei.Is.Api.Data.Models.DeviceCollection", "Collection")
-                        .WithMany("CollectionShares")
-                        .HasForeignKey("CollectionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Fei.Is.Api.Data.Models.ApplicationUser", "User")
-                        .WithMany("CollectionShares")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Collection");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Fei.Is.Api.Data.Models.Command", b =>
                 {
                     b.HasOne("Fei.Is.Api.Data.Models.DeviceTemplate", "DeviceTemplate")
@@ -900,8 +854,6 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.ApplicationUser", b =>
                 {
-                    b.Navigation("CollectionShares");
-
                     b.Navigation("DeviceTemplates");
 
                     b.Navigation("Devices");
@@ -926,8 +878,6 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.Navigation("AllCollectionsFlat");
 
                     b.Navigation("ChildItems");
-
-                    b.Navigation("CollectionShares");
 
                     b.Navigation("ParentItems");
                 });

@@ -75,6 +75,7 @@ public static class UpdateDevice
             {
                 return Result.Fail(new NotFoundError());
             }
+            
             if (device.OwnerId != message.User.GetUserId())
             {
                 return Result.Fail(new ForbiddenError());

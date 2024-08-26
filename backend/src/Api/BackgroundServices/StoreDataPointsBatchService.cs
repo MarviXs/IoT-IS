@@ -1,3 +1,4 @@
+using EFCore.BulkExtensions;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Redis;
@@ -5,8 +6,7 @@ using StackExchange.Redis;
 
 namespace Fei.Is.Api.BackgroundServices;
 
-public class StoreDataPointsBatchService(RedisService redis, TimeScaleDbContext timescale, ILogger<StoreDataPointsBatchService> logger)
-    : BackgroundService
+public class StoreDataPointsBatchService(IServiceProvider serviceProvider, ILogger<StoreDataPointsBatchService> logger) : BackgroundService
 {
     private const string StreamName = "datapoints";
     private const string GroupName = "store_data";
@@ -23,6 +23,10 @@ public class StoreDataPointsBatchService(RedisService redis, TimeScaleDbContext 
         {
             try
             {
+                using var scope = serviceProvider.CreateScope();
+                var timescale = scope.ServiceProvider.GetRequiredService<TimeScaleDbContext>();
+                var redis = scope.ServiceProvider.GetRequiredService<RedisService>();
+
                 // Create consumer group if it doesn't exist
                 if (!await redis.Db.KeyExistsAsync(StreamName) || (await redis.Db.StreamGroupInfoAsync(StreamName)).All(x => x.Name != GroupName))
                 {
@@ -62,7 +66,8 @@ public class StoreDataPointsBatchService(RedisService redis, TimeScaleDbContext 
 
                     if (dataPoints.Count != 0)
                     {
-                        await timescale.DataPoints.BulkInsertAsync(dataPoints);
+
+                        await timescale.BulkInsertAsync(dataPoints, cancellationToken: stoppingToken);
                         var messageIds = messages.Select(m => m.Id).ToArray();
                         await redis.Db.StreamAcknowledgeAsync(StreamName, GroupName, messageIds);
                     }

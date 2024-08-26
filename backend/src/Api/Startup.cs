@@ -1,8 +1,10 @@
 using System.Text.Json.Serialization;
 using Carter;
+using Fei.Is.Api.BackgroundServices;
 using Fei.Is.Api.Common.OpenAPI;
 using Fei.Is.Api.Extensions;
 using Fei.Is.Api.Features.Auth;
+using Fei.Is.Api.MqttClient;
 using Fei.Is.Api.Redis;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
@@ -51,7 +53,8 @@ public class Startup(IConfiguration configuration)
         // Add services
         services.AddScoped<TokenService>();
         services.AddSingleton<RedisService>();
-        // services.AddHostedService<MqttClientService>();
+        services.AddHostedService<MqttClientService>();
+        services.AddHostedService<StoreDataPointsBatchService>();
 
         // Add validators
         services.AddValidatorsFromAssemblyContaining<Startup>(ServiceLifetime.Scoped);

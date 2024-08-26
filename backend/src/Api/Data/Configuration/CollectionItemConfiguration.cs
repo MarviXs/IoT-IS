@@ -10,7 +10,7 @@ public class CollectionItemConfiguration : IEntityTypeConfiguration<CollectionIt
     {
         builder
             .HasOne(collectionItem => collectionItem.CollectionParent)
-            .WithMany(deviceCollection => deviceCollection.Items)
+            .WithMany(deviceCollection => deviceCollection.ChildItems)
             .HasForeignKey(collectionItem => collectionItem.CollectionParentId)
             .OnDelete(DeleteBehavior.Cascade);
 
@@ -22,7 +22,7 @@ public class CollectionItemConfiguration : IEntityTypeConfiguration<CollectionIt
 
         builder
             .HasOne(collectionItem => collectionItem.SubCollection)
-            .WithMany(deviceCollection => deviceCollection.SubItems)
+            .WithMany(deviceCollection => deviceCollection.ParentItems)
             .HasForeignKey(collectionItem => collectionItem.SubCollectionId)
             .OnDelete(DeleteBehavior.SetNull);
     }

@@ -37,7 +37,6 @@
 <script setup lang="ts">
 import DevicesTable from '@/components/devices/DevicesTable.vue';
 import { useI18n } from 'vue-i18n';
-import { useAuthStore } from '@/stores/auth-store';
 import { mdiPlus } from '@quasar/extras/mdi-v7';
 import PageLayout from '@/layouts/PageLayout.vue';
 import { ref } from 'vue';
@@ -51,7 +50,6 @@ import { DevicesQueryParams, DevicesResponse } from '@/api/types/Device';
 import CreateDeviceDialog from '@/components/devices/CreateDeviceDialog.vue';
 
 const { t } = useI18n();
-const authStore = useAuthStore();
 const filter = ref('');
 
 // Setup for automatic refresh

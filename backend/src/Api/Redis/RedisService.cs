@@ -12,7 +12,12 @@ public class RedisService : IDisposable
     {
         _connectionString = Configuration.GetConnectionString("RedisConnection")!;
 
-        var config = new ConfigurationOptions { AbortOnConnectFail = false, EndPoints = { _connectionString } };
+        var config = new ConfigurationOptions
+        {
+            AbortOnConnectFail = false,
+            EndPoints = { _connectionString },
+            Password = Configuration.GetSection("RedisSettings:Password").Value
+        };
 
         var conn = new Lazy<IConnectionMultiplexer>(() => ConnectionMultiplexer.Connect(config));
         Connection = conn.Value;

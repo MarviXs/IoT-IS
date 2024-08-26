@@ -57,13 +57,17 @@ public static class CreateDeviceCollection
                 return Result.Fail(new ValidationError(result));
             }
 
+            var collectionId = Guid.NewGuid();
             var deviceCollection = new DeviceCollection
             {
+                Id = collectionId,
                 Name = message.Request.Name,
                 OwnerId = message.User.GetUserId(),
+                RootCollectionId = collectionId,
                 IsRoot = true
             };
 
+            // Create a sub-collection
             if (message.Request.CollectionParentId.HasValue)
             {
                 deviceCollection.IsRoot = false;
@@ -76,7 +80,8 @@ public static class CreateDeviceCollection
                     return Result.Fail(new NotFoundError());
                 }
 
-                deviceCollection.SubItems.Add(new CollectionItem { CollectionParent = parentCollection });
+                deviceCollection.RootCollectionId = parentCollection.RootCollectionId;
+                deviceCollection.ParentItems.Add(new CollectionItem { CollectionParent = parentCollection });
             }
 
             await context.DeviceCollections.AddAsync(deviceCollection, cancellationToken);

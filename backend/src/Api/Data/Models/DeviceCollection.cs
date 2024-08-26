@@ -6,6 +6,12 @@ public class DeviceCollection : BaseModel
     public ApplicationUser? Owner { get; set; } = null!;
     public required string Name { get; set; }
     public bool IsRoot { get; set; } = true;
-    public ICollection<CollectionItem> Items { get; set; } = [];
-    public ICollection<CollectionItem> SubItems { get; set; } = [];
+
+    public Guid RootCollectionId { get; set; } = Guid.Empty!;
+    public DeviceCollection? RootCollection { get; set; } = null!;
+    public ICollection<CollectionItem> AllCollectionsFlat { get; set; } = [];
+
+    public ICollection<CollectionItem> ChildItems { get; set; } = [];
+    public ICollection<CollectionItem> ParentItems { get; set; } = [];
+    public ICollection<CollectionShare> CollectionShares { get; set; } = [];
 }

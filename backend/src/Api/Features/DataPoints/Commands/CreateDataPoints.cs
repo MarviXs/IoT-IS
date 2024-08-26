@@ -1,4 +1,5 @@
 using Carter;
+using EFCore.BulkExtensions;
 using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models;
@@ -78,7 +79,7 @@ public static class CreateDataPoints
                     }
             );
 
-            await timescaleContext.BulkInsertAsync(dataPoints, cancellationToken);
+            await timescaleContext.BulkInsertAsync(dataPoints, cancellationToken: cancellationToken);
 
             return Result.Ok();
         }

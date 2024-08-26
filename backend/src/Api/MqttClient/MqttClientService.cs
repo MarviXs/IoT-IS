@@ -25,10 +25,10 @@ public class MqttClientService : IHostedService
 
         var clientId = Guid.NewGuid().ToString();
 
-        var connectionString = configuration.GetConnectionString("MqttConnection");
+        var connectionString = configuration.GetSection("MqttSettings:Host").Value;
 
-        var username = configuration.GetSection("MqttConnection:Username").Value;
-        var password = configuration.GetSection("MqttConnection:Password").Value;
+        var username = configuration.GetSection("MqttSettings:Username").Value;
+        var password = configuration.GetSection("MqttSettings:Password").Value;
 
         var clientOptions = new MqttClientOptionsBuilder()
             .WithClientId("Backend-" + clientId)
@@ -60,6 +60,7 @@ public class MqttClientService : IHostedService
 
                 if (MqttTopicFilterComparer.Compare(topic, "devices/+/data") == MqttTopicFilterCompareResult.IsMatch)
                 {
+                    _logger.LogInformation("Processing data point message");
                     var command = new ProcessDataPointMessage.Command(topicParts[1], args.ApplicationMessage.PayloadSegment);
                     await mediator.Send(command);
                 }

@@ -67,9 +67,9 @@ public static class GetDeviceCollectionById
             var deviceCollection = await context
                 .DeviceCollections.AsNoTracking()
                 .Where(c => c.Id == message.CollectionId)
-                .Include(c => c.Items)
+                .Include(c => c.ChildItems)
                 .ThenInclude(i => i.Device)
-                .Include(c => c.Items)
+                .Include(c => c.ChildItems)
                 .ThenInclude(i => i.SubCollection)
                 .FirstOrDefaultAsync(cancellationToken);
 
@@ -78,7 +78,7 @@ public static class GetDeviceCollectionById
                 return Result.Fail(new NotFoundError());
             }
 
-            var subItems = await LoadSubItemsRecursive(deviceCollection.Items, 0, queryParameters.MaxDepth ?? 10, cancellationToken);
+            var subItems = await LoadSubItemsRecursive(deviceCollection.ChildItems, 0, queryParameters.MaxDepth ?? 10, cancellationToken);
             var response = new Response(deviceCollection.Id, deviceCollection.Name, subItems);
 
             return Result.Ok(response);
@@ -105,15 +105,15 @@ public static class GetDeviceCollectionById
                 {
                     // Load the sub-collection items from the context
                     var subCollection = await context
-                        .DeviceCollections.Include(c => c.Items)
+                        .DeviceCollections.Include(c => c.ChildItems)
                         .ThenInclude(i => i.Device)
-                        .Include(c => c.Items)
+                        .Include(c => c.ChildItems)
                         .ThenInclude(i => i.SubCollection)
                         .FirstOrDefaultAsync(c => c.Id == item.SubCollectionId, cancellationToken);
 
                     if (subCollection != null)
                     {
-                        var subItems = await LoadSubItemsRecursive(subCollection.Items, currentDepth + 1, maxDepth, cancellationToken);
+                        var subItems = await LoadSubItemsRecursive(subCollection.ChildItems, currentDepth + 1, maxDepth, cancellationToken);
                         subItemResponses.Add(new SubItemResponse(subCollection.Id, subCollection.Name, subItems, SubItemTypes.SubCollection));
                     }
                 }
