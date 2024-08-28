@@ -14,7 +14,7 @@ public static class JobExtensions
             return 0;
         }
 
-        if (job?.Status == JobStatusEnum.JOB_DONE)
+        if (job?.Status == JobStatusEnum.SUCCEEDED)
         {
             return 100;
         }

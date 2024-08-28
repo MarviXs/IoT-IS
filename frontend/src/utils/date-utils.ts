@@ -2,13 +2,8 @@ import { format, formatDistanceToNowStrict } from 'date-fns';
 import { enUS, sk } from 'date-fns/locale';
 import { useI18n } from 'vue-i18n';
 
-const formatToLocalTime = (val: number) => {
-  if (!val) return '';
-  return format(val, 'dd/MM/yyyy HH:mm:ss');
-};
-
-const formatTimeToDistance = (val: number) => {
-  if (!val) return '';
+const formatTimeToDistance = (time: string) => {
+  if (!time) return '';
   let locale;
   const i18n = useI18n();
   const localeCode = i18n.locale.value;
@@ -19,7 +14,7 @@ const formatTimeToDistance = (val: number) => {
     locale = enUS;
   }
 
-  return formatDistanceToNowStrict(val, { addSuffix: true, locale });
+  return formatDistanceToNowStrict(time, { addSuffix: true, locale });
 };
 
-export { formatToLocalTime, formatTimeToDistance };
+export { formatTimeToDistance };

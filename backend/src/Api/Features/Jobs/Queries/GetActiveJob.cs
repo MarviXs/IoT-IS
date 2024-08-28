@@ -70,13 +70,7 @@ public static class GetActiveJob
                 .Jobs.AsNoTracking()
                 .Where(j => j.DeviceId == request.DeviceId)
                 .Include(j => j.Commands.OrderBy(c => c.Order))
-                .Where(j =>
-                    j.Status == JobStatusEnum.JOB_PROCESSING
-                    || j.Status == JobStatusEnum.JOB_IDLE
-                    || j.Status == JobStatusEnum.JOB_PENDING
-                    || j.Status == JobStatusEnum.JOB_PAUSED
-                    || j.Status == JobStatusEnum.JOB_CANCELED
-                )
+                .Where(j => j.Status == JobStatusEnum.QUEUED || j.Status == JobStatusEnum.IN_PROGRESS || j.Status == JobStatusEnum.PAUSED)
                 .FirstOrDefaultAsync(cancellationToken);
 
             if (activeJob == null)

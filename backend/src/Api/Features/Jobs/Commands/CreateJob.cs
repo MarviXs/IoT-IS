@@ -5,6 +5,7 @@ using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
+using Fei.Is.Api.Features.Jobs.EventHandlers;
 using FluentResults;
 using FluentValidation;
 using MediatR;
@@ -97,7 +98,7 @@ public static class CreateJob
                 CurrentStep = 1,
                 CurrentCycle = 1,
                 TotalCycles = message.Request.Cycles,
-                Status = JobStatusEnum.JOB_PENDING
+                Status = JobStatusEnum.QUEUED
             };
             await context.Jobs.AddAsync(job, cancellationToken);
             await context.SaveChangesAsync(cancellationToken);
@@ -114,6 +115,7 @@ public static class CreateJob
                 commands[i].Order = i;
             }
             job.TotalSteps = commands.Count;
+            job.AddDomainEvent(new JobCreatedEvent(job));
 
             await context.JobCommands.AddRangeAsync(commands, cancellationToken);
             await context.SaveChangesAsync(cancellationToken);
@@ -121,7 +123,13 @@ public static class CreateJob
             return Result.Ok(job.Id);
         }
 
-        private async Task<List<JobCommand>> UnpackRecipeStep(RecipeStep step, Guid jobId, int currentDepth, int maxDepth, CancellationToken cancellationToken)
+        private async Task<List<JobCommand>> UnpackRecipeStep(
+            RecipeStep step,
+            Guid jobId,
+            int currentDepth,
+            int maxDepth,
+            CancellationToken cancellationToken
+        )
         {
             var commands = new List<JobCommand>();
 

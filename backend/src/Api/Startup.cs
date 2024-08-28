@@ -53,7 +53,10 @@ public class Startup(IConfiguration configuration)
         // Add services
         services.AddScoped<TokenService>();
         services.AddSingleton<RedisService>();
-        services.AddHostedService<MqttClientService>();
+
+        services.AddSingleton<MqttClientService>();
+        services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<MqttClientService>());
+
         services.AddHostedService<StoreDataPointsBatchService>();
 
         // Add validators

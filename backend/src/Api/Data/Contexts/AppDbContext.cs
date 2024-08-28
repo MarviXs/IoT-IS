@@ -1,5 +1,7 @@
 ﻿using Fei.Is.Api.Data.Configuration;
 using Fei.Is.Api.Data.Models;
+using Fei.Is.Api.Extensions;
+using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -18,8 +20,13 @@ public class AppDbContext
         IdentityUserToken<Guid>
     >
 {
-    public AppDbContext(DbContextOptions<AppDbContext> options)
-        : base(options) { }
+    private readonly IMediator _mediator;
+
+    public AppDbContext(DbContextOptions<AppDbContext> options, IMediator mediator)
+        : base(options)
+    {
+        _mediator = mediator;
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -58,10 +65,11 @@ public class AppDbContext
         return base.SaveChanges(acceptAllChangesOnSuccess);
     }
 
-    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         UpdateTimestamps();
-        return base.SaveChangesAsync(cancellationToken);
+        await _mediator.DispatchDomainEventsAsync(this);
+        return await base.SaveChangesAsync(cancellationToken);
     }
 
     public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)

@@ -57,6 +57,9 @@ public static class ProcessDataPointMessage
                 await redis.Db.StringSetAsync(redisKey, deviceId, TimeSpan.FromHours(1));
             }
 
+            redis.Db.StringSet($"device:{deviceId}:connected", "1", TimeSpan.FromMinutes(30));
+            redis.Db.StringSet($"device:{deviceId}:lastSeen", DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString());
+
             // For testing
             // var base64Decoded = Convert.FromBase64String(Encoding.UTF8.GetString(message.Payload));
             // var datapoint = Serializer.Deserialize<DataPoint>(base64Decoded.AsMemory());

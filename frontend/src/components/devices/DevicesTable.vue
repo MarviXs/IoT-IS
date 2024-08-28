@@ -30,18 +30,18 @@
 
       <template #body-cell-lastResponse="propsContact">
         <q-td auto-width :props="propsContact">
-          {{ formatTimeToDistance(propsContact.row.lastResponse) }}
-          <q-tooltip v-if="propsContact.row.lastResponse" content-style="font-size: 11px" :offset="[0, 4]">
-            {{ formatToLocalTime(propsContact.row.lastResponse) }}
+          {{ formatTimeToDistance(propsContact.row.lastSeen) }}
+          <q-tooltip v-if="propsContact.row.lastSeen" content-style="font-size: 11px" :offset="[0, 4]">
+            {{ new Date(propsContact.row.lastSeen).toLocaleString() }}
           </q-tooltip>
         </q-td>
       </template>
 
-      <!-- <template #body-cell-status="propsStatus">
+      <template #body-cell-status="propsStatus">
         <q-td auto-width :props="propsStatus">
-          <StatusDot :status="getDeviceStatus(propsStatus.row)" />
+          <StatusDot :connected="propsStatus.row.connected" />
         </q-td>
-      </template> -->
+      </template>
 
       <template #body-cell-jobstatus="jobProps">
         <q-td auto-width :props="jobProps">
@@ -52,6 +52,11 @@
 
       <template #body-cell-actions="propsActions">
         <q-td auto-width :props="propsActions">
+          <q-btn :icon="mdiChartLine" color="grey-color" flat round :to="`/devices/${propsActions.row.id}`"
+            ><q-tooltip content-style="font-size: 11px" :offset="[0, 4]">
+              {{ t('global.open') }}
+            </q-tooltip>
+          </q-btn>
           <q-btn :icon="mdiPencil" color="grey-color" flat round @click.stop="openUpdateDialog(propsActions.row.id)"
             ><q-tooltip content-style="font-size: 11px" :offset="[0, 4]">
               {{ t('global.edit') }}
@@ -111,17 +116,20 @@ import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth-store';
 import {
   mdiCellphoneLink,
+  mdiChartLine,
   mdiDotsVertical,
+  mdiEye,
   mdiOpenInNew,
   mdiPencil,
   mdiTrashCan,
   mdiTrashCanOutline,
 } from '@quasar/extras/mdi-v7';
 import DeleteDeviceDialog from '@/components/devices/DeleteDeviceDialog.vue';
-import { formatTimeToDistance, formatToLocalTime } from '@/utils/date-utils';
+import { formatTimeToDistance } from '@/utils/date-utils';
 import { PaginationClient } from '@/models/Pagination';
 import { DevicesResponse } from '@/api/types/Device';
 import EditDeviceDialog from '@/components/devices/EditDeviceDialog.vue';
+import StatusDot from './StatusDot.vue';
 
 const props = defineProps({
   devices: {
@@ -170,37 +178,26 @@ const shareDialog = ref(false);
 
 const columns = computed<QTableProps['columns']>(() => [
   {
+    name: 'status',
+    label: t('device.status'),
+    field: 'connected',
+    align: 'center',
+    sortable: false,
+  },
+  {
     name: 'name',
     label: t('global.name'),
     field: 'name',
     sortable: true,
     align: 'left',
   },
-  // {
-  //   name: 'permissions',
-  //   label: t('global.permissions'),
-  //   field(row) {
-  //     return getPermissions(row);
-  //   },
-  //   sortable: false,
-  //   align: 'left',
-  // },
-  // {
-  //   name: 'lastResponse',
-  //   label: t('device.last_activity'),
-  //   field: 'lastResponse',
-  //   align: 'left',
-  //   sortable: true,
-  // },
-  // {
-  //   name: 'status',
-  //   label: t('device.status'),
-  //   field(row) {
-  //     return getDeviceStatus(row);
-  //   },
-  //   align: 'center',
-  //   sortable: false,
-  // },
+  {
+    name: 'lastResponse',
+    label: t('device.last_activity'),
+    field: 'lastSeen',
+    align: 'left',
+    sortable: false,
+  },
   // {
   //   name: 'jobstatus',
   //   label: t('job.job_status'),

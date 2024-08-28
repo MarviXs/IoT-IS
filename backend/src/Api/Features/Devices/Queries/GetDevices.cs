@@ -6,9 +6,11 @@ using Fei.Is.Api.Common.Utils;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
+using Fei.Is.Api.Redis;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using StackExchange.Redis;
 
 namespace Fei.Is.Api.Features.Devices.Queries;
 
@@ -41,7 +43,7 @@ public static class GetDevices
 
     public record Query(ClaimsPrincipal User, QueryParameters Parameters) : IRequest<PagedList<Response>>;
 
-    public sealed class Handler(AppDbContext context) : IRequestHandler<Query, PagedList<Response>>
+    public sealed class Handler(AppDbContext context, RedisService redis) : IRequestHandler<Query, PagedList<Response>>
     {
         public async Task<PagedList<Response>> Handle(Query message, CancellationToken cancellationToken)
         {
@@ -55,14 +57,40 @@ public static class GetDevices
 
             var totalCount = await query.CountAsync(cancellationToken);
 
-            var devices = await query
-                .Paginate(deviceParameters)
-                .Select(device => new Response(device.Id, device.Name))
-                .ToListAsync(cancellationToken);
+            var devices = await query.Paginate(deviceParameters).ToListAsync(cancellationToken);
 
-            return devices.ToPagedList(totalCount, deviceParameters.PageNumber, deviceParameters.PageSize);
+            // Prepare Redis keys for MGet
+            var deviceIds = devices.Select(d => d.Id).ToList();
+            var onlineKeys = deviceIds.Select(id => (RedisKey)$"device:{id}:connected").ToArray();
+            var lastSeenKeys = deviceIds.Select(id => (RedisKey)$"device:{id}:lastSeen").ToArray();
+
+            // Fetch online status and last seen from Redis
+            var onlineStatuses = await redis.Db.StringGetAsync(onlineKeys);
+            var lastSeenTimestamps = await redis.Db.StringGetAsync(lastSeenKeys);
+
+            Console.WriteLine(onlineStatuses[0].HasValue);
+            Console.WriteLine(lastSeenTimestamps[0].HasValue);
+
+            // Map Redis data to devices
+            var responseDevices = devices
+                .Select(
+                    (device, index) =>
+                    {
+                        var online = onlineStatuses[index].HasValue && onlineStatuses[index] == "1";
+                        DateTimeOffset? lastSeen = null;
+
+                        if (lastSeenTimestamps[index].HasValue && long.TryParse(lastSeenTimestamps[index], out var timestamp))
+                        {
+                            lastSeen = DateTimeOffset.FromUnixTimeSeconds(timestamp);
+                        }
+                        return new Response(device.Id, device.Name, online, lastSeen);
+                    }
+                )
+                .ToList();
+
+            return responseDevices.ToPagedList(totalCount, deviceParameters.PageNumber, deviceParameters.PageSize);
         }
     }
 
-    public record Response(Guid Id, string Name);
+    public record Response(Guid Id, string Name, bool Connected, DateTimeOffset? LastSeen = null);
 }
