@@ -1,6 +1,5 @@
 using Fei.Is.Api.Data.Models;
-using Fei.Is.Api.MqttClient;
-using Fei.Is.Api.MqttClient.Commands;
+using Fei.Is.Api.MqttClient.Publish;
 using MediatR;
 
 namespace Fei.Is.Api.Features.Jobs.EventHandlers;
@@ -15,9 +14,7 @@ public class JobCreatedEventHandler(IServiceScopeFactory serviceScopeFactory) : 
     public async Task Handle(JobCreatedEvent notification, CancellationToken cancellationToken)
     {
         using var scope = serviceScopeFactory.CreateScope();
-        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-
-        var sendJobStatusCommand = new SendJobStatus.Command(notification.Job.DeviceId, notification.Job.Device.AccessToken, notification.Job);
-        await mediator.Send(sendJobStatusCommand, cancellationToken);
+        var publishJobStatus = scope.ServiceProvider.GetRequiredService<PublishJobStatus>();
+        await publishJobStatus.Execute(notification.Job.DeviceId, notification.Job.Device.AccessToken, notification.Job);
     }
 }

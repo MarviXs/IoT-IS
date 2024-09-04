@@ -1,4 +1,4 @@
-import type { paths } from '@/api/generated/schema.d.ts';
+import type { components, paths } from '@/api/generated/schema.d.ts';
 
 export type ActiveJobResponse =
   paths['/devices/{deviceId}/jobs/active']['get']['responses']['200']['content']['application/json'];

@@ -1,5 +1,6 @@
 using System.Linq.Dynamic.Core;
 using Fei.Is.Api.Common.Utils;
+using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
 
@@ -14,7 +15,7 @@ public static class JobExtensions
             return 0;
         }
 
-        if (job?.Status == JobStatusEnum.SUCCEEDED)
+        if (job?.Status == JobStatusEnum.JOB_SUCCEEDED)
         {
             return 100;
         }
@@ -24,5 +25,16 @@ public static class JobExtensions
         double progress = (double)completedCmds / totalCmds * 100;
 
         return progress;
+    }
+
+    public static IQueryable<Job> GetActiveJobs(this IQueryable<Job> jobs, Guid deviceId)
+    {
+        return jobs.Where(j => j.DeviceId == deviceId)
+            .Where(j => j.Status == JobStatusEnum.JOB_QUEUED || j.Status == JobStatusEnum.JOB_IN_PROGRESS || j.Status == JobStatusEnum.JOB_PAUSED);
+    }
+
+    public static IQueryable<Job> GetActiveJobsWithoutQueued(this IQueryable<Job> jobs, Guid deviceId)
+    {
+        return jobs.Where(j => j.DeviceId == deviceId).Where(j => j.Status == JobStatusEnum.JOB_IN_PROGRESS || j.Status == JobStatusEnum.JOB_PAUSED);
     }
 }

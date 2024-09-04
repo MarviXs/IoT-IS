@@ -67,10 +67,7 @@ public static class GetDevices
             // Fetch online status and last seen from Redis
             var onlineStatuses = await redis.Db.StringGetAsync(onlineKeys);
             var lastSeenTimestamps = await redis.Db.StringGetAsync(lastSeenKeys);
-
-            Console.WriteLine(onlineStatuses[0].HasValue);
-            Console.WriteLine(lastSeenTimestamps[0].HasValue);
-
+            
             // Map Redis data to devices
             var responseDevices = devices
                 .Select(

@@ -15,7 +15,13 @@
     </template>
     <template #actions>
       <AutoRefreshButton v-model="refreshInterval" :loading="isLoadingJob" @on-refresh="getJob" />
-      <JobControls class="col-grow" :job-id="job.id" :paused="job.paused" @action-performed="getJob" />
+      <JobControls
+        class="col-grow"
+        :job-id="job.id"
+        :paused="job.paused"
+        :status="job.status as JobStatusEnum"
+        @action-performed="getJob"
+      />
     </template>
     <template #default>
       <q-table
@@ -77,6 +83,7 @@ import { JobResponse } from '@/api/types/Job';
 import { handleError } from '@/utils/error-handler';
 import DeviceService from '@/api/services/DeviceService';
 import { DeviceResponse } from '@/api/types/Device';
+import { JobStatusEnum } from '@/models/JobStatusEnum';
 
 const { t } = useI18n();
 

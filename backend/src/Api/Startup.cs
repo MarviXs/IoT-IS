@@ -5,6 +5,8 @@ using Fei.Is.Api.Common.OpenAPI;
 using Fei.Is.Api.Extensions;
 using Fei.Is.Api.Features.Auth;
 using Fei.Is.Api.MqttClient;
+using Fei.Is.Api.MqttClient.Publish;
+using Fei.Is.Api.MqttClient.Subscribe;
 using Fei.Is.Api.Redis;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
@@ -58,7 +60,16 @@ public class Startup(IConfiguration configuration)
         services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<MqttClientService>());
 
         services.AddHostedService<StoreDataPointsBatchService>();
+        services.AddHostedService<JobTimeOutService>();
 
+        //MQTT Services
+        services.AddScoped<JobStatusReceived>();
+        services.AddScoped<OnDeviceDisconnected>();
+        services.AddScoped<OnDeviceConnected>();
+        services.AddScoped<DataPointReceived>();
+        services.AddScoped<PublishJobControl>();
+        services.AddScoped<PublishJobStatus>();
+        
         // Add validators
         services.AddValidatorsFromAssemblyContaining<Startup>(ServiceLifetime.Scoped);
     }

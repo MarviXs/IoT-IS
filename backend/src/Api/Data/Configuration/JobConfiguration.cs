@@ -9,5 +9,6 @@ public class JobConfiguration : IEntityTypeConfiguration<Job>
     public void Configure(EntityTypeBuilder<Job> builder)
     {
         builder.HasMany(j => j.Commands).WithOne(c => c.Job).HasForeignKey(rs => rs.JobId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasIndex(j => j.Status);
     }
 }

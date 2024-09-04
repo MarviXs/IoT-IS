@@ -3,6 +3,12 @@
     <q-expansion-item switch-toggle-side>
       <template #header>
         <div class="text-weight-medium text-subtitle1 flex items-center">{{ t('job.label') }}</div>
+        <JobStatusBadges
+          v-if="activeJob"
+          class="q-ml-md flex items-center"
+          :job-status="activeJob.status"
+          :paused="activeJob.paused"
+        />
         <q-space></q-space>
         <q-btn
           v-if="activeJob"
@@ -34,7 +40,6 @@
                 {{ activeJob.progress.toFixed(0) }}%
               </q-circular-progress>
               <div class="column q-ml-sm q-gutter-y-xs justify-center q-my-md items-start">
-                <JobStatusBadges :job-status="activeJob.status" :paused="activeJob.paused" />
                 <div class="text-weight-medium">
                   {{ activeJob.name }}
                 </div>
@@ -51,6 +56,7 @@
               class="col-grow"
               :job-id="activeJob.id"
               :paused="activeJob.paused"
+              :status="activeJob.status as JobStatusEnum"
               @action-performed="getActiveJob"
             />
           </div>
@@ -85,6 +91,7 @@ import { ActiveJobResponse } from '@/api/types/Job';
 import { handleError } from '@/utils/error-handler';
 import { ref } from 'vue';
 import { ProblemDetails } from '@/api/types/ProblemDetails';
+import { JobStatusEnum } from '@/models/JobStatusEnum';
 
 const props = defineProps({
   deviceId: {

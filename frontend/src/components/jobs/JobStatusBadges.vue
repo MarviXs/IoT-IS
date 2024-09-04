@@ -3,9 +3,6 @@
     <q-badge :color="jobStatusColors[jobStatus]" class="q-pa-xs">
       {{ props.jobStatus }}
     </q-badge>
-    <q-badge v-if="paused" color="accent" class="q-pa-xs q-ml-sm">
-      {{ t('job.paused').toUpperCase() }}
-    </q-badge>
   </div>
 </template>
 

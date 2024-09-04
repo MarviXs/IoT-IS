@@ -68,9 +68,8 @@ public static class GetActiveJob
 
             var activeJob = await context
                 .Jobs.AsNoTracking()
-                .Where(j => j.DeviceId == request.DeviceId)
+                .GetActiveJobs(request.DeviceId)
                 .Include(j => j.Commands.OrderBy(c => c.Order))
-                .Where(j => j.Status == JobStatusEnum.QUEUED || j.Status == JobStatusEnum.IN_PROGRESS || j.Status == JobStatusEnum.PAUSED)
                 .FirstOrDefaultAsync(cancellationToken);
 
             if (activeJob == null)

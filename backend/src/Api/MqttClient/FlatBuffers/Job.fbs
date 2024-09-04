@@ -1,0 +1,33 @@
+attribute "fs_serializer";
+
+namespace JobFlatBuffers;
+
+enum JobStatusFbsEnum: byte {
+    JOB_QUEUED = 0,
+    JOB_IN_PROGRESS = 1,
+    JOB_PAUSED = 2,
+    JOB_SUCCEEDED = 3,
+    JOB_REJECTED = 4,
+    JOB_FAILED = 5,
+    JOB_TIMED_OUT = 6,
+    JOB_CANCELED = 7
+}
+
+table JobFbs (fs_serializer) {
+    job_id: string;
+    commands: [CommandFbs];
+    status: JobStatusFbsEnum;
+    name: string;
+    current_step: int32;
+    total_steps: int32;
+    current_cycle: int32;
+    total_cycles: int32;
+    paused: bool;
+    started_at: long;
+    finished_at: long;
+}
+
+table CommandFbs (fs_serializer) {
+    name: string;
+    params: [double];
+}

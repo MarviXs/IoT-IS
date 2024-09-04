@@ -11,7 +11,7 @@ public class StoreDataPointsBatchService(IServiceProvider serviceProvider, ILogg
     private const string StreamName = "datapoints";
     private const string GroupName = "store_data";
     private const int ProcessingSpeed = 250;
-    private const int MaxPendingTimeUnclaimed = 30000;
+    private const int MaxPendingTimeUnclaimed = 20000;
 
     static Dictionary<string, string> ParseResult(StreamEntry entry) => entry.Values.ToDictionary(x => x.Name.ToString(), x => x.Value.ToString());
 

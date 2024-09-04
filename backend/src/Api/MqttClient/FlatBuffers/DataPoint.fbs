@@ -1,0 +1,9 @@
+attribute "fs_serializer";
+
+namespace DataPointFlatBuffers;
+
+table DataPointFbs (fs_serializer) {
+    tag: string;
+    value: double;
+    ts: long;
+}

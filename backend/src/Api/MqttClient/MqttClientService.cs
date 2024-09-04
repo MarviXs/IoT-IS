@@ -1,4 +1,4 @@
-using Fei.Is.Api.MqttClient.Commands;
+using Fei.Is.Api.MqttClient.Subscribe;
 using MediatR;
 using MQTTnet;
 using MQTTnet.Client;
@@ -58,11 +58,12 @@ public class MqttClientService : IHostedService
                         if (!await _mqttClient.TryPingAsync())
                         {
                             await _mqttClient.ConnectAsync(_mqttOptions, cancellationToken);
+                            await SubscribeToTopics();
                         }
                     }
                     catch
                     {
-                        // Handle the exception properly (logging etc.).
+                        _logger.LogError("Failed to connect to MQTT broker. Retrying in 5 seconds...");
                     }
                     finally
                     {
@@ -81,32 +82,30 @@ public class MqttClientService : IHostedService
             try
             {
                 using var scope = _serviceScopeFactory.CreateScope();
-                var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
                 var topic = args.ApplicationMessage.Topic;
                 var topicParts = topic.Split('/');
 
                 if (MqttTopicFilterComparer.Compare(topic, "devices/+/data") == MqttTopicFilterCompareResult.IsMatch)
                 {
-                    var command = new ProcessDataPointMessage.Command(topicParts[1], args.ApplicationMessage.PayloadSegment);
-                    await mediator.Send(command);
+                    var dataPointReceived = scope.ServiceProvider.GetRequiredService<DataPointReceived>();
+                    await dataPointReceived.Handle(topicParts[1], args.ApplicationMessage.PayloadSegment, CancellationToken.None);
                 }
                 else if (MqttTopicFilterComparer.Compare(topic, "devices/+/job_from_device") == MqttTopicFilterCompareResult.IsMatch)
                 {
-                    var command = new JobStatusReceived.Command(topicParts[1], args.ApplicationMessage.PayloadSegment);
-                    await mediator.Send(command);
+                    var jobStatusReceived = scope.ServiceProvider.GetRequiredService<JobStatusReceived>();
+                    await jobStatusReceived.Handle(topicParts[1], args.ApplicationMessage.PayloadSegment, CancellationToken.None);
                 }
                 else if (MqttTopicFilterComparer.Compare(topic, "$SYS/brokers/+/clients/+/connected") == MqttTopicFilterCompareResult.IsMatch)
                 {
-                    var command = new OnDeviceConnected.Command(args.ApplicationMessage.PayloadSegment);
-                    await mediator.Send(command);
+                    var onDeviceConnected = scope.ServiceProvider.GetRequiredService<OnDeviceConnected>();
+                    await onDeviceConnected.Handle(args.ApplicationMessage.PayloadSegment, CancellationToken.None);
                 }
                 else if (MqttTopicFilterComparer.Compare(topic, "$SYS/brokers/+/clients/+/disconnected") == MqttTopicFilterCompareResult.IsMatch)
                 {
-                    var command = new OnDeviceDisconnected.Command(args.ApplicationMessage.PayloadSegment);
-                    await mediator.Send(command);
+                    var onDeviceDisconnected = scope.ServiceProvider.GetRequiredService<OnDeviceDisconnected>();
+                    await onDeviceDisconnected.Handle(args.ApplicationMessage.PayloadSegment, CancellationToken.None);
                 }
-
             }
             catch (Exception ex)
             {
@@ -119,14 +118,7 @@ public class MqttClientService : IHostedService
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        await _mqttClient.ConnectAsync(_mqttOptions, cancellationToken);
         Reconnect_Using_Timer(cancellationToken);
-
-        await _mqttClient.SubscribeAsync("$SYS/brokers/+/clients/+/connected", MqttQualityOfServiceLevel.AtLeastOnce);
-        await _mqttClient.SubscribeAsync("$SYS/brokers/+/clients/+/disconnected", MqttQualityOfServiceLevel.AtLeastOnce);
-
-        await _mqttClient.SubscribeAsync("$queue/devices/+/data", MqttQualityOfServiceLevel.AtLeastOnce);
-        await _mqttClient.SubscribeAsync("$queue/devices/+/job_from_device", MqttQualityOfServiceLevel.AtLeastOnce);
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
@@ -134,15 +126,33 @@ public class MqttClientService : IHostedService
         await _mqttClient.DisconnectAsync();
     }
 
-    public async Task PublishAsync(string topic, ArraySegment<byte> payload)
+    private async Task SubscribeToTopics()
+    {
+        var subscribeOptions = new MqttClientSubscribeOptionsBuilder()
+            .WithTopicFilter("devices/+/data", MqttQualityOfServiceLevel.AtLeastOnce)
+            .WithTopicFilter("devices/+/job_from_device", MqttQualityOfServiceLevel.AtLeastOnce)
+            .WithTopicFilter("$SYS/brokers/+/clients/+/connected", MqttQualityOfServiceLevel.AtLeastOnce)
+            .WithTopicFilter("$SYS/brokers/+/clients/+/disconnected", MqttQualityOfServiceLevel.AtLeastOnce)
+            .Build();
+
+        await _mqttClient.SubscribeAsync(subscribeOptions, CancellationToken.None);
+        _logger.LogInformation("Subscribed to MQTT topics");
+    }
+
+    public async Task<MqttClientPublishResult> PublishAsync(
+        string topic,
+        byte[] payload,
+        MqttQualityOfServiceLevel qos = MqttQualityOfServiceLevel.AtLeastOnce,
+        bool retain = false
+    )
     {
         var message = new MqttApplicationMessageBuilder()
             .WithTopic(topic)
             .WithPayload(payload)
-            .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.AtLeastOnce)
-            .WithRetainFlag(false)
+            .WithQualityOfServiceLevel(qos)
+            .WithRetainFlag(retain)
             .Build();
 
-        await _mqttClient.PublishAsync(message);
+        return await _mqttClient.PublishAsync(message);
     }
 }

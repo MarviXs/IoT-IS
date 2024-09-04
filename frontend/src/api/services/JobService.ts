@@ -18,24 +18,24 @@ class JobService {
     return await client.POST('/devices/{deviceId}/jobs', { params: { path: { deviceId } }, body });
   }
 
-  async cancelJob(deviceId: string) {
-    return await client.GET('/devices/{deviceId}/jobs/active', { params: { path: { deviceId } } });
+  async cancelJob(jobId: string) {
+    return await client.PUT('/jobs/{jobId}/cancel', { params: { path: { jobId } } });
   }
 
-  async pauseJob(deviceId: string) {
-    return await client.GET('/devices/{deviceId}/jobs/active', { params: { path: { deviceId } } });
+  async pauseJob(jobId: string) {
+    return await client.PUT('/jobs/{jobId}/pause', { params: { path: { jobId } } });
   }
 
-  async continueJob(deviceId: string) {
-    return await client.GET('/devices/{deviceId}/jobs/active', { params: { path: { deviceId } } });
+  async resumeJob(jobId: string) {
+    return await client.PUT('/jobs/{jobId}/resume', { params: { path: { jobId } } });
   }
 
-  async skipStep(deviceId: string) {
-    return await client.GET('/devices/{deviceId}/jobs/active', { params: { path: { deviceId } } });
+  async skipStep(jobId: string) {
+    return await client.PUT('/jobs/{jobId}/skip-step', { params: { path: { jobId } } });
   }
 
-  async skipCycle(deviceId: string) {
-    return await client.GET('/devices/{deviceId}/jobs/active', { params: { path: { deviceId } } });
+  async skipCycle(jobId: string) {
+    return await client.PUT('/jobs/{jobId}/skip-cycle', { params: { path: { jobId } } });
   }
 }
 

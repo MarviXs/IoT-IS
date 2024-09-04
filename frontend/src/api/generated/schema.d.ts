@@ -510,6 +510,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/jobs/{jobId}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Cancel a job
+         * @description Cancel a running or paused job.
+         */
+        put: operations["CancelJob"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/devices/{deviceId}/jobs": {
         parameters: {
             query?: never;
@@ -524,6 +544,86 @@ export interface paths {
          * @description Create a job for a device from a recipe.
          */
         post: operations["CreateJob"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/jobs/{jobId}/pause": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Pause a job
+         * @description Pause a job.
+         */
+        put: operations["PauseJob"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/jobs/{jobId}/resume": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Resume a job
+         * @description Resume a paused job.
+         */
+        put: operations["ResumeJob"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/jobs/{jobId}/skip-cycle": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Skip a cycle in a job
+         * @description Skip the current cycle in a job and move to the next cycle.
+         */
+        put: operations["SkipCycle"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/jobs/{jobId}/skip-step": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Skip a step in a job
+         * @description Skip the current step in a job and move to the next step.
+         */
+        put: operations["SkipStep"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -724,7 +824,7 @@ export interface components {
             items: components["schemas"]["Fei.Is.Api.Features.UserManagement.Queries.GetUsers.Response"][];
         };
         /** @enum {string} */
-        "Fei.Is.Api.Data.Enums.JobStatusEnum": "JOB_FREE" | "JOB_IDLE" | "JOB_PENDING" | "JOB_PROCESSING" | "JOB_DONE" | "JOB_ERR" | "JOB_PAUSED" | "JOB_CANCELED" | "JOB_STATUS_MAX";
+        "Fei.Is.Api.Data.Enums.JobStatusEnum": "JOB_QUEUED" | "JOB_IN_PROGRESS" | "JOB_PAUSED" | "JOB_SUCCEEDED" | "JOB_REJECTED" | "JOB_FAILED" | "JOB_TIMED_OUT" | "JOB_CANCELED";
         /** @enum {string} */
         "Fei.Is.Api.Data.Enums.Role": "Admin" | "User";
         "Fei.Is.Api.Features.AdminUserManagement.Commands.UpdateUserEmail.Request": {
@@ -939,6 +1039,9 @@ export interface components {
             /** Format: uuid */
             id: string;
             name: string;
+            connected: boolean;
+            /** Format: date-time */
+            lastSeen?: string | null;
         };
         "Fei.Is.Api.Features.Jobs.Commands.CreateJob.Request": {
             /** Format: uuid */
@@ -2493,6 +2596,47 @@ export interface operations {
             };
         };
     };
+    CancelJob: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                jobId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     CreateJob: {
         parameters: {
             query?: never;
@@ -2528,6 +2672,170 @@ export interface operations {
             };
             /** @description Not Found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PauseJob: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                jobId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ResumeJob: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                jobId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SkipCycle: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                jobId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SkipStep: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                jobId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unprocessable Entity */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };

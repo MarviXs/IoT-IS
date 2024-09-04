@@ -81,7 +81,22 @@ public static class GetJobById
                 var command = job.Commands[i];
                 var progress = CommandProgress.CommandPending;
 
-                if (job.CurrentStep == i + 1)
+                if (job.Status == JobStatusEnum.JOB_SUCCEEDED)
+                {
+                    progress = CommandProgress.CommandDone;
+                }
+                else if (job.Status == JobStatusEnum.JOB_CANCELED || job.Status == JobStatusEnum.JOB_FAILED)
+                {
+                    if (job.CurrentStep > i + 1)
+                    {
+                        progress = CommandProgress.CommandDone;
+                    }
+                    else
+                    {
+                        progress = CommandProgress.CommandPending;
+                    }
+                }
+                else if (job.CurrentStep == i + 1)
                 {
                     progress = CommandProgress.CommandProcessing;
                 }

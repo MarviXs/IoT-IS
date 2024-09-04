@@ -98,7 +98,7 @@ public static class CreateJob
                 CurrentStep = 1,
                 CurrentCycle = 1,
                 TotalCycles = message.Request.Cycles,
-                Status = JobStatusEnum.QUEUED
+                Status = JobStatusEnum.JOB_QUEUED
             };
             await context.Jobs.AddAsync(job, cancellationToken);
             await context.SaveChangesAsync(cancellationToken);

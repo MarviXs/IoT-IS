@@ -6,6 +6,7 @@
         color="grey-color"
         :icon="mdiPause"
         :loading="pausingJob"
+        :disable="status === JobStatusEnum.JOB_PAUSED"
         @click="pauseJob"
       ></JobControlButton>
     </div>
@@ -50,13 +51,14 @@
 
 <script setup lang="ts">
 import { toast } from 'vue3-toastify';
-import { PropType, ref } from 'vue';
+import { ref } from 'vue';
 import JobService from '@/api/services/JobService';
 import JobControlButton from './JobControlButton.vue';
 import { handleError } from '@/utils/error-handler';
 import { useI18n } from 'vue-i18n';
 import { mdiPause, mdiPlay, mdiSkipNext, mdiSkipForward, mdiStop } from '@quasar/extras/mdi-v7';
-import { ActiveJobResponse, JobResponse } from '@/api/types/Job';
+import { JobStatusEnum } from '@/models/JobStatusEnum';
+import { PropType } from 'vue';
 
 const props = defineProps({
   jobId: {
@@ -65,6 +67,10 @@ const props = defineProps({
   },
   paused: {
     type: Boolean,
+    required: true,
+  },
+  status: {
+    type: Object as PropType<JobStatusEnum>,
     required: true,
   },
 });
@@ -105,7 +111,7 @@ async function pauseJob() {
 const resumingJob = ref(false);
 async function resumeJob() {
   resumingJob.value = true;
-  const { data, error } = await JobService.continueJob(props.jobId);
+  const { data, error } = await JobService.resumeJob(props.jobId);
   resumingJob.value = false;
 
   if (error) {
