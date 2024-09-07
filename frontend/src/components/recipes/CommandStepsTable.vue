@@ -27,11 +27,10 @@ import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { mdiPlus } from '@quasar/extras/mdi-v7';
 import CommandService from '@/api/services/CommandService';
-import { CommandListResponse } from '@/models/Command';
 import { RecipeResponse } from '@/api/types/Recipe';
 import { PaginationClient, PaginationTable } from '@/models/Pagination';
 import { useRoute } from 'vue-router';
-import { CommandsQueryParams, CommandsResponse } from '@/api/types/Command';
+import { CommandResponse, CommandsQueryParams, CommandsResponse } from '@/api/types/Command';
 import { handleError } from '@/utils/error-handler';
 
 const { t } = useI18n();
@@ -79,11 +78,13 @@ async function getCommands(paginationReq: PaginationTable) {
 }
 getCommands(pagination.value);
 
-function addCommandToSteps(command: CommandListResponse) {
+function addCommandToSteps(command: CommandResponse) {
   if (!recipe.value.steps) recipe.value.steps = [];
 
   recipe.value.steps.push({
+    id: null!,
     command: command,
+    subrecipe: null!,
     cycles: 1,
     order: recipe.value.steps.length,
   });

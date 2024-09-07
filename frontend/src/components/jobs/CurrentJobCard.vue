@@ -154,9 +154,7 @@ async function getActiveJobsSSE() {
   for await (const { data, event, id } of es) {
     const jobs = JSON.parse(data);
     activeJobs.value = jobs;
-    console.log(jobs);
   }
-
   es.close();
 }
 getActiveJobsSSE();

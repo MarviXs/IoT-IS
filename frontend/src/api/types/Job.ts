@@ -9,3 +9,4 @@ export type JobsQueryParams = paths['/jobs']['get']['parameters']['query'];
 
 export type JobResponse = paths['/jobs/{jobId}']['get']['responses']['200']['content']['application/json'];
 export type JobsResponse = paths['/jobs']['get']['responses']['200']['content']['application/json'];
+export type JobStatus = components['schemas']['Fei.Is.Api.Data.Enums.JobStatusEnum'];

@@ -108,11 +108,11 @@ const timeRanges = computed(() => [
 
 const selectedTimeRangeIndex = ref(2);
 const customTimeRangeSelected = ref<{
-  from: string | null;
-  to: string | null;
+  from: string;
+  to: string;
 }>({
-  from: null,
-  to: null,
+  from: '',
+  to: '',
 });
 
 const isCustomTimeRangeSelected = ref(false);

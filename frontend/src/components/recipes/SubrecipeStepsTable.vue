@@ -25,6 +25,7 @@
               {
                 id: propsName.row.id,
                 subrecipe: propsName.row,
+                command: null!,
                 cycles: 0,
                 order: 0,
               },
@@ -106,7 +107,9 @@ function addSubrecipeToSteps(subrecipe: RecipeResponse) {
   if (!recipe.value.steps) recipe.value.steps = [];
 
   recipe.value.steps.push({
+    id: null!,
     subrecipe: subrecipe,
+    command: null!,
     cycles: 1,
     order: recipe.value.steps.length,
   });

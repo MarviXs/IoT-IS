@@ -8,17 +8,18 @@
 </template>
 
 <script setup lang="ts">
-import { JobStatusEnum } from '@/models/JobStatusEnum';
+import { JobStatus } from '@/api/types/Job';
 import { jobStatusColors, jobStatusIcon } from '@/utils/job-status-look';
+import { PropType } from 'vue';
 
 const props = defineProps({
   status: {
-    type: String,
+    type: String as PropType<JobStatus>,
     default: '',
   },
 });
 
-const statusColor = jobStatusColors[props.status as JobStatusEnum];
-const icon = jobStatusIcon[props.status as JobStatusEnum];
+const statusColor = jobStatusColors[props.status];
+const icon = jobStatusIcon[props.status];
 </script>
 @/utils/job-status-look

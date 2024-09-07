@@ -841,9 +841,9 @@ export interface components {
             items: components["schemas"]["Fei.Is.Api.Features.UserManagement.Queries.GetUsers.Response"][];
         };
         /** @enum {string} */
-        "Fei.Is.Api.Data.Enums.JobStatusEnum": FeiIsApiDataEnumsJobStatusEnum;
+        "Fei.Is.Api.Data.Enums.JobStatusEnum": "JOB_QUEUED" | "JOB_IN_PROGRESS" | "JOB_PAUSED" | "JOB_SUCCEEDED" | "JOB_REJECTED" | "JOB_FAILED" | "JOB_TIMED_OUT" | "JOB_CANCELED";
         /** @enum {string} */
-        "Fei.Is.Api.Data.Enums.Role": FeiIsApiDataEnumsRole;
+        "Fei.Is.Api.Data.Enums.Role": "Admin" | "User";
         "Fei.Is.Api.Features.AdminUserManagement.Commands.UpdateUserEmail.Request": {
             email: string;
         };
@@ -860,7 +860,7 @@ export interface components {
             result: string;
             is_superuser: boolean;
             client_attrs?: {
-                [key: string]: string | undefined;
+                [key: string]: string;
             } | null;
         };
         "Fei.Is.Api.Features.Auth.Commands.Login.Request": {
@@ -929,7 +929,7 @@ export interface components {
             timeStamp?: number | null;
         };
         /** @enum {string} */
-        "Fei.Is.Api.Features.DataPoints.Queries.GetSensorDataPoints.DownsampleMethod": FeiIsApiFeaturesDataPointsQueriesGetSensorDataPointsDownsampleMethod;
+        "Fei.Is.Api.Features.DataPoints.Queries.GetSensorDataPoints.DownsampleMethod": "Asap" | "Lttb";
         "Fei.Is.Api.Features.DataPoints.Queries.GetSensorDataPoints.Response": {
             /** Format: date-time */
             ts: string;
@@ -937,7 +937,7 @@ export interface components {
             value?: number | null;
         };
         /** @enum {string} */
-        "Fei.Is.Api.Features.DataPoints.Queries.GetSensorDataPoints.TimeBucketMethod": FeiIsApiFeaturesDataPointsQueriesGetSensorDataPointsTimeBucketMethod;
+        "Fei.Is.Api.Features.DataPoints.Queries.GetSensorDataPoints.TimeBucketMethod": "Average" | "Max" | "Min" | "StdDev" | "Sum";
         "Fei.Is.Api.Features.DeviceCollections.Commands.CreateDeviceCollection.Request": {
             name: string;
             /** Format: uuid */
@@ -970,7 +970,7 @@ export interface components {
             type: components["schemas"]["Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionById.SubItemTypes"];
         };
         /** @enum {string} */
-        "Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionById.SubItemTypes": FeiIsApiFeaturesDeviceCollectionsQueriesGetDeviceCollectionByIdSubItemTypes;
+        "Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionById.SubItemTypes": "Device" | "SubCollection";
         "Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionWithSensors.Response": {
             /** Format: uuid */
             id: string;
@@ -989,7 +989,7 @@ export interface components {
             accuracyDecimals?: number | null;
         };
         /** @enum {string} */
-        "Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionWithSensors.SubItemTypes": FeiIsApiFeaturesDeviceCollectionsQueriesGetDeviceCollectionWithSensorsSubItemTypes;
+        "Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionWithSensors.SubItemTypes": "Device" | "SubCollection" | "Sensor";
         "Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollections.Response": {
             /** Format: uuid */
             id: string;
@@ -1087,7 +1087,7 @@ export interface components {
             status: components["schemas"]["Fei.Is.Api.Data.Enums.JobStatusEnum"];
         };
         /** @enum {string} */
-        "Fei.Is.Api.Features.Jobs.Queries.GetJobById.CommandProgress": FeiIsApiFeaturesJobsQueriesGetJobByIdCommandProgress;
+        "Fei.Is.Api.Features.Jobs.Queries.GetJobById.CommandProgress": "CommandPending" | "CommandProcessing" | "CommandDone";
         "Fei.Is.Api.Features.Jobs.Queries.GetJobById.CommandResponse": {
             /** Format: int32 */
             order: number;
@@ -1264,8 +1264,9 @@ export interface components {
             detail?: string | null;
             instance?: string | null;
             errors: {
-                [key: string]: string[] | undefined;
+                [key: string]: string[];
             };
+        } & {
             [key: string]: unknown;
         };
         "Microsoft.AspNetCore.Mvc.ProblemDetails": {
@@ -1275,6 +1276,7 @@ export interface components {
             status: number | null;
             detail: string | null;
             instance: string | null;
+        } & {
             [key: string]: unknown;
         };
     };
@@ -3297,43 +3299,4 @@ export interface operations {
             };
         };
     };
-}
-export enum FeiIsApiDataEnumsJobStatusEnum {
-    JOB_QUEUED = "JOB_QUEUED",
-    JOB_IN_PROGRESS = "JOB_IN_PROGRESS",
-    JOB_PAUSED = "JOB_PAUSED",
-    JOB_SUCCEEDED = "JOB_SUCCEEDED",
-    JOB_REJECTED = "JOB_REJECTED",
-    JOB_FAILED = "JOB_FAILED",
-    JOB_TIMED_OUT = "JOB_TIMED_OUT",
-    JOB_CANCELED = "JOB_CANCELED"
-}
-export enum FeiIsApiDataEnumsRole {
-    Admin = "Admin",
-    User = "User"
-}
-export enum FeiIsApiFeaturesDataPointsQueriesGetSensorDataPointsDownsampleMethod {
-    Asap = "Asap",
-    Lttb = "Lttb"
-}
-export enum FeiIsApiFeaturesDataPointsQueriesGetSensorDataPointsTimeBucketMethod {
-    Average = "Average",
-    Max = "Max",
-    Min = "Min",
-    StdDev = "StdDev",
-    Sum = "Sum"
-}
-export enum FeiIsApiFeaturesDeviceCollectionsQueriesGetDeviceCollectionByIdSubItemTypes {
-    Device = "Device",
-    SubCollection = "SubCollection"
-}
-export enum FeiIsApiFeaturesDeviceCollectionsQueriesGetDeviceCollectionWithSensorsSubItemTypes {
-    Device = "Device",
-    SubCollection = "SubCollection",
-    Sensor = "Sensor"
-}
-export enum FeiIsApiFeaturesJobsQueriesGetJobByIdCommandProgress {
-    CommandPending = "CommandPending",
-    CommandProcessing = "CommandProcessing",
-    CommandDone = "CommandDone"
 }
