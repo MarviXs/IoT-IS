@@ -5,6 +5,7 @@ using FlatSharp;
 using FluentResults;
 using JobFlatBuffers;
 using Microsoft.EntityFrameworkCore;
+using StackExchange.Redis;
 
 namespace Fei.Is.Api.MqttClient.Subscribe;
 
@@ -45,6 +46,7 @@ public class JobStatusReceived(AppDbContext appContext, RedisService redis)
 
         var job = await appContext
             .Jobs.Where(j => j.DeviceId == Guid.Parse(deviceId) && j.Id == Guid.Parse(jobFbs.JobId))
+            .Include(j => j.Device)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (job == null)
@@ -62,6 +64,8 @@ public class JobStatusReceived(AppDbContext appContext, RedisService redis)
         job.FinishedAt = DateTimeOffset.FromUnixTimeMilliseconds(jobFbs.FinishedAt).UtcDateTime;
 
         await appContext.SaveChangesAsync(cancellationToken);
+        await redis.Db.PublishAsync(RedisChannel.Literal($"jobs-active-{job.Device?.OwnerId}"), job.Id.ToString());
+
         return Result.Ok();
     }
 }

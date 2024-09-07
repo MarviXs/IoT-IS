@@ -29,4 +29,9 @@ public class RedisService : IDisposable
     {
         Connection.Dispose();
     }
+
+    public ISubscriber GetSubscriber()
+    {
+        return Connection.GetSubscriber();
+    }
 }

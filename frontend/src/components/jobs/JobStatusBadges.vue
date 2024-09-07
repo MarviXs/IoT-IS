@@ -7,14 +7,14 @@
 </template>
 
 <script setup lang="ts">
+import { FeiIsApiDataEnumsJobStatusEnum } from '@/api/generated/schema';
 import { jobStatusColors } from '@/utils/job-status-look';
 import { PropType } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { JobStatusEnum } from '@/api/types/Job';
 
 const props = defineProps({
   jobStatus: {
-    type: Object as PropType<JobStatusEnum>,
+    type: String as PropType<FeiIsApiDataEnumsJobStatusEnum>,
     required: true,
   },
   paused: {

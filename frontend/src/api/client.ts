@@ -1,82 +1,71 @@
-import createClient, { Middleware } from 'openapi-fetch';
+import createClient from 'openapi-fetch';
 import type { paths } from './generated/schema.d.ts';
 import { useAuthStore } from '@/stores/auth-store.js';
 import { toast } from 'vue3-toastify';
+import { createEventSource, EventSourceMessage } from 'eventsource-client';
 
-const authMiddleware: Middleware = {
-  async onRequest({ request }) {
-    const authStore = useAuthStore();
+const baseUrl = process.env.VITE_API_URL || 'http://localhost:5097/';
 
-    if (authStore.accessToken) {
-      request.headers.set('Authorization', `Bearer ${authStore.accessToken}`);
+const customFetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+  const request = new Request(input, init);
+  const authStore = useAuthStore();
+
+  if (authStore.accessToken) {
+    request.headers.set('Authorization', `Bearer ${authStore.accessToken}`);
+  }
+
+  const fetchWithRetry = async (req: Request): Promise<Response> => {
+    let response = await fetch(req.clone());
+
+    if (response.status === 401 && !req.url.includes('/auth/refresh')) {
+      if (authStore.refreshToken) {
+        const newToken = await authStore.refreshAccessToken();
+        if (newToken) {
+          request.headers.set('Authorization', `Bearer ${newToken}`);
+          const retriedRequest = new Request(request.clone(), { headers: request.headers });
+          response = await fetch(retriedRequest);
+        }
+      }
     }
 
-    return request;
-  },
-
-  async onResponse({ request, response, options }) {
     if (response.status === 204 || response.headers.get('content-length') === '0') {
       return response;
     }
-    const clonedResponse = response.clone();
-    let data;
 
-    try {
-      data = await clonedResponse.json();
-    } catch (error) {
-      console.error('Error parsing response:', error);
-      return response;
+    if (!response.headers.get('content-type')?.includes('text/event-stream')) {
+      try {
+        const data = await response.clone().json();
+        if (data.status === 403 && data.detail === 'Invalid refresh token') {
+          authStore.logout();
+        }
+      } catch (error) {
+        console.error('Error parsing response:', error);
+      }
     }
 
-    if (data.status === 403 && data.detail === 'Invalid refresh token') {
-      const authStore = useAuthStore();
-      authStore.logout();
-    }
-  },
+    return response;
+  };
+
+  try {
+    return await fetchWithRetry(request);
+  } catch (error) {
+    toast.error('An error occurred. Please try again later.');
+    throw error;
+  }
 };
 
+function createServerEventSource(url: string) {
+  const es = createEventSource({
+    url: baseUrl + url,
+    fetch: customFetch,
+  });
+
+  return es;
+}
+
 const client = createClient<paths>({
-  baseUrl: process.env.VITE_API_URL || 'http://localhost:5097/',
-  fetch: async (input: Request) => {
-    // Read the body of the request
-    const originalBody = input.body ? await input.text() : null;
-    const originalHeaders = new Headers(input.headers);
-    const originalRequest = new Request(input, {
-      body: originalBody,
-      headers: originalHeaders,
-    });
-
-    const fetchWithRetry = async (request: Request): Promise<Response> => {
-      let response = await fetch(request);
-
-      if (response.status === 401 && request.url.includes('/auth/refresh') === false) {
-        const authStore = useAuthStore();
-
-        if (authStore.refreshToken) {
-          const accessToken = await authStore.refreshAccessToken();
-          if (accessToken) {
-            const retriedHeaders = new Headers(request.headers);
-            retriedHeaders.set('Authorization', `Bearer ${authStore.accessToken}`);
-            const retriedRequest = new Request(request, {
-              headers: retriedHeaders,
-              body: originalBody,
-            });
-            response = await fetch(retriedRequest);
-          }
-        }
-      }
-      return response;
-    };
-
-    try {
-      return await fetchWithRetry(originalRequest);
-    } catch (error) {
-      toast.error('An error occurred. Please try again later.');
-      throw error;
-    }
-  },
+  baseUrl: baseUrl,
+  fetch: customFetch,
 });
 
-client.use(authMiddleware);
-
-export { client };
+export { baseUrl, client, customFetch, createServerEventSource };

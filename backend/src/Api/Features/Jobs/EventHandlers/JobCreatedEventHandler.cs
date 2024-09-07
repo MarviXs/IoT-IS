@@ -14,6 +14,8 @@ public class JobCreatedEventHandler(IServiceScopeFactory serviceScopeFactory) : 
     public async Task Handle(JobCreatedEvent notification, CancellationToken cancellationToken)
     {
         using var scope = serviceScopeFactory.CreateScope();
+
+        // Publish job status to MQTT
         var publishJobStatus = scope.ServiceProvider.GetRequiredService<PublishJobStatus>();
         await publishJobStatus.Execute(notification.Job.DeviceId, notification.Job.Device.AccessToken, notification.Job);
     }

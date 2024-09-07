@@ -6,7 +6,7 @@
         color="grey-color"
         :icon="mdiPause"
         :loading="pausingJob"
-        :disable="status === JobStatusEnum.JOB_PAUSED"
+        :disable="status === FeiIsApiDataEnumsJobStatusEnum.JOB_PAUSED"
         @click="pauseJob"
       ></JobControlButton>
     </div>
@@ -59,6 +59,7 @@ import { useI18n } from 'vue-i18n';
 import { mdiPause, mdiPlay, mdiSkipNext, mdiSkipForward, mdiStop } from '@quasar/extras/mdi-v7';
 import { JobStatusEnum } from '@/models/JobStatusEnum';
 import { PropType } from 'vue';
+import { FeiIsApiDataEnumsJobStatusEnum } from '@/api/generated/schema.d';
 
 const props = defineProps({
   jobId: {
@@ -70,7 +71,7 @@ const props = defineProps({
     required: true,
   },
   status: {
-    type: Object as PropType<JobStatusEnum>,
+    type: String as PropType<FeiIsApiDataEnumsJobStatusEnum>,
     required: true,
   },
 });

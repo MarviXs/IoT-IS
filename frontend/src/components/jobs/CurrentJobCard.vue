@@ -11,10 +11,23 @@
         />
         <q-space></q-space>
         <q-btn
+          color="grey-color"
+          unelevated
+          :icon="mdiPlayCircleOutline"
+          no-caps
+          flat
+          dense
+          round
+          size="15px"
+          @click.stop="openDialog = true"
+        >
+          <q-tooltip :offset="[0, 4]">{{ t('job.run_job') }}</q-tooltip>
+        </q-btn>
+        <q-btn
           v-if="activeJob"
           dense
           size="14px"
-          :icon="mdiOpenInNew"
+          :icon="mdiEye"
           color="grey-color"
           :to="`/jobs/${activeJob.id}?device=${activeJob.deviceId}`"
           flat
@@ -22,10 +35,9 @@
           ><q-tooltip :offset="[0, 4]">{{ t('global.details') }}</q-tooltip>
         </q-btn>
       </template>
-      <div class="q-px-lg q-pb-md">
+      <div class="q-px-lg q-pb-sm">
         <div class="column full-height">
-          <div class="row items-center"></div>
-          <div v-if="activeJob" class="column justify-between col-grow q-my-sm wrap">
+          <div v-if="activeJob" class="column justify-between col-grow q-mt-sm wrap">
             <div class="row justify-start items-center q-mb-sm">
               <q-circular-progress
                 show-value
@@ -56,11 +68,25 @@
               class="col-grow"
               :job-id="activeJob.id"
               :paused="activeJob.paused"
-              :status="activeJob.status as JobStatusEnum"
-              @action-performed="getActiveJob"
+              :status="activeJob.status"
+              @action-performed="getActiveJob()"
             />
+            <div class="flex justify-center q-mt-md">
+              <div class="row items-center q-gutter-x-sm">
+                <q-btn flat dense round :icon="mdiChevronLeft" :disable="currentJobIndex === 0" @click="previousJob" />
+                <span class="text-caption">{{ currentJobIndex + 1 }} of {{ activeJobs.length }}</span>
+                <q-btn
+                  flat
+                  dense
+                  round
+                  :icon="mdiChevronRight"
+                  :disable="currentJobIndex === activeJobs.length - 1"
+                  @click="nextJob"
+                />
+              </div>
+            </div>
           </div>
-          <div v-else class="column items-center justify-center col-grow">
+          <div v-else class="column items-center justify-center col-grow q-mt-sm q-mb-md">
             <div class="q-mb-sm">{{ t('job.no_running_job') }}</div>
             <q-btn
               class="shadow"
@@ -85,13 +111,13 @@ import StartJobDialog from '@/components/jobs/StartJobDialog.vue';
 import JobControls from './JobControls.vue';
 import JobStatusBadges from './JobStatusBadges.vue';
 import { useI18n } from 'vue-i18n';
-import { mdiOpenInNew } from '@quasar/extras/mdi-v7';
+import { mdiChevronLeft, mdiChevronRight, mdiEye, mdiPlayCircleOutline } from '@quasar/extras/mdi-v7';
 import JobService from '@/api/services/JobService';
-import { ActiveJobResponse } from '@/api/types/Job';
+import { ActiveJobsResponse } from '@/api/types/Job';
 import { handleError } from '@/utils/error-handler';
-import { ref } from 'vue';
-import { ProblemDetails } from '@/api/types/ProblemDetails';
+import { computed, onUnmounted, ref } from 'vue';
 import { JobStatusEnum } from '@/models/JobStatusEnum';
+import { EventSourceClient, EventSourceMessage } from 'eventsource-client';
 
 const props = defineProps({
   deviceId: {
@@ -103,29 +129,67 @@ const props = defineProps({
 const { t } = useI18n();
 const openDialog = ref(false);
 
-const activeJob = ref<ActiveJobResponse | null>(null);
-const isLoadingJob = ref(false);
+const activeJobs = ref<ActiveJobsResponse>([]);
+const selectedJobId = ref<string | null>(null);
+
+const isLoadingJobs = ref(false);
 
 async function getActiveJob() {
-  isLoadingJob.value = true;
-  const { data, error } = await JobService.getActiveJob(props.deviceId);
-  isLoadingJob.value = false;
+  isLoadingJobs.value = true;
+  const { data, error } = await JobService.getActiveJobs(props.deviceId);
+  isLoadingJobs.value = false;
 
   if (error) {
-    const problemDetails = error as ProblemDetails;
-
-    if (problemDetails.status === 404) {
-      activeJob.value = null;
-      return;
-    }
-
     handleError(error, t('device.toasts.loading_failed'));
     return;
   }
-
-  activeJob.value = data;
+  activeJobs.value = data;
 }
 getActiveJob();
+
+let es: EventSourceClient | null = null;
+async function getActiveJobsSSE() {
+  es = JobService.getActiveJobsEventSource(props.deviceId);
+
+  for await (const { data, event, id } of es) {
+    const jobs = JSON.parse(data);
+    activeJobs.value = jobs;
+    console.log(jobs);
+  }
+
+  es.close();
+}
+getActiveJobsSSE();
+
+const activeJob = computed(() => {
+  if (!activeJobs.value || activeJobs.value.length === 0) {
+    return null;
+  }
+  return activeJobs.value.find((job) => job.id === selectedJobId.value) || activeJobs.value[0];
+});
+
+const currentJobIndex = computed(() => {
+  if (!activeJobs.value || !activeJob.value) {
+    return -1;
+  }
+  return activeJobs.value.findIndex((job) => job.id === activeJob.value?.id);
+});
+
+function previousJob() {
+  const index = currentJobIndex.value - 1;
+  selectedJobId.value = activeJobs.value[index].id;
+}
+
+function nextJob() {
+  const index = currentJobIndex.value + 1;
+  selectedJobId.value = activeJobs.value[index].id;
+}
+
+onUnmounted(() => {
+  if (es) {
+    es.close();
+  }
+});
 </script>
 
 <style lang="scss" scoped></style>

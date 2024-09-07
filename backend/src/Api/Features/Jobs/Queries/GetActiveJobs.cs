@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fei.Is.Api.Features.Jobs.Queries;
 
-public static class GetActiveJob
+public static class GetActiveJobs
 {
     public sealed class Endpoint : ICarterModule
     {
@@ -21,7 +21,7 @@ public static class GetActiveJob
         {
             app.MapGet(
                     "devices/{deviceId:guid}/jobs/active",
-                    async Task<Results<Ok<Response>, NotFound, ForbidHttpResult>> (IMediator mediator, ClaimsPrincipal user, Guid deviceId) =>
+                    async Task<Results<Ok<List<Response>>, NotFound, ForbidHttpResult>> (IMediator mediator, ClaimsPrincipal user, Guid deviceId) =>
                     {
                         var query = new Query(user, deviceId);
                         var result = await mediator.Send(query);
@@ -39,21 +39,21 @@ public static class GetActiveJob
                         return TypedResults.Ok(result.Value);
                     }
                 )
-                .WithName(nameof(GetActiveJob))
+                .WithName(nameof(GetActiveJobs))
                 .WithTags(nameof(Job))
                 .WithOpenApi(o =>
                 {
-                    o.Summary = "Get the active job on a device";
+                    o.Summary = "Get all active jobs on a device";
                     return o;
                 });
         }
     }
 
-    public record Query(ClaimsPrincipal User, Guid DeviceId) : IRequest<Result<Response>>;
+    public record Query(ClaimsPrincipal User, Guid DeviceId) : IRequest<Result<List<Response>>>;
 
-    public sealed class Handler(AppDbContext context) : IRequestHandler<Query, Result<Response>>
+    public sealed class Handler(AppDbContext context) : IRequestHandler<Query, Result<List<Response>>>
     {
-        public async Task<Result<Response>> Handle(Query request, CancellationToken cancellationToken)
+        public async Task<Result<List<Response>>> Handle(Query request, CancellationToken cancellationToken)
         {
             var device = await context.Devices.AsNoTracking().Where(d => d.Id == request.DeviceId).SingleOrDefaultAsync(cancellationToken);
 
@@ -66,33 +66,31 @@ public static class GetActiveJob
                 return Result.Fail(new ForbiddenError());
             }
 
-            var activeJob = await context
+            var activeJobs = await context
                 .Jobs.AsNoTracking()
                 .GetActiveJobs(request.DeviceId)
                 .Include(j => j.Commands.OrderBy(c => c.Order))
-                .FirstOrDefaultAsync(cancellationToken);
+                .ToListAsync(cancellationToken);
 
-            if (activeJob == null)
+            var responses = activeJobs.Select(activeJob =>
             {
-                return Result.Fail(new NotFoundError());
-            }
+                var currentCommand = activeJob.Commands.ElementAtOrDefault(activeJob.CurrentStep - 1)?.Name ?? string.Empty;
+                return new Response(
+                    activeJob.Id,
+                    activeJob.DeviceId,
+                    activeJob.Name,
+                    activeJob.TotalSteps,
+                    activeJob.TotalCycles,
+                    activeJob.CurrentStep,
+                    activeJob.CurrentCycle,
+                    currentCommand,
+                    activeJob.Paused,
+                    activeJob.GetProgress(),
+                    activeJob.Status
+                );
+            }).ToList();
 
-            var currentCommand = activeJob.Commands.ElementAtOrDefault(activeJob.CurrentStep - 1)?.Name ?? string.Empty;
-            var response = new Response(
-                activeJob.Id,
-                activeJob.DeviceId,
-                activeJob.Name,
-                activeJob.TotalSteps,
-                activeJob.TotalCycles,
-                activeJob.CurrentStep,
-                activeJob.CurrentCycle,
-                currentCommand,
-                activeJob.Paused,
-                activeJob.GetProgress(),
-                activeJob.Status
-            );
-
-            return Result.Ok(response);
+            return Result.Ok(responses);
         }
     }
 

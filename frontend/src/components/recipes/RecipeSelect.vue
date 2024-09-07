@@ -77,9 +77,7 @@ async function filterFn(
   doneFn: (callbackFn: () => void, afterFn?: ((ref: QSelect) => void) | undefined) => void,
 ) {
   if (val === filter.value) {
-    doneFn(() => {
-      console.log('doneFn');
-    });
+    doneFn(() => {});
     return;
   }
 
@@ -88,9 +86,7 @@ async function filterFn(
   lastPage.value = 1;
   recipes.value = [];
   await getOnScroll({ to: -1, ref: null });
-  doneFn(() => {
-    console.log('doneFn');
-  });
+  doneFn(() => {});
 }
 
 const recipeOptions = computed(() => {

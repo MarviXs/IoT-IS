@@ -466,8 +466,25 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get the active job on a device */
-        get: operations["GetActiveJob"];
+        /** Get all active jobs on a device */
+        get: operations["GetActiveJobs"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/devices/{deviceId}/jobs/active/sse": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get all active jobs on a device using Server-Sent Events */
+        get: operations["GetActiveJobsSSE"];
         put?: never;
         post?: never;
         delete?: never;
@@ -824,9 +841,9 @@ export interface components {
             items: components["schemas"]["Fei.Is.Api.Features.UserManagement.Queries.GetUsers.Response"][];
         };
         /** @enum {string} */
-        "Fei.Is.Api.Data.Enums.JobStatusEnum": "JOB_QUEUED" | "JOB_IN_PROGRESS" | "JOB_PAUSED" | "JOB_SUCCEEDED" | "JOB_REJECTED" | "JOB_FAILED" | "JOB_TIMED_OUT" | "JOB_CANCELED";
+        "Fei.Is.Api.Data.Enums.JobStatusEnum": FeiIsApiDataEnumsJobStatusEnum;
         /** @enum {string} */
-        "Fei.Is.Api.Data.Enums.Role": "Admin" | "User";
+        "Fei.Is.Api.Data.Enums.Role": FeiIsApiDataEnumsRole;
         "Fei.Is.Api.Features.AdminUserManagement.Commands.UpdateUserEmail.Request": {
             email: string;
         };
@@ -912,7 +929,7 @@ export interface components {
             timeStamp?: number | null;
         };
         /** @enum {string} */
-        "Fei.Is.Api.Features.DataPoints.Queries.GetSensorDataPoints.DownsampleMethod": "Asap" | "Lttb";
+        "Fei.Is.Api.Features.DataPoints.Queries.GetSensorDataPoints.DownsampleMethod": FeiIsApiFeaturesDataPointsQueriesGetSensorDataPointsDownsampleMethod;
         "Fei.Is.Api.Features.DataPoints.Queries.GetSensorDataPoints.Response": {
             /** Format: date-time */
             ts: string;
@@ -920,7 +937,7 @@ export interface components {
             value?: number | null;
         };
         /** @enum {string} */
-        "Fei.Is.Api.Features.DataPoints.Queries.GetSensorDataPoints.TimeBucketMethod": "Average" | "Max" | "Min" | "StdDev" | "Sum";
+        "Fei.Is.Api.Features.DataPoints.Queries.GetSensorDataPoints.TimeBucketMethod": FeiIsApiFeaturesDataPointsQueriesGetSensorDataPointsTimeBucketMethod;
         "Fei.Is.Api.Features.DeviceCollections.Commands.CreateDeviceCollection.Request": {
             name: string;
             /** Format: uuid */
@@ -953,7 +970,7 @@ export interface components {
             type: components["schemas"]["Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionById.SubItemTypes"];
         };
         /** @enum {string} */
-        "Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionById.SubItemTypes": "Device" | "SubCollection";
+        "Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionById.SubItemTypes": FeiIsApiFeaturesDeviceCollectionsQueriesGetDeviceCollectionByIdSubItemTypes;
         "Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionWithSensors.Response": {
             /** Format: uuid */
             id: string;
@@ -972,7 +989,7 @@ export interface components {
             accuracyDecimals?: number | null;
         };
         /** @enum {string} */
-        "Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionWithSensors.SubItemTypes": "Device" | "SubCollection" | "Sensor";
+        "Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionWithSensors.SubItemTypes": FeiIsApiFeaturesDeviceCollectionsQueriesGetDeviceCollectionWithSensorsSubItemTypes;
         "Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollections.Response": {
             /** Format: uuid */
             id: string;
@@ -1049,7 +1066,7 @@ export interface components {
             /** Format: int32 */
             cycles: number;
         };
-        "Fei.Is.Api.Features.Jobs.Queries.GetActiveJob.Response": {
+        "Fei.Is.Api.Features.Jobs.Queries.GetActiveJobs.Response": {
             /** Format: uuid */
             id: string;
             /** Format: uuid */
@@ -1070,7 +1087,7 @@ export interface components {
             status: components["schemas"]["Fei.Is.Api.Data.Enums.JobStatusEnum"];
         };
         /** @enum {string} */
-        "Fei.Is.Api.Features.Jobs.Queries.GetJobById.CommandProgress": "CommandPending" | "CommandProcessing" | "CommandDone";
+        "Fei.Is.Api.Features.Jobs.Queries.GetJobById.CommandProgress": FeiIsApiFeaturesJobsQueriesGetJobByIdCommandProgress;
         "Fei.Is.Api.Features.Jobs.Queries.GetJobById.CommandResponse": {
             /** Format: int32 */
             order: number;
@@ -2504,7 +2521,7 @@ export interface operations {
             };
         };
     };
-    GetActiveJob: {
+    GetActiveJobs: {
         parameters: {
             query?: never;
             header?: never;
@@ -2521,11 +2538,31 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Features.Jobs.Queries.GetActiveJob.Response"];
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.Jobs.Queries.GetActiveJobs.Response"][];
                 };
             };
             /** @description Not Found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GetActiveJobsSSE: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                deviceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3260,4 +3297,43 @@ export interface operations {
             };
         };
     };
+}
+export enum FeiIsApiDataEnumsJobStatusEnum {
+    JOB_QUEUED = "JOB_QUEUED",
+    JOB_IN_PROGRESS = "JOB_IN_PROGRESS",
+    JOB_PAUSED = "JOB_PAUSED",
+    JOB_SUCCEEDED = "JOB_SUCCEEDED",
+    JOB_REJECTED = "JOB_REJECTED",
+    JOB_FAILED = "JOB_FAILED",
+    JOB_TIMED_OUT = "JOB_TIMED_OUT",
+    JOB_CANCELED = "JOB_CANCELED"
+}
+export enum FeiIsApiDataEnumsRole {
+    Admin = "Admin",
+    User = "User"
+}
+export enum FeiIsApiFeaturesDataPointsQueriesGetSensorDataPointsDownsampleMethod {
+    Asap = "Asap",
+    Lttb = "Lttb"
+}
+export enum FeiIsApiFeaturesDataPointsQueriesGetSensorDataPointsTimeBucketMethod {
+    Average = "Average",
+    Max = "Max",
+    Min = "Min",
+    StdDev = "StdDev",
+    Sum = "Sum"
+}
+export enum FeiIsApiFeaturesDeviceCollectionsQueriesGetDeviceCollectionByIdSubItemTypes {
+    Device = "Device",
+    SubCollection = "SubCollection"
+}
+export enum FeiIsApiFeaturesDeviceCollectionsQueriesGetDeviceCollectionWithSensorsSubItemTypes {
+    Device = "Device",
+    SubCollection = "SubCollection",
+    Sensor = "Sensor"
+}
+export enum FeiIsApiFeaturesJobsQueriesGetJobByIdCommandProgress {
+    CommandPending = "CommandPending",
+    CommandProcessing = "CommandProcessing",
+    CommandDone = "CommandDone"
 }

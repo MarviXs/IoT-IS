@@ -1,9 +1,14 @@
-import { client } from '@/api/client';
-import { JobsQueryParams, StartJobRequest } from '../types/Job';
+import { client, customFetch, baseUrl, createServerEventSource } from '@/api/client';
+import { ActiveJobsResponse, JobsQueryParams, StartJobRequest } from '../types/Job';
+import { EventSourceMessage } from 'eventsource-client';
 
 class JobService {
-  async getActiveJob(deviceId: string) {
+  async getActiveJobs(deviceId: string) {
     return await client.GET('/devices/{deviceId}/jobs/active', { params: { path: { deviceId } } });
+  }
+
+  getActiveJobsEventSource(deviceId: string) {
+    return createServerEventSource(`devices/${deviceId}/jobs/active/sse`);
   }
 
   async getJob(jobId: string) {
