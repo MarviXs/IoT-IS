@@ -8,7 +8,7 @@
   >
     <template #title>{{ t('job.run_job') }}</template>
     <template #default>
-      <RecipeSelect v-model="selectedRecipe" />
+      <RecipeSelect v-model="selectedRecipe" :device-id="deviceId" />
       <q-input
         ref="repetitionsRef"
         v-model="jobToRun.cycles"

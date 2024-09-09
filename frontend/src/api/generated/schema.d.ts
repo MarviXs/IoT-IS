@@ -1036,6 +1036,9 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
+            connected: boolean;
+            /** Format: date-time */
+            lastSeen?: string | null;
         };
         "Fei.Is.Api.Features.Devices.Queries.GetDeviceById.SensorResponse": {
             /** Format: uuid */
@@ -2982,6 +2985,7 @@ export interface operations {
         parameters: {
             query?: {
                 DeviceTemplateId?: string;
+                DeviceId?: string;
                 SortBy?: string;
                 Descending?: boolean;
                 SearchTerm?: string;

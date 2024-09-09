@@ -17,6 +17,7 @@
             </div>
           </div>
           <p class="title-text current-item">{{ currentItem.label }}</p>
+          <slot name="after-title" />
         </div>
         <slot name="description" />
         <q-space></q-space>

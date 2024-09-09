@@ -69,6 +69,8 @@ public static class GetActiveJobsSSE
                             channel,
                             async (channel, message) =>
                             {
+                                using var innerScope = serviceProvider.CreateScope();
+                                var mediator = innerScope.ServiceProvider.GetRequiredService<IMediator>();
                                 var result = await mediator.Send(query, ct);
                                 await SendSSEEvent(response, result.Value, ct);
                             }
@@ -130,7 +132,7 @@ public static class GetActiveJobsSSE
             var responses = activeJobs
                 .Select(activeJob =>
                 {
-                    var currentCommand = activeJob.Commands.ElementAtOrDefault(activeJob.CurrentStep - 1)?.Name ?? string.Empty;
+                    var currentCommand = activeJob.Commands.ElementAtOrDefault(activeJob.CurrentStep - 1)?.DisplayName ?? string.Empty;
                     return new Response(
                         activeJob.Id,
                         activeJob.DeviceId,

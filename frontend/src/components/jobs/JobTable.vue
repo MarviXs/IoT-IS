@@ -22,7 +22,7 @@
 
     <template #body-cell-deviceName="tableProps">
       <q-td :props="tableProps">
-        <router-link class="text-black" :to="`/devices/${tableProps.row.device.id}`">
+        <router-link class="text-primary" :to="`/devices/${tableProps.row.device.id}`">
           {{ tableProps.row.device.name }}</router-link
         >
       </q-td>

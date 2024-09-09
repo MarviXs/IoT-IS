@@ -4,10 +4,12 @@ using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
+using Fei.Is.Api.Redis;
 using FluentResults;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using StackExchange.Redis;
 
 namespace Fei.Is.Api.Features.Devices.Queries;
 
@@ -48,7 +50,7 @@ public static class GetDeviceById
 
     public record Query(Guid DeviceId, ClaimsPrincipal User) : IRequest<Result<Response>>;
 
-    public sealed class Handler(AppDbContext context) : IRequestHandler<Query, Result<Response>>
+    public sealed class Handler(AppDbContext context, RedisService redis) : IRequestHandler<Query, Result<Response>>
     {
         public async Task<Result<Response>> Handle(Query request, CancellationToken cancellationToken)
         {
@@ -67,6 +69,12 @@ public static class GetDeviceById
                 return Result.Fail(new ForbiddenError());
             }
 
+            RedisKey isOnlineKey = $"device:{device.Id}:connected";
+            RedisKey lastSeenKey = $"device:{device.Id}:lastSeen";
+
+            RedisValue isOnline = await redis.Db.StringGetAsync(isOnlineKey);
+            RedisValue lastSeen = await redis.Db.StringGetAsync(lastSeenKey);
+
             var response = new Response(
                 device.Id,
                 device.Name,
@@ -82,7 +90,9 @@ public static class GetDeviceById
                         .ToArray()
                 ) : null,
                 device.CreatedAt,
-                device.UpdatedAt
+                device.UpdatedAt,
+                isOnline.HasValue && isOnline == "1",
+                lastSeen.HasValue && long.TryParse(lastSeen, out var timestamp) ? DateTimeOffset.FromUnixTimeSeconds(timestamp) : null
             );
 
             return Result.Ok(response);
@@ -100,6 +110,8 @@ public static class GetDeviceById
         string? AccessToken,
         TemplateResponse? DeviceTemplate,
         DateTime CreatedAt,
-        DateTime UpdatedAt
+        DateTime UpdatedAt,
+        bool Connected,
+        DateTimeOffset? LastSeen
     );
 }

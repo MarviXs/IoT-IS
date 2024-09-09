@@ -5,6 +5,9 @@
       { label: device?.name, to: `/devices/${deviceId}` },
     ]"
   >
+    <template #after-title>
+      <StatusDot v-if="device" :connected="device.connected" />
+    </template>
     <template v-if="device" #actions>
       <q-btn
         class="shadow bg-white"
@@ -79,6 +82,7 @@ import { handleError } from '@/utils/error-handler';
 import { DeviceResponse } from '@/api/types/Device';
 import EditDeviceDialog from '@/components/devices/EditDeviceDialog.vue';
 import { SensorNode } from '@/models/SensorNode';
+import StatusDot from '@/components/devices/StatusDot.vue';
 
 const { t } = useI18n();
 

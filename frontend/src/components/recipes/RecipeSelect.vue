@@ -26,6 +26,13 @@ export interface RecipeSelectData {
   name?: string;
 }
 
+const props = defineProps({
+  deviceId: {
+    type: String,
+    required: false,
+  },
+});
+
 const { t } = useI18n();
 
 const selectedRecipe = defineModel<RecipeSelectData>({ required: false });
@@ -41,16 +48,17 @@ async function getOnScroll({ to, ref }: { to: number; ref: QSelect | null }) {
 
   if (loadingRecipes.value || nextPage.value > lastPage.value || lastIndex != to) return;
 
-  const paginationQuery: RecipesQueryParams = {
+  const queryParams: RecipesQueryParams = {
     SortBy: 'name',
     Descending: false,
     SearchTerm: filter.value,
     PageNumber: nextPage.value,
     PageSize: 50,
+    DeviceId: props.deviceId,
   };
 
   loadingRecipes.value = true;
-  const { data, error } = await RecipeService.getRecipes(paginationQuery);
+  const { data, error } = await RecipeService.getRecipes(queryParams);
   loadingRecipes.value = false;
 
   if (error) {

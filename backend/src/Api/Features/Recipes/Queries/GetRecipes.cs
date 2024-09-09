@@ -19,6 +19,7 @@ public static class GetRecipes
     public class QueryParameters : SearchParameters
     {
         public Guid? DeviceTemplateId { get; init; }
+        public Guid? DeviceId { get; init; }
     }
 
     public sealed class Endpoint : ICarterModule
@@ -76,9 +77,11 @@ public static class GetRecipes
             var query = context
                 .Recipes.AsNoTracking()
                 .Include(d => d.DeviceTemplate)
+                .Include(d => d.DeviceTemplate!.Devices)
                 .Where(d => d.DeviceTemplate!.OwnerId == message.User.GetUserId())
                 .Where(d => d.Name.ToLower().Contains(StringUtils.Normalized(queryParameters.SearchTerm)))
-                .Where(d => queryParameters.DeviceTemplateId == null || d.DeviceTemplateId == queryParameters.DeviceTemplateId);
+                .Where(d => queryParameters.DeviceTemplateId == null || d.DeviceTemplateId == queryParameters.DeviceTemplateId)
+                .Where(d => queryParameters.DeviceId == null || d.DeviceTemplate!.Devices.Any(device => device.Id == queryParameters.DeviceId));
 
             var totalCount = await query.CountAsync(cancellationToken);
 
