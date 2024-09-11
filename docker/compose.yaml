@@ -41,7 +41,7 @@ services:
       - RedisSettings__Password=${REDIS_PASSWORD}
       - JwtSettings__ValidIssuer=${BACKEND_DOMAIN}
       - JwtSettings__ValidAudience=${FRONTEND_DOMAIN}
-      - Cors__AllowedOrigins=${FRONTEND_DOMAIN}
+      - Cors__AllowedOrigins=https://${FRONTEND_DOMAIN}
     ports:
       - 5097:5097
       - 5096:5096
