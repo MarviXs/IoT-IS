@@ -1,5 +1,9 @@
-# Redirect HTTP to HTTPS
+# Redirect HTTP to HTTPS, except for MQTT domain
 http:// {
+    @mqtt {
+        host {$MQTT_DOMAIN}
+    }
+    redir @mqtt http://{host}{uri}
     redir https://{host}{uri}
 }
 
@@ -13,14 +17,7 @@ https://{$BACKEND_DOMAIN} {
     reverse_proxy backend:5097
 }
 
-# Proxy for EMQX dashboard (port 1883)
+# Proxy for MQTT broker (port 1883)
 http://{$MQTT_DOMAIN} {
     reverse_proxy emqx:1883
 }
-
-# Serve any static files if needed (optional)
-# If you want to serve static files, uncomment the section below:
-# https://static.your-domain.com {
-#     root * /path/to/static/files
-#     file_server
-# }
