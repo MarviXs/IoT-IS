@@ -1,9 +1,5 @@
-# Redirect HTTP to HTTPS, except for MQTT domain
+# Redirect HTTP to HTTPS
 http:// {
-    @mqtt {
-        host {$MQTT_DOMAIN}
-    }
-    redir @mqtt http://{host}{uri}
     redir https://{host}{uri}
 }
 
@@ -15,9 +11,4 @@ https://{$FRONTEND_DOMAIN} {
 # Proxy for the backend (port 5097)
 https://{$BACKEND_DOMAIN} {
     reverse_proxy backend:5097
-}
-
-# Proxy for MQTT broker (port 1883)
-http://{$MQTT_DOMAIN} {
-    reverse_proxy emqx:1883
 }
