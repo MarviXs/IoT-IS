@@ -39,6 +39,9 @@ services:
       - MqttSettings__Username=${EMQX_USERNAME}
       - MqttSettings__Password=${EMQX_PASSWORD}
       - RedisSettings__Password=${REDIS_PASSWORD}
+      - JwtSettings__ValidIssuer=${BACKEND_DOMAIN}
+      - JwtSettings__ValidAudience=${FRONTEND_DOMAIN}
+      - Cors__AllowedOrigins=${FRONTEND_DOMAIN}
     ports:
       - 5097:5097
       - 5096:5096

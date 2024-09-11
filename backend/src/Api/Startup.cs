@@ -23,7 +23,16 @@ public class Startup(IConfiguration configuration)
         // Add services to the container.
         services.ConfigurePostgresContext(Configuration);
         services.ConfigureTimescaleContext(Configuration);
-        services.AddCors();
+        services.AddCors(options =>
+        {
+            options.AddPolicy(
+                "CorsPolicy",
+                builder =>
+                {
+                    builder.WithOrigins(Configuration["Cors:AllowedOrigins"] ?? "*").AllowAnyMethod().AllowAnyHeader();
+                }
+            );
+        });
         services.AddControllers();
         services.ConfigureProblemDetails();
         services.AddCarter();
@@ -69,7 +78,7 @@ public class Startup(IConfiguration configuration)
         services.AddScoped<DataPointReceived>();
         services.AddScoped<PublishJobControl>();
         services.AddScoped<PublishJobStatus>();
-        
+
         // Add validators
         services.AddValidatorsFromAssemblyContaining<Startup>(ServiceLifetime.Scoped);
     }
@@ -82,9 +91,8 @@ public class Startup(IConfiguration configuration)
             app.UseSwaggerUI();
             app.UseDeveloperExceptionPage();
         }
-
-        // TODO: Remove this in production
-        app.UseCors(x => x.AllowAnyMethod().AllowAnyHeader().SetIsOriginAllowed(origin => true).AllowCredentials());
+        
+        app.UseCors("CorsPolicy");
 
         app.UseStatusCodePages();
 
