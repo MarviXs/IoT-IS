@@ -34,6 +34,7 @@ public class AppDbContext
 
         modelBuilder.ApplyConfiguration(new ApplicationUserConfiguration());
         modelBuilder.ApplyConfiguration(new ApplicationRoleConfiguration());
+        modelBuilder.ApplyConfiguration(new ApplicationUserRoleConfiguration());
         modelBuilder.ApplyConfiguration(new RecipeConfiguration());
         modelBuilder.ApplyConfiguration(new RecipeStepConfiguration());
         modelBuilder.ApplyConfiguration(new DeviceTemplateConfiguration());
