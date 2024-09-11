@@ -78,6 +78,7 @@ public static class UpdateUserEmail
             }
 
             user.Email = message.Request.Email;
+            user.UserName = message.Request.Email;
 
             var resultUpdate = await userManager.UpdateAsync(user);
 
