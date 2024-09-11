@@ -1,5 +1,19 @@
 name: iot-is
 services:
+  caddy:
+    image: caddy:latest
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile
+      - ./caddy/data:/data
+      - ./caddy/config:/config
+    environment:
+      - FRONTEND_DOMAIN=${FRONTEND_DOMAIN}
+      - BACKEND_DOMAIN=${BACKEND_DOMAIN}
+      - MQTT_DOMAIN=${MQTT_DOMAIN}
   frontend:
     restart: unless-stopped
     image: iot-is-frontend
@@ -31,7 +45,7 @@ services:
   pg:
     image: postgres:16-alpine3.20
     restart: unless-stopped
-    shm_size: 1024mb
+    shm_size: 256mb
     environment:
       POSTGRES_USER: is
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -41,17 +55,11 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     command:
-      [
-        "postgres",
-        "-c",
-        "synchronous_commit=off",
-        "-c",
-        "max_connections=200"
-      ]
+      ["postgres", "-c", "synchronous_commit=off", "-c", "max_connections=200"]
   timescaledb:
-    image: timescale/timescaledb-ha:pg16.3-ts2.15.3
+    image: timescale/timescaledb-ha:pg16.4-ts2.16.1
     restart: unless-stopped
-    shm_size: 2048mb
+    shm_size: 256mb
     environment:
       POSTGRES_USER: is
       POSTGRES_PASSWORD: ${TIMESCALE_PASSWORD}
@@ -61,22 +69,14 @@ services:
     volumes:
       - timescaledb_data:/home/postgres/pgdata/data
     command:
-      [
-        "postgres",
-        "-c",
-        "synchronous_commit=off",
-        "-c",
-        "max_connections=300"
-      ]
+      ["postgres", "-c", "synchronous_commit=off", "-c", "max_connections=300"]
   emqx:
-    image: emqx/emqx:5.7.2
+    image: emqx/emqx:5.8.0
     network_mode: "bridge"
     restart: unless-stopped
     ports:
       - "1883:1883" # MQTT
-      - "8083:8083" # MQTT over WebSocket
       - "8883:8883" # MQTT over SSL/TLS
-      - "8084:8084" # MQTT over WSS (WebSocket Secure)
       - "18083:18083" # Dashboard
     volumes:
       - ./emqx/cluster.hocon:/opt/emqx/data/configs/cluster.hocon
@@ -85,7 +85,7 @@ services:
   redis:
     image: redis/redis-stack:7.2.0-v11
     restart: unless-stopped
-    command: [ "redis-server", "--requirepass", "${REDIS_PASSWORD}" ]
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
     ports:
       - "6379:6379"
 volumes:

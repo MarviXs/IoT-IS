@@ -8,6 +8,15 @@
       />
     </div>
     <div>
+      <q-select
+        v-model="graphOptions.timeFormat"
+        :options="timeFormatOptions"
+        :label="t('chart.time_format')"
+        map-options
+        emit-value
+      ></q-select>
+    </div>
+    <div>
       <div class="form-subtitle text-primary">Graph Style</div>
       <div class="chart-form">
         <q-select
@@ -89,6 +98,7 @@ import { useI18n } from 'vue-i18n';
 
 export type GraphOptions = {
   refreshInterval: number;
+  timeFormat: '12h' | '24h';
 
   interpolationMethod: 'straight' | 'bezier';
   lineStyle: string;
@@ -103,6 +113,11 @@ export type GraphOptions = {
 };
 
 const { t } = useI18n();
+
+const timeFormatOptions = [
+  { value: '12h', label: '12 hours' },
+  { value: '24h', label: '24 hours' },
+];
 
 const samplingOptions = [
   { value: 'DOWNSAMPLE', label: 'Downsample' },

@@ -219,6 +219,7 @@
       "geometry_mean": "Geometric mean",
       "harmonic_mean": "Harmonic mean"
     },
+    "time_format": "Time format",
     "curve_type": "Interpolation",
     "curve_options": {
       "straight": "Straight",

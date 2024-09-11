@@ -115,6 +115,7 @@ const tickedNodes = defineModel('tickedNodes', {
 const isGraphOptionsDialogOpen = ref(false);
 const graphOptions = useStorage<GraphOptions>('graphOptions', {
   refreshInterval: 0,
+  timeFormat: '24h',
 
   interpolationMethod: 'straight',
   lineStyle: 'lines',
@@ -195,7 +196,8 @@ async function onClickRefresh() {
 
 function roundNumber(num: number | undefined | null, decimals: number) {
   if (num === undefined || num === null) return num;
-  return Math.round(num * Math.pow(10, decimals)) / Math.pow(10, decimals);
+  const factor = 10 ** decimals;
+  return Math.round(num * factor) / factor;
 }
 
 function updateChartData() {
@@ -222,7 +224,7 @@ function updateChartData() {
       data:
         dataPoints.get(key)?.map((dataPoint) => ({
           x: dataPoint.ts,
-          y: roundNumber(dataPoint.value, sensor.accuracyDecimals ?? 2),
+          y: dataPoint.value,
         })) ?? [],
       backgroundColor: transparentize(graphColors[index], 0.5),
       borderColor: graphColors[index],
@@ -246,13 +248,13 @@ function updateChartData() {
       position: 'left',
       axis: 'y',
       grid: {
-        drawOnChartArea: index === 0, // only want the grid lines for one axis to show up
+        drawOnChartArea: index === 0,
       },
       ticks: {
         color: color,
         callback: function (value) {
           if (typeof value !== 'number') return value;
-          return `${value} ${unit}`;
+          return `${roundNumber(value, props.sensors[index].accuracyDecimals ?? 2)} ${unit}`;
         },
       },
     };
@@ -345,7 +347,12 @@ onMounted(() => {
         tooltip: {
           callbacks: {
             label: (context) => {
-              return `${context.dataset.label}: ${context.parsed.y} ${props.sensors[context.datasetIndex].unit}`;
+              const sensor = props.sensors[context.datasetIndex];
+              const roundedValue =
+                sensor.accuracyDecimals !== undefined && sensor.accuracyDecimals !== null
+                  ? roundNumber(context.parsed.y, sensor.accuracyDecimals)
+                  : context.parsed.y;
+              return `${context.dataset.label}: ${roundedValue} ${sensor.unit || ''}`;
             },
           },
         },
@@ -379,6 +386,16 @@ onMounted(() => {
           type: 'time',
           grid: {
             drawOnChartArea: false,
+          },
+          time: {
+            tooltipFormat:
+              graphOptions.value.timeFormat === '12h' ? 'MMM d, yyyy, hh:mm:ss a' : 'MMM d, yyyy, HH:mm:ss',
+            displayFormats: {
+              millisecond: graphOptions.value.timeFormat === '12h' ? 'hh:mm:ss.SSS a' : 'HH:mm:ss.SSS',
+              second: graphOptions.value.timeFormat === '12h' ? 'hh:mm:ss a' : 'HH:mm:ss',
+              minute: graphOptions.value.timeFormat === '12h' ? 'hh:mm a' : 'HH:mm',
+              hour: graphOptions.value.timeFormat === '12h' ? 'hh:mm a' : 'HH:mm',
+            },
           },
         },
       },

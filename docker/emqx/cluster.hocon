@@ -8,7 +8,7 @@ authentication = [
     headers {Content-Type = "application/json", X-Request-Source = EMQX}
     mechanism = password_based
     method = post
-    url = "http://host.docker.internal:5097/auth/device"
+    url = "http://{$BACKEND_DOMAIN}/auth/device"
   },
   {
     backend = built_in_database

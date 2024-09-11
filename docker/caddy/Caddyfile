@@ -1,0 +1,26 @@
+# Redirect HTTP to HTTPS
+http:// {
+    redir https://{host}{uri}
+}
+
+# Proxy for the frontend (port 9000)
+https://{$FRONTEND_DOMAIN} {
+    reverse_proxy frontend:80
+}
+
+# Proxy for the backend (port 5097)
+https://{$BACKEND_DOMAIN} {
+    reverse_proxy backend:5097
+}
+
+# Proxy for EMQX dashboard (port 1883)
+http://{$MQTT_DOMAIN} {
+    reverse_proxy emqx:1883
+}
+
+# Serve any static files if needed (optional)
+# If you want to serve static files, uncomment the section below:
+# https://static.your-domain.com {
+#     root * /path/to/static/files
+#     file_server
+# }
