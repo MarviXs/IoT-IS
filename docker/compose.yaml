@@ -75,7 +75,6 @@ services:
       ["postgres", "-c", "synchronous_commit=off", "-c", "max_connections=300"]
   emqx:
     image: emqx/emqx:5.8.0
-    network_mode: "bridge"
     restart: unless-stopped
     ports:
       - "1883:1883" # MQTT
