@@ -80,12 +80,6 @@ public static class Register
                 return Result.Fail(new ValidationError(identityResult));
             }
 
-            // TODO: Remove in production
-            if (identityResult.Succeeded)
-            {
-                await userManager.AddToRoleAsync(user, "Admin");
-            }
-
             return Result.Ok();
         }
     }

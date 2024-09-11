@@ -13,7 +13,6 @@ services:
     environment:
       - FRONTEND_DOMAIN=${FRONTEND_DOMAIN}
       - BACKEND_DOMAIN=${BACKEND_DOMAIN}
-      - MQTT_DOMAIN=${MQTT_DOMAIN}
   frontend:
     restart: unless-stopped
     image: iot-is-frontend
@@ -43,8 +42,7 @@ services:
       - JwtSettings__ValidAudience=${FRONTEND_DOMAIN}
       - Cors__AllowedOrigins=https://${FRONTEND_DOMAIN}
     ports:
-      - 5097:5097
-      - 5096:5096
+      - 9001:8080
   pg:
     image: postgres:16-alpine3.20
     restart: unless-stopped

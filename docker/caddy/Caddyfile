@@ -3,12 +3,10 @@ http:// {
     redir https://{host}{uri}
 }
 
-# Proxy for the frontend (port 9000)
 https://{$FRONTEND_DOMAIN} {
     reverse_proxy frontend:80
 }
 
-# Proxy for the backend (port 5097)
 https://{$BACKEND_DOMAIN} {
-    reverse_proxy backend:5097
+    reverse_proxy backend:8080
 }
