@@ -57,7 +57,7 @@ async function onSubmit() {
   const valid = qform.value?.validate();
   if (!valid) return;
 
-  emit('onSubmit', password);
+  emit('onSubmit', password.value);
   password.value = '';
 }
 </script>
