@@ -68,7 +68,7 @@
             :name="sensor.name"
             :unit="sensor.unit ?? ''"
             :accuracy-decimals="sensor.accuracyDecimals ?? 2"
-            :color="graphColors[index]"
+            :color="getGraphColor(index)"
           />
         </div>
       </div>
@@ -96,7 +96,7 @@ import EditDeviceDialog from '@/components/devices/EditDeviceDialog.vue';
 import { SensorNode } from '@/models/SensorNode';
 import StatusDot from '@/components/devices/StatusDot.vue';
 import LatestDataPointCard from '@/components/datapoints/LatestDataPointCard.vue';
-import { graphColors } from '@/utils/colors';
+import { getGraphColor } from '@/utils/colors';
 import AutoRefreshButton from '@/components/core/AutoRefreshButton.vue';
 
 const { t } = useI18n();

@@ -35,6 +35,11 @@ export const graphColors = [
   '#743411',
 ];
 
+export function getGraphColor(index: number): string {
+  const colorCount = graphColors.length;
+  return graphColors[index % colorCount];
+}
+
 export function transparentize(value: string | number[] | Color | RGBA, opacity: number) {
   const alpha = opacity === undefined ? 0.5 : 1 - opacity;
   return colorLib(value).alpha(alpha).rgbString();

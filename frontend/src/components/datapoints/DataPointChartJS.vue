@@ -70,7 +70,7 @@
 import { ref, reactive, onMounted, PropType, shallowRef, watch, watchEffect } from 'vue';
 import ChartTimeRangeSelect from '@/components/datapoints/ChartTimeRangeSelect.vue';
 import { TimeRange } from '@/models/TimeRange';
-import { graphColors, transparentize } from '@/utils/colors';
+import { getGraphColor, transparentize } from '@/utils/colors';
 import { useStorage } from '@vueuse/core';
 import { useI18n } from 'vue-i18n';
 import DialogCommon from '../core/DialogCommon.vue';
@@ -210,7 +210,7 @@ function updateChartData() {
     const unit = sensor.unit ?? '';
 
     if (!uniqueUnits.has(unit)) {
-      uniqueUnits.set(unit, { key, color: graphColors[index] });
+      uniqueUnits.set(unit, { key, color: getGraphColor(index) });
     }
 
     const unitInfo = uniqueUnits.get(unit);
@@ -224,8 +224,8 @@ function updateChartData() {
           x: dataPoint.ts,
           y: dataPoint.value,
         })) ?? [],
-      backgroundColor: transparentize(graphColors[index], 0.5),
-      borderColor: graphColors[index],
+      backgroundColor: transparentize(getGraphColor(index), 0.5),
+      borderColor: getGraphColor(index),
       cubicInterpolationMode: graphOptions.value.interpolationMethod === 'bezier' ? 'monotone' : 'default',
       showLine: graphOptions.value.lineStyle === 'lines' || graphOptions.value.lineStyle === 'linesmarkers',
       borderWidth: graphOptions.value.lineWidth,
