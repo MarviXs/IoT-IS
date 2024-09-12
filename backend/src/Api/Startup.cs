@@ -2,6 +2,8 @@ using System.Text.Json.Serialization;
 using Carter;
 using Fei.Is.Api.BackgroundServices;
 using Fei.Is.Api.Common.OpenAPI;
+using Fei.Is.Api.Data.Models;
+using Fei.Is.Api.Data.Seed;
 using Fei.Is.Api.Extensions;
 using Fei.Is.Api.Features.Auth;
 using Fei.Is.Api.MqttClient;
@@ -11,6 +13,7 @@ using Fei.Is.Api.Redis;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Json;
+using Microsoft.AspNetCore.Identity;
 
 namespace Fei.Is.Api;
 
@@ -112,5 +115,14 @@ public class Startup(IConfiguration configuration)
         {
             endpoints.MapCarter();
         });
+
+        
+        using (var scope = app.ApplicationServices.CreateScope())
+        {
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
+
+            AppDbContextSeed.SeedDefaultUserAsync(userManager, roleManager).GetAwaiter().GetResult();
+        }
     }
 }

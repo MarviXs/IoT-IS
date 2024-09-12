@@ -8,12 +8,5 @@ public class ApplicationUserRoleConfiguration : IEntityTypeConfiguration<Applica
 {
     public void Configure(EntityTypeBuilder<ApplicationUserRole> builder)
     {
-        builder.HasData(
-            new ApplicationUserRole
-            {
-                RoleId = new Guid("00000000-0000-0000-0000-000000000001"),
-                UserId = new Guid("00000000-0000-0000-0000-000000000001")
-            }
-        );
     }
 }
