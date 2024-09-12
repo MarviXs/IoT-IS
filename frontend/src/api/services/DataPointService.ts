@@ -7,6 +7,12 @@ class DataPointService {
       params: { path: { deviceId, sensorTag }, query },
     });
   }
+
+  async getLatestDataPoints(deviceId: string, sensorTag: string) {
+    return await client.GET('/devices/{deviceId}/sensors/{sensorTag}/data/latest', {
+      params: { path: { deviceId, sensorTag } },
+    });
+  }
 }
 
 export default new DataPointService();

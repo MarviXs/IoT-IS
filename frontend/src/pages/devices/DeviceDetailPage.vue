@@ -19,7 +19,7 @@
         :label="t('job.label', 2)"
         :icon="mdiListStatus"
       />
-      <!-- <AutoRefreshButton v-model="refreshInterval" :loading="isLoadingDevice" @on-refresh="refreshDevice" /> -->
+      <AutoRefreshButton v-model="refreshInterval" :loading="isRefreshingDataPoints" @on-refresh="refreshDatapoints" />
       <q-btn
         class="shadow"
         color="primary"
@@ -32,7 +32,7 @@
       />
     </template>
     <template v-if="device" #default>
-      <div class="row q-col-gutter-x-lg q-col-gutter-y-lg justify-between">
+      <div class="row q-col-gutter-x-lg q-col-gutter-y-lg justify-starrt">
         <div class="col-12 col-xl-4">
           <DeviceInfoCard :device="device" class="shadow container"></DeviceInfoCard>
         </div>
@@ -58,6 +58,19 @@
             @refresh="getDevice"
           ></DataPointChartJS>
         </div>
+
+        <div class="col-12 col-md-4 col-lg-3 col-xl-2" v-for="(sensor, index) in sensors">
+          <LatestDataPointCard
+            ref="latestDataPointCards"
+            :key="sensor.id"
+            :device-id="device.id"
+            :sensor-tag="sensor.tag"
+            :name="sensor.name"
+            :unit="sensor.unit ?? ''"
+            :accuracy-decimals="sensor.accuracyDecimals ?? 2"
+            :color="graphColors[index]"
+          />
+        </div>
       </div>
     </template>
   </PageLayout>
@@ -73,7 +86,6 @@ import DeviceService from '@/api/services/DeviceService';
 import { deviceToTreeNode, extractNodeKeys } from '@/utils/sensor-nodes';
 import SensorSelectionTree from '@/components/datapoints/SensorSelectionTree.vue';
 import CurrentJobCard from '@/components/jobs/CurrentJobCard.vue';
-import { useAuthStore } from '@/stores/auth-store';
 import { useI18n } from 'vue-i18n';
 import { mdiListStatus, mdiPencil } from '@quasar/extras/mdi-v7';
 import PageLayout from '@/layouts/PageLayout.vue';
@@ -83,11 +95,13 @@ import { DeviceResponse } from '@/api/types/Device';
 import EditDeviceDialog from '@/components/devices/EditDeviceDialog.vue';
 import { SensorNode } from '@/models/SensorNode';
 import StatusDot from '@/components/devices/StatusDot.vue';
+import LatestDataPointCard from '@/components/datapoints/LatestDataPointCard.vue';
+import { graphColors } from '@/utils/colors';
+import AutoRefreshButton from '@/components/core/AutoRefreshButton.vue';
 
 const { t } = useI18n();
 
 const route = useRoute();
-const authStore = useAuthStore();
 
 const deviceId = route.params.id.toString();
 const device = ref<DeviceResponse>();
@@ -133,9 +147,15 @@ async function getDevice() {
 }
 getDevice();
 
-async function refreshDevice() {
-  currentJobCard.value?.refresh();
-  await getDevice();
+const isRefreshingDataPoints = ref(false);
+const latestDataPointCards = ref<InstanceType<typeof LatestDataPointCard>[]>();
+async function refreshDatapoints() {
+  isRefreshingDataPoints.value = true;
+  dataPointChart.value.refresh();
+  latestDataPointCards.value?.forEach((card) => {
+    card.refresh();
+  });
+  isRefreshingDataPoints.value = false;
 }
 
 const isUpdateDialogOpen = ref(false);

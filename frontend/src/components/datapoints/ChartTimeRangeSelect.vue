@@ -70,6 +70,17 @@ const customTimeRangeDialog = ref(false);
 
 const timeRanges = computed(() => [
   {
+    title: t('time_range.predefined.last_5min'),
+    name: '5m',
+    time: 300,
+  },
+
+  {
+    title: t('time_range.predefined.last_15min'),
+    name: '15m',
+    time: 900,
+  },
+  {
     title: t('time_range.predefined.last_30min'),
     name: '30m',
     time: 1800,

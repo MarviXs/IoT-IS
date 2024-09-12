@@ -239,6 +239,8 @@
     "to": "To",
     "now": "Now",
     "predefined": {
+      "last_5min": "Last 5 minutes",
+      "last_15min": "Last 15 minutes",
       "last_30min": "Last 30 minutes",
       "last_1h": "Last hour",
       "last_6h": "Last 6 hours",

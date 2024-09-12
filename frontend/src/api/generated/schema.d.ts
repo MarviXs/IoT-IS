@@ -257,6 +257,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/devices/{deviceId}/sensors/{sensorTag}/data/latest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieve the most recent data points for a sensor
+         * @description Fetch the latest data points for a sensor
+         */
+        get: operations["GetLatestDataPoints"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/devices/{deviceId}/sensors/{sensorTag}/data": {
         parameters: {
             query?: never;
@@ -927,6 +947,12 @@ export interface components {
             value: number;
             /** Format: int64 */
             timeStamp?: number | null;
+        };
+        "Fei.Is.Api.Features.DataPoints.Queries.GetLatestDataPoints.Response": {
+            /** Format: date-time */
+            ts: string;
+            /** Format: double */
+            value?: number | null;
         };
         /** @enum {string} */
         "Fei.Is.Api.Features.DataPoints.Queries.GetSensorDataPoints.DownsampleMethod": "Asap" | "Lttb";
@@ -1872,6 +1898,36 @@ export interface operations {
                 content: {
                     "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
                 };
+            };
+        };
+    };
+    GetLatestDataPoints: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                deviceId: string;
+                sensorTag: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.DataPoints.Queries.GetLatestDataPoints.Response"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

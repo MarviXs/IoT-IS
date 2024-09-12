@@ -1,0 +1,70 @@
+<template>
+  <div>
+    <div class="shadow card bg-white rounded full-width q-pa-md column items-center justify-center">
+      <div class="sensor-name">{{ name }}</div>
+      <div class="sensor-value">{{ valueRounded }} {{ unit }}</div>
+    </div>
+    <div class="color-strip"></div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { GetLatestDataPointsResponse } from '@/api/types/DataPoint';
+import DataPointService from '@/api/services/DataPointService';
+import { computed, ref } from 'vue';
+const props = defineProps<{
+  deviceId: string;
+  sensorTag: string;
+  name: string;
+  unit: string;
+  accuracyDecimals: number;
+  color: string;
+}>();
+
+const latestDataPoint = ref<GetLatestDataPointsResponse>();
+const isLoadingLatestDataPoint = ref(false);
+async function getLatestDataPoint() {
+  isLoadingLatestDataPoint.value = true;
+  const { data, error } = await DataPointService.getLatestDataPoints(props.deviceId, props.sensorTag);
+
+  if (error) {
+    latestDataPoint.value = undefined;
+  } else {
+    latestDataPoint.value = data;
+  }
+  isLoadingLatestDataPoint.value = false;
+}
+getLatestDataPoint();
+
+const valueRounded = computed(() => {
+  return latestDataPoint.value?.value?.toFixed(props.accuracyDecimals) ?? '-';
+});
+
+async function refresh() {
+  await getLatestDataPoint();
+}
+
+defineExpose({
+  refresh,
+});
+</script>
+
+<style scoped>
+.sensor-name {
+  font-weight: 400;
+  color: var(--q-grey-color);
+  font-size: 1rem;
+}
+
+.sensor-value {
+  margin-top: 0.25rem;
+  font-weight: 500;
+  font-size: 1.3rem;
+}
+
+.color-strip {
+  height: 0.2rem;
+  width: 100%;
+  background-color: v-bind(color);
+}
+</style>

@@ -4,7 +4,7 @@
       <p class="text-weight-medium text-h6">{{ t('chart.label') }}</p>
       <q-space></q-space>
       <chart-time-range-select ref="timeRangeSelectRef" @update:model-value="updateTimeRange"></chart-time-range-select>
-      <q-btn
+      <!-- <q-btn
         padding="0.5rem 1rem"
         outline
         no-caps
@@ -12,15 +12,14 @@
         text-color="grey-5"
         class="options-btn"
         :icon="mdiRefresh"
-        @click="onClickRefresh"
+        @click="refresh"
       >
         <template #default>
           <div class="text-grey-10 text-weight-regular q-ml-sm">
             {{ t('global.refresh') }}
           </div>
         </template>
-      </q-btn>
-
+      </q-btn> -->
       <q-btn
         padding="0.5rem 1rem"
         outline
@@ -75,7 +74,6 @@ import { graphColors, transparentize } from '@/utils/colors';
 import { useStorage } from '@vueuse/core';
 import { useI18n } from 'vue-i18n';
 import DialogCommon from '../core/DialogCommon.vue';
-import { mdiRefresh } from '@quasar/extras/mdi-v7';
 import GraphOptionsForm, { GraphOptions } from './GraphOptionsForm.vue';
 import { GetDataPointsQuery } from '@/api/types/DataPoint';
 import { DataPoint } from '@/models/DataPoint';
@@ -141,13 +139,13 @@ function getSensorUniqueId(sensor: SensorData) {
   return `${sensor.deviceId}-${sensor.tag}`;
 }
 
+const currentXMin = ref<string>();
+const currentXMax = ref<string>();
 async function updateTimeRange(timeRange: TimeRange) {
   selectedTimeRange.value = timeRange;
 
-  if (chart.value?.options.scales?.x) {
-    chart.value.options.scales.x.min = timeRange.from;
-    chart.value.options.scales.x.max = timeRange.to;
-  }
+  currentXMin.value = timeRange.from;
+  currentXMax.value = timeRange.to;
 
   await getDataPoints();
 }
@@ -189,9 +187,8 @@ async function getDataPoints() {
   updateChartData();
 }
 
-async function onClickRefresh() {
+async function refresh() {
   timeRangeSelectRef.value?.emitUpdate();
-  await getDataPoints();
 }
 
 function roundNumber(num: number | undefined | null, decimals: number) {
@@ -202,6 +199,7 @@ function roundNumber(num: number | undefined | null, decimals: number) {
 
 function updateChartData() {
   if (!chart.value) return;
+  const isZoomed = chart.value.isZoomedOrPanned();
 
   const datasets: DataSetCustom[] = [];
   const uniqueUnits = new Map<string, { key: string; color: string }>();
@@ -267,7 +265,10 @@ function updateChartData() {
 
   if (!chart.value.options.scales) return;
 
-  if (chart.value.options.scales.x) {
+  currentXMin.value = selectedTimeRange.value?.from;
+  currentXMax.value = selectedTimeRange.value?.to;
+
+  if (chart.value.options.scales.x && !isZoomed) {
     chart.value.options.scales.x.min = selectedTimeRange.value?.from;
     chart.value.options.scales.x.max = selectedTimeRange.value?.to;
   }
@@ -293,6 +294,12 @@ function onLegendClick(e: ChartEvent, legendItem: LegendItem) {
 }
 
 function resetZoom() {
+  if (!chart.value?.options.scales?.x) return;
+
+  chart.value.options.scales.x.min = currentXMin.value;
+  chart.value.options.scales.x.max = currentXMax.value;
+  chart.value.update();
+
   chart.value?.resetZoom();
 }
 
@@ -401,6 +408,10 @@ onMounted(() => {
       },
     },
   });
+});
+
+defineExpose({
+  refresh,
 });
 </script>
 
