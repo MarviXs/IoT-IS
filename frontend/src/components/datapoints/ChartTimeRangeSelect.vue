@@ -117,7 +117,7 @@ const timeRanges = computed(() => [
   },
 ]);
 
-const selectedTimeRangeIndex = ref(2);
+const selectedTimeRangeIndex = ref(4);
 const customTimeRangeSelected = ref<{
   from: string;
   to: string;
