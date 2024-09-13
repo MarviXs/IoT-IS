@@ -53,6 +53,8 @@ public class DataPointReceived(AppDbContext appContext, RedisService redis)
             ],
             maxLength: 500000
         );
+        
+        await redis.Db.StringSetAsync($"device:{deviceId}:{datapoint.Tag}:last", datapoint.Value, TimeSpan.FromHours(1));
 
         return Result.Ok();
     }

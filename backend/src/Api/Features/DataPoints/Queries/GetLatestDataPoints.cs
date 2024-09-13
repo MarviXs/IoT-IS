@@ -5,6 +5,7 @@ using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
+using Fei.Is.Api.Redis;
 using FluentResults;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -57,7 +58,7 @@ public static class GetLatestDataPoints
 
     public record Query(Guid DeviceId, string SensorTag, ClaimsPrincipal User) : IRequest<Result<Response>>;
 
-    public sealed class Handler(AppDbContext appContext, TimeScaleDbContext timescaleContext) : IRequestHandler<Query, Result<Response>>
+    public sealed class Handler(AppDbContext appContext, TimeScaleDbContext timescaleContext, RedisService redis) : IRequestHandler<Query, Result<Response>>
     {
         public async Task<Result<Response>> Handle(Query message, CancellationToken cancellationToken)
         {
@@ -73,26 +74,30 @@ public static class GetLatestDataPoints
                 return Result.Fail(new ForbiddenError());
             }
 
+            var redisKey = $"device:{message.DeviceId}:{message.SensorTag}:latest";
+            var cachedLatestDataPoint = await redis.Db.StringGetAsync(redisKey);
+            if (cachedLatestDataPoint.HasValue)
+            {
+                if (double.TryParse(cachedLatestDataPoint.ToString(), out double value))
+                {
+                    return Result.Ok(new Response(value));
+                }
+            }
+
             var latestDataPoint = await timescaleContext
                 .DataPoints.Where(dp => dp.DeviceId == message.DeviceId && dp.SensorTag == message.SensorTag)
                 .OrderByDescending(dp => dp.TimeStamp)
                 .FirstOrDefaultAsync(cancellationToken);
-
             if (latestDataPoint == null)
             {
                 return Result.Fail(new NotFoundError());
             }
 
-            var response = new Response(
-                message.DeviceId,
-                message.SensorTag,
-                latestDataPoint.TimeStamp,
-                latestDataPoint.Value
-            );
-
+            await redis.Db.StringSetAsync(redisKey, latestDataPoint.Value.ToString(), TimeSpan.FromHours(1));
+            var response = new Response(latestDataPoint.Value);
             return Result.Ok(response);
         }
     }
 
-    public record Response(Guid DeviceId, string SensorTag, DateTimeOffset Ts, double? Value);
+    public record Response(double? Value);
 }
