@@ -1,18 +1,5 @@
 name: iot-is
 services:
-  caddy:
-    image: caddy:latest
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./caddy/Caddyfile:/etc/caddy/Caddyfile
-      - ./caddy/data:/data
-      - ./caddy/config:/config
-    environment:
-      - FRONTEND_DOMAIN=${FRONTEND_DOMAIN}
-      - BACKEND_DOMAIN=${BACKEND_DOMAIN}
   frontend:
     restart: unless-stopped
     image: iot-is-frontend
@@ -22,6 +9,9 @@ services:
       context: ../frontend
       args:
         - VITE_API_URL=${API_URL}
+    networks:
+      - out-network
+      - int-network
   backend:
     image: iot-is-backend
     build:
@@ -38,11 +28,14 @@ services:
       - MqttSettings__Username=${EMQX_USERNAME}
       - MqttSettings__Password=${EMQX_PASSWORD}
       - RedisSettings__Password=${REDIS_PASSWORD}
-      - JwtSettings__ValidIssuer=${BACKEND_DOMAIN}
-      - JwtSettings__ValidAudience=${FRONTEND_DOMAIN}
-      - Cors__AllowedOrigins=https://${FRONTEND_DOMAIN}
+      - JwtSettings__ValidIssuer=${JWT_ISSUER}
+      - JwtSettings__ValidAudience=${JWT_AUDIENCE}
+      - Cors__AllowedOrigins=${CORS_ALLOWED_ORIGINS}
     ports:
       - 9001:8080
+    networks:
+      - out-network
+      - int-network
   pg:
     image: postgres:16-alpine3.20
     restart: unless-stopped
@@ -57,6 +50,8 @@ services:
       - pgdata:/var/lib/postgresql/data
     command:
       ["postgres", "-c", "synchronous_commit=off", "-c", "max_connections=200"]
+    networks:
+      - int-network
   timescaledb:
     image: timescale/timescaledb-ha:pg16.4-ts2.16.1
     restart: unless-stopped
@@ -71,6 +66,8 @@ services:
       - timescaledb_data:/home/postgres/pgdata/data
     command:
       ["postgres", "-c", "synchronous_commit=off", "-c", "max_connections=300"]
+    networks:
+      - int-network
   emqx:
     image: emqx/emqx:5.8.0
     restart: unless-stopped
@@ -82,12 +79,22 @@ services:
       - ./emqx/cluster.hocon:/opt/emqx/data/configs/cluster.hocon
       - ./emqx/acl.conf:/opt/emqx/etc/acl.conf
       - ./emqx/init_user.json:/opt/emqx/init_user.json
+    networks:
+      - out-network
+      - int-network
   redis:
     image: redis/redis-stack:7.2.0-v11
     restart: unless-stopped
     command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
     ports:
       - "6379:6379"
+    networks:
+      - int-network
 volumes:
   pgdata:
   timescaledb_data:
+
+networks:
+  int-network:
+    internal: true
+  out-network:

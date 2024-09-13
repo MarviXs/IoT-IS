@@ -3,6 +3,11 @@ services:
   redis-insight: # use host.docker.internal as host in redis-insight
     image: redis/redisinsight:latest
     restart: unless-stopped
-    network_mode: "bridge"
     ports:
       - "5540:5540"
+    networks:
+      - iot-is_int-network
+
+networks:
+  iot-is_int-network:
+    external: true
