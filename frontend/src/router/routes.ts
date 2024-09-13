@@ -70,7 +70,6 @@ const routes: RouteRecordRaw[] = [
             component: () => import('pages/recipes/RecipesPage.vue'),
           },
         ],
-        meta: { requiresAdmin: true },
       },
 
       {
