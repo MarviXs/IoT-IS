@@ -8,7 +8,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Fei.Is.Api.Data.Migrations.AppDb
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -32,6 +32,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    RegistrationDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     UserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
@@ -166,6 +167,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     OwnerId = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
                     IsRoot = table.Column<bool>(type: "boolean", nullable: false),
+                    RootCollectionId = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
@@ -176,6 +178,12 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                         name: "FK_DeviceCollections_AspNetUsers_OwnerId",
                         column: x => x.OwnerId,
                         principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_DeviceCollections_DeviceCollections_RootCollectionId",
+                        column: x => x.RootCollectionId,
+                        principalTable: "DeviceCollections",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -218,6 +226,34 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                         name: "FK_RefreshTokens_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CollectionShare",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    CollectionId = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Permission = table.Column<int>(type: "integer", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CollectionShare", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CollectionShare_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CollectionShare_DeviceCollections_CollectionId",
+                        column: x => x.CollectionId,
+                        principalTable: "DeviceCollections",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -328,6 +364,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     CollectionParentId = table.Column<Guid>(type: "uuid", nullable: false),
                     DeviceId = table.Column<Guid>(type: "uuid", nullable: true),
                     SubCollectionId = table.Column<Guid>(type: "uuid", nullable: true),
+                    DeviceCollectionId = table.Column<Guid>(type: "uuid", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
@@ -340,6 +377,11 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                         principalTable: "DeviceCollections",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CollectionItems_DeviceCollections_DeviceCollectionId",
+                        column: x => x.DeviceCollectionId,
+                        principalTable: "DeviceCollections",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_CollectionItems_DeviceCollections_SubCollectionId",
                         column: x => x.SubCollectionId,
@@ -492,6 +534,11 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                 column: "CollectionParentId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_CollectionItems_DeviceCollectionId",
+                table: "CollectionItems",
+                column: "DeviceCollectionId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_CollectionItems_DeviceId",
                 table: "CollectionItems",
                 column: "DeviceId");
@@ -502,6 +549,16 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                 column: "SubCollectionId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_CollectionShare_CollectionId",
+                table: "CollectionShare",
+                column: "CollectionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CollectionShare_UserId",
+                table: "CollectionShare",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Commands_DeviceTemplateId",
                 table: "Commands",
                 column: "DeviceTemplateId");
@@ -510,6 +567,11 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                 name: "IX_DeviceCollections_OwnerId",
                 table: "DeviceCollections",
                 column: "OwnerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DeviceCollections_RootCollectionId",
+                table: "DeviceCollections",
+                column: "RootCollectionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_DeviceTemplates_Name",
@@ -604,6 +666,9 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
             migrationBuilder.DropTable(
                 name: "CollectionItems");
+
+            migrationBuilder.DropTable(
+                name: "CollectionShare");
 
             migrationBuilder.DropTable(
                 name: "JobCommands");
