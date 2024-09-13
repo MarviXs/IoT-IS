@@ -8,5 +8,7 @@ https://{$FRONTEND_DOMAIN} {
 }
 
 https://{$BACKEND_DOMAIN} {
-    reverse_proxy backend:8080
+    reverse_proxy backend:8080 {
+        flush_interval -1
+    }
 }
