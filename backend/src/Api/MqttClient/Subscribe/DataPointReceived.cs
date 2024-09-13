@@ -1,8 +1,8 @@
 using DataPointFlatBuffers;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Redis;
-using FlatSharp;
 using FluentResults;
+using Google.FlatBuffers;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fei.Is.Api.MqttClient.Subscribe;
@@ -41,10 +41,8 @@ public class DataPointReceived(AppDbContext appContext, RedisService redis)
 
         redis.Db.StringSet($"device:{deviceId}:connected", "1", TimeSpan.FromMinutes(30));
         redis.Db.StringSet($"device:{deviceId}:lastSeen", DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString());
-
-        var datapoint = DataPointFbs.Serializer.Parse(payload.ToArray(), FlatBufferDeserializationOption.Lazy);
-
-        // Push to redis stream
+        
+        var datapoint = DataPointFbs.GetRootAsDataPointFbs(new ByteBuffer(payload.ToArray()));
         var redisResult = await redis.Db.StreamAddAsync(
             "datapoints",
             [

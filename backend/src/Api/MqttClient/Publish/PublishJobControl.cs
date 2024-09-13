@@ -1,23 +1,28 @@
 using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Enums;
-using FlatSharp;
 using FluentResults;
+using Google.FlatBuffers;
 using JobFlatBuffers;
 
 namespace Fei.Is.Api.MqttClient.Publish;
 
-public class PublishJobControl(MqttClientService mqttClient, AppDbContext context, ILogger<PublishJobControl> logger)
+public class PublishJobControl(MqttClientService mqttClient, ILogger<PublishJobControl> logger)
 {
     public async Task<Result> Execute(string accessToken, Guid jobId, JobControl jobControlEnum)
     {
         var topic = $"devices/{accessToken}/job/control";
 
-        var jobControl = new JobControlFbs { JobId = jobId.ToString(), Control = ConvertToJobControlEnumFbs(jobControlEnum) };
+        var builder = new FlatBufferBuilder(1);
+        var jobIdOffset = builder.CreateString(jobId.ToString());
+        var jobControlEnumFbs = ConvertToJobControlEnumFbs(jobControlEnum);
 
-        int maxSize = JobControlFbs.Serializer.GetMaxSize(jobControl);
-        byte[] buffer = new byte[maxSize];
-        int bytesWritten = JobControlFbs.Serializer.Write(buffer, jobControl);
+        JobControlFbs.StartJobControlFbs(builder);
+        JobControlFbs.AddJobId(builder, jobIdOffset);
+        JobControlFbs.AddControl(builder, jobControlEnumFbs);
+        var jobControl = JobControlFbs.EndJobControlFbs(builder);
+        builder.Finish(jobControl.Value);
+        var buffer = builder.SizedByteArray();
 
         var result = await mqttClient.PublishAsync(topic, buffer, MQTTnet.Protocol.MqttQualityOfServiceLevel.ExactlyOnce);
         if (result.IsSuccess)

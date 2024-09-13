@@ -1,8 +1,8 @@
 using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Redis;
-using FlatSharp;
 using FluentResults;
+using Google.FlatBuffers;
 using JobFlatBuffers;
 using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
@@ -42,7 +42,7 @@ public class JobStatusReceived(AppDbContext appContext, RedisService redis)
         redis.Db.StringSet($"device:{deviceId}:connected", "1", TimeSpan.FromMinutes(30));
         redis.Db.StringSet($"device:{deviceId}:lastSeen", DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString());
 
-        var jobFbs = JobFbs.Serializer.Parse(payload.ToArray(), FlatBufferDeserializationOption.Lazy);
+        var jobFbs = JobFbs.GetRootAsJobFbs(new ByteBuffer(payload.ToArray()));
 
         var job = await appContext
             .Jobs.Where(j => j.DeviceId == Guid.Parse(deviceId) && j.Id == Guid.Parse(jobFbs.JobId))

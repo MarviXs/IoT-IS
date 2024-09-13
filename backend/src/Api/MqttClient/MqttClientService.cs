@@ -1,8 +1,6 @@
 using Fei.Is.Api.MqttClient.Subscribe;
-using MediatR;
 using MQTTnet;
 using MQTTnet.Client;
-using MQTTnet.Extensions.ManagedClient;
 using MQTTnet.Formatter;
 using MQTTnet.Protocol;
 

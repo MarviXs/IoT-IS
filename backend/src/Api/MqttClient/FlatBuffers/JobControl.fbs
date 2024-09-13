@@ -1,5 +1,3 @@
-attribute "fs_serializer";
-
 namespace JobFlatBuffers;
 
 enum JobControlEnumFbs: byte {
@@ -10,7 +8,7 @@ enum JobControlEnumFbs: byte {
     JOB_CANCEL = 4
 }
 
-table JobControlFbs (fs_serializer) {
+table JobControlFbs {
     job_id: string;
     control: JobControlEnumFbs;
 }
