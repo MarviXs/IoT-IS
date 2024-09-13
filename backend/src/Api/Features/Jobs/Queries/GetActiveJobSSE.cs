@@ -59,7 +59,6 @@ public static class GetActiveJobsSSE
                         response.Headers.Append("Content-Type", "text/event-stream");
                         response.Headers.Append("Cache-Control", "no-cache");
                         response.Headers.Append("X-Accel-Buffering", "no");
-                        response.Headers.Append("Transfer-Encoding", "chunked");
                         response.Headers.Append("Connection", "keep-alive");
 
                         var userId = user.GetUserId();
