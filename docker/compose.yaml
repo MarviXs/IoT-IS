@@ -96,5 +96,4 @@ volumes:
 
 networks:
   int-network:
-    internal: true
   out-network:
