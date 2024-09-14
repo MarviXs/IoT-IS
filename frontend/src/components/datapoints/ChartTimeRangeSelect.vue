@@ -167,6 +167,12 @@ emitUpdate();
 
 <style lang="scss" scoped>
 .date-picker {
-  min-width: 190px;
+  width: 100%;
+}
+
+@media (min-width: 600px) {
+  .date-picker {
+    max-width: 180px;
+  }
 }
 </style>

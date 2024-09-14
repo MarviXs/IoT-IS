@@ -1,46 +1,33 @@
 <template>
   <div id="chart">
-    <div class="row items-center justify-start q-mb-md q-gutter-x-md">
-      <p class="text-weight-medium text-h6">{{ t('chart.label') }}</p>
+    <div class="row items-center justify-start q-mb-md q-gutter-x-md q-gutter-y-sm">
+      <p class="text-weight-medium text-h6 chart-title">{{ t('chart.label') }}</p>
       <q-space></q-space>
-      <chart-time-range-select ref="timeRangeSelectRef" @update:model-value="updateTimeRange"></chart-time-range-select>
-      <!-- <q-btn
-        padding="0.5rem 1rem"
-        outline
-        no-caps
-        color="grey-7"
-        text-color="grey-5"
-        class="options-btn"
-        :icon="mdiRefresh"
-        @click="refresh"
-      >
-        <template #default>
-          <div class="text-grey-10 text-weight-regular q-ml-sm">
-            {{ t('global.refresh') }}
-          </div>
-        </template>
-      </q-btn> -->
+      <chart-time-range-select
+        class="col-grow col-lg-auto"
+        ref="timeRangeSelectRef"
+        @update:model-value="updateTimeRange"
+      ></chart-time-range-select>
       <q-btn
         padding="0.5rem 1rem"
         outline
         no-caps
         color="grey-7"
         text-color="grey-5"
-        class="options-btn"
+        class="options-btn col-grow col-lg-auto"
         @click="resetZoom"
       >
         <template #default>
           <div class="text-grey-10 text-weight-regular">Reset Zoom</div>
         </template>
       </q-btn>
-
       <q-btn
         padding="0.5rem 1rem"
         outline
         no-caps
         color="grey-7"
         text-color="grey-5"
-        class="options-btn"
+        class="options-btn col-grow col-lg-auto"
         @click="isGraphOptionsDialogOpen = true"
       >
         <template #default>
@@ -434,5 +421,9 @@ defineExpose({
 .chart-wrapper {
   position: relative;
   height: 400px;
+}
+
+.chart-title {
+  margin-bottom: 0px;
 }
 </style>
