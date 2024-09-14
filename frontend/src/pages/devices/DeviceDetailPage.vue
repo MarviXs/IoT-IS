@@ -10,7 +10,7 @@
     </template>
     <template v-if="device" #actions>
       <q-btn
-        class="shadow bg-white"
+        class="shadow bg-white col-grow col-lg-auto"
         :to="`/devices/${device.id}/jobs`"
         text-color="grey-color"
         unelevated
@@ -19,9 +19,14 @@
         :label="t('job.label', 2)"
         :icon="mdiListStatus"
       />
-      <AutoRefreshButton v-model="refreshInterval" :loading="isRefreshingDataPoints" @on-refresh="refreshDatapoints" />
+      <AutoRefreshButton
+        class="col-grow col-lg-auto"
+        v-model="refreshInterval"
+        :loading="isRefreshingDataPoints"
+        @on-refresh="refreshDatapoints"
+      />
       <q-btn
-        class="shadow"
+        class="shadow col-grow col-lg-auto"
         color="primary"
         unelevated
         no-caps
