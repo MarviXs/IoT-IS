@@ -231,7 +231,9 @@ function updateChartData() {
     yScales[key] = {
       type: 'linear',
       position: 'left',
-      display: tickedNodes.value.includes(unitInfo.key),
+      display: tickedNodes.value.some((node) =>
+        datasets.find((dataset) => dataset.sensorKey === node && dataset.yAxisID === key),
+      ),
       axis: 'y',
       grid: {
         drawOnChartArea: index === 0,
@@ -299,15 +301,18 @@ function updateDatasetVisibility(tickedNodes: string[]) {
   datasets.forEach((dataset) => {
     const key = dataset.sensorKey;
     dataset.hidden = !tickedNodes.includes(key);
-
-    // Hide y-scale if dataset is hidden
-    if (chart.value?.options.scales && dataset.yAxisID) {
-      const yScale = chart.value.options.scales[dataset.yAxisID] as ScaleOptions;
-      if (yScale) {
-        yScale.display = !dataset.hidden;
-      }
-    }
   });
+
+  // Update y-axis visibility based on the visibility of datasets
+  if (chart.value.options.scales) {
+    Object.keys(chart.value.options.scales ?? {}).forEach((scaleID) => {
+      if (scaleID === 'x') return; // Skip the x-axis
+      const scale = chart.value?.options.scales?.[scaleID] as ScaleOptions;
+      if (scale) {
+        scale.display = datasets.some((dataset) => dataset.yAxisID === scaleID && !dataset.hidden);
+      }
+    });
+  }
 
   chart.value.update();
 }
