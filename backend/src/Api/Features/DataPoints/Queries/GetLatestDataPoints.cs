@@ -74,7 +74,7 @@ public static class GetLatestDataPoints
                 return Result.Fail(new ForbiddenError());
             }
 
-            var redisKey = $"device:{message.DeviceId}:{message.SensorTag}:latest";
+            var redisKey = $"device:{message.DeviceId}:{message.SensorTag}:last";
             var cachedLatestDataPoint = await redis.Db.StringGetAsync(redisKey);
             if (cachedLatestDataPoint.HasValue)
             {
