@@ -27,7 +27,7 @@ public static class GetActiveJobsSSE
         {
             app.MapGet(
                     "devices/{deviceId:guid}/jobs/active/sse",
-                    async Task (
+                    async Task<Results<Ok, NotFound, ForbidHttpResult>> (
                         HttpContext httpContext,
                         IServiceProvider serviceProvider,
                         ClaimsPrincipal user,
@@ -46,14 +46,12 @@ public static class GetActiveJobsSSE
 
                         if (result.HasError<NotFoundError>())
                         {
-                            response.StatusCode = StatusCodes.Status404NotFound;
-                            return;
+                            return TypedResults.NotFound();
                         }
 
                         if (result.HasError<ForbiddenError>())
                         {
-                            response.StatusCode = StatusCodes.Status403Forbidden;
-                            return;
+                            return TypedResults.Forbid();
                         }
 
                         response.Headers.Append("Content-Type", "text/event-stream");
@@ -88,6 +86,8 @@ public static class GetActiveJobsSSE
                         {
                             await subscriber.UnsubscribeAsync(channel);
                         }
+
+                        return TypedResults.Ok();
                     }
                 )
                 .WithName(nameof(GetActiveJobsSSE))

@@ -19,8 +19,8 @@ import { handleError } from '@/utils/error-handler';
 import { toast } from 'vue3-toastify';
 import { useI18n } from 'vue-i18n';
 import DialogCommon from '@/components/core/DialogCommon.vue';
-import CollectionForm, { CollectionData } from '@/components/collections/CollectionForm.vue';
-import { CreateCollectionRequest } from '@/api/types/DeviceCollection';
+import CollectionForm from '@/components/collections/CollectionForm.vue';
+import { CreateCollectionRequest, UpdateCollectionRequest } from '@/api/types/DeviceCollection';
 
 const isDialogOpen = defineModel<boolean>();
 const emit = defineEmits(['onCreate']);
@@ -36,7 +36,7 @@ const props = defineProps({
 });
 
 const isCreatingCollection = ref(false);
-const collection = ref<CollectionData>({
+const collection = ref<UpdateCollectionRequest>({
   name: '',
 });
 

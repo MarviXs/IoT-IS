@@ -16,9 +16,9 @@ class DeviceCollectionService {
     });
   }
 
-  async getCollectionWithSensors(id: string, maxDepth?: number) {
+  async getCollectionWithSensors(id: string) {
     return await client.GET('/device-collections/{collectionId}/sensors', {
-      params: { path: { collectionId: id }, query: { MaxDepth: maxDepth } },
+      params: { path: { collectionId: id } },
     });
   }
 

@@ -19,7 +19,7 @@ import { handleError } from '@/utils/error-handler';
 import { toast } from 'vue3-toastify';
 import { useI18n } from 'vue-i18n';
 import DialogCommon from '@/components/core/DialogCommon.vue';
-import CollectionForm, { CollectionData } from '@/components/collections/CollectionForm.vue';
+import CollectionForm from '@/components/collections/CollectionForm.vue';
 import { UpdateCollectionRequest } from '@/api/types/DeviceCollection';
 
 const isDialogOpen = defineModel<boolean>();
@@ -46,7 +46,7 @@ async function getCollection() {
 }
 
 const updatingCollection = ref(false);
-const collection = ref<CollectionData>({
+const collection = ref<UpdateCollectionRequest>({
   name: '',
 });
 
