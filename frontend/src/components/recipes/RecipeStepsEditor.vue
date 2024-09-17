@@ -103,8 +103,14 @@
           :label="t('recipe.subrecipe', 2)"
         />
       </q-tabs>
-      <CommandStepsTable v-if="selectedStepType === 'commands'" v-model="recipe"> </CommandStepsTable>
-      <SubrecipeStepsTable v-if="selectedStepType === 'subrecipes'" v-model="recipe"> </SubrecipeStepsTable>
+      <CommandStepsTable v-if="selectedStepType === 'commands'" v-model="recipe" :device-template-id="deviceTemplateId">
+      </CommandStepsTable>
+      <SubrecipeStepsTable
+        v-if="selectedStepType === 'subrecipes'"
+        v-model="recipe"
+        :device-template-id="deviceTemplateId"
+      >
+      </SubrecipeStepsTable>
     </div>
   </div>
 </template>
@@ -125,6 +131,10 @@ const { t } = useI18n();
 
 const recipe = defineModel<RecipeResponse>({ required: true });
 const props = defineProps({
+  deviceTemplateId: {
+    type: String,
+    required: true,
+  },
   loading: {
     type: Boolean,
     default: false,

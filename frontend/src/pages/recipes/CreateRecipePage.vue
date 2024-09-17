@@ -22,7 +22,7 @@
         @click="createRecipe"
       />
     </template>
-    <RecipeForm ref="recipeForm" v-model="recipe" />
+    <RecipeForm ref="recipeForm" v-model="recipe" :device-template-id="templateId" />
   </PageLayout>
 </template>
 

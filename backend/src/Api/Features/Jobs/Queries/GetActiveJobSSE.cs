@@ -33,7 +33,8 @@ public static class GetActiveJobsSSE
                         ClaimsPrincipal user,
                         Guid deviceId,
                         RedisService redis,
-                        CancellationToken ct
+                        CancellationToken ct,
+                        ILogger<Endpoint> logger
                     ) =>
                     {
                         // Create a new scope to ensure services remain available
@@ -62,28 +63,40 @@ public static class GetActiveJobsSSE
                         var userId = user.GetUserId();
                         var channel = RedisChannel.Literal($"jobs-active-{userId}");
 
-                        await SendSSEEvent(response, result.Value, ct);
-                        var subscriber = redis.GetSubscriber();
-                        await subscriber.SubscribeAsync(
-                            channel,
-                            async (channel, message) =>
-                            {
-                                using var innerScope = serviceProvider.CreateScope();
-                                var mediator = innerScope.ServiceProvider.GetRequiredService<IMediator>();
-                                var result = await mediator.Send(query, ct);
-                                await SendSSEEvent(response, result.Value, ct);
-                            }
-                        );
-
                         try
                         {
+                            await SendSSEEvent(response, result.Value, ct);
+                            var subscriber = redis.GetSubscriber();
+                            await subscriber.SubscribeAsync(
+                                channel,
+                                async (channel, message) =>
+                                {
+                                    try
+                                    {
+                                        using var innerScope = serviceProvider.CreateScope();
+                                        var mediator = innerScope.ServiceProvider.GetRequiredService<IMediator>();
+                                        var result = await mediator.Send(query, ct);
+                                        await SendSSEEvent(response, result.Value, ct);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        logger.LogError(ex, "Error in SSE connection");
+                                    }
+                                }
+                            );
+
                             while (!ct.IsCancellationRequested)
                             {
                                 await Task.Delay(Timeout.Infinite, ct);
                             }
                         }
+                        catch (Exception ex)
+                        {
+                            logger.LogError(ex, "Error in SSE connection");
+                        }
                         finally
                         {
+                            var subscriber = redis.GetSubscriber();
                             await subscriber.UnsubscribeAsync(channel);
                         }
 

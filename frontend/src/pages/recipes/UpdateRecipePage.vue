@@ -22,7 +22,13 @@
         @click="updateRecipe"
       />
     </template>
-    <RecipeForm v-if="recipe" ref="recipeForm" v-model="recipe" :loading="updatingRecipe" />
+    <RecipeForm
+      v-if="recipe"
+      ref="recipeForm"
+      v-model="recipe"
+      :loading="updatingRecipe"
+      :device-template-id="templateId"
+    />
   </PageLayout>
 </template>
 

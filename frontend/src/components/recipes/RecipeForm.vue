@@ -12,7 +12,12 @@
         />
       </div>
     </q-card>
-    <RecipeStepsEditor v-model="recipe" class="q-mt-none" :loading="props.loading" />
+    <RecipeStepsEditor
+      v-model="recipe"
+      class="q-mt-none"
+      :loading="props.loading"
+      :device-template-id="deviceTemplateId"
+    />
   </div>
 </template>
 
@@ -28,6 +33,10 @@ const props = defineProps({
   loading: {
     type: Boolean,
     default: false,
+  },
+  deviceTemplateId: {
+    type: String,
+    required: true,
   },
 });
 defineExpose({ validate });

@@ -36,8 +36,14 @@ import { handleError } from '@/utils/error-handler';
 const { t } = useI18n();
 const route = useRoute();
 
+const props = defineProps({
+  deviceTemplateId: {
+    type: String,
+    required: true,
+  },
+});
+
 const recipe = defineModel<RecipeResponse>({ required: true });
-const deviceTemplateId = route.params.id as string;
 
 const pagination = ref<PaginationClient>({
   sortBy: 'updatedAt',
@@ -51,8 +57,8 @@ const commandsPaginated = ref<CommandsResponse>();
 const commands = computed(() => commandsPaginated.value?.items ?? []);
 const isLoadingCommands = ref(false);
 async function getCommands(paginationReq: PaginationTable) {
-  const paginationQuery: CommandsQueryParams = {
-    DeviceTemplateId: deviceTemplateId,
+  const query: CommandsQueryParams = {
+    DeviceTemplateId: props.deviceTemplateId,
     SearchTerm: '',
     SortBy: paginationReq.sortBy,
     Descending: paginationReq.descending,
@@ -61,7 +67,7 @@ async function getCommands(paginationReq: PaginationTable) {
   };
 
   isLoadingCommands.value = true;
-  const { data, error } = await CommandService.getCommands(paginationQuery);
+  const { data, error } = await CommandService.getCommands(query);
   isLoadingCommands.value = false;
 
   if (error) {
