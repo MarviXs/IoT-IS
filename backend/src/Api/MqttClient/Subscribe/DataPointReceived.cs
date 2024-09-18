@@ -39,9 +39,6 @@ public class DataPointReceived(AppDbContext appContext, RedisService redis)
             await redis.Db.StringSetAsync(redisKey, deviceId, TimeSpan.FromHours(1));
         }
 
-        redis.Db.StringSet($"device:{deviceId}:connected", "1", TimeSpan.FromMinutes(30));
-        redis.Db.StringSet($"device:{deviceId}:lastSeen", DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString());
-        
         var datapoint = DataPointFbs.GetRootAsDataPointFbs(new ByteBuffer(payload.ToArray()));
         var redisResult = await redis.Db.StreamAddAsync(
             "datapoints",
@@ -53,8 +50,10 @@ public class DataPointReceived(AppDbContext appContext, RedisService redis)
             ],
             maxLength: 500000
         );
-        
-        await redis.Db.StringSetAsync($"device:{deviceId}:{datapoint.Tag}:last", datapoint.Value, TimeSpan.FromHours(1));
+
+        redis.Db.StringSetAsync($"device:{deviceId}:connected", "1", TimeSpan.FromMinutes(30));
+        redis.Db.StringSetAsync($"device:{deviceId}:lastSeen", DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString());
+        redis.Db.StringSetAsync($"device:{deviceId}:{datapoint.Tag}:last", datapoint.Value, TimeSpan.FromHours(1));
 
         return Result.Ok();
     }

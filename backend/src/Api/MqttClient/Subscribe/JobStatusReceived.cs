@@ -39,8 +39,8 @@ public class JobStatusReceived(AppDbContext appContext, RedisService redis)
             await redis.Db.StringSetAsync(redisKey, deviceId, TimeSpan.FromHours(1));
         }
 
-        redis.Db.StringSet($"device:{deviceId}:connected", "1", TimeSpan.FromMinutes(30));
-        redis.Db.StringSet($"device:{deviceId}:lastSeen", DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString());
+        redis.Db.StringSetAsync($"device:{deviceId}:connected", "1", TimeSpan.FromMinutes(30));
+        redis.Db.StringSetAsync($"device:{deviceId}:lastSeen", DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString());
 
         var jobFbs = JobFbs.GetRootAsJobFbs(new ByteBuffer(payload.ToArray()));
 
@@ -64,7 +64,7 @@ public class JobStatusReceived(AppDbContext appContext, RedisService redis)
         job.FinishedAt = DateTimeOffset.FromUnixTimeMilliseconds(jobFbs.FinishedAt).UtcDateTime;
 
         await appContext.SaveChangesAsync(cancellationToken);
-        await redis.Db.PublishAsync(RedisChannel.Literal($"jobs-active-{job.Device?.OwnerId}"), job.Id.ToString());
+        redis.Db.PublishAsync(RedisChannel.Literal($"jobs-active-{job.Device?.OwnerId}"), job.Id.ToString());
 
         return Result.Ok();
     }

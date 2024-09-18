@@ -4,7 +4,7 @@ namespace Fei.Is.Api.Redis;
 
 public class RedisService : IDisposable
 {
-    public IDatabase Db { get; }
+    public IDatabaseAsync Db { get; }
     private readonly IConnectionMultiplexer Connection;
     private readonly string _connectionString;
 

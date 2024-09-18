@@ -43,8 +43,8 @@ public class OnDeviceConnected(AppDbContext context, RedisService redis)
         {
             return Result.Fail("Device not found");
         }
-        redis.Db.StringSet($"device:{device.Id}:connected", "1", TimeSpan.FromMinutes(30));
-        redis.Db.StringSet($"device:{device.Id}:lastSeen", DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString());
+        redis.Db.StringSetAsync($"device:{device.Id}:connected", "1", TimeSpan.FromMinutes(30));
+        redis.Db.StringSetAsync($"device:{device.Id}:lastSeen", DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString());
 
         await FailActiveJobs(device.Id, cancellationToken);
 
