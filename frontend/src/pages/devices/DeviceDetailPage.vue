@@ -1,7 +1,7 @@
 <template>
   <PageLayout
     :breadcrumbs="[
-      { label: t('device.label', 2), to: '/dvices' },
+      { label: t('device.label', 2), to: '/devices' },
       { label: device?.name, to: `/devices/${deviceId}` },
     ]"
   >
