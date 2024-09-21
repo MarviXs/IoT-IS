@@ -1,7 +1,7 @@
 <template>
   <PageLayout
     :breadcrumbs="[
-      { label: t('device.label', 2), to: '/devices' },
+      { label: t('device.label', 2), to: '/dvices' },
       { label: device?.name, to: `/devices/${deviceId}` },
     ]"
   >
@@ -18,12 +18,6 @@
         size="15px"
         :label="t('job.label', 2)"
         :icon="mdiListStatus"
-      />
-      <AutoRefreshButton
-        class="col-grow col-lg-auto"
-        v-model="refreshInterval"
-        :loading="isRefreshingDataPoints"
-        @on-refresh="refreshDatapoints"
       />
       <q-btn
         class="shadow col-grow col-lg-auto"
@@ -74,6 +68,7 @@
             :unit="sensor.unit ?? ''"
             :accuracy-decimals="sensor.accuracyDecimals ?? 2"
             :color="getGraphColor(index)"
+            :last-value="sensor.lastValue ?? null"
           />
         </div>
       </div>
@@ -86,7 +81,7 @@
 import { useRoute } from 'vue-router';
 import DeviceInfoCard from '@/components/devices/DeviceInfoCard.vue';
 import DataPointChartJS, { SensorData } from '@/components/datapoints/DataPointChartJS.vue';
-import { computed, ref } from 'vue';
+import { computed, onUnmounted, ref } from 'vue';
 import DeviceService from '@/api/services/DeviceService';
 import { deviceToTreeNode, extractNodeKeys } from '@/utils/sensor-nodes';
 import SensorSelectionTree from '@/components/datapoints/SensorSelectionTree.vue';
@@ -94,7 +89,6 @@ import CurrentJobCard from '@/components/jobs/CurrentJobCard.vue';
 import { useI18n } from 'vue-i18n';
 import { mdiListStatus, mdiPencil } from '@quasar/extras/mdi-v7';
 import PageLayout from '@/layouts/PageLayout.vue';
-import { useStorage } from '@vueuse/core';
 import { handleError } from '@/utils/error-handler';
 import { DeviceResponse } from '@/api/types/Device';
 import EditDeviceDialog from '@/components/devices/EditDeviceDialog.vue';
@@ -102,10 +96,12 @@ import { SensorNode } from '@/models/SensorNode';
 import StatusDot from '@/components/devices/StatusDot.vue';
 import LatestDataPointCard from '@/components/datapoints/LatestDataPointCard.vue';
 import { getGraphColor } from '@/utils/colors';
-import AutoRefreshButton from '@/components/core/AutoRefreshButton.vue';
+import { useSignalR } from '@/composables/useSignalR';
+import { LastDataPoint } from '@/models/LastDataPoint';
+import DataPointService from '@/api/services/DataPointService';
 
 const { t } = useI18n();
-
+const { connection, connect } = useSignalR();
 const route = useRoute();
 
 const deviceId = route.params.id.toString();
@@ -128,6 +124,7 @@ const sensors = computed<SensorData[]>(() => {
         name: sensor.name,
         unit: sensor.unit,
         accuracyDecimals: sensor.accuracyDecimals,
+        lastValue: lastDataPoints.value.find((dp) => dp.deviceId === device.value?.id && dp.tag === sensor.tag)?.value,
       };
     }) ?? []
   );
@@ -149,23 +146,55 @@ async function getDevice() {
     sensorTree.value = deviceToTreeNode(device.value);
     tickedNodes.value = extractNodeKeys(sensorTree.value);
   }
+  getLastDataPoints();
 }
 getDevice();
 
-const isRefreshingDataPoints = ref(false);
-const latestDataPointCards = ref<InstanceType<typeof LatestDataPointCard>[]>();
-async function refreshDatapoints() {
-  isRefreshingDataPoints.value = true;
-  dataPointChart.value.refresh();
-  latestDataPointCards.value?.forEach((card) => {
-    card.refresh();
-  });
-  isRefreshingDataPoints.value = false;
+async function subscribeDeviceUpdates() {
+  await connect();
+  connection.send('SubscribeToDevice', deviceId);
+}
+subscribeDeviceUpdates();
+
+const lastDataPoints = ref<LastDataPoint[]>([]);
+async function getLastDataPoints() {
+  for (const sensor of sensors.value) {
+    const { data, error } = await DataPointService.getLatestDataPoints(deviceId, sensor.tag);
+    if (error) {
+      handleError(error, t('device.toasts.loading_failed'));
+      return;
+    }
+    const newDataPoint = { deviceId: device.value?.id ?? '', tag: sensor.tag, value: data.value };
+    const index = lastDataPoints.value.findIndex(
+      (dp) => dp.deviceId === newDataPoint.deviceId && dp.tag === newDataPoint.tag,
+    );
+    if (index !== -1) {
+      lastDataPoints.value[index] = newDataPoint;
+    } else {
+      lastDataPoints.value.push(newDataPoint);
+    }
+  }
 }
 
-const isUpdateDialogOpen = ref(false);
+async function subscribeToLastDataPointUpdates() {
+  connection.on('ReceiveSensorLastDataPoint', (dataPoint: LastDataPoint) => {
+    const index = lastDataPoints.value.findIndex(
+      (dp) => dp.deviceId === dataPoint.deviceId && dp.tag === dataPoint.tag,
+    );
+    if (index !== -1) {
+      lastDataPoints.value[index] = dataPoint;
+    } else {
+      lastDataPoints.value.push(dataPoint);
+    }
+  });
+}
+subscribeToLastDataPointUpdates();
 
-const refreshInterval = useStorage('DeviceDetailRefreshInterval', 30);
+const isUpdateDialogOpen = ref(false);
+onUnmounted(() => {
+  connection.send('UnsubscribeFromDevice', deviceId);
+  connection.off('ReceiveSensorLastDataPoint');
+});
 </script>
 
 <style lang="scss" scoped></style>

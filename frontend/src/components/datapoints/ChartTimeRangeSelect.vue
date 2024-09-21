@@ -31,24 +31,24 @@
         {{ scope.opt.title }}
       </template>
     </template>
+    <q-dialog v-model="customTimeRangeDialog">
+      <q-card class="q-pa-xs">
+        <q-card-section>
+          <div class="text-h6">
+            {{ t('time_range.custom') }}
+          </div>
+        </q-card-section>
+        <q-card-section class="q-pt-none column q-gutter-md">
+          <DateTimeInput v-model="customTimeRangeSelected.from" :label="t('time_range.from')" />
+          <DateTimeInput v-model="customTimeRangeSelected.to" :label="t('time_range.to')" :show-now-button="true" />
+        </q-card-section>
+        <q-card-actions align="right" class="text-primary">
+          <q-btn v-close-popup flat :label="t('global.cancel')" no-caps />
+          <q-btn unelevated color="primary" label="Filter" no-caps padding="6px 20px" @click="setCustomTimeRange" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-select>
-  <q-dialog v-model="customTimeRangeDialog">
-    <q-card class="q-pa-xs">
-      <q-card-section>
-        <div class="text-h6">
-          {{ t('time_range.custom') }}
-        </div>
-      </q-card-section>
-      <q-card-section class="q-pt-none column q-gutter-md">
-        <DateTimeInput v-model="customTimeRangeSelected.from" :label="t('time_range.from')" />
-        <DateTimeInput v-model="customTimeRangeSelected.to" :label="t('time_range.to')" :show-now-button="true" />
-      </q-card-section>
-      <q-card-actions align="right" class="text-primary">
-        <q-btn v-close-popup flat :label="t('global.cancel')" no-caps />
-        <q-btn unelevated color="primary" label="Filter" no-caps padding="6px 20px" @click="setCustomTimeRange" />
-      </q-card-actions>
-    </q-card>
-  </q-dialog>
 </template>
 
 <script setup lang="ts">
@@ -61,7 +61,7 @@ import DateTimeInput from './DateTimeInput.vue';
 
 const emit = defineEmits(['update:modelValue']);
 defineExpose({
-  emitUpdate,
+  updateTimeRange,
 });
 
 const { t } = useI18n();
@@ -131,18 +131,18 @@ const isCustomTimeRangeSelected = ref(false);
 function setCustomTimeRange() {
   isCustomTimeRangeSelected.value = true;
   customTimeRangeDialog.value = false;
-  emitUpdate();
+  updateTimeRange();
 }
 
 function setPredefinedTimeRange(val: PredefinedTimeRange) {
   selectedTimeRangeIndex.value = timeRanges.value.findIndex((r) => r.name === val.name);
   isCustomTimeRangeSelected.value = false;
-  emitUpdate();
+  updateTimeRange();
 }
 
 const formatDate = (date: Date) => format(date, 'yyyy-MM-dd HH:mm:ss');
 
-function emitUpdate() {
+function updateTimeRange() {
   let newVal;
   if (isCustomTimeRangeSelected.value) {
     if (customTimeRangeSelected.value.from === null) {
@@ -162,17 +162,7 @@ function emitUpdate() {
   }
   emit('update:modelValue', newVal);
 }
-emitUpdate();
+updateTimeRange();
 </script>
 
-<style lang="scss" scoped>
-.date-picker {
-  width: 100%;
-}
-
-@media (min-width: 600px) {
-  .date-picker {
-    max-width: 180px;
-  }
-}
-</style>
+<style lang="scss" scoped></style>

@@ -69,7 +69,6 @@
               :job-id="activeJob.id"
               :paused="activeJob.paused"
               :status="activeJob.status"
-              @action-performed="getActiveJob()"
             />
             <div class="flex justify-center q-mt-md">
               <div class="row items-center q-gutter-x-sm">
@@ -102,7 +101,7 @@
         </div>
       </div>
     </q-expansion-item>
-    <StartJobDialog v-model="openDialog" :device-id="props.deviceId" @job-started="getActiveJob" />
+    <StartJobDialog v-model="openDialog" :device-id="props.deviceId" @job-started="getActiveJobs" />
   </div>
 </template>
 
@@ -116,8 +115,7 @@ import JobService from '@/api/services/JobService';
 import { ActiveJobsResponse } from '@/api/types/Job';
 import { handleError } from '@/utils/error-handler';
 import { computed, onUnmounted, ref } from 'vue';
-import { JobStatusEnum } from '@/models/JobStatusEnum';
-import { EventSourceClient, EventSourceMessage } from 'eventsource-client';
+import { useSignalR } from '@/composables/useSignalR';
 
 const props = defineProps({
   deviceId: {
@@ -126,6 +124,7 @@ const props = defineProps({
   },
 });
 
+const { connection } = useSignalR();
 const { t } = useI18n();
 const openDialog = ref(false);
 
@@ -134,7 +133,7 @@ const selectedJobId = ref<string | null>(null);
 
 const isLoadingJobs = ref(false);
 
-async function getActiveJob() {
+async function getActiveJobs() {
   isLoadingJobs.value = true;
   const { data, error } = await JobService.getActiveJobs(props.deviceId);
   isLoadingJobs.value = false;
@@ -145,19 +144,23 @@ async function getActiveJob() {
   }
   activeJobs.value = data;
 }
-getActiveJob();
+getActiveJobs();
 
-let es: EventSourceClient | null = null;
-async function getActiveJobsSSE() {
-  es = JobService.getActiveJobsEventSource(props.deviceId);
-
-  for await (const { data, event, id } of es) {
-    const jobs = JSON.parse(data);
-    activeJobs.value = jobs;
-  }
-  es.close();
+async function subscribeToJobUpdates() {
+  connection.on('ReceiveJobUpdate', (job) => {
+    const jobId = job.id;
+    const index = activeJobs.value.findIndex((j) => j.id === jobId);
+    if (index !== -1) {
+      activeJobs.value[index] = job;
+    } else {
+      activeJobs.value.push(job);
+    }
+    if (activeJobs.value.length === 1 || selectedJobId.value === jobId) {
+      selectedJobId.value = job.id;
+    }
+  });
 }
-getActiveJobsSSE();
+subscribeToJobUpdates();
 
 const activeJob = computed(() => {
   if (!activeJobs.value || activeJobs.value.length === 0) {
@@ -184,9 +187,7 @@ function nextJob() {
 }
 
 onUnmounted(() => {
-  if (es) {
-    es.close();
-  }
+  connection.off('ReceiveJobUpdate');
 });
 </script>
 

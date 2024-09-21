@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Text;
-using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Data.Contexts;
+using Fei.Is.Api.Data.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -72,22 +72,53 @@ public static class ServiceExtensions
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
                     ClockSkew = TimeSpan.Zero
                 };
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+                        var path = context.HttpContext.Request.Path;
+                        if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/is-hub"))
+                        {
+                            context.Token = accessToken;
+                        }
+                        return Task.CompletedTask;
+                    }
+                };
             });
     }
 
     public static void ConfigureProblemDetails(this IServiceCollection services)
     {
-        services.AddProblemDetails(
-            options =>
-                options.CustomizeProblemDetails = ctx =>
+        services.AddProblemDetails(options =>
+            options.CustomizeProblemDetails = ctx =>
+            {
+                if (!ctx.ProblemDetails.Extensions.ContainsKey("traceId"))
                 {
-                    if (!ctx.ProblemDetails.Extensions.ContainsKey("traceId"))
-                    {
-                        ctx.ProblemDetails.Extensions.Add("traceId", Activity.Current?.Id ?? ctx.HttpContext.TraceIdentifier);
-                    }
-
-                    ctx.ProblemDetails.Extensions.Add("instance", $"{ctx.HttpContext.Request.Method} {ctx.HttpContext.Request.Path}");
+                    ctx.ProblemDetails.Extensions.Add("traceId", Activity.Current?.Id ?? ctx.HttpContext.TraceIdentifier);
                 }
+
+                ctx.ProblemDetails.Extensions.Add("instance", $"{ctx.HttpContext.Request.Method} {ctx.HttpContext.Request.Path}");
+            }
         );
+    }
+
+    public static void ConfigureCors(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddCors(options =>
+        {
+            options.AddPolicy(
+                "CorsPolicy",
+                builder =>
+                {
+                    var origins = configuration["Cors:AllowedOrigins"]?.Split(',') ?? ["http://localhost:9000"];
+                    builder.WithOrigins(origins)
+                           .AllowAnyMethod()
+                           .AllowAnyHeader()
+                           .AllowCredentials();
+                }
+            );
+        });
     }
 }

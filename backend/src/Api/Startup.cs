@@ -8,6 +8,7 @@ using Fei.Is.Api.MqttClient;
 using Fei.Is.Api.MqttClient.Publish;
 using Fei.Is.Api.MqttClient.Subscribe;
 using Fei.Is.Api.Redis;
+using Fei.Is.Api.SignalR.Hubs;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Json;
@@ -23,20 +24,11 @@ public class Startup(IConfiguration configuration)
         // Add services to the container.
         services.ConfigurePostgresContext(Configuration);
         services.ConfigureTimescaleContext(Configuration);
-        services.AddCors(options =>
-        {
-            options.AddPolicy(
-                "CorsPolicy",
-                builder =>
-                {
-                    builder.WithOrigins(Configuration["Cors:AllowedOrigins"] ?? "*").AllowAnyMethod().AllowAnyHeader();
-                }
-            );
-        });
-        services.AddControllers();
+        services.ConfigureCors(Configuration);
         services.ConfigureProblemDetails();
         services.AddCarter();
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Startup>());
+        services.AddSignalR();
 
         // Auth
         services.AddAuthentication();
@@ -111,6 +103,7 @@ public class Startup(IConfiguration configuration)
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapCarter();
+            endpoints.MapHub<IsHub>("/is-hub");
         });
     }
 }

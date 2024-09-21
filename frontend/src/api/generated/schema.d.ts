@@ -496,23 +496,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/devices/{deviceId}/jobs/active/sse": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get all active jobs on a device using Server-Sent Events */
-        get: operations["GetActiveJobsSSE"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/jobs/{jobId}": {
         parameters: {
             query?: never;
@@ -949,10 +932,8 @@ export interface components {
             timeStamp?: number | null;
         };
         "Fei.Is.Api.Features.DataPoints.Queries.GetLatestDataPoints.Response": {
-            /** Format: date-time */
-            ts: string;
             /** Format: double */
-            value?: number | null;
+            value: number | null;
         };
         /** @enum {string} */
         "Fei.Is.Api.Features.DataPoints.Queries.GetSensorDataPoints.DownsampleMethod": "Asap" | "Lttb";
@@ -2604,26 +2585,6 @@ export interface operations {
             };
             /** @description Not Found */
             404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    GetActiveJobsSSE: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                deviceId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
                 headers: {
                     [name: string]: unknown;
                 };

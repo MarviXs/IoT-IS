@@ -1,15 +1,20 @@
 using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
+using Fei.Is.Api.Data.Enums;
+using Fei.Is.Api.Features.Jobs.Extensions;
 using Fei.Is.Api.Redis;
+using Fei.Is.Api.SignalR.Dtos;
+using Fei.Is.Api.SignalR.Hubs;
+using Fei.Is.Api.SignalR.Interfaces;
 using FluentResults;
 using Google.FlatBuffers;
 using JobFlatBuffers;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using StackExchange.Redis;
 
 namespace Fei.Is.Api.MqttClient.Subscribe;
 
-public class JobStatusReceived(AppDbContext appContext, RedisService redis)
+public class JobStatusReceived(AppDbContext appContext, RedisService redis, IHubContext<IsHub, INotificationsClient> hubContext)
 {
     public async Task<Result> Handle(string deviceAccessToken, ArraySegment<byte> payload, CancellationToken cancellationToken)
     {
@@ -47,6 +52,7 @@ public class JobStatusReceived(AppDbContext appContext, RedisService redis)
         var job = await appContext
             .Jobs.Where(j => j.DeviceId == Guid.Parse(deviceId) && j.Id == Guid.Parse(jobFbs.JobId))
             .Include(j => j.Device)
+            .Include(j => j.Commands.OrderBy(c => c.Order))
             .FirstOrDefaultAsync(cancellationToken);
 
         if (job == null)
@@ -54,7 +60,7 @@ public class JobStatusReceived(AppDbContext appContext, RedisService redis)
             return Result.Fail(new NotFoundError());
         }
 
-        job.Status = (Data.Enums.JobStatusEnum)jobFbs.Status;
+        job.Status = (JobStatusEnum)jobFbs.Status;
         job.CurrentStep = jobFbs.CurrentStep;
         job.TotalSteps = jobFbs.TotalSteps;
         job.CurrentCycle = jobFbs.CurrentCycle;
@@ -62,9 +68,24 @@ public class JobStatusReceived(AppDbContext appContext, RedisService redis)
         job.Paused = jobFbs.Paused;
         job.StartedAt = DateTimeOffset.FromUnixTimeMilliseconds(jobFbs.StartedAt).UtcDateTime;
         job.FinishedAt = DateTimeOffset.FromUnixTimeMilliseconds(jobFbs.FinishedAt).UtcDateTime;
-
         await appContext.SaveChangesAsync(cancellationToken);
-        redis.Db.PublishAsync(RedisChannel.Literal($"jobs-active-{job.Device?.OwnerId}"), job.Id.ToString());
+
+        var currentCommand = job.Commands.ElementAtOrDefault(job.CurrentStep - 1)?.DisplayName ?? string.Empty;
+        var jobUpdate = new JobUpdateDto(
+            job.Id,
+            job.DeviceId,
+            job.Name,
+            job.TotalSteps,
+            job.TotalCycles,
+            job.CurrentStep,
+            job.CurrentCycle,
+            currentCommand,
+            job.Paused,
+            job.GetProgress(),
+            job.Status
+        );
+
+        await hubContext.Clients.Group(job.DeviceId.ToString()).ReceiveJobUpdate(jobUpdate);
 
         return Result.Ok();
     }

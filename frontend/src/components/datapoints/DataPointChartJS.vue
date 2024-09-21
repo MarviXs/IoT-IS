@@ -28,6 +28,22 @@
         color="grey-7"
         text-color="grey-5"
         class="options-btn col-grow col-lg-auto"
+        :icon="mdiRefresh"
+        @click="refresh"
+      >
+        <template #default>
+          <div class="text-grey-10 text-weight-regular q-ml-sm">
+            {{ t('global.refresh') }}
+          </div>
+        </template>
+      </q-btn>
+      <q-btn
+        padding="0.5rem 1rem"
+        outline
+        no-caps
+        color="grey-7"
+        text-color="grey-5"
+        class="options-btn col-grow col-lg-auto"
         @click="isGraphOptionsDialogOpen = true"
       >
         <template #default>
@@ -54,7 +70,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, PropType, shallowRef, watch, watchEffect } from 'vue';
+import { ref, reactive, onMounted, PropType, shallowRef, watch, watchEffect, computed } from 'vue';
 import ChartTimeRangeSelect from '@/components/datapoints/ChartTimeRangeSelect.vue';
 import { TimeRange } from '@/models/TimeRange';
 import { getGraphColor, transparentize } from '@/utils/colors';
@@ -68,6 +84,8 @@ import DataPointService from '@/api/services/DataPointService';
 import { Chart, ChartDataset, ChartEvent, LegendItem, ScaleOptions } from 'chart.js/auto';
 import 'chartjs-adapter-date-fns';
 import zoomPlugin from 'chartjs-plugin-zoom';
+import { mdiRefresh } from '@quasar/extras/mdi-v7';
+import { useInterval } from '@/composables/useInterval';
 
 Chart.register(zoomPlugin);
 
@@ -83,6 +101,7 @@ export type SensorData = {
   name: string;
   unit?: string | null;
   accuracyDecimals?: number | null;
+  lastValue?: number | null;
 };
 
 const props = defineProps({
@@ -99,7 +118,7 @@ const tickedNodes = defineModel('tickedNodes', {
 
 const isGraphOptionsDialogOpen = ref(false);
 const graphOptions = useStorage<GraphOptions>('graphOptions', {
-  refreshInterval: 0,
+  refreshInterval: 30,
   timeFormat: '24h',
 
   interpolationMethod: 'straight',
@@ -107,7 +126,7 @@ const graphOptions = useStorage<GraphOptions>('graphOptions', {
   lineWidth: 3,
   markerSize: 3,
 
-  samplingOption: 'DOWNSAMPLE',
+  samplingOption: 'BUCKETS',
   downsampleResolution: 100,
   downsampleMethod: 'Lttb',
   timeBucketSizeSeconds: 60,
@@ -175,7 +194,7 @@ async function getDataPoints() {
 }
 
 async function refresh() {
-  timeRangeSelectRef.value?.emitUpdate();
+  timeRangeSelectRef.value?.updateTimeRange();
 }
 
 function roundNumber(num: number | undefined | null, decimals: number) {
@@ -410,6 +429,11 @@ onMounted(() => {
     },
   });
 });
+
+const intervalMilliseconds = computed(() => graphOptions.value.refreshInterval * 1000);
+useInterval(() => {
+  refresh();
+}, intervalMilliseconds);
 
 defineExpose({
   refresh,

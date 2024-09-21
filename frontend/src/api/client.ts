@@ -2,7 +2,6 @@ import createClient from 'openapi-fetch';
 import type { paths } from './generated/schema.d.ts';
 import { useAuthStore } from '@/stores/auth-store.js';
 import { toast } from 'vue3-toastify';
-import { createEventSource, EventSourceMessage } from 'eventsource-client';
 
 const baseUrl = process.env.VITE_API_URL || 'http://localhost:5097/';
 
@@ -54,18 +53,9 @@ const customFetch = async (input: RequestInfo | URL, init?: RequestInit): Promis
   }
 };
 
-function createServerEventSource(url: string) {
-  const es = createEventSource({
-    url: baseUrl + url,
-    fetch: customFetch,
-  });
-
-  return es;
-}
-
 const client = createClient<paths>({
   baseUrl: baseUrl,
   fetch: customFetch,
 });
 
-export { baseUrl, client, customFetch, createServerEventSource };
+export { baseUrl, client, customFetch };

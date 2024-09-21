@@ -8,15 +8,6 @@ https://{$FRONTEND_DOMAIN} {
 }
 
 https://{$BACKEND_DOMAIN} {
-    reverse_proxy /devices/*/jobs/active/sse backend:8080 {
-        flush_interval -1
-        header_down Content-Type "text/event-stream"
-        header_down Transfer-Encoding "chunked"
-        transport http {
-            compression off
-        }
-    }
-
     reverse_proxy backend:8080 {
         # Default settings for all paths
     }

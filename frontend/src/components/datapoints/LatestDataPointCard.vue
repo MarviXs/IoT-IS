@@ -9,7 +9,6 @@
 </template>
 
 <script setup lang="ts">
-import { GetLatestDataPointsResponse } from '@/api/types/DataPoint';
 import DataPointService from '@/api/services/DataPointService';
 import { computed, ref } from 'vue';
 const props = defineProps<{
@@ -19,33 +18,11 @@ const props = defineProps<{
   unit: string;
   accuracyDecimals: number;
   color: string;
+  lastValue: number | null;
 }>();
 
-const latestDataPoint = ref<GetLatestDataPointsResponse>();
-const isLoadingLatestDataPoint = ref(false);
-async function getLatestDataPoint() {
-  isLoadingLatestDataPoint.value = true;
-  const { data, error } = await DataPointService.getLatestDataPoints(props.deviceId, props.sensorTag);
-
-  if (error) {
-    latestDataPoint.value = undefined;
-  } else {
-    latestDataPoint.value = data;
-  }
-  isLoadingLatestDataPoint.value = false;
-}
-getLatestDataPoint();
-
 const valueRounded = computed(() => {
-  return latestDataPoint.value?.value?.toFixed(props.accuracyDecimals) ?? '-';
-});
-
-async function refresh() {
-  await getLatestDataPoint();
-}
-
-defineExpose({
-  refresh,
+  return props.lastValue?.toFixed(props.accuracyDecimals) ?? '-';
 });
 </script>
 

@@ -5,6 +5,7 @@
         v-model.number="graphOptions.refreshInterval"
         type="number"
         :label="t('global.automatic_refresh_interval')"
+        :hint="t('global.enter_refresh_interval_s')"
       />
     </div>
     <div>
