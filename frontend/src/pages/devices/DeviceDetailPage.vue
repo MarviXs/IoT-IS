@@ -159,20 +159,24 @@ subscribeDeviceUpdates();
 const lastDataPoints = ref<LastDataPoint[]>([]);
 async function getLastDataPoints() {
   for (const sensor of sensors.value) {
-    const { data, error } = await DataPointService.getLatestDataPoints(deviceId, sensor.tag);
-    if (error) {
-      handleError(error, t('device.toasts.loading_failed'));
-      return;
-    }
-    const newDataPoint = { deviceId: device.value?.id ?? '', tag: sensor.tag, value: data.value };
-    const index = lastDataPoints.value.findIndex(
-      (dp) => dp.deviceId === newDataPoint.deviceId && dp.tag === newDataPoint.tag,
-    );
-    if (index !== -1) {
-      lastDataPoints.value[index] = newDataPoint;
-    } else {
-      lastDataPoints.value.push(newDataPoint);
-    }
+    getLastDataPoint(device.value?.id ?? '', sensor.tag);
+  }
+}
+
+async function getLastDataPoint(deviceId: string, tag: string) {
+  const { data, error } = await DataPointService.getLatestDataPoints(deviceId, tag);
+  if (error) {
+    handleError(error, t('device.toasts.loading_failed'));
+    return;
+  }
+  const newDataPoint = { deviceId: device.value?.id ?? '', tag: tag, value: data.value };
+  const index = lastDataPoints.value.findIndex(
+    (dp) => dp.deviceId === newDataPoint.deviceId && dp.tag === newDataPoint.tag,
+  );
+  if (index !== -1) {
+    lastDataPoints.value[index] = newDataPoint;
+  } else {
+    lastDataPoints.value.push(newDataPoint);
   }
 }
 
