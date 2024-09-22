@@ -25,7 +25,7 @@ RUN dotnet publish -a $TARGETARCH -c Release -o out --no-restore \
     && dotnet ef migrations bundle --context TimeScaleDbContext --output out/timescaleMigration
 
 # Stage 2: Production stage
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS production
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS production
 
 # Set the working directory
 WORKDIR /app
