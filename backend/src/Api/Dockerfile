@@ -21,8 +21,8 @@ COPY . .
 
 # Publish the application and create migration bundles
 RUN dotnet publish -a $TARGETARCH -c Release -o out --no-restore \
-    && dotnet ef migrations bundle --context AppDbContext --output out/appMigration \
-    && dotnet ef migrations bundle --context TimeScaleDbContext --output out/timescaleMigration
+    && dotnet ef migrations bundle --target-runtime $TARGETOS-$TARGETARCH --context AppDbContext --output out/appMigration \
+    && dotnet ef migrations bundle --target-runtime $TARGETOS-$TARGETARCH --context TimeScaleDbContext --output out/timescaleMigration
 
 # Stage 2: Production stage
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS production
