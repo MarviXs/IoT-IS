@@ -21,12 +21,12 @@ RUN dotnet restore
 COPY . .
 
 # Publish the application and create migration bundles
-RUN dotnet publish -a $TARGETARCH -c Release -o out --no-restore --self-contained \
+RUN dotnet publish -a $TARGETARCH -c Release -o out --no-restore --self-contained /p:PublishTrimmed=true \
     && dotnet ef migrations bundle --target-runtime $TARGETOS-$TARGETARCH --self-contained --context AppDbContext --output out/appMigration \
     && dotnet ef migrations bundle --target-runtime $TARGETOS-$TARGETARCH --self-contained --context TimeScaleDbContext --output out/timescaleMigration
 
 # Stage 2: Production stage
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS production
+FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-alpine AS production
 
 # Set the working directory
 WORKDIR /app
@@ -35,4 +35,4 @@ WORKDIR /app
 COPY --from=builder /app/out .
 
 # Set the entry point
-ENTRYPOINT ["dotnet", "Api.dll"]
+ENTRYPOINT ["./Api"]
