@@ -12,6 +12,8 @@ jobs:
       DOCKERHUB_REPO_FRONTEND: iot-is-frontend
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
       # Set up QEMU
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
