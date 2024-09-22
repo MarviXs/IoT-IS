@@ -1,6 +1,7 @@
 # Stage 1: Build the application
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS builder
 ARG TARGETARCH
+ARG TARGETOS
 
 # Install dotnet-ef tool
 RUN dotnet tool install --global dotnet-ef
