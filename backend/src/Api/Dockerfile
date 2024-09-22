@@ -21,9 +21,9 @@ RUN dotnet restore
 COPY . .
 
 # Publish the application and create migration bundles
-RUN dotnet publish -a $TARGETARCH -c Release -o out --no-restore \
-    && dotnet ef migrations bundle --target-runtime $TARGETOS-$TARGETARCH --context AppDbContext --output out/appMigration \
-    && dotnet ef migrations bundle --target-runtime $TARGETOS-$TARGETARCH --context TimeScaleDbContext --output out/timescaleMigration
+RUN dotnet publish -a $TARGETARCH -c Release -o out --no-restore --self-contained \
+    && dotnet ef migrations bundle --target-runtime $TARGETOS-$TARGETARCH --self-contained --context AppDbContext --output out/appMigration \
+    && dotnet ef migrations bundle --target-runtime $TARGETOS-$TARGETARCH --self-contained --context TimeScaleDbContext --output out/timescaleMigration
 
 # Stage 2: Production stage
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS production
