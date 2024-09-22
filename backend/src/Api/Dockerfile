@@ -1,5 +1,5 @@
 # Stage 1: Build the application
-FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS builder
+FROM mcr.microsoft.com/dotnet/sdk:9.0-alpine AS builder
 
 # Install dotnet-ef tool
 RUN dotnet tool install --global dotnet-ef
@@ -24,7 +24,7 @@ RUN dotnet publish -c Release -o out --no-restore \
     && dotnet ef migrations bundle --context TimeScaleDbContext --output out/timescaleMigration
 
 # Stage 2: Production stage
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS production
+FROM mcr.microsoft.com/dotnet/aspnet:9.0-alpine AS production
 
 # Set the working directory
 WORKDIR /app
