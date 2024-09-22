@@ -2,22 +2,22 @@ name: iot-is
 services:
   frontend:
     restart: unless-stopped
-    image: iot-is-frontend
-    ports:
-      - 9000:80
+    image: marvixs/iot-is-frontend
     build:
       context: ../frontend
       args:
         - VITE_API_URL=${API_URL}
+    ports:
+      - 9000:80
     networks:
       - out-network
       - int-network
   backend:
-    image: iot-is-backend
+    restart: unless-stopped
+    image: marvixs/iot-is-backend
     build:
       context: ../backend/src/Api
       dockerfile: Dockerfile
-    restart: unless-stopped
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ConnectionStrings__PostgresConnection=Host=pg;Port=5432;Database=is_sdg;Username=is;Password=${POSTGRES_PASSWORD}
