@@ -1,5 +1,6 @@
 # Stage 1: Build the application
-FROM mcr.microsoft.com/dotnet/sdk:9.0-alpine AS builder
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS builder
+ARG TARGETARCH
 
 # Install dotnet-ef tool
 RUN dotnet tool install --global dotnet-ef
@@ -19,12 +20,12 @@ RUN dotnet restore
 COPY . .
 
 # Publish the application and create migration bundles
-RUN dotnet publish -c Release -o out --no-restore \
+RUN dotnet publish -a $TARGETARCH -c Release -o out --no-restore \
     && dotnet ef migrations bundle --context AppDbContext --output out/appMigration \
     && dotnet ef migrations bundle --context TimeScaleDbContext --output out/timescaleMigration
 
 # Stage 2: Production stage
-FROM mcr.microsoft.com/dotnet/aspnet:9.0-alpine AS production
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS production
 
 # Set the working directory
 WORKDIR /app
