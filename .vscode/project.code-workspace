@@ -11,6 +11,9 @@
 		{
 			"name": "Docker",
 			"path": "../docker"
+		},
+		{
+			"path": "../.github"
 		}
 	],
 	"settings": {}
