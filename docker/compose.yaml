@@ -2,7 +2,7 @@ name: iot-is
 services:
   frontend:
     restart: unless-stopped
-    image: marvixs/iot-is-frontend
+    image: iot-is-frontend
     build:
       context: ../frontend
       args:
@@ -14,7 +14,7 @@ services:
       - int-network
   backend:
     restart: unless-stopped
-    image: marvixs/iot-is-backend
+    image: iot-is-backend
     build:
       context: ../backend/src/Api
       dockerfile: Dockerfile
