@@ -113,10 +113,7 @@ public static class ServiceExtensions
                 builder =>
                 {
                     var origins = configuration["Cors:AllowedOrigins"]?.Split(',') ?? ["http://localhost:9000"];
-                    builder.WithOrigins(origins)
-                           .AllowAnyMethod()
-                           .AllowAnyHeader()
-                           .AllowCredentials();
+                    builder.WithOrigins(origins).AllowAnyMethod().AllowAnyHeader();
                 }
             );
         });

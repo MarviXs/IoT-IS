@@ -15,6 +15,7 @@ export function useSignalR() {
       connection = new HubConnectionBuilder()
         .withUrl(baseUrl, {
           accessTokenFactory: () => authStore.accessToken,
+          withCredentials: false,
         })
         .withAutomaticReconnect()
         .build();
