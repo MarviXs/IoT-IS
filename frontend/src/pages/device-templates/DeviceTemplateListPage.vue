@@ -75,7 +75,7 @@ import SearchBar from '@/components/core/SearchBar.vue';
 import { PaginationClient, PaginationTable } from '@/models/Pagination';
 import DeviceTemplateService from '@/api/services/DeviceTemplateService';
 import { handleError } from '@/utils/error-handler';
-import { DeviceTemplatesQueryParams, DeviceTemplatesResponse } from '@/api/types/DeviceTemplate';
+import { DeviceTemplatesQueryParams, DeviceTemplatesResponse } from '@/api/services/DeviceTemplateService';
 import { QTableProps } from 'quasar';
 import DeleteDeviceTemplateDialog from '@/components/device-templates/DeleteDeviceTemplateDialog.vue';
 import { watchDebounced } from '@vueuse/core';

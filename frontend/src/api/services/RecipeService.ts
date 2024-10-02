@@ -1,6 +1,14 @@
 import { client } from '@/api/client';
-import { RecipesQueryParams, CreateRecipeRequest, UpdateRecipeRequest } from '../types/Recipe';
-import { UpdateRecipeStepsRequest } from '../types/RecipeStep';
+import type { paths, components } from '@/api/generated/schema.d.ts';
+
+export type RecipesQueryParams = paths['/recipes']['get']['parameters']['query'];
+export type RecipesResponse = paths['/recipes']['get']['responses']['200']['content']['application/json'];
+export type RecipeResponse = paths['/recipes/{id}']['get']['responses']['200']['content']['application/json'];
+export type CreateRecipeRequest = paths['/recipes']['post']['requestBody']['content']['application/json'];
+export type UpdateRecipeRequest = paths['/recipes/{id}']['put']['requestBody']['content']['application/json'];
+export type UpdateRecipeStepsRequest =
+  paths['/recipes/{recipeId}/steps']['put']['requestBody']['content']['application/json'];
+export type RecipeStep = components['schemas']['Fei.Is.Api.Features.Recipes.Queries.GetRecipeById.RecipeStepResponse'];
 
 class RecipeService {
   async getRecipes(queryParams: RecipesQueryParams) {

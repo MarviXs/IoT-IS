@@ -7,8 +7,7 @@ import { jwtDecode } from 'jwt-decode';
 import { Role } from '@/models/Role';
 import { useStoreRouter } from '@/composables/useStoreRouter';
 import { JwtPayload } from '@/models/Tokens';
-import { LoginRequest } from '@/api/types/Auth';
-import { toast } from 'vue3-toastify';
+import { LoginRequest } from '@/api/services/AuthService';
 
 export const useAuthStore = defineStore('authStore', () => {
   const router = useStoreRouter();

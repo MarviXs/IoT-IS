@@ -70,7 +70,7 @@ import { useI18n } from 'vue-i18n';
 import { mdiAccount, mdiEye, mdiEyeOff, mdiLock } from '@quasar/extras/mdi-v7';
 import GoogleLoginBtn from '@/components/account/GoogleLoginBtn.vue';
 import { handleError } from '@/utils/error-handler';
-import { LoginRequest } from '@/api/types/Auth';
+import { LoginRequest } from '@/api/services/AuthService';
 
 const { t } = useI18n();
 

@@ -5,7 +5,7 @@
 </template>
 
 <script setup lang="ts">
-import { UpdateCollectionRequest } from '@/api/types/DeviceCollection';
+import { UpdateCollectionRequest } from '@/api/services/DeviceCollectionService';
 import { useI18n } from 'vue-i18n';
 
 const collection = defineModel<UpdateCollectionRequest>({ required: true });

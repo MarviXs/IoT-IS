@@ -21,7 +21,7 @@ import DialogCommon from '@/components/core/DialogCommon.vue';
 import DeviceForm from '@/components/devices/DeviceForm.vue';
 import { DeviceFormData } from '@/components/devices/DeviceForm.vue';
 import DeviceService from '@/api/services/DeviceService';
-import { UpdateDeviceRequest } from '@/api/types/Device';
+import { UpdateDeviceRequest } from '@/api/services/DeviceService';
 
 const isDialogOpen = defineModel<boolean>();
 const props = defineProps({

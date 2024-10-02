@@ -127,7 +127,7 @@ import {
 import DeleteDeviceDialog from '@/components/devices/DeleteDeviceDialog.vue';
 import { formatTimeToDistance } from '@/utils/date-utils';
 import { PaginationClient } from '@/models/Pagination';
-import { DevicesResponse } from '@/api/types/Device';
+import { DevicesResponse } from '@/api/services/DeviceService';
 import EditDeviceDialog from '@/components/devices/EditDeviceDialog.vue';
 import StatusDot from './StatusDot.vue';
 

@@ -80,7 +80,7 @@ import CommandService from '@/api/services/CommandService';
 import SearchBar from '@/components/core/SearchBar.vue';
 import { useAuthStore } from '@/stores/auth-store';
 import { PaginationClient, PaginationTable } from '@/models/Pagination';
-import { CommandsQueryParams, CommandsResponse } from '@/api/types/Command';
+import { CommandsQueryParams, CommandsResponse } from '@/api/services/CommandService';
 import { handleError } from '@/utils/error-handler';
 import { useRoute } from 'vue-router';
 import { watchDebounced } from '@vueuse/core';
@@ -203,4 +203,3 @@ watchDebounced(filter, () => getCommands(pagination.value), { debounce: 400 });
   color: $secondary;
 }
 </style>
-@/api/types/DeviceTemplate

@@ -58,7 +58,7 @@ import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import UserManagementService from '@/api/services/UserManagementService';
 import { ref } from 'vue';
-import { GetUserByIdResponse } from '@/api/types/UserManagementTypes';
+import { GetUserByIdResponse } from '@/api/services/UserManagementService';
 import { handleError } from '@/utils/error-handler';
 import { Role } from '@/models/Role';
 import { toast } from 'vue3-toastify';

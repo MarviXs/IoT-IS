@@ -169,7 +169,7 @@ import {
   CreateCollectionResponse,
   DeviceCollectionQueryParams,
   UpdateCollectionResponse,
-} from '@/api/types/DeviceCollection';
+} from '@/api/services/DeviceCollectionService';
 import DeviceCollectionService from '@/api/services/DeviceCollectionService';
 import { handleError } from '@/utils/error-handler';
 import CreateCollectionDialog from '@/components/collections/CreateCollectionDialog.vue';

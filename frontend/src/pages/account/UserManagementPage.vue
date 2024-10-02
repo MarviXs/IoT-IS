@@ -42,7 +42,7 @@ import { mdiAccountGroup, mdiPencil } from '@quasar/extras/mdi-v7';
 import PageLayout from '@/layouts/PageLayout.vue';
 import SearchBar from '@/components/core/SearchBar.vue';
 import { PaginationClient, PaginationTable } from '@/models/Pagination';
-import { UsersQueryParams, UsersResponse } from '@/api/types/UserManagementTypes';
+import { UsersQueryParams, UsersResponse } from '@/api/services/UserManagementService';
 import UserManagementService from '@/api/services/UserManagementService';
 import { handleError } from '@/utils/error-handler';
 import { watchDebounced } from '@vueuse/core';

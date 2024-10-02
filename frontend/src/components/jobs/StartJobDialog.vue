@@ -31,7 +31,7 @@ import { isFormValid } from '@/utils/form-validation';
 import DialogCommon from '../core/DialogCommon.vue';
 import JobService from '@/api/services/JobService';
 import { RecipeSelectData } from '@/components/recipes/RecipeSelect.vue';
-import { StartJobRequest } from '@/api/types/Job';
+import { StartJobRequest } from '@/api/services/JobService';
 import RecipeSelect from '@/components/recipes/RecipeSelect.vue';
 
 const isDialogOpen = defineModel<boolean>();

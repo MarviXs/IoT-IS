@@ -17,7 +17,7 @@ import PageLayout from '@/layouts/PageLayout.vue';
 import { ref } from 'vue';
 import JobTable from '@/components/jobs/JobTable.vue';
 import { handleError } from '@/utils/error-handler';
-import { DeviceResponse } from '@/api/types/Device';
+import { DeviceResponse } from '@/api/services/DeviceService';
 import DeviceService from '@/api/services/DeviceService';
 
 const { t } = useI18n();

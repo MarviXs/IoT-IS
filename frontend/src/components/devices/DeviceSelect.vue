@@ -19,7 +19,7 @@ import { computed, nextTick, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { handleError } from '@/utils/error-handler';
 import { QSelect } from 'quasar';
-import { DevicesQueryParams, DevicesResponse } from '@/api/types/Device';
+import { DevicesQueryParams, DevicesResponse } from '@/api/services/DeviceService';
 import DeviceService from '@/api/services/DeviceService';
 
 export interface DeviceSelectData {

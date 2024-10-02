@@ -78,7 +78,7 @@ import { useStorage } from '@vueuse/core';
 import { useI18n } from 'vue-i18n';
 import DialogCommon from '../core/DialogCommon.vue';
 import GraphOptionsForm, { GraphOptions } from './GraphOptionsForm.vue';
-import { GetDataPointsQuery } from '@/api/types/DataPoint';
+import { GetDataPointsQuery } from '@/api/services/DataPointService';
 import { DataPoint } from '@/models/DataPoint';
 import DataPointService from '@/api/services/DataPointService';
 import { Chart, ChartDataset, ChartEvent, LegendItem, ScaleOptions } from 'chart.js/auto';

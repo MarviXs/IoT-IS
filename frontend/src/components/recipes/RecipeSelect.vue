@@ -19,7 +19,7 @@ import { useI18n } from 'vue-i18n';
 import RecipeService from '@/api/services/RecipeService';
 import { handleError } from '@/utils/error-handler';
 import { QSelect } from 'quasar';
-import { RecipesQueryParams, RecipesResponse } from '@/api/types/Recipe';
+import { RecipesQueryParams, RecipesResponse } from '@/api/services/RecipeService';
 
 export interface RecipeSelectData {
   id?: string;

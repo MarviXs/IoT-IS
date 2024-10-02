@@ -41,10 +41,10 @@ import { handleError } from '@/utils/error-handler';
 import { toast } from 'vue3-toastify';
 import { useRoute, useRouter } from 'vue-router';
 import RecipeService from '@/api/services/RecipeService';
-import { DeviceTemplateResponse } from '@/api/types/DeviceTemplate';
+import { DeviceTemplateResponse } from '@/api/services/DeviceTemplateService';
 import DeviceTemplateService from '@/api/services/DeviceTemplateService';
-import { RecipeResponse, UpdateRecipeRequest } from '@/api/types/Recipe';
-import { UpdateRecipeStepsRequest } from '@/api/types/RecipeStep';
+import { RecipeResponse, UpdateRecipeRequest } from '@/api/services/RecipeService';
+import { UpdateRecipeStepsRequest } from '@/api/services/RecipeService';
 
 const { t } = useI18n();
 const route = useRoute();

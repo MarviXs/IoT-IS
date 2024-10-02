@@ -20,7 +20,7 @@ import { useI18n } from 'vue-i18n';
 import DialogCommon from '@/components/core/DialogCommon.vue';
 import CommandService from '@/api/services/CommandService';
 import CommandForm from './CommandForm.vue';
-import { CommandResponse } from '@/api/types/Command';
+import { CommandResponse } from '@/api/services/CommandService';
 
 const isDialogOpen = defineModel<boolean>();
 const props = defineProps({

@@ -83,7 +83,7 @@ import DeleteRecipeDialog from '@/components/recipes/DeleteRecipeDialog.vue';
 import SearchBar from '@/components/core/SearchBar.vue';
 import { useAuthStore } from '@/stores/auth-store';
 import { PaginationClient, PaginationTable } from '@/models/Pagination';
-import { RecipesQueryParams, RecipesResponse } from '@/api/types/Recipe';
+import { RecipesQueryParams, RecipesResponse } from '@/api/services/RecipeService';
 import { useRoute } from 'vue-router';
 import RecipeService from '@/api/services/RecipeService';
 import { handleError } from '@/utils/error-handler';

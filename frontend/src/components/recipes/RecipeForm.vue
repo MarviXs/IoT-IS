@@ -26,7 +26,7 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { isFormValid } from '@/utils/form-validation';
 import RecipeStepsEditor from '@/components/recipes/RecipeStepsEditor.vue';
-import { RecipeResponse } from '@/api/types/Recipe';
+import { RecipeResponse } from '@/api/services/RecipeService';
 
 const recipe = defineModel<RecipeResponse>({ required: true });
 const props = defineProps({

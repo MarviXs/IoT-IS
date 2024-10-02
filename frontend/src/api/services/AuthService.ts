@@ -1,5 +1,8 @@
 import { client } from '@/api/client';
-import { LoginRequest, RegisterRequest } from '@/api/types/Auth';
+import type { paths } from '@/api/generated/schema.d.ts';
+
+export type LoginRequest = paths['/auth/login']['post']['requestBody']['content']['application/json'];
+export type RegisterRequest = paths['/auth/register']['post']['requestBody']['content']['application/json'];
 
 class AuthService {
   async login(body: LoginRequest) {

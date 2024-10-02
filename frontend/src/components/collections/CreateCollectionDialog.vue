@@ -20,7 +20,7 @@ import { toast } from 'vue3-toastify';
 import { useI18n } from 'vue-i18n';
 import DialogCommon from '@/components/core/DialogCommon.vue';
 import CollectionForm from '@/components/collections/CollectionForm.vue';
-import { CreateCollectionRequest, UpdateCollectionRequest } from '@/api/types/DeviceCollection';
+import { CreateCollectionRequest, UpdateCollectionRequest } from '@/api/services/DeviceCollectionService';
 
 const isDialogOpen = defineModel<boolean>();
 const emit = defineEmits(['onCreate']);

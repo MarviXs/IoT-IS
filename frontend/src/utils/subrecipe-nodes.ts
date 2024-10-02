@@ -1,5 +1,5 @@
 import RecipeService from '@/api/services/RecipeService';
-import { RecipeStep } from '@/api/types/RecipeStep';
+import { RecipeStep } from '@/api/services/RecipeService';
 import { SubRecipeNode } from '@/models/SubrecipeNode';
 
 function subrecipeToNodes(recipeStep: RecipeStep, root = false): SubRecipeNode {

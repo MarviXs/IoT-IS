@@ -21,7 +21,7 @@ import { useI18n } from 'vue-i18n';
 import DialogCommon from '@/components/core/DialogCommon.vue';
 import CommandForm, { CommandFormData } from '@/components/commands/CommandForm.vue';
 import { useRoute } from 'vue-router';
-import { CreateCommandRequest } from '@/api/types/Command';
+import { CreateCommandRequest } from '@/api/services/CommandService';
 
 const isDialogOpen = defineModel<boolean>();
 const emit = defineEmits(['onCreate']);

@@ -90,7 +90,7 @@ import { useI18n } from 'vue-i18n';
 import { mdiListStatus, mdiPencil } from '@quasar/extras/mdi-v7';
 import PageLayout from '@/layouts/PageLayout.vue';
 import { handleError } from '@/utils/error-handler';
-import { DeviceResponse } from '@/api/types/Device';
+import { DeviceResponse } from '@/api/services/DeviceService';
 import EditDeviceDialog from '@/components/devices/EditDeviceDialog.vue';
 import { SensorNode } from '@/models/SensorNode';
 import StatusDot from '@/components/devices/StatusDot.vue';

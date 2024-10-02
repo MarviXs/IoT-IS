@@ -27,10 +27,10 @@ import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { mdiPlus } from '@quasar/extras/mdi-v7';
 import CommandService from '@/api/services/CommandService';
-import { RecipeResponse } from '@/api/types/Recipe';
+import { RecipeResponse } from '@/api/services/RecipeService';
 import { PaginationClient, PaginationTable } from '@/models/Pagination';
 import { useRoute } from 'vue-router';
-import { CommandResponse, CommandsQueryParams, CommandsResponse } from '@/api/types/Command';
+import { CommandResponse, CommandsQueryParams, CommandsResponse } from '@/api/services/CommandService';
 import { handleError } from '@/utils/error-handler';
 
 const { t } = useI18n();

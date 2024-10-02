@@ -101,4 +101,3 @@ defineExpose({
   padding: 1rem 2.5rem 1.5rem 2.5rem;
 }
 </style>
-@/api/types/Sensor

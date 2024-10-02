@@ -1,5 +1,5 @@
-import { DeviceResponse } from '@/api/types/Device';
-import { DeviceCollectionWithSensorsResponse } from '@/api/types/DeviceCollection';
+import { DeviceResponse } from '@/api/services/DeviceService';
+import { DeviceCollectionWithSensorsResponse } from '@/api/services/DeviceCollectionService';
 import { SensorData } from '@/components/datapoints/DataPointChartJS.vue';
 import { SensorNode } from '@/models/SensorNode';
 
