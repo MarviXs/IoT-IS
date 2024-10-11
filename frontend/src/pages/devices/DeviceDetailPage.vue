@@ -165,8 +165,7 @@ async function getLastDataPoints() {
 
 async function getLastDataPoint(deviceId: string, tag: string) {
   const { data, error } = await DataPointService.getLatestDataPoints(deviceId, tag);
-  if (error) {
-    handleError(error, t('device.toasts.loading_failed'));
+  if (error || !data || !data.value) {
     return;
   }
   const newDataPoint = { deviceId: device.value?.id ?? '', tag: tag, value: data.value };

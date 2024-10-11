@@ -56,14 +56,10 @@
     <div class="chart-wrapper">
       <canvas id="chart" ref="chartRef" class="chart"></canvas>
     </div>
-    <dialog-common
-      v-model="isGraphOptionsDialogOpen"
-      :action-label="t('global.refresh')"
-      @on-submit="isGraphOptionsDialogOpen = false"
-    >
+    <dialog-common v-model="isGraphOptionsDialogOpen">
       <template #title>{{ t('global.options') }}</template>
       <template #default>
-        <GraphOptionsForm v-model="graphOptions" />
+        <GraphOptionsForm v-model="graphOptions" @on-submit="isGraphOptionsDialogOpen = false" />
       </template>
     </dialog-common>
   </div>

@@ -1,13 +1,8 @@
 <template>
-  <dialog-common
-    v-model="isDialogOpen"
-    :action-label="t('global.save')"
-    :loading="updatingCommand"
-    @on-submit="updateCommand"
-  >
+  <dialog-common v-model="isDialogOpen">
     <template #title>{{ t('command.edit_command') }}</template>
     <template #default>
-      <CommandForm ref="commandForm" v-model="command" />
+      <CommandForm v-model="command" @on-submit="updateCommand" :is-loading="updatingCommand" />
     </template>
   </dialog-common>
 </template>
@@ -49,13 +44,7 @@ async function getCommand() {
 getCommand();
 
 const updatingCommand = ref(false);
-const commandForm = ref();
-
 async function updateCommand() {
-  if (!commandForm.value?.validate()) {
-    return;
-  }
-
   if (!command.value.params) {
     command.value.params = [];
   }

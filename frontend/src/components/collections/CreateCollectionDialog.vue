@@ -1,13 +1,8 @@
 <template>
-  <dialog-common
-    v-model="isDialogOpen"
-    :action-label="t('global.create')"
-    :loading="isCreatingCollection"
-    @on-submit="createCollection"
-  >
+  <dialog-common v-model="isDialogOpen">
     <template #title>{{ t('collection.create_collection') }}</template>
     <template #default>
-      <collection-form v-model="collection" />
+      <collection-form v-model="collection" @on-submit="createCollection" :is-loading="isCreatingCollection" />
     </template>
   </dialog-common>
 </template>
@@ -58,6 +53,7 @@ async function createCollection() {
 
   if (error) {
     handleError(error, 'Failed to create collection');
+    return;
   }
 
   toast.success(t('collection.toasts.create_success'));

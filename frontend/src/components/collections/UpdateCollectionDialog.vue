@@ -1,13 +1,8 @@
 <template>
-  <dialog-common
-    v-model="isDialogOpen"
-    :action-label="t('global.save')"
-    :loading="updatingCollection"
-    @on-submit="updateCollection"
-  >
+  <dialog-common v-model="isDialogOpen">
     <template #title>{{ t('collection.edit_collection') }}</template>
     <template #default>
-      <collection-form v-model="collection" />
+      <collection-form v-model="collection" @on-submit="updateCollection" :is-loading="updatingCollection" />
     </template>
   </dialog-common>
 </template>

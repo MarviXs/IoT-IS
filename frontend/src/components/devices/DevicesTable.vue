@@ -101,7 +101,7 @@
       v-if="deviceToUpdate"
       v-model="isUpdateDialogOpen"
       :device-id="deviceToUpdate"
-      @on-create="emit('onChange')"
+      @on-update="emit('onChange')"
     />
 
     <!-- <ShareDeviceDialog v-if="deviceToShare" v-model="shareDialog" :device="deviceToShare" /> -->

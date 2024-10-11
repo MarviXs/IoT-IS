@@ -1,18 +1,32 @@
 <template>
-  <div>
-    <q-input ref="nameRef" v-model="device.name" :rules="nameRules" autofocus :label="t('global.name')" />
-    <device-template-select v-model="device.deviceTemplate" />
-    <q-input v-model="device.accessToken" class="q-mt-lg q-mb-sm" :label="t('device.access_token')">
-      <template #append>
-        <q-icon v-if="!device.accessToken" :name="mdiAutorenew" class="cursor-pointer" @click="generateAccessToken">
-          <q-tooltip>{{ t('device.generate_access_token') }}</q-tooltip>
-        </q-icon>
-        <q-icon v-else :name="mdiContentCopy" class="cursor-pointer" @click="copyAccessToken">
-          <q-tooltip>{{ copied ? t('device.access_token_copied') : t('device.copy_access_token') }}</q-tooltip>
-        </q-icon>
-      </template>
-    </q-input>
-  </div>
+  <q-form @submit="onSubmit" ref="deviceForm">
+    <q-card-section class="q-pt-none column q-gutter-md">
+      <q-input v-model="device.name" :rules="nameRules" autofocus :label="t('global.name')" />
+      <device-template-select v-model="device.deviceTemplate" />
+      <q-input v-model="device.accessToken" class="q-mt-lg q-mb-sm" :label="t('device.access_token')">
+        <template #append>
+          <q-icon v-if="!device.accessToken" :name="mdiAutorenew" class="cursor-pointer" @click="generateAccessToken">
+            <q-tooltip>{{ t('device.generate_access_token') }}</q-tooltip>
+          </q-icon>
+          <q-icon v-else :name="mdiContentCopy" class="cursor-pointer" @click="copyAccessToken">
+            <q-tooltip>{{ copied ? t('device.access_token_copied') : t('device.copy_access_token') }}</q-tooltip>
+          </q-icon>
+        </template>
+      </q-input>
+    </q-card-section>
+    <q-card-actions align="right" class="text-primary">
+      <q-btn v-close-popup flat :label="t('global.cancel')" no-caps />
+      <q-btn
+        unelevated
+        color="primary"
+        :label="t('global.save')"
+        type="submit"
+        no-caps
+        padding="6px 20px"
+        :loading="props.loading"
+      />
+    </q-card-actions>
+  </q-form>
 </template>
 
 <script setup lang="ts">
@@ -29,6 +43,12 @@ export interface DeviceFormData {
   accessToken: string;
   deviceTemplate?: DeviceTemplateSelectData;
 }
+
+const props = defineProps<{
+  loading?: boolean;
+}>();
+
+const emit = defineEmits(['onSubmit']);
 
 const { t } = useI18n();
 
@@ -54,16 +74,16 @@ function copyAccessToken() {
 }
 
 const device = defineModel<DeviceFormData>({ required: true });
-const nameRef = ref();
 const nameRules = [(val: string) => (val && val.length > 0) || t('global.rules.required')];
 
-function validate() {
-  const refs = [nameRef.value];
-  return isFormValid(refs);
+const deviceForm = ref();
+
+function onSubmit() {
+  if (!deviceForm.value?.validate()) {
+    return;
+  }
+  emit('onSubmit');
 }
-defineExpose({
-  validate,
-});
 </script>
 
 <style lang="scss" scoped></style>

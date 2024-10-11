@@ -1,13 +1,8 @@
 <template>
-  <dialog-common
-    v-model="isDialogOpen"
-    :action-label="t('global.create')"
-    :loading="creatingDevice"
-    @on-submit="createDevice"
-  >
+  <dialog-common v-model="isDialogOpen">
     <template #title>{{ t('device.add_device') }}</template>
     <template #default>
-      <DeviceForm ref="deviceForm" v-model="device" />
+      <DeviceForm ref="deviceForm" v-model="device" @on-submit="createDevice" :loading="creatingDevice" />
     </template>
   </dialog-common>
 </template>
@@ -37,10 +32,6 @@ const device = ref<DeviceFormData>({
 const deviceForm = ref();
 
 async function createDevice() {
-  if (!deviceForm.value?.validate()) {
-    return;
-  }
-
   const createRequest: CreateDeviceRequest = {
     name: device.value.name,
     templateId: device.value.deviceTemplate?.id,

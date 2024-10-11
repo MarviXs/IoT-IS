@@ -1,13 +1,8 @@
 <template>
-  <dialog-common
-    v-model="isDialogOpen"
-    :action-label="t('global.create')"
-    :loading="creatingCommand"
-    @on-submit="createCommand"
-  >
+  <dialog-common v-model="isDialogOpen">
     <template #title>{{ t('command.create_command') }}</template>
     <template #default>
-      <CommandForm ref="commandForm" v-model="command" />
+      <CommandForm v-model="command" @on-submit="createCommand" :is-loading="creatingCommand" />
     </template>
   </dialog-common>
 </template>
@@ -35,13 +30,8 @@ const command = ref<CommandFormData>({
   name: '',
   params: [],
 });
-const commandForm = ref();
 
 async function createCommand() {
-  if (!commandForm.value?.validate()) {
-    return;
-  }
-
   const createCommandRequest: CreateCommandRequest = {
     displayName: command.value.displayName,
     name: command.value.name,

@@ -1,13 +1,8 @@
 <template>
-  <dialog-common
-    v-model="isDialogOpen"
-    :action-label="t('global.save')"
-    :loading="updatingDevice"
-    @on-submit="updateDevice"
-  >
+  <dialog-common v-model="isDialogOpen">
     <template #title>{{ t('device.edit_device') }}</template>
     <template #default>
-      <DeviceForm ref="deviceForm" v-model="device" />
+      <DeviceForm ref="deviceForm" v-model="device" :loading="updatingDevice" @on-submit="updateDevice" />
     </template>
   </dialog-common>
 </template>
@@ -59,10 +54,6 @@ async function getDevice() {
 const updatingDevice = ref(false);
 const deviceForm = ref();
 async function updateDevice() {
-  if (!deviceForm.value?.validate()) {
-    return;
-  }
-
   const updateRequest: UpdateDeviceRequest = {
     name: device.value.name,
     templateId: device.value.deviceTemplate?.id,
@@ -80,7 +71,6 @@ async function updateDevice() {
 
   emit('onUpdate', data);
   isDialogOpen.value = false;
-
   toast.success(t('device.toasts.update_success'));
 }
 

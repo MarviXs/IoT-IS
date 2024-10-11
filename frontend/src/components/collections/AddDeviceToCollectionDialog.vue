@@ -1,13 +1,24 @@
 <template>
-  <dialog-common
-    v-model="isDialogOpen"
-    :action-label="t('global.add')"
-    :loading="isLoading"
-    @on-submit="addDeviceToCollection"
-  >
+  <dialog-common v-model="isDialogOpen">
     <template #title>Add device to collection</template>
     <template #default>
-      <DeviceSelect v-model="selectedDevice" />
+      <q-form @submit="addDeviceToCollection">
+        <q-card-section class="q-pt-none column q-gutter-md">
+          <DeviceSelect v-model="selectedDevice" />
+        </q-card-section>
+        <q-card-actions align="right" class="text-primary">
+          <q-btn v-close-popup flat :label="t('global.cancel')" no-caps />
+          <q-btn
+            unelevated
+            color="primary"
+            :label="t('global.add')"
+            type="submit"
+            no-caps
+            padding="6px 20px"
+            :loading="isLoading"
+          />
+        </q-card-actions>
+      </q-form>
     </template>
   </dialog-common>
 </template>

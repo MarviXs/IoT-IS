@@ -1,22 +1,31 @@
 <template>
-  <dialog-common
-    v-if="jobToRun"
-    v-model="isDialogOpen"
-    :action-label="t('job.run_job')"
-    :loading="jobIsStarting"
-    @on-submit="runJob"
-  >
+  <dialog-common v-if="jobToRun" v-model="isDialogOpen">
     <template #title>{{ t('job.run_job') }}</template>
     <template #default>
-      <RecipeSelect v-model="selectedRecipe" :device-id="deviceId" />
-      <q-input
-        ref="repetitionsRef"
-        v-model="jobToRun.cycles"
-        :label="t('job.repetitions')"
-        type="number"
-        lazy-rules
-        :rules="repetitionRules"
-      />
+      <q-form @submit="runJob" ref="jobForm">
+        <q-card-section class="column q-gutter-md">
+          <RecipeSelect v-model="selectedRecipe" :device-id="deviceId" />
+          <q-input
+            v-model="jobToRun.cycles"
+            :label="t('job.repetitions')"
+            type="number"
+            lazy-rules
+            :rules="repetitionRules"
+          />
+        </q-card-section>
+        <q-card-actions align="right" class="text-primary">
+          <q-btn v-close-popup flat :label="t('global.cancel')" no-caps />
+          <q-btn
+            unelevated
+            color="primary"
+            :label="t('job.run_job')"
+            type="submit"
+            no-caps
+            padding="6px 20px"
+            :loading="jobIsStarting"
+          />
+        </q-card-actions>
+      </q-form>
     </template>
   </dialog-common>
 </template>
@@ -51,12 +60,11 @@ const jobToRun = ref<StartJobRequest>({
 });
 const selectedRecipe = ref<RecipeSelectData>();
 const jobIsStarting = ref(false);
+const jobForm = ref();
 
 async function runJob() {
   if (!jobToRun.value) return;
-
-  const form = [repetitionsRef.value, recipeRef.value];
-  if (!isFormValid(form)) return;
+  if (!jobForm.value?.validate()) return;
 
   jobIsStarting.value = true;
   jobToRun.value.recipeId = selectedRecipe.value?.id ?? '';
@@ -76,16 +84,7 @@ async function runJob() {
 }
 
 //Input validation
-const repetitionsRef = ref<QInput>();
 const repetitionRules = [(val: number) => (val && val > 0) || t('job.rules.repetitions_min')];
-
-const recipeRef = ref<QInput>();
-const recipeRules = [
-  (val: string) => {
-    if (!val) return t('global.rules.required');
-    return true;
-  },
-];
 </script>
 
 <style lang="scss" scoped></style>
