@@ -56,15 +56,8 @@
           <side-menu-button to="/device-templates" :label="t('device_template.label', 2)" :icon="mdiContentCopy" />
           <side-menu-button to="/devices" :label="t('device.label', 2)" :icon="mdiMemory" />
           <side-menu-button to="/collections" :label="t('collection.label', 2)" :icon="mdiFileTreeOutline" />
-          <!-- <side-menu-button
-            to="/company"
-            label="Team"
-            icon="mdi-account-group"
-          /> -->
           <side-menu-button to="/jobs" :label="t('job.label', 2)" :icon="mdiListStatus" />
-          <!-- <side-menu-button to="/recipes" :label="t('recipe.label', 2)" :icon="mdiBookMultipleOutline" /> -->
-          <!-- <side-menu-button to="/commands" :label="t('command.label', 2)" :icon="mdiCodeTags" /> -->
-          <!-- <side-menu-button to="/scenarios" :label="t('scenario.label', 2)" :icon="mdiVariable" /> -->
+          <side-menu-button to="/scenes" :label="t('scene.label', 2)" :icon="mdiCubeOutline" />
           <side-menu-button
             v-if="authStore.isAdmin"
             to="/user-management"
@@ -98,6 +91,8 @@ import {
   mdiMemory,
   mdiFileTree,
   mdiFileTreeOutline,
+  mdiVariable,
+  mdiCubeOutline,
 } from '@quasar/extras/mdi-v7';
 import { toast } from 'vue3-toastify';
 

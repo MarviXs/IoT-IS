@@ -22,7 +22,7 @@
         @click="createRecipe"
       />
     </template>
-    <RecipeForm ref="recipeForm" v-model="recipe" :device-template-id="templateId" />
+    <RecipeForm ref="recipeForm" v-model="recipe" :device-template-id="templateId" @onSubmit="createRecipe" />
   </PageLayout>
 </template>
 
@@ -56,7 +56,8 @@ const creatingRecipe = ref(false);
 const recipeForm = ref();
 
 async function createRecipe() {
-  if (!recipeForm.value?.validate()) return;
+  if (!recipeForm.value) return;
+  if (!(await recipeForm.value.validate())) return;
 
   creatingRecipe.value = true;
 

@@ -69,12 +69,12 @@ async function getRecipe() {
 getRecipe();
 
 async function updateRecipe() {
-  if (!recipeForm.value?.validate() || !recipe.value?.id) return;
+  if (!recipeForm.value || !(await recipeForm.value.validate())) return;
 
   updatingRecipe.value = true;
 
   const recipeRequest: UpdateRecipeRequest = {
-    name: recipe.value?.name,
+    name: recipe.value?.name ?? '',
   };
 
   const recipeResponse = await RecipeService.updateRecipe(recipeId, recipeRequest);
@@ -93,7 +93,7 @@ async function updateRecipe() {
       order: index + 1,
     })) ?? [];
 
-  const stepResponse = await RecipeService.updateRecipeSteps(recipe.value.id, stepRequest);
+  const stepResponse = await RecipeService.updateRecipeSteps(recipe.value?.id ?? '', stepRequest);
   updatingRecipe.value = false;
   if (stepResponse.error) {
     handleError(stepResponse.error, t('recipe.toasts.update_failed'));

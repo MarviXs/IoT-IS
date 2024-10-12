@@ -10,6 +10,7 @@
     "add": "Add",
     "create": "Create",
     "details": "Details",
+    "description": "Description",
     "yes": "Yes",
     "no": "No",
     "info": "Info",
@@ -152,7 +153,6 @@
     "firmware": "Firmware",
     "mac_address": "MAC Address",
     "api_key": "API Key",
-    "device_info": "Device info",
     "sensor": "Sensor",
     "sensors": "Sensors",
     "tag": "Tag",
@@ -374,85 +374,11 @@
       "add_device_to_module_failed": "Adding device to module failed!"
     }
   },
-  "scenario": {
-    "label": "Scenario | Scenarios",
-    "all": "All",
-    "active": "Active",
-    "activity": "Activity",
-    "mute": "Mute",
-    "mute_time": "Mute time (min)",
-    "activated": "ACTIVATED",
-    "deactivated": "DEACTIVATED",
-    "create_scenario": "Create scenario",
-    "delete_scenario": "Delete scenario",
-    "delete_scenario_desc": "Are you sure you want to delete this scenario?",
-    "edit_scenario": "Edit scenario",
-    "conditions_label": "Conditions",
-    "toasts": {
-      "load_failed": "Scenario loading failed!",
-      "create_success": "Scenario created!",
-      "create_failed": "Scenario creation failed!",
-      "update_success": "Scenario updated!",
-      "update_failed": "Scenario update failed!",
-      "delete_success": "Scenario deleted!",
-      "delete_failed": "Scenario delete failed!"
-    },
-    "scenario_type_options": {
-      "option1": "All",
-      "option2": "Active"
-    },
-    "rules_type_options": {
-      "option1": "Graphical mode",
-      "option2": "Pseudocode",
-      "option3": "Programmer mode(JSON)"
-    },
-    "day_options": {
-      "option1": "Monday",
-      "option2": "Tuesday",
-      "option3": "Wednesday",
-      "option4": "Thursday",
-      "option5": "Friday",
-      "option6": "Saturday",
-      "option7": "Sunday"
-    },
-    "form": {
-      "muted_until": "Muted  until (minutes):",
-      "scenario_active": "Scenario is deactivated:",
-      "scenario_triggered": "Scenario has been triggered:",
-      "set_muted_until": "Scenario mute time setting (minutes)",
-      "activation_hours": "Scenario activation hours",
-      "activation_days": "Active scenario days",
-      "choose_all_hours": "Select all time ranges",
-      "choose_all_days": "Select all days",
-      "add_conditions": "Add conditions",
-      "remove_conditions": "Remove conditions"
-    },
-    "insert_pseudocode": "Insert pseudocode here...",
-    "hint_pseudocode": "Don't forget to check the correct syntax!",
-    "json_pseudocode": "Insert JSON conditions here...",
-    "json_conditions": "Conditions (JSON format)",
-    "conditions": {
-      "constant": "Constant",
-      "insert_constant": "Insert constant",
-      "value": "Value",
-      "choose_value": "Choose value",
-      "operand": "Operand",
-      "operator": "Logical operator",
-      "insert_notification": "Insert notification message",
-      "job": "Job (Management role)",
-      "duration": "DURATION",
-      "no_action": "No action",
-      "condition": "Condition"
-    }
+  "scene": {
+    "label": "Scene | Scenes",
+    "create_scene": "Create Scene"
   },
   "notification": {
-    "label": "Notification | Notifications",
-    "number": "Number",
-    "level": "Level",
-    "toasts": {
-      "load_failed": "Notifications loading failed!",
-      "processing_successful": "The processing of the notification was successful.",
-      "proccessing_failed": "Processing of the notification was unsuccessful."
-    }
+    "label": "Notification | Notifications"
   }
 }
