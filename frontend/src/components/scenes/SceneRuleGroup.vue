@@ -1,13 +1,9 @@
 <template>
   <div class="rule-group" :class="{ 'root-group': isRoot, 'sub-group': !isRoot }">
-    <div class="row items-center gap-md">
-      <div>If</div>
-      {{ depth }}
+    <div class="row gap-md">
       <q-btn v-if="!isRoot" :icon="mdiCloseCircleOutline" color="red" round dense flat @click="emit('remove')">
         <q-tooltip>Remove Group</q-tooltip>
       </q-btn>
-    </div>
-    <div class="q-mt-md row gap-md">
       <q-btn label="Add Rule" color="primary" unelevated @click="addRule" />
       <q-btn label="Add Group" color="primary" unelevated @click="addGroup" />
     </div>
@@ -18,6 +14,7 @@
         :key="index"
         :depth="depth + 1"
         v-model="getRules()[index]"
+        :devices="devices"
         @remove="removeRule(getRules()[index])"
       />
     </div>
@@ -26,14 +23,16 @@
 
 <script setup lang="ts">
 import { ReservedOperations, RulesLogic } from 'json-logic-js';
-import { computed, ref } from 'vue';
+import { computed, PropType, ref } from 'vue';
 import SceneRule from './SceneRule.vue';
 import { mdiCloseCircleOutline } from '@quasar/extras/mdi-v7';
 import { getRuleColor } from '@/utils/rule-colors';
+import { DevicesWithSensorsResponse } from '@/api/services/DeviceService';
 
 const props = defineProps({
   isRoot: { type: Boolean, required: true },
   depth: { type: Number, required: true },
+  devices: { type: Array as PropType<DevicesWithSensorsResponse>, required: true },
 });
 const emit = defineEmits(['remove']);
 
@@ -60,7 +59,7 @@ function addRule() {
     rules.value = { and: [] };
   }
   const currentRules = getRules();
-  currentRules.push({} as RulesLogic);
+  currentRules.push({ '>': ['', ''] } as RulesLogic);
   rules.value = { [condition.value]: currentRules } as RulesLogic;
 }
 
@@ -91,9 +90,6 @@ const getColor = computed(() => getRuleColor(props.depth));
 <style scoped lang="scss">
 .gap-md {
   gap: 10px;
-}
-
-.root-group {
 }
 
 .sub-group {

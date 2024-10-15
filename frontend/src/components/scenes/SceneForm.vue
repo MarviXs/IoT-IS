@@ -10,7 +10,7 @@
     <div class="q-mt-md">
       <div class="card-name text-secondary">Conditions</div>
       <q-card class="q-pa-lg shadow">
-        <SceneRuleGroup v-model="scene.condition.if[0]" :depth="0" :is-root="true" />
+        <SceneRuleGroup v-model="scene.condition.if[0]" :depth="0" :is-root="true" :devices="devices ?? []" />
       </q-card>
     </div>
     <q-card class="q-pa-lg shadow">
@@ -23,11 +23,27 @@
 import { useI18n } from 'vue-i18n';
 import { Scene } from '@/models/Scene';
 import SceneRuleGroup from './SceneRuleGroup.vue';
+import { ref } from 'vue';
+import DeviceService, { DevicesQueryParams, DevicesWithSensorsResponse } from '@/api/services/DeviceService';
+import { handleError } from '@/utils/error-handler';
 
 const { t } = useI18n();
 const emit = defineEmits(['onSubmit']);
 
 const scene = defineModel<Scene>({ required: true });
+
+const devices = ref<DevicesWithSensorsResponse>();
+async function getDevices() {
+  const { data, error } = await DeviceService.getDevicesWithSensors();
+
+  if (error) {
+    handleError(error, 'Failed to load devices');
+    return;
+  }
+
+  devices.value = data;
+}
+getDevices();
 </script>
 
 <style scoped>

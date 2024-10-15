@@ -373,6 +373,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/devices/with-sensors": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get devices with sensors */
+        get: operations["GetDevicesWithSensors"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/device-collections/{collectionId}": {
         parameters: {
             query?: never;
@@ -1069,6 +1086,17 @@ export interface components {
             connected: boolean;
             /** Format: date-time */
             lastSeen?: string | null;
+        };
+        "Fei.Is.Api.Features.Devices.Queries.GetDevicesWithSensors.Response": {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            sensors: components["schemas"]["Fei.Is.Api.Features.Devices.Queries.GetDevicesWithSensors.Sensor"][];
+        };
+        "Fei.Is.Api.Features.Devices.Queries.GetDevicesWithSensors.Sensor": {
+            name: string;
+            tag: string;
+            unit: string;
         };
         "Fei.Is.Api.Features.Jobs.Commands.CreateJob.Request": {
             /** Format: uuid */
@@ -2250,6 +2278,32 @@ export interface operations {
                 };
                 content: {
                     "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+        };
+    };
+    GetDevicesWithSensors: {
+        parameters: {
+            query?: {
+                SortBy?: string;
+                Descending?: boolean;
+                SearchTerm?: string;
+                PageNumber?: number;
+                PageSize?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.Devices.Queries.GetDevicesWithSensors.Response"][];
                 };
             };
         };

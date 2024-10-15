@@ -32,7 +32,8 @@
     "automatic_refresh_interval": "Automatic refresh interval",
     "enter_refresh_interval_s": "Enter refresh interval in seconds (0 to disable)",
     "rules": {
-      "required": "This field is required!"
+      "required": "This field is required!",
+      "number": "This field must be a number!"
     }
   },
   "table": {
