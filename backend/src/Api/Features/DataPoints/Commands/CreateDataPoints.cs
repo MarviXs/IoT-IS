@@ -68,16 +68,13 @@ public static class CreateDataPoints
             {
                 return Result.Fail(new NotFoundError());
             }
-            var dataPoints = message.Request.Select(
-                dataPoint =>
-                    new DataPoint
-                    {
-                        DeviceId = device.Id,
-                        SensorTag = dataPoint.Tag,
-                        TimeStamp = GetDataPointTimeStampOrCurrentTime(dataPoint.TimeStamp),
-                        Value = dataPoint.Value
-                    }
-            );
+            var dataPoints = message.Request.Select(dataPoint => new DataPoint
+            {
+                DeviceId = device.Id,
+                SensorTag = dataPoint.Tag,
+                TimeStamp = GetDataPointTimeStampOrCurrentTime(dataPoint.TimeStamp),
+                Value = dataPoint.Value
+            });
 
             await timescaleContext.BulkInsertAsync(dataPoints, cancellationToken: cancellationToken);
 
@@ -86,7 +83,11 @@ public static class CreateDataPoints
 
         private static DateTimeOffset GetDataPointTimeStampOrCurrentTime(long? timeStamp)
         {
-            return timeStamp.HasValue ? DateTimeOffset.FromUnixTimeMilliseconds(timeStamp.Value) : DateTimeOffset.UtcNow;
+            if (!timeStamp.HasValue)
+                return DateTimeOffset.UtcNow;
+
+            var date = DateTimeOffset.FromUnixTimeMilliseconds(timeStamp.Value);
+            return date.Year < 2000 ? DateTimeOffset.UtcNow : date;
         }
     }
 }

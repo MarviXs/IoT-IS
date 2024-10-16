@@ -65,6 +65,10 @@ public class DataPointReceived(AppDbContext appContext, RedisService redis, IHub
 
     private static DateTimeOffset GetDataPointTimeStampOrCurrentTime(long? timeStamp)
     {
-        return timeStamp.HasValue ? DateTimeOffset.FromUnixTimeMilliseconds(timeStamp.Value) : DateTimeOffset.UtcNow;
+        if (!timeStamp.HasValue)
+            return DateTimeOffset.UtcNow;
+
+        var date = DateTimeOffset.FromUnixTimeMilliseconds(timeStamp.Value);
+        return date.Year < 2000 ? DateTimeOffset.UtcNow : date;
     }
 }
