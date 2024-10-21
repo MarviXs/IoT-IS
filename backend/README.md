@@ -1,3 +1,4 @@
+## App DB migrations
 dotnet ef migrations add InitialCreate --context AppDbContext --output-dir Data/Migrations/AppDb
 dotnet ef database update --context AppDbContext
 
