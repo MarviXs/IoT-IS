@@ -381,5 +381,8 @@
   },
   "notification": {
     "label": "Notification | Notifications"
+  },
+  "products": {
+    "label": "Product | Products"
   }
 }
