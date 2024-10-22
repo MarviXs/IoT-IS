@@ -321,6 +321,14 @@
       "delete_failed": "Deleting recipe failed!"
     }
   },
+  "product": {
+    "label": "Product | Products",
+    "plu_code": "PLU Code",
+    "czech_name": "Czech Name",
+    "latin_name": "Latin Name",
+    "retail_price": "Retail Price",
+    "add_product": "Add Product"
+  },
   "command": {
     "label": "Command | Commands",
     "create_command": "Create command",

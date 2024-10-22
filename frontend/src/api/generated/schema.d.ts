@@ -667,6 +667,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/products": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get paginated products */
+        get: operations["GetProducts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/recipes/{id}": {
         parameters: {
             query?: never;
@@ -833,6 +850,19 @@ export interface components {
             readonly hasPrevious: boolean;
             readonly hasNext: boolean;
             items: components["schemas"]["Fei.Is.Api.Features.Jobs.Queries.GetJobsOnDevice.Response"][];
+        };
+        "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Products.Queries.GetProducts.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+            /** Format: int32 */
+            currentPage: number;
+            /** Format: int32 */
+            totalPages: number;
+            /** Format: int32 */
+            pageSize: number;
+            /** Format: int32 */
+            totalCount: number;
+            readonly hasPrevious: boolean;
+            readonly hasNext: boolean;
+            items: components["schemas"]["Fei.Is.Api.Features.Products.Queries.GetProducts.Response"][];
         };
         "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Recipes.Queries.GetRecipes.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
             /** Format: int32 */
@@ -1180,6 +1210,13 @@ export interface components {
             createdAt?: string | null;
             /** Format: date-time */
             updatedAt?: string | null;
+        };
+        "Fei.Is.Api.Features.Products.Queries.GetProducts.Response": {
+            /** Format: int32 */
+            pluCode: number;
+            czechName: string;
+            /** Format: double */
+            retailPrice: number;
         };
         "Fei.Is.Api.Features.RecipeSteps.Commands.UpdateRecipeSteps.Request": {
             /** Format: uuid */
@@ -2953,6 +2990,32 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    GetProducts: {
+        parameters: {
+            query?: {
+                SortBy?: string;
+                Descending?: boolean;
+                SearchTerm?: string;
+                PageNumber?: number;
+                PageSize?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Products.Queries.GetProducts.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"];
+                };
             };
         };
     };

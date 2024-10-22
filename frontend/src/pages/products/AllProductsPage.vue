@@ -2,12 +2,21 @@
   <PageLayout :breadcrumbs="[{ label: t('products.label', 2) }]">
     <template #actions>
       <SearchBar v-model="filter" class="col-grow col-lg-auto" />
+      <q-btn
+        class="shadow col-grow col-lg-auto"
+        color="primary"
+        unelevated
+        no-caps
+        size="15px"
+        :label="t('product.add_product')"
+        :icon="mdiPlus"
+      />
     </template>
     <template #default>
-      <DevicesTable
+      <ProductsTable
         v-model:pagination="pagination"
-        :devices="devicesPaginated"
-        :loading="isLoadingDevices"
+        :devices="productsPaginated"
+        :loading="isLoadingProducts"
         :filter="filter"
         class="shadow"
         @on-change="getDevices(pagination)"
@@ -18,14 +27,15 @@
 </template>
 
 <script setup lang="ts">
-import DevicesTable from '@/components/devices/DevicesTable.vue';
+import ProductsTable from '@/components/products/ProductsTable.vue';
 import { useI18n } from 'vue-i18n';
 import PageLayout from '@/layouts/PageLayout.vue';
 import { ref } from 'vue';
 import SearchBar from '@/components/core/SearchBar.vue';
-import { useStorage } from '@vueuse/core';
 import { PaginationClient, PaginationTable } from '@/models/Pagination';
-import { DevicesResponse } from '@/api/services/DeviceService';
+import ProductsService, { ProductsQueryParams } from '@/api/services/ProductsService';
+import { handleError } from '@/utils/error-handler';
+import { mdiPlus } from '@quasar/extras/mdi-v7';
 
 const { t } = useI18n();
 const filter = ref('');
@@ -37,47 +47,32 @@ const pagination = ref<PaginationClient>({
   rowsPerPage: 10,
   rowsNumber: 0,
 });
-const devicesPaginated = ref<DevicesResponse>();
-const isLoadingDevices = ref(false);
+const productsPaginated = ref<any>();
+const isLoadingProducts = ref(false);
 
 async function onRequest(props: { pagination: PaginationClient }) {
   await getDevices(props.pagination);
 }
 
 async function getDevices(paginationTable: PaginationTable) {
-  /* const paginationQuery: DevicesQueryParams = {
-      SortBy: paginationTable.sortBy,
-      Descending: paginationTable.descending,
-      SearchTerm: filter.value,
-      PageNumber: paginationTable.page,
-      PageSize: paginationTable.rowsPerPage,
-    };
-  
-    isLoadingDevices.value = true;
-    const { data, error } = await DeviceService.getDevices(paginationQuery);
-    isLoadingDevices.value = false;
-  
-    if (error) {
-      handleError(error, 'Loading recipes failed');
-      return;
-    } */
-
-  const data = {
-    currentPage: paginationTable.page,
-    totalPages: 5,
-    pageSize: paginationTable.rowsPerPage,
-    totalCount: 50,
-    hasPrevious: paginationTable.page > 1,
-    hasNext: paginationTable.page < 5,
-    items: Array.from({ length: paginationTable.rowsPerPage }, (_, index) => ({
-      id: (index + 1 + (paginationTable.page - 1) * paginationTable.rowsPerPage).toString(),
-      name: `Device ${index + 1 + (paginationTable.page - 1) * paginationTable.rowsPerPage}`,
-      connected: true,
-      lastSeen: new Date().toISOString(),
-    })),
+  const paginationQuery: ProductsQueryParams = {
+    SortBy: paginationTable.sortBy,
+    Descending: paginationTable.descending,
+    SearchTerm: filter.value,
+    PageNumber: paginationTable.page,
+    PageSize: paginationTable.rowsPerPage,
   };
 
-  devicesPaginated.value = data;
+  isLoadingProducts.value = true;
+  const { data, error } = await ProductsService.getProducts(paginationQuery);
+  isLoadingProducts.value = false;
+
+  if (error) {
+    handleError(error, 'Loading recipes failed');
+    return;
+  }
+
+  productsPaginated.value = data;
   pagination.value.rowsNumber = data.totalCount ?? 0;
   pagination.value.sortBy = paginationTable.sortBy;
   pagination.value.descending = paginationTable.descending;
@@ -85,6 +80,4 @@ async function getDevices(paginationTable: PaginationTable) {
   pagination.value.rowsPerPage = data.pageSize;
 }
 getDevices(pagination.value);
-
-const isCreateDialogOpen = ref(false);
 </script>
