@@ -4,6 +4,15 @@
       <SearchBar v-model="filter" class="col-grow col-lg-auto" />
       <q-btn
         class="shadow col-grow col-lg-auto"
+        color="secondary"
+        unelevated
+        no-caps
+        size="15px"
+        :label="t('product.import_products')"
+        :icon="mdiImport"
+      />
+      <q-btn
+        class="shadow col-grow col-lg-auto"
         color="primary"
         unelevated
         no-caps
@@ -35,7 +44,7 @@ import SearchBar from '@/components/core/SearchBar.vue';
 import { PaginationClient, PaginationTable } from '@/models/Pagination';
 import ProductsService, { ProductsQueryParams } from '@/api/services/ProductsService';
 import { handleError } from '@/utils/error-handler';
-import { mdiPlus } from '@quasar/extras/mdi-v7';
+import { mdiPlus, mdiImport } from '@quasar/extras/mdi-v7';
 
 const { t } = useI18n();
 const filter = ref('');

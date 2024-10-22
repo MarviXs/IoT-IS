@@ -327,7 +327,8 @@
     "czech_name": "Czech Name",
     "latin_name": "Latin Name",
     "retail_price": "Retail Price",
-    "add_product": "Add Product"
+    "add_product": "Add Product",
+    "import_products": "Import Products"
   },
   "command": {
     "label": "Command | Commands",
