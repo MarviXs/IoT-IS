@@ -1,0 +1,43 @@
+kind: StatefulSet
+metadata:
+  name: timescaledb
+spec:
+  serviceName: "timescaledb"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: timescaledb
+  template:
+    metadata:
+      labels:
+        app: timescaledb
+    spec:
+      containers:
+        - name: timescaledb
+          image: timescale/timescaledb-ha:pg16.4-ts2.16.1
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - configMapRef:
+                name: backend-config
+          env:
+            - name: POSTGRES_USER
+              value: "is"
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: TIMESCALE_PASSWORD
+            - name: POSTGRES_DB
+              value: "is_sdg"
+          volumeMounts:
+            - name: timescaledb-data
+              mountPath: /home/postgres/pgdata/data
+  volumeClaimTemplates:
+    - metadata:
+        name: timescaledb-data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 1Gi

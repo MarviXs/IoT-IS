@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: marvixs/iot-is-backend
+        envFrom:
+        - configMapRef:
+            name: backend-config
+        env:
+        - name: ASPNETCORE_ENVIRONMENT
+          value: "Development"
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: POSTGRES_PASSWORD
+        - name: TIMESCALE_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: TIMESCALE_PASSWORD
+        - name: EMQX_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: EMQX_HOST
+        - name: EMQX_USERNAME
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: EMQX_USERNAME
+        - name: EMQX_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: EMQX_PASSWORD
+        - name: JWT_SECRET
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: JWT_SECRET
+        - name: JWT_ISSUER
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: JWT_ISSUER
+        - name: JWT_AUDIENCE
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: JWT_AUDIENCE
+        - name: CORS_ALLOWED_ORIGINS
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: CORS_ALLOWED_ORIGINS
+        - name: API_URL
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: API_URL
+      restartPolicy: Always
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+spec:
+  selector:
+    app: backend
+  ports:
+    - protocol: TCP
+      port: 9000
+      targetPort: 9000
+  type: LoadBalancer
