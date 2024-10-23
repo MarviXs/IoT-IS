@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: emqx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: emqx
+  template:
+    metadata:
+      labels:
+        app: emqx
+    spec:
+      containers:
+        - name: emqx
+          image: emqx/emqx:5.8.0
+          ports:
+            - containerPort: 1883
+            - containerPort: 8883
+            - containerPort: 18083
+          volumeMounts:
+            - name: emqx-config
+              mountPath: /opt/emqx/etc/acl.conf
+              subPath: acl.conf
+            - name: emqx-cluster
+              mountPath: /opt/emqx/data/configs/cluster.hocon
+              subPath: cluster.hocon
+            - name: emqx-init
+              mountPath: /opt/emqx/init_user.json
+              subPath: init_user.json
+      volumes:
+        - name: emqx-config
+          configMap:
+            name: emqx-configmap
+        - name: emqx-cluster
+          configMap:
+            name: emqx-cluster-configmap
+        - name: emqx-init
+          configMap:
+            name: emqx-init-configmap
+
+---
+
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: emqx-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: emqx
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 50
+

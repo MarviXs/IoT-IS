@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: env-config
+data:
+  # Databases
+  POSTGRES_PASSWORD: "password"
+  TIMESCALE_PASSWORD: "password"
+  REDIS_PASSWORD: "password"
+
+  # Backend client MQTT connection
+  EMQX_HOST: "emqx"
+  EMQX_USERNAME: "backend"
+  EMQX_PASSWORD: "YdA#zY+ti2V£N46Q0si0Id"
+
+  # JWT secret for the backend
+  JWT_SECRET: "vnstmpXjmJVMCeIqvwGDOldvaRNQB7DE"
+  JWT_ISSUER: "localhost"
+  JWT_AUDIENCE: "localhost"
+
+  # CORS settings
+  CORS_ALLOWED_ORIGINS: "*"
+
+  # Frontend client API connection
+  API_URL: "http://localhost:9001"
+
+  # Backend client API connection
+  ConnectionStrings__PostgresConnection: "Host=pg.default.svc.cluster.local;Port=5432;Database=is_sdg;Username=is;Password=password"
+  ConnectionStrings__TimeScaleConnection: "Host=timescaledb.default.svc.cluster.local;Port=5433;Database=is_sdg;Username=is;Password=password"
+  ConnectionStrings__RedisConnection: "redis.default.svc.cluster.local:6379"
+  RedisSettings__Password: "password"
+  MqttSettings__Host: "emqx.default.svc.cluster.local"
+
+  JwtSettings__validAudience: "http://localhost"
+  Cors__AllowedOrigins: "http://localhost"

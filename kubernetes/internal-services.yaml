@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: pg
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 5432
+  selector:
+    app: pg
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: timescaledb
+spec:
+  type: LoadBalancer  # Headless service for StatefulSet
+  ports:
+    - port: 5433
+      targetPort: 5432
+  selector:
+    app: timescaledb
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  labels:
+    app: redis
+spec:
+  type: ClusterIP
+  ports:
+  - port: 6379
+    targetPort: 6379
+  selector:
+    app: redis

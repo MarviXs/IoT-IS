@@ -1,0 +1,119 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pgpool
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pgpool
+  template:
+    metadata:
+      labels:
+        app: pgpool
+    spec:
+      containers:
+        - name: pgpool
+          image: pgpool/pgpool:latest
+          ports:
+            - containerPort: 5432
+          env:
+            # PostgreSQL Backend 1 (pg-0)
+            - name: PGPOOL_PARAMS_BACKEND_HOSTNAME0
+              value: "pg-0.pg.default.svc.cluster.local"
+            - name: PGPOOL_PARAMS_BACKEND_PORT0
+              value: "5432"
+            - name: PGPOOL_PARAMS_BACKEND_WEIGHT0
+              value: "1"
+            - name: PGPOOL_PARAMS_BACKEND_FLAG0
+              value: "ALLOW_TO_FAILOVER"
+            
+            # PostgreSQL Backend 2 (pg-1)
+            - name: PGPOOL_PARAMS_BACKEND_HOSTNAME1
+              value: "pg-1.pg.default.svc.cluster.local"
+            - name: PGPOOL_PARAMS_BACKEND_PORT1
+              value: "5432"
+            - name: PGPOOL_PARAMS_BACKEND_WEIGHT1
+              value: "1"
+            - name: PGPOOL_PARAMS_BACKEND_FLAG1
+              value: "ALLOW_TO_FAILOVER"
+            
+            # PostgreSQL Backend 3 (pg-2)
+            - name: PGPOOL_PARAMS_BACKEND_HOSTNAME2
+              value: "pg-2.pg.default.svc.cluster.local"
+            - name: PGPOOL_PARAMS_BACKEND_PORT2
+              value: "5432"
+            - name: PGPOOL_PARAMS_BACKEND_WEIGHT2
+              value: "1"
+            - name: PGPOOL_PARAMS_BACKEND_FLAG2
+              value: "ALLOW_TO_FAILOVER"
+
+            # Admin credentials for pgpool
+            - name: PGPOOL_ADMIN_USER
+              value: "is"
+            - name: PGPOOL_ADMIN_PASSWORD
+              value: "password"
+
+            # PCP user for Pgpool Control Protocol (optional)
+            - name: PGPOOL_PCP_USER
+              value: "is"
+            - name: PGPOOL_PCP_PASSWORD
+              value: "password"
+
+          volumeMounts:
+            - name: pgpool-config
+              mountPath: /etc/pgpool
+      volumes:
+        - name: pgpool-config
+          configMap:
+            name: pgpool-config-map
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pgpool-config-map
+data:
+  pgpool.conf: |
+    # Custom Pgpool configuration example
+    listen_addresses = '*'
+    port = 5432
+    enable_pool_hba = on
+    health_check_period = 10
+    health_check_timeout = 20
+    health_check_max_retries = 3
+    health_check_user = "pgpool_admin"
+    health_check_password = "your_password"
+    
+    # Load balancing and failover configuration
+    load_balance_mode = on
+
+    # Backend configuration for 3 PostgreSQL nodes
+    backend_hostname0 = 'pg-0.pg.default.svc.cluster.local'
+    backend_port0 = 5432
+    backend_weight0 = 1
+    backend_flag0 = 'ALLOW_TO_FAILOVER'
+    
+    backend_hostname1 = 'pg-1.pg.default.svc.cluster.local'
+    backend_port1 = 5432
+    backend_weight1 = 1
+    backend_flag1 = 'ALLOW_TO_FAILOVER'
+    
+    backend_hostname2 = 'pg-2.pg.default.svc.cluster.local'
+    backend_port2 = 5432
+    backend_weight2 = 1
+    backend_flag2 = 'ALLOW_TO_FAILOVER'
+
+    # Other pgpool settings can be added here as necessary
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pgpool
+spec:
+  selector:
+    app: pgpool
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
+
