@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: marvixs/iot-is-backend
+        envFrom:
+        - configMapRef:
+            name: backend-config
+        env:
+        - name: ASPNETCORE_ENVIRONMENT
+          value: "Production"
+        - name: POSTGRES_PASSWORD
+          value: "password"
+        - name: TIMESCALE_PASSWORD
+          value: "password"
+        - name: EMQX_HOST
+          value: "emqx"
+        - name: EMQX_USERNAME
+          value: "backend"
+        - name: EMQX_PASSWORD
+          value: "YdA#zY+ti2V£N46Q0si0Id"
+        - name: JWT_SECRET
+          value: "vnstmpXjmJVMCeIqvwGDOldvaRNQB7DE"
+        - name: JWT_ISSUER
+          value: "localhost"
+        - name: JWT_AUDIENCE
+          value: "localhost"
+        - name: CORS_ALLOWED_ORIGINS
+          value: "*"
+        - name: API_URL
+          value: "http://localhost:9001/"
+      restartPolicy: Always
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+spec:
+  selector:
+    app: backend
+  ports:
+    - protocol: TCP
+      port: 9000
+      targetPort: 9000
+  type: LoadBalancer
