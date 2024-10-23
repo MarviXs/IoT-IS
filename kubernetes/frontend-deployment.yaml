@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: marvixs/iot-is-frontend
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 80
+          env:
+            - name: API_URL
+              value: "http://localhost:9001/"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  type: LoadBalancer  # Change to LoadBalancer to expose it externally
+  ports:
+    - port: 9000
+      targetPort: 80
+  selector:
+    app: frontend
+

@@ -1,0 +1,19 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: emqx
+spec:
+  type: LoadBalancer  # Expose EMQX externally
+  ports:
+    - name: mqtt         # Name for the MQTT port
+      port: 1883         # MQTT
+      targetPort: 1883
+    - name: mqtt-ssl     # Name for MQTT over SSL/TLS
+      port: 8883         # MQTT over SSL/TLS
+      targetPort: 8883
+    - name: dashboard    # Name for the EMQX Dashboard
+      port: 18083        # EMQX Dashboard
+      targetPort: 18083
+  selector:
+    app: emqx

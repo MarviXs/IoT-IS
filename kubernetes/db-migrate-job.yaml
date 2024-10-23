@@ -1,0 +1,31 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-migrate-job
+spec:
+  template:
+    spec:
+      containers:
+        - name: db-migrate
+          image: xbrosman/iot-beckend:latest
+          command: ["sh", "-c", "dotnet ef database update --context AppDbContext && dotnet ef database update --context TimeScaleDbContext"]
+          envFrom:
+            - configMapRef:
+                name: backend-config
+          env:
+            - name: ConnectionStrings__PostgresConnection
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: POSTGRES_PASSWORD
+            - name: TIMESCALE_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: TIMESCALE_PASSWORD
+      restartPolicy: OnFailure
