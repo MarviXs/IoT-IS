@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: marvixs/iot-is-backend
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Production"
+            - name: ConnectionStrings__PostgresConnection
+              value: "Host=pg;Port=5432;Database=is_sdg;Username=is;Password={{POSTGRES_PASSWORD}}"
+            - name: ConnectionStrings__TimescaleConnection
+              value: "Host=timescaledb;Port=5432;Database=is_sdg;Username=is;Password={{TIMESCALE_PASSWORD}}"
+            - name: ConnectionStrings__RedisConnection
+              value: "redis:6379"
+            - name: JwtSettings__Secret
+              value: "{{JWT_SECRET}}"
+            - name: MqttSettings__Host
+              value: "{{EMQX_HOST}}"
+            - name: MqttSettings__Username
+              value: "{{EMQX_USERNAME}}"
+            - name: MqttSettings__Password
+              value: "{{EMQX_PASSWORD}}"
+            - name: RedisSettings__Password
+              value: "{{REDIS_PASSWORD}}"
+            - name: JwtSettings__ValidIssuer
+              value: "{{JWT_ISSUER}}"
+            - name: JwtSettings__ValidAudience
+              value: "{{JWT_AUDIENCE}}"
+            - name: Cors__AllowedOrigins
+              value: "{{CORS_ALLOWED_ORIGINS}}"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+spec:
+  type: LoadBalancer  # Change to LoadBalancer to expose it externally
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    app: backend

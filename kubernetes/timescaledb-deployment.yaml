@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: timescaledb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: timescaledb
+  template:
+    metadata:
+      labels:
+        app: timescaledb
+    spec:
+      containers:
+        - name: timescaledb
+          image: timescale/timescaledb-ha:pg16.4-ts2.16.1
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              value: "is"
+            - name: POSTGRES_PASSWORD
+              value: "{{TIMESCALE_PASSWORD}}"
+            - name: POSTGRES_DB
+              value: "is_sdg"
+          volumeMounts:
+            - name: timescaledb-data
+              mountPath: /home/postgres/pgdata/data
+      volumes:
+        - name: timescaledb-data
+          persistentVolumeClaim:
+            claimName: timescaledb-data-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: timescaledb-data-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi

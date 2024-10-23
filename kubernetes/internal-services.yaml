@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: pg-service
+spec:
+  type: ClusterIP  # Internal service
+  ports:
+    - port: 5432
+  selector:
+    app: pg
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: timescaledb-service
+spec:
+  type: ClusterIP  # Internal service
+  ports:
+    - port: 5432
+  selector:
+    app: timescaledb
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-service
+spec:
+  type: ClusterIP  # Internal service
+  ports:
+    - port: 6379
+  selector:
+    app: redis
