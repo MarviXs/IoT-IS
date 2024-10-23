@@ -1,0 +1,10 @@
+backend-daployment.yaml
+deploy.bash
+empqy-deployment.yaml
+filenames.txt
+frontend-deployment.yaml
+internal-services.yaml
+outbound-service.yaml
+postgres-deploymant.yaml
+redis-deployment.yaml
+timescaledb-deployment.yaml

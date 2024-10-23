@@ -1,0 +1,44 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-migrate-job
+spec:
+  template:
+    spec:
+      containers:
+        - name: db-migrate
+          image: your-backend-image:latest # Replace with your actual image name
+          env:
+            - name: POSTGRES_USER
+              value: "is"
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_DB
+              value: "is_sdg"
+            - name: TIMESCALE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: timescale-secret
+                  key: TIMESCALE_PASSWORD
+      restartPolicy: OnFailure
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-secret
+type: Opaque
+data:
+  POSTGRES_PASSWORD: cGFzc3dvcmQ= # base64 encoded value of "password"
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: timescale-secret
+type: Opaque
+data:
+  TIMESCALE_PASSWORD: cGFzc3dvcmQ= # base64 encoded value of "password"

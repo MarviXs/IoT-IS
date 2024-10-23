@@ -1,0 +1,80 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: migrate-job
+spec:
+  template:
+    spec:
+      containers:
+      - name: migrate
+        image: your-docker-image:latest
+        command: ["dotnet", "ef", "database", "update"]
+        env:
+        - name: ASPNETCORE_ENVIRONMENT
+          value: "Development"
+        - name: ConnectionStrings__DefaultConnection
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: ConnectionStrings__DefaultConnection
+        - name: ConnectionStrings__PostgresConnection
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: POSTGRES_PASSWORD
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: POSTGRES_PASSWORD
+        - name: TIMESCALE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: TIMESCALE_PASSWORD
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: REDIS_PASSWORD
+        - name: EMQX_HOST
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: EMQX_HOST
+        - name: EMQX_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: EMQX_USERNAME
+        - name: EMQX_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: EMQX_PASSWORD
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: JWT_SECRET
+        - name: JWT_ISSUER
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: JWT_ISSUER
+        - name: JWT_AUDIENCE
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: JWT_AUDIENCE
+        - name: CORS_ALLOWED_ORIGINS
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: CORS_ALLOWED_ORIGINS
+        - name: API_URL
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: API_URL
+      restartPolicy: OnFailure
