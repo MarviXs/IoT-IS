@@ -1,5 +1,7 @@
 ﻿using Fei.Is.Api.Data.Configuration;
+using Fei.Is.Api.Data.Configuration.InformationSystem;
 using Fei.Is.Api.Data.Models;
+using Fei.Is.Api.Data.Models.InformationSystem;
 using Fei.Is.Api.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
@@ -40,6 +42,7 @@ public class AppDbContext
         modelBuilder.ApplyConfiguration(new DeviceTemplateConfiguration());
         modelBuilder.ApplyConfiguration(new DeviceConfiguration());
         modelBuilder.ApplyConfiguration(new CollectionItemConfiguration());
+        modelBuilder.ApplyConfiguration(new ProductConfiguration());
     }
 
     public DbSet<RefreshToken> RefreshTokens { get; set; }
@@ -53,6 +56,8 @@ public class AppDbContext
     public DbSet<JobCommand> JobCommands { get; set; }
     public DbSet<DeviceCollection> DeviceCollections { get; set; }
     public DbSet<CollectionItem> CollectionItems { get; set; }
+    public DbSet<Product> Products { get; set; }
+
 
     public override int SaveChanges()
     {
