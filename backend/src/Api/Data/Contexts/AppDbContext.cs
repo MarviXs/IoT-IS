@@ -43,6 +43,7 @@ public class AppDbContext
         modelBuilder.ApplyConfiguration(new DeviceConfiguration());
         modelBuilder.ApplyConfiguration(new CollectionItemConfiguration());
         modelBuilder.ApplyConfiguration(new ProductConfiguration());
+        modelBuilder.ApplyConfiguration(new CategoryConfiguration());
     }
 
     public DbSet<RefreshToken> RefreshTokens { get; set; }
@@ -57,7 +58,7 @@ public class AppDbContext
     public DbSet<DeviceCollection> DeviceCollections { get; set; }
     public DbSet<CollectionItem> CollectionItems { get; set; }
     public DbSet<Product> Products { get; set; }
-
+    public DbSet<Category> ProductCategories { get; set; }
 
     public override int SaveChanges()
     {

@@ -31,6 +31,7 @@
         @on-change="getDevices(pagination)"
         @on-request="onRequest"
       />
+      <ProductCategorySelect />
     </template>
   </PageLayout>
 </template>
@@ -45,6 +46,7 @@ import { PaginationClient, PaginationTable } from '@/models/Pagination';
 import ProductsService, { ProductsQueryParams } from '@/api/services/ProductsService';
 import { handleError } from '@/utils/error-handler';
 import { mdiPlus, mdiImport } from '@quasar/extras/mdi-v7';
+import ProductCategorySelect from '@/components/products/ProductCategorySelect.vue';
 
 const { t } = useI18n();
 const filter = ref('');
