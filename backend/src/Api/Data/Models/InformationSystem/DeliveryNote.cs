@@ -5,13 +5,8 @@ public class DeliveryNote
     public int Id { get; set; }
     public string DeliveryNumber { get; set; }
     public DateTime DeliveryDate { get; set; }
-
     public int SupplierId { get; set; }
     public int CustomerId { get; set; }
-
-    public Company Supplier { get; set; }
-    public Company Customer { get; set; }
-
     public decimal VatGroup15 { get; set; }
     public decimal VatGroup21 { get; set; }
     public decimal VatTotal { get; set; }
@@ -20,6 +15,8 @@ public class DeliveryNote
     public string Forwarded { get; set; }
     public string Note { get; set; }
     public string LicensePlate { get; set; }
-
+    
+    public Company Supplier { get; set; }
+    public Company Customer { get; set; }
     public List<DeliveryItem> DeliveryItems { get; set; } = new List<DeliveryItem>();
 }

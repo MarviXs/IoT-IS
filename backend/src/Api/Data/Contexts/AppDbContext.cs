@@ -1,5 +1,7 @@
 ﻿using Fei.Is.Api.Data.Configuration;
+using Fei.Is.Api.Data.Configuration.InformationSystem;
 using Fei.Is.Api.Data.Models;
+using Fei.Is.Api.Data.Models.InformationSystem;
 using Fei.Is.Api.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
@@ -40,9 +42,27 @@ public class AppDbContext
         modelBuilder.ApplyConfiguration(new DeviceTemplateConfiguration());
         modelBuilder.ApplyConfiguration(new DeviceConfiguration());
         modelBuilder.ApplyConfiguration(new CollectionItemConfiguration());
+
+        //IS configurations
+        modelBuilder.ApplyConfiguration(new AdditionalOrderConfiguration());
+        modelBuilder.ApplyConfiguration(new CategoryConfiguration());
+        modelBuilder.ApplyConfiguration(new CompanyConfiguration());
+        modelBuilder.ApplyConfiguration(new DeliveryItemConfiguration());
+        modelBuilder.ApplyConfiguration(new DeliveryNoteConfiguration());
+        modelBuilder.ApplyConfiguration(new InvoiceConfiguration());
+        modelBuilder.ApplyConfiguration(new InvoiceItemConfiguration());
+        modelBuilder.ApplyConfiguration(new OrderConfiguration());
+        modelBuilder.ApplyConfiguration(new OrderItemConfiguration());
+        modelBuilder.ApplyConfiguration(new ProductConfiguration());
+        modelBuilder.ApplyConfiguration(new ProductionPlanConfiguration());
+        modelBuilder.ApplyConfiguration(new SummaryConfiguration());
+        modelBuilder.ApplyConfiguration(new WorkDayDetailConfiguration());
+        modelBuilder.ApplyConfiguration(new WorkReportConfiguration());
+
+        modelBuilder.ApplyDataSeeds();
     }
 
-    public DbSet<RefreshToken> RefreshTokens { get; set; }
+    //IoT tables
     public DbSet<DeviceTemplate> DeviceTemplates { get; set; }
     public DbSet<Device> Devices { get; set; }
     public DbSet<Sensor> Sensors { get; set; }
@@ -53,6 +73,23 @@ public class AppDbContext
     public DbSet<JobCommand> JobCommands { get; set; }
     public DbSet<DeviceCollection> DeviceCollections { get; set; }
     public DbSet<CollectionItem> CollectionItems { get; set; }
+
+    //IS tables
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
+    public DbSet<AdditionalOrder> AdditionalOrders { get; set; }
+    public DbSet<Category> Categories { get; set; }
+    public DbSet<Company> Companies { get; set; }
+    public DbSet<DeliveryItem> DeliveryItems { get; set; }
+    public DbSet<DeliveryNote> DeliveryNotes { get; set; }
+    public DbSet<Invoice> Invoices { get; set; }
+    public DbSet<InvoiceItem> InvoiceItems { get; set; }
+    public DbSet<Order> Orders { get; set; }
+    public DbSet<OrderItem> OrderItems { get; set; }
+    public DbSet<Product> Products { get; set; }
+    public DbSet<ProductionPlan> ProductionPlans { get; set; }
+    public DbSet<Summary> Summaries { get; set; }
+    public DbSet<WorkDayDetail> WorkDayDetails { get; set; }
+    public DbSet<WorkReport> WorkReports { get; set; }
 
     public override int SaveChanges()
     {

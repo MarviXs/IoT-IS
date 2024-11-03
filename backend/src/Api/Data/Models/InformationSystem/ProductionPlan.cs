@@ -4,6 +4,7 @@ public class ProductionPlan
 {
     public int Id { get; set; }
     public int Year { get; set; }
+    public string ProductNumber { get; set; }
     public int DeliveryWeek { get; set; }
     public int OrderedQuantity { get; set; }
     public int StrQuantity { get; set; }
@@ -26,5 +27,5 @@ public class ProductionPlan
     public int TotalQuantity { get; set; }
     public int ActualQuantity { get; set; }
 
-    public List<Product> Products { get; set; } = new List<Product>();
+    public Product Product { get; set; }
 }

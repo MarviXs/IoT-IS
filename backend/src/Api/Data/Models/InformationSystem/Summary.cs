@@ -4,7 +4,8 @@ public class Summary
 {
     public int Id { get; set; }
     public string Place { get; set; }
+    public string ProductNumber { get; set; }
     public int Amount { get; set; }
 
-    public List<Product> Products { get; set; } = new List<Product>();
+    public Product Product { get; set; }
 }
