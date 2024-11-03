@@ -373,14 +373,14 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/devices/with-sensors": {
+    "/devices/sensors-recipes": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get devices with sensors */
+        /** Get devices with sensors and recipes */
         get: operations["GetDevicesWithSensors"];
         put?: never;
         post?: never;
@@ -1087,11 +1087,17 @@ export interface components {
             /** Format: date-time */
             lastSeen?: string | null;
         };
+        "Fei.Is.Api.Features.Devices.Queries.GetDevicesWithSensors.Recipe": {
+            /** Format: uuid */
+            id: string;
+            name: string;
+        };
         "Fei.Is.Api.Features.Devices.Queries.GetDevicesWithSensors.Response": {
             /** Format: uuid */
             id: string;
             name: string;
             sensors: components["schemas"]["Fei.Is.Api.Features.Devices.Queries.GetDevicesWithSensors.Sensor"][];
+            recipes: components["schemas"]["Fei.Is.Api.Features.Devices.Queries.GetDevicesWithSensors.Recipe"][];
         };
         "Fei.Is.Api.Features.Devices.Queries.GetDevicesWithSensors.Sensor": {
             name: string;

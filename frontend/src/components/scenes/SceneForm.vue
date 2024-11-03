@@ -10,12 +10,16 @@
     <div class="q-mt-md">
       <div class="card-name text-secondary">Conditions</div>
       <q-card class="q-pa-lg shadow">
-        <SceneRuleGroup v-model="scene.condition.if[0]" :depth="0" :is-root="true" :devices="devices ?? []" />
+        <SceneRuleGroup v-model="scene.condition" :depth="0" :is-root="true" :devices="devices ?? []" />
+        {{ scene.condition }}
       </q-card>
     </div>
-    <q-card class="q-pa-lg shadow">
-      {{ scene.condition }}
-    </q-card>
+    <div class="q-mt-md">
+      <div class="card-name text-secondary">Actions</div>
+      <q-card class="q-pa-lg shadow">
+        <SceneActions v-model="scene.actions" :devices="devices ?? []" />
+      </q-card>
+    </div>
   </q-form>
 </template>
 
@@ -24,17 +28,18 @@ import { useI18n } from 'vue-i18n';
 import { Scene } from '@/models/Scene';
 import SceneRuleGroup from './SceneRuleGroup.vue';
 import { ref } from 'vue';
-import DeviceService, { DevicesQueryParams, DevicesWithSensorsResponse } from '@/api/services/DeviceService';
+import DeviceService, { SceneDevice } from '@/api/services/DeviceService';
 import { handleError } from '@/utils/error-handler';
+import SceneActions from './SceneActions.vue';
 
 const { t } = useI18n();
 const emit = defineEmits(['onSubmit']);
 
 const scene = defineModel<Scene>({ required: true });
 
-const devices = ref<DevicesWithSensorsResponse>();
+const devices = ref<SceneDevice>();
 async function getDevices() {
-  const { data, error } = await DeviceService.getDevicesWithSensors();
+  const { data, error } = await DeviceService.getSceneDevices();
 
   if (error) {
     handleError(error, 'Failed to load devices');

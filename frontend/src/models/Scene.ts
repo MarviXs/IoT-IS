@@ -1,12 +1,20 @@
 import { RulesLogic } from 'json-logic-js';
 
+interface SceneAction {
+  type: 'job' | 'notification';
+  deviceId?: string;
+  recipeId?: string;
+  notificationMessage?: string;
+}
+
 interface Scene {
   id?: string;
   name: string;
   description?: string;
   isActive: boolean;
   triggerType: 'scheduled' | 'conditional';
-  condition: { if: [RulesLogic, string, string] };
+  condition: RulesLogic;
+  actions: SceneAction[];
 }
 
-export type { Scene };
+export type { Scene, SceneAction };

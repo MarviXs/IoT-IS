@@ -28,6 +28,7 @@ const scene = ref<Scene>({
   name: '',
   isActive: true,
   triggerType: 'conditional',
-  condition: { if: [{ and: [] }, 'NO_ACTION', 'NO_ACTION'] },
+  condition: { and: [] },
+  actions: [],
 });
 </script>

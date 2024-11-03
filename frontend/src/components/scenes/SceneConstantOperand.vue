@@ -1,5 +1,5 @@
 <template>
-  <q-input v-model="constant" label="Value" outlined class="q-ma-xs" :rules="constantRules" type="number" />
+  <q-input v-model="constant" label="Value" outlined class="q-mr-sm" :rules="constantRules" type="number" />
 </template>
 
 <script setup lang="ts">
