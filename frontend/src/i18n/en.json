@@ -326,9 +326,18 @@
     "plu_code": "PLU Code",
     "czech_name": "Czech Name",
     "latin_name": "Latin Name",
+    "code": "Code",
+    "flower_leaf_description": "Flower Leaf Description",
+    "pot_diameter_pack": "Pot Diameter Pack",
+    "price_per_piece_pack": "Price Per Piece Pack",
+    "price_per_piece_pack_vat": "Price Per Piece Pack VAT",
+    "discounted_price_without_vat": "Discounted Price Without VAT",
     "retail_price": "Retail Price",
     "add_product": "Add Product",
     "import_products": "Import Products"
+  },
+  "product_category": {
+    "label": "Category"
   },
   "command": {
     "label": "Command | Commands",

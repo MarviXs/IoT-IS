@@ -8,13 +8,15 @@ using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Data.Models.InformationSystem;
 using Fei.Is.Api.Extensions;
 using Fei.Is.Api.Redis;
+using FluentResults;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using StackExchange.Redis;
 
-namespace Fei.Is.Api.Features.Products.Queries;
+namespace Fei.Is.Api.Features.ProductCategories.Queries;
 
-public static class GetProducts
+public static class GetProductCategories
 {
     public class QueryParameters : SearchParameters { }
 
@@ -23,38 +25,40 @@ public static class GetProducts
         public void AddRoutes(IEndpointRouteBuilder app)
         {
             app.MapGet(
-                    "products",
+                    "product-categories",
                     async Task<Ok<PagedList<Response>>> (IMediator mediator, ClaimsPrincipal user, [AsParameters] QueryParameters parameters) =>
                     {
                         var query = new Query(user, parameters);
                         var result = await mediator.Send(query);
-                        return TypedResults.Ok(result);
+                        return TypedResults.Ok(result.Value);
                     }
                 )
-                .WithName(nameof(GetProducts))
-                .WithTags(nameof(Product))
+                .WithName(nameof(GetProductCategories))
+                .WithTags(nameof(Category))
                 .WithOpenApi(o =>
                 {
-                    o.Summary = "Get paginated products";
+                    o.Summary = "Get product categories";
                     return o;
                 });
         }
     }
 
-    public record Query(ClaimsPrincipal User, QueryParameters Parameters) : IRequest<PagedList<Response>>;
+    public record Query(ClaimsPrincipal User, QueryParameters Parameters) : IRequest<Result<PagedList<Response>>>;
 
-    public sealed class Handler(AppDbContext context) : IRequestHandler<Query, PagedList<Response>>
+    public sealed class Handler(AppDbContext context) : IRequestHandler<Query, Result<PagedList<Response>>>
     {
-        public async Task<PagedList<Response>> Handle(Query message, CancellationToken cancellationToken)
+        public async Task<Result<PagedList<Response>>> Handle(Query message, CancellationToken cancellationToken)
         {
             var query = context
-                .Products.AsNoTracking()
-                .Select((product) => new Response(product.Id, product.PLUCode, product.CzechName, product.RetailPrice))
+                .Categories.AsNoTracking()
+                .Where(category => category.CategoryName.ToLower().Contains(StringUtils.Normalized(message.Parameters.SearchTerm)))
+                .Sort(message.Parameters.SortBy ?? nameof(Category.CategoryName), message.Parameters.Descending)
+                .Select((category) => new Response(category.Id, category.CategoryName))
                 .Paginate(message.Parameters);
 
             return query.ToPagedList(query.Count(), message.Parameters.PageNumber, message.Parameters.PageSize);
         }
     }
 
-    public record Response(Guid Id, string pluCode, string? czechName, decimal? retailPrice);
+    public record Response(int Id, string Name);
 }

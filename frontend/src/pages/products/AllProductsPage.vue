@@ -19,6 +19,7 @@
         size="15px"
         :label="t('product.add_product')"
         :icon="mdiPlus"
+        @click="isCreateDialogOpen = true"
       />
     </template>
     <template #default>
@@ -28,11 +29,12 @@
         :loading="isLoadingProducts"
         :filter="filter"
         class="shadow"
-        @on-change="getDevices(pagination)"
+        @on-change="getProducts(pagination)"
         @on-request="onRequest"
       />
     </template>
   </PageLayout>
+  <CreateProductDialog v-model="isCreateDialogOpen" @on-create="getProducts(pagination)" />
 </template>
 
 <script setup lang="ts">
@@ -42,9 +44,10 @@ import PageLayout from '@/layouts/PageLayout.vue';
 import { ref } from 'vue';
 import SearchBar from '@/components/core/SearchBar.vue';
 import { PaginationClient, PaginationTable } from '@/models/Pagination';
-import ProductsService, { ProductsQueryParams } from '@/api/services/ProductsService';
+import ProductService, { ProductsQueryParams } from '@/api/services/ProductService';
 import { handleError } from '@/utils/error-handler';
 import { mdiPlus, mdiImport } from '@quasar/extras/mdi-v7';
+import CreateProductDialog from '@/components/products/CreateProductDialog.vue';
 
 const { t } = useI18n();
 const filter = ref('');
@@ -60,10 +63,10 @@ const productsPaginated = ref<any>();
 const isLoadingProducts = ref(false);
 
 async function onRequest(props: { pagination: PaginationClient }) {
-  await getDevices(props.pagination);
+  await getProducts(props.pagination);
 }
 
-async function getDevices(paginationTable: PaginationTable) {
+async function getProducts(paginationTable: PaginationTable) {
   const paginationQuery: ProductsQueryParams = {
     SortBy: paginationTable.sortBy,
     Descending: paginationTable.descending,
@@ -73,7 +76,7 @@ async function getDevices(paginationTable: PaginationTable) {
   };
 
   isLoadingProducts.value = true;
-  const { data, error } = await ProductsService.getProducts(paginationQuery);
+  const { data, error } = await ProductService.getProducts(paginationQuery);
   isLoadingProducts.value = false;
 
   if (error) {
@@ -88,5 +91,7 @@ async function getDevices(paginationTable: PaginationTable) {
   pagination.value.page = data.currentPage;
   pagination.value.rowsPerPage = data.pageSize;
 }
-getDevices(pagination.value);
+getProducts(pagination.value);
+
+const isCreateDialogOpen = ref(false);
 </script>

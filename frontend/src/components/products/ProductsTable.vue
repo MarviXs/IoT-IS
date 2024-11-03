@@ -27,7 +27,7 @@ import { PropType, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { mdiFileSearchOutline } from '@quasar/extras/mdi-v7';
 import { PaginationClient } from '@/models/Pagination';
-import { ProductsResponse } from '@/api/services/ProductsService';
+import { ProductsResponse } from '@/api/services/ProductService';
 
 const props = defineProps({
   devices: {

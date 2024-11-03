@@ -10,6 +10,8 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
     {
         builder.HasKey(p => p.PLUCode);
 
+        builder.Property(p => p.PLUCode).IsRequired();
+
         builder.Property(p => p.Code).IsRequired();
 
         builder.Property(p => p.LatinName).IsRequired();

@@ -220,6 +220,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/product-categories": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get product categories */
+        get: operations["GetProductCategories"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/commands/{id}": {
         parameters: {
             query?: never;
@@ -677,7 +694,8 @@ export interface paths {
         /** Get paginated products */
         get: operations["GetProducts"];
         put?: never;
-        post?: never;
+        /** Create a product */
+        post: operations["CreateProduct"];
         delete?: never;
         options?: never;
         head?: never;
@@ -850,6 +868,19 @@ export interface components {
             readonly hasPrevious: boolean;
             readonly hasNext: boolean;
             items: components["schemas"]["Fei.Is.Api.Features.Jobs.Queries.GetJobsOnDevice.Response"][];
+        };
+        "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.ProductCategories.Queries.GetProductCategories.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+            /** Format: int32 */
+            currentPage: number;
+            /** Format: int32 */
+            totalPages: number;
+            /** Format: int32 */
+            pageSize: number;
+            /** Format: int32 */
+            totalCount: number;
+            readonly hasPrevious: boolean;
+            readonly hasNext: boolean;
+            items: components["schemas"]["Fei.Is.Api.Features.ProductCategories.Queries.GetProductCategories.Response"][];
         };
         "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Products.Queries.GetProducts.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
             /** Format: int32 */
@@ -1211,12 +1242,34 @@ export interface components {
             /** Format: date-time */
             updatedAt?: string | null;
         };
-        "Fei.Is.Api.Features.Products.Queries.GetProducts.Response": {
+        "Fei.Is.Api.Features.ProductCategories.Queries.GetProductCategories.Response": {
             /** Format: int32 */
-            pluCode: number;
-            czechName: string;
+            id: number;
+            name: string;
+        };
+        "Fei.Is.Api.Features.Products.Commands.CreateProduct.Request": {
+            pluCode: string;
+            code: string;
+            latinName: string;
+            czechName?: string | null;
+            flowerLeafDescription?: string | null;
+            potDiameterPack?: string | null;
             /** Format: double */
-            retailPrice: number;
+            pricePerPiecePack?: number | null;
+            /** Format: double */
+            pricePerPiecePackVAT?: number | null;
+            /** Format: double */
+            discountedPriceWithoutVAT?: number | null;
+            /** Format: double */
+            retailPrice?: number | null;
+            /** Format: int32 */
+            categoryId: number;
+        };
+        "Fei.Is.Api.Features.Products.Queries.GetProducts.Response": {
+            pluCode: string;
+            czechName?: string | null;
+            /** Format: double */
+            retailPrice?: number | null;
         };
         "Fei.Is.Api.Features.RecipeSteps.Commands.UpdateRecipeSteps.Request": {
             /** Format: uuid */
@@ -1786,6 +1839,32 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    GetProductCategories: {
+        parameters: {
+            query?: {
+                SortBy?: string;
+                Descending?: boolean;
+                SearchTerm?: string;
+                PageNumber?: number;
+                PageSize?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.ProductCategories.Queries.GetProductCategories.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"];
+                };
             };
         };
     };
@@ -3015,6 +3094,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Products.Queries.GetProducts.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"];
+                };
+            };
+        };
+    };
+    CreateProduct: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.Products.Commands.CreateProduct.Request"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
                 };
             };
         };
