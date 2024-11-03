@@ -10,14 +10,10 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
     {
         builder.HasKey(p => p.PLUCode);
 
-        builder.Property(p => p.Code)
-            .IsRequired();
+        builder.Property(p => p.Code).IsRequired();
 
-        builder.Property(p => p.LatinName)
-            .IsRequired();
+        builder.Property(p => p.LatinName).IsRequired();
 
-        builder.HasOne(p => p.Category)
-            .WithMany(c => c.Products)
-            .HasForeignKey(p => p.CategoryId);
+        builder.HasOne(p => p.Category).WithMany(c => c.Products).HasForeignKey(p => p.CategoryId);
     }
 }

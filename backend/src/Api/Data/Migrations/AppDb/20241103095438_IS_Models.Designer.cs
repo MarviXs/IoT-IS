@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Fei.Is.Api.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Fei.Is.Api.Data.Migrations.AppDb
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241103095438_IS_Models")]
+    partial class IS_Models
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -393,103 +396,6 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.HasKey("Id");
 
                     b.ToTable("Categories");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CategoryName = "BALKÓNOVÉ ROSTLINY, LETNIČKY, DVOULETKY, TRVALKY A TRÁVY"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            CategoryName = "POKOJOVÉ A PŘENOSNÉ ROSTLINY"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            CategoryName = "OKURKY ROUBOVANÉ, Pravokořenné"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            CategoryName = "TYKVE - CUKETY"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            CategoryName = "RAJČATA, LILEK"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            CategoryName = "Papriky"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            CategoryName = "LISTOVÁ ZELENINA"
-                        },
-                        new
-                        {
-                            Id = 8,
-                            CategoryName = "BYLINKY"
-                        },
-                        new
-                        {
-                            Id = 9,
-                            CategoryName = "CHRYZANTÉMY"
-                        },
-                        new
-                        {
-                            Id = 10,
-                            CategoryName = "Podzimní košík s květinami"
-                        },
-                        new
-                        {
-                            Id = 11,
-                            CategoryName = "Vřes"
-                        },
-                        new
-                        {
-                            Id = 12,
-                            CategoryName = "Cibuloviny"
-                        },
-                        new
-                        {
-                            Id = 13,
-                            CategoryName = "Substráty, hnojiva a ostatní materiály"
-                        },
-                        new
-                        {
-                            Id = 14,
-                            CategoryName = "Osiva"
-                        },
-                        new
-                        {
-                            Id = 15,
-                            CategoryName = "Keře a stromy (Okrasné)"
-                        },
-                        new
-                        {
-                            Id = 16,
-                            CategoryName = "DENIVKY A IRISY"
-                        },
-                        new
-                        {
-                            Id = 17,
-                            CategoryName = "Vazba a aranžmá"
-                        },
-                        new
-                        {
-                            Id = 18,
-                            CategoryName = "Keře a stromy (Ovocné)"
-                        },
-                        new
-                        {
-                            Id = 19,
-                            CategoryName = "Nástroje a nářadí"
-                        });
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Company", b =>
