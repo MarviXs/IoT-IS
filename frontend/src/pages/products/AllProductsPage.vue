@@ -32,7 +32,6 @@
         @on-change="getProducts(pagination)"
         @on-request="onRequest"
       />
-      <ProductCategorySelect />
     </template>
   </PageLayout>
   <CreateProductDialog v-model="isCreateDialogOpen" @on-create="getProducts(pagination)" />
@@ -48,7 +47,6 @@ import { PaginationClient, PaginationTable } from '@/models/Pagination';
 import ProductService, { ProductsQueryParams } from '@/api/services/ProductService';
 import { handleError } from '@/utils/error-handler';
 import { mdiPlus, mdiImport } from '@quasar/extras/mdi-v7';
-import ProductCategorySelect from '@/components/products/ProductCategorySelect.vue';
 import CreateProductDialog from '@/components/products/CreateProductDialog.vue';
 
 const { t } = useI18n();
