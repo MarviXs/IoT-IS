@@ -10,10 +10,10 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
     {
         builder.HasKey(c => c.Id);
 
-        builder.Property(c => c.CategoryName)
-            .IsRequired();
+        builder.Property(c => c.Id).ValueGeneratedOnAdd();
 
-        builder.HasMany(c => c.Products)
-            .WithOne(p => p.Category);
+        builder.Property(c => c.CategoryName).IsRequired();
+
+        builder.HasMany(c => c.Products).WithOne(p => p.Category);
     }
 }

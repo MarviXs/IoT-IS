@@ -53,7 +53,7 @@ services:
     networks:
       - int-network
   timescaledb:
-    image: timescale/timescaledb-ha:pg16.4-ts2.16.1
+    image: timescale/timescaledb-ha:pg16.4-ts2.17.1
     restart: unless-stopped
     shm_size: 256mb
     environment:
@@ -69,7 +69,7 @@ services:
     networks:
       - int-network
   emqx:
-    image: emqx/emqx:5.8.0
+    image: emqx/emqx:5.8.1
     restart: unless-stopped
     ports:
       - "1883:1883" # MQTT
