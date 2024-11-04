@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Fei.Is.Api.Data.Migrations.AppDb
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241028195925_Product_Categories")]
+    [Migration("20241104163401_Product_Categories")]
     partial class Product_Categories
     {
         /// <inheritdoc />
@@ -348,6 +348,39 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.ToTable("DeviceTemplates");
                 });
 
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.AdditionalOrder", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Amount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Company")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ProductId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("Year")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("AdditionalOrders");
+                });
+
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Category", b =>
                 {
                     b.Property<int>("Id")
@@ -362,7 +395,387 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasKey("Id");
 
-                    b.ToTable("ProductCategories");
+                    b.ToTable("Category");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CategoryName = "BALKÓNOVÉ ROSTLINY, LETNIČKY, DVOULETKY, TRVALKY A TRÁVY"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CategoryName = "POKOJOVÉ A PŘENOSNÉ ROSTLINY"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CategoryName = "OKURKY ROUBOVANÉ, Pravokořenné"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            CategoryName = "TYKVE - CUKETY"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            CategoryName = "RAJČATA, LILEK"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            CategoryName = "Papriky"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            CategoryName = "LISTOVÁ ZELENINA"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            CategoryName = "BYLINKY"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            CategoryName = "CHRYZANTÉMY"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            CategoryName = "Podzimní košík s květinami"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            CategoryName = "Vřes"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            CategoryName = "Cibuloviny"
+                        },
+                        new
+                        {
+                            Id = 13,
+                            CategoryName = "Substráty, hnojiva a ostatní materiály"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            CategoryName = "Osiva"
+                        },
+                        new
+                        {
+                            Id = 15,
+                            CategoryName = "Keře a stromy (Okrasné)"
+                        },
+                        new
+                        {
+                            Id = 16,
+                            CategoryName = "DENIVKY A IRISY"
+                        },
+                        new
+                        {
+                            Id = 17,
+                            CategoryName = "Vazba a aranžmá"
+                        },
+                        new
+                        {
+                            Id = 18,
+                            CategoryName = "Keře a stromy (Ovocné)"
+                        },
+                        new
+                        {
+                            Id = 19,
+                            CategoryName = "Nástroje a nářadí"
+                        });
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Company", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("City")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Dic")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Ic")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Psc")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Title2")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Ulice")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Companies");
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.DeliveryItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("DeliveryNoteId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("PackSize")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PlantPassport")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PluCode")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ProductName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("TotalPriceWithoutVat")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("UnitPriceWithoutVat")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("VatRate")
+                        .HasColumnType("numeric");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DeliveryNoteId");
+
+                    b.ToTable("DeliveryItems");
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.DeliveryNote", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("DeliveryDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DeliveryNumber")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Forwarded")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("LicensePlate")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Note")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("SupplierId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Took")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("TotalAmountWithVat")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("VatGroup15")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("VatGroup21")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("VatTotal")
+                        .HasColumnType("numeric");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomerId");
+
+                    b.HasIndex("SupplierId");
+
+                    b.ToTable("DeliveryNotes");
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Invoice", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("DueDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("InvoiceNumber")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("IssueDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("SupplierId")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("numeric");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomerId");
+
+                    b.HasIndex("SupplierId");
+
+                    b.ToTable("Invoices");
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.InvoiceItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("InvoiceId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ItemDescription")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PluCode")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("TotalPrice")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("numeric");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InvoiceId");
+
+                    b.ToTable("InvoiceItems");
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Order", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ContactPhone")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("DeliveryWeek")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Note")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("OrderDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("PaymentMethod")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomerId");
+
+                    b.ToTable("Orders");
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.OrderItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ProductNumber")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("VarietyName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("ProductNumber");
+
+                    b.ToTable("OrderItems");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Product", b =>
@@ -378,31 +791,31 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                         .HasColumnType("text");
 
                     b.Property<string>("CzechName")
-                        .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<decimal>("DiscountedPriceWithoutVAT")
+                    b.Property<decimal?>("DiscountedPriceWithoutVAT")
                         .HasColumnType("numeric");
 
                     b.Property<string>("FlowerLeafDescription")
-                        .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("LatinName")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("PotDiameterPack")
-                        .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<decimal>("PricePerPiecePack")
+                    b.Property<decimal?>("PricePerPiecePack")
                         .HasColumnType("numeric");
 
-                    b.Property<decimal>("PricePerPiecePackVAT")
+                    b.Property<decimal?>("PricePerPiecePackVAT")
                         .HasColumnType("numeric");
 
-                    b.Property<decimal>("RetailPrice")
+                    b.Property<decimal?>("RetailPrice")
                         .HasColumnType("numeric");
 
                     b.HasKey("PLUCode");
@@ -410,6 +823,199 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.HasIndex("CategoryId");
 
                     b.ToTable("Products");
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.ProductionPlan", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ActualQuantity")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CbQuantity")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("DeliveryWeek")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("M10")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("M6")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("OrderedQuantity")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Pack10")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Pack6")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Pot10")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Pot12")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Pot14")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Pot17")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Pot21")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Pot9")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ProductNumber")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("S84")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("StoreQuantity")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("StrQuantity")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TabQuantity")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TotalQuantity")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("VolyneQuantity")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Z")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductNumber");
+
+                    b.ToTable("ProductionPlans");
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Summary", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Amount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Place")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ProductNumber")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductNumber");
+
+                    b.ToTable("Summaries");
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.WorkDayDetail", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Equipment")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("RateA")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("RateB")
+                        .HasColumnType("numeric");
+
+                    b.Property<int>("ReportId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TaskNumber")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("TotalA")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("TotalB")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("TotalEquipment")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTime>("WorkDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("WorkHours")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("WorkLocation")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("WorkType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("WorkersCount")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("WorkDayDetails");
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.WorkReport", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("ReportDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ReportNumber")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("SupplierId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomerId");
+
+                    b.HasIndex("SupplierId");
+
+                    b.ToTable("WorkReports");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.Job", b =>
@@ -844,6 +1450,107 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.Navigation("Owner");
                 });
 
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.AdditionalOrder", b =>
+                {
+                    b.HasOne("Fei.Is.Api.Data.Models.InformationSystem.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.DeliveryItem", b =>
+                {
+                    b.HasOne("Fei.Is.Api.Data.Models.InformationSystem.DeliveryNote", "DeliveryNote")
+                        .WithMany("DeliveryItems")
+                        .HasForeignKey("DeliveryNoteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("DeliveryNote");
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.DeliveryNote", b =>
+                {
+                    b.HasOne("Fei.Is.Api.Data.Models.InformationSystem.Company", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Fei.Is.Api.Data.Models.InformationSystem.Company", "Supplier")
+                        .WithMany("DeliveryNotes")
+                        .HasForeignKey("SupplierId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("Supplier");
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Invoice", b =>
+                {
+                    b.HasOne("Fei.Is.Api.Data.Models.InformationSystem.Company", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Fei.Is.Api.Data.Models.InformationSystem.Company", "Supplier")
+                        .WithMany("Invoices")
+                        .HasForeignKey("SupplierId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("Supplier");
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.InvoiceItem", b =>
+                {
+                    b.HasOne("Fei.Is.Api.Data.Models.InformationSystem.Invoice", "Invoice")
+                        .WithMany("InvoiceItems")
+                        .HasForeignKey("InvoiceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Invoice");
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Order", b =>
+                {
+                    b.HasOne("Fei.Is.Api.Data.Models.InformationSystem.Company", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Customer");
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.OrderItem", b =>
+                {
+                    b.HasOne("Fei.Is.Api.Data.Models.InformationSystem.Order", "Order")
+                        .WithMany("OrderItems")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Fei.Is.Api.Data.Models.InformationSystem.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductNumber")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Product", b =>
                 {
                     b.HasOne("Fei.Is.Api.Data.Models.InformationSystem.Category", "Category")
@@ -853,6 +1560,58 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                         .IsRequired();
 
                     b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.ProductionPlan", b =>
+                {
+                    b.HasOne("Fei.Is.Api.Data.Models.InformationSystem.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductNumber")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Summary", b =>
+                {
+                    b.HasOne("Fei.Is.Api.Data.Models.InformationSystem.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductNumber")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.WorkDayDetail", b =>
+                {
+                    b.HasOne("Fei.Is.Api.Data.Models.InformationSystem.WorkReport", "WorkReport")
+                        .WithMany("WorkDayDetails")
+                        .HasForeignKey("Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("WorkReport");
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.WorkReport", b =>
+                {
+                    b.HasOne("Fei.Is.Api.Data.Models.InformationSystem.Company", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Fei.Is.Api.Data.Models.InformationSystem.Company", "Supplier")
+                        .WithMany()
+                        .HasForeignKey("SupplierId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("Supplier");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.Job", b =>
@@ -1024,6 +1783,33 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Category", b =>
                 {
                     b.Navigation("Products");
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Company", b =>
+                {
+                    b.Navigation("DeliveryNotes");
+
+                    b.Navigation("Invoices");
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.DeliveryNote", b =>
+                {
+                    b.Navigation("DeliveryItems");
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Invoice", b =>
+                {
+                    b.Navigation("InvoiceItems");
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Order", b =>
+                {
+                    b.Navigation("OrderItems");
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.WorkReport", b =>
+                {
+                    b.Navigation("WorkDayDetails");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.Job", b =>
