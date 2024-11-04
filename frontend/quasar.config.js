@@ -107,6 +107,10 @@ export default configure((/* ctx */) => {
         screen: {
           bodyClasses: true,
         },
+        brand: {
+          primary: '#657cfd',
+          secondary: '#6d6d6d',
+        },
       },
 
       iconSet: 'svg-mdi-v7', // Quasar icon set
