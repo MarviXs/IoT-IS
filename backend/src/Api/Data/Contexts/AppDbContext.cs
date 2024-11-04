@@ -54,6 +54,7 @@ public class AppDbContext
         modelBuilder.ApplyConfiguration(new OrderConfiguration());
         modelBuilder.ApplyConfiguration(new OrderItemConfiguration());
         modelBuilder.ApplyConfiguration(new ProductConfiguration());
+        modelBuilder.ApplyConfiguration(new CategoryConfiguration());
         modelBuilder.ApplyConfiguration(new ProductionPlanConfiguration());
         modelBuilder.ApplyConfiguration(new SummaryConfiguration());
         modelBuilder.ApplyConfiguration(new WorkDayDetailConfiguration());

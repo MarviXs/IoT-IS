@@ -321,6 +321,36 @@
       "delete_failed": "Deleting recipe failed!"
     }
   },
+  "product": {
+    "label": "Product | Products",
+    "plu_code": "PLU Code",
+    "czech_name": "Czech Name",
+    "latin_name": "Latin Name",
+    "code": "Code",
+    "flower_leaf_description": "Flower Leaf Description",
+    "pot_diameter_pack": "Pot Diameter Pack",
+    "price_per_piece_pack": "Price Per Piece Pack",
+    "price_per_piece_pack_vat": "Price Per Piece Pack VAT",
+    "discounted_price_without_vat": "Discounted Price Without VAT",
+    "retail_price": "Retail Price",
+    "add_product": "Add Product",
+    "edit_product": "Edit Product",
+    "import_products": "Import Products",
+    "delete_product": "Delete Product",
+    "delete_product_desc": "Are you sure you want to delete this product?",
+    "toasts": {
+      "load_failed": "Loading products failed!",
+      "create_success": "Product created!",
+      "create_failed": "Creating product failed!",
+      "update_success": "Product updated!",
+      "update_failed": "Updating product failed!",
+      "delete_success": "Product deleted!",
+      "delete_failed": "Deleting product failed!"
+    }
+  },
+  "product_category": {
+    "label": "Category"
+  },
   "command": {
     "label": "Command | Commands",
     "create_command": "Create command",
@@ -381,5 +411,8 @@
   },
   "notification": {
     "label": "Notification | Notifications"
+  },
+  "products": {
+    "label": "Product | Products"
   }
 }

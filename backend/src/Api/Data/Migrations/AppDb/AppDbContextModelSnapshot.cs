@@ -360,9 +360,8 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("ProductId")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Type")
                         .IsRequired()
@@ -380,15 +379,19 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Category", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<string>("CategoryName")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -397,98 +400,136 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.HasData(
                         new
                         {
-                            Id = 1,
-                            CategoryName = "BALKÓNOVÉ ROSTLINY, LETNIČKY, DVOULETKY, TRVALKY A TRÁVY"
+                            Id = new Guid("7f0ad469-b458-4f45-9eb2-8b4a02621b1e"),
+                            CategoryName = "BALKÓNOVÉ ROSTLINY, LETNIČKY, DVOULETKY, TRVALKY A TRÁVY",
+                            CreatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(4942),
+                            UpdatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(4945)
                         },
                         new
                         {
-                            Id = 2,
-                            CategoryName = "POKOJOVÉ A PŘENOSNÉ ROSTLINY"
+                            Id = new Guid("3fcf4483-2d74-49da-8c13-83fbaaaf2abe"),
+                            CategoryName = "POKOJOVÉ A PŘENOSNÉ ROSTLINY",
+                            CreatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5032),
+                            UpdatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5032)
                         },
                         new
                         {
-                            Id = 3,
-                            CategoryName = "OKURKY ROUBOVANÉ, Pravokořenné"
+                            Id = new Guid("812a5ae3-47a7-4122-83ee-9cdc446dc1b6"),
+                            CategoryName = "OKURKY ROUBOVANÉ, Pravokořenné",
+                            CreatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5034),
+                            UpdatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5034)
                         },
                         new
                         {
-                            Id = 4,
-                            CategoryName = "TYKVE - CUKETY"
+                            Id = new Guid("ea37a145-665b-47af-b600-30fdac0a22c3"),
+                            CategoryName = "TYKVE - CUKETY",
+                            CreatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5036),
+                            UpdatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5036)
                         },
                         new
                         {
-                            Id = 5,
-                            CategoryName = "RAJČATA, LILEK"
+                            Id = new Guid("d721b2f0-4dad-4e4f-8f32-9d280ee90212"),
+                            CategoryName = "RAJČATA, LILEK",
+                            CreatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5037),
+                            UpdatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5038)
                         },
                         new
                         {
-                            Id = 6,
-                            CategoryName = "Papriky"
+                            Id = new Guid("fb35fdce-8f70-400a-b0ae-df0d83156181"),
+                            CategoryName = "Papriky",
+                            CreatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5039),
+                            UpdatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5039)
                         },
                         new
                         {
-                            Id = 7,
-                            CategoryName = "LISTOVÁ ZELENINA"
+                            Id = new Guid("5d96313a-46b8-4998-bae6-98e2527fdbdc"),
+                            CategoryName = "LISTOVÁ ZELENINA",
+                            CreatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5040),
+                            UpdatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5041)
                         },
                         new
                         {
-                            Id = 8,
-                            CategoryName = "BYLINKY"
+                            Id = new Guid("44265d72-34a0-40fe-bc37-256aaac2120f"),
+                            CategoryName = "BYLINKY",
+                            CreatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5042),
+                            UpdatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5042)
                         },
                         new
                         {
-                            Id = 9,
-                            CategoryName = "CHRYZANTÉMY"
+                            Id = new Guid("cfac1f57-04b7-45b7-934d-361a46ffe85b"),
+                            CategoryName = "CHRYZANTÉMY",
+                            CreatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5044),
+                            UpdatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5044)
                         },
                         new
                         {
-                            Id = 10,
-                            CategoryName = "Podzimní košík s květinami"
+                            Id = new Guid("1804fc51-a765-417c-b390-9ffb957b75f6"),
+                            CategoryName = "Podzimní košík s květinami",
+                            CreatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5047),
+                            UpdatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5048)
                         },
                         new
                         {
-                            Id = 11,
-                            CategoryName = "Vřes"
+                            Id = new Guid("dfeaad02-9283-4617-83d0-c93e2dd5e569"),
+                            CategoryName = "Vřes",
+                            CreatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5049),
+                            UpdatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5049)
                         },
                         new
                         {
-                            Id = 12,
-                            CategoryName = "Cibuloviny"
+                            Id = new Guid("7ef51fe1-4f14-4d36-a53e-aa327de57afe"),
+                            CategoryName = "Cibuloviny",
+                            CreatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5051),
+                            UpdatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5051)
                         },
                         new
                         {
-                            Id = 13,
-                            CategoryName = "Substráty, hnojiva a ostatní materiály"
+                            Id = new Guid("beb811f3-3e50-46d2-a25c-d48e7c2438ee"),
+                            CategoryName = "Substráty, hnojiva a ostatní materiály",
+                            CreatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5052),
+                            UpdatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5053)
                         },
                         new
                         {
-                            Id = 14,
-                            CategoryName = "Osiva"
+                            Id = new Guid("2d43f4b3-c5f4-4097-a471-30996b0c9894"),
+                            CategoryName = "Osiva",
+                            CreatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5054),
+                            UpdatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5054)
                         },
                         new
                         {
-                            Id = 15,
-                            CategoryName = "Keře a stromy (Okrasné)"
+                            Id = new Guid("3525b3ad-e90f-4fd5-a588-5cb3dc5e2024"),
+                            CategoryName = "Keře a stromy (Okrasné)",
+                            CreatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5056),
+                            UpdatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5056)
                         },
                         new
                         {
-                            Id = 16,
-                            CategoryName = "DENIVKY A IRISY"
+                            Id = new Guid("3f43c95b-4a35-42ba-b542-be61e836a1b8"),
+                            CategoryName = "DENIVKY A IRISY",
+                            CreatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5057),
+                            UpdatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5058)
                         },
                         new
                         {
-                            Id = 17,
-                            CategoryName = "Vazba a aranžmá"
+                            Id = new Guid("a25fdc74-49be-4687-8bc5-c2249af04258"),
+                            CategoryName = "Vazba a aranžmá",
+                            CreatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5059),
+                            UpdatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5059)
                         },
                         new
                         {
-                            Id = 18,
-                            CategoryName = "Keře a stromy (Ovocné)"
+                            Id = new Guid("be0f2f69-9fa7-4cce-a71a-16180d140a51"),
+                            CategoryName = "Keře a stromy (Ovocné)",
+                            CreatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5062),
+                            UpdatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5063)
                         },
                         new
                         {
-                            Id = 19,
-                            CategoryName = "Nástroje a nářadí"
+                            Id = new Guid("56aefbe5-813d-4089-a291-382bc7c0bc9f"),
+                            CategoryName = "Nástroje a nářadí",
+                            CreatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5064),
+                            UpdatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5064)
                         });
                 });
 
@@ -755,9 +796,8 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.Property<int>("OrderId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("ProductNumber")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<Guid>("ProductNumber")
+                        .HasColumnType("uuid");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("integer");
@@ -777,45 +817,53 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Product", b =>
                 {
-                    b.Property<string>("PLUCode")
-                        .HasColumnType("text");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
 
-                    b.Property<int>("CategoryId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("CzechName")
-                        .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<decimal>("DiscountedPriceWithoutVAT")
+                    b.Property<decimal?>("DiscountedPriceWithoutVAT")
                         .HasColumnType("numeric");
 
                     b.Property<string>("FlowerLeafDescription")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("LatinName")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("PotDiameterPack")
+                    b.Property<string>("PLUCode")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<decimal>("PricePerPiecePack")
+                    b.Property<string>("PotDiameterPack")
+                        .HasColumnType("text");
+
+                    b.Property<decimal?>("PricePerPiecePack")
                         .HasColumnType("numeric");
 
-                    b.Property<decimal>("PricePerPiecePackVAT")
+                    b.Property<decimal?>("PricePerPiecePackVAT")
                         .HasColumnType("numeric");
 
-                    b.Property<decimal>("RetailPrice")
+                    b.Property<decimal?>("RetailPrice")
                         .HasColumnType("numeric");
 
-                    b.HasKey("PLUCode");
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
 
@@ -872,9 +920,8 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.Property<int>("Pot9")
                         .HasColumnType("integer");
 
-                    b.Property<string>("ProductNumber")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<Guid>("ProductNumber")
+                        .HasColumnType("uuid");
 
                     b.Property<int>("S84")
                         .HasColumnType("integer");
@@ -922,9 +969,8 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("ProductNumber")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<Guid>("ProductNumber")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
