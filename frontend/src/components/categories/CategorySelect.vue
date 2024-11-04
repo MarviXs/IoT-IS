@@ -22,7 +22,7 @@ import { QSelect } from 'quasar';
 import CategoryService, { CategoryQueryParams, CategoryResponse } from '@/api/services/CategoryService';
 
 export interface CategorySelectData {
-  id: number;
+  id: string;
   name: string;
 }
 

@@ -27,8 +27,6 @@
         v-model:pagination="pagination"
         :devices="productsPaginated"
         :loading="isLoadingProducts"
-        :filter="filter"
-        class="shadow"
         @on-change="getProducts(pagination)"
         @on-request="onRequest"
       />
@@ -48,6 +46,7 @@ import ProductService, { ProductsQueryParams } from '@/api/services/ProductServi
 import { handleError } from '@/utils/error-handler';
 import { mdiPlus, mdiImport } from '@quasar/extras/mdi-v7';
 import CreateProductDialog from '@/components/products/CreateProductDialog.vue';
+import DeleteProductDialog from '@/components/products/DeleteProductDialog.vue';
 
 const { t } = useI18n();
 const filter = ref('');

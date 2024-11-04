@@ -18,16 +18,44 @@
         {{ message }}
       </div>
     </template>
+    <template #body-cell-actions="propsActions">
+      <q-td auto-width :props="propsActions">
+        <q-btn :icon="mdiPencil" color="grey-color" flat round @click.stop="openUpdateDialog(propsActions.row.id)"
+          ><q-tooltip content-style="font-size: 11px" :offset="[0, 4]">
+            {{ t('global.edit') }}
+          </q-tooltip>
+        </q-btn>
+        <q-btn :icon="mdiTrashCan" color="grey-color" flat round @click.stop="openDeleteDialog(propsActions.row.id)"
+          ><q-tooltip content-style="font-size: 11px" :offset="[0, 4]">
+            {{ t('global.delete') }}
+          </q-tooltip>
+        </q-btn>
+      </q-td>
+    </template>
   </q-table>
+  <EditProductDialog
+    v-if="productToUpdate"
+    v-model="isUpdateDialogOpen"
+    :product-id="productToUpdate"
+    @on-update="emit('onChange')"
+  />
+  <DeleteProductDialog
+    v-if="productToDelete"
+    v-model="isDeleteDialogOpen"
+    :product-id="productToDelete"
+    @on-deleted="emit('onChange')"
+  />
 </template>
 
 <script setup lang="ts">
 import { QTableProps } from 'quasar';
-import { PropType, computed } from 'vue';
+import { PropType, computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { mdiFileSearchOutline } from '@quasar/extras/mdi-v7';
+import { mdiFileSearchOutline, mdiPencil, mdiTrashCan } from '@quasar/extras/mdi-v7';
 import { PaginationClient } from '@/models/Pagination';
 import { ProductsResponse } from '@/api/services/ProductService';
+import EditProductDialog from './EditProductDialog.vue';
+import DeleteProductDialog from './DeleteProductDialog.vue';
 
 const props = defineProps({
   devices: {
@@ -71,5 +99,26 @@ const columns = computed<QTableProps['columns']>(() => [
     align: 'left',
     sortable: false,
   },
+  {
+    name: 'actions',
+    label: '',
+    field: '',
+    align: 'center',
+    sortable: false,
+  },
 ]);
+
+const isUpdateDialogOpen = ref(false);
+const productToUpdate = ref<string>();
+function openUpdateDialog(productId: string) {
+  productToUpdate.value = productId;
+  isUpdateDialogOpen.value = true;
+}
+
+const isDeleteDialogOpen = ref(false);
+const productToDelete = ref<string>();
+function openDeleteDialog(productId: string) {
+  isDeleteDialogOpen.value = true;
+  productToDelete.value = productId;
+}
 </script>

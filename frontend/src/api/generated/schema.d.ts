@@ -237,6 +237,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/product-categories/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a category by Id */
+        get: operations["GetCategoryById"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/commands/{id}": {
         parameters: {
             query?: never;
@@ -346,7 +363,8 @@ export interface paths {
         /** Update a product */
         put: operations["UpdateProduct"];
         post?: never;
-        delete?: never;
+        /** Delete a product */
+        delete: operations["DeleteProduct"];
         options?: never;
         head?: never;
         patch?: never;
@@ -365,7 +383,7 @@ export interface paths {
         put: operations["UpdateDeviceTemplate"];
         post?: never;
         /** Delete a device template */
-        delete: operations["DeleteDeviceTemplate"];
+        delete: operations["DeleteProduct"];
         options?: never;
         head?: never;
         patch?: never;
@@ -1260,9 +1278,14 @@ export interface components {
             /** Format: date-time */
             updatedAt?: string | null;
         };
+        "Fei.Is.Api.Features.ProductCategories.Queries.GetCategoryById.Response": {
+            /** Format: uuid */
+            id: string;
+            name: string;
+        };
         "Fei.Is.Api.Features.ProductCategories.Queries.GetProductCategories.Response": {
-            /** Format: int32 */
-            id: number;
+            /** Format: uuid */
+            id: string;
             name: string;
         };
         "Fei.Is.Api.Features.Products.Commands.CreateProduct.Request": {
@@ -1280,8 +1303,8 @@ export interface components {
             discountedPriceWithoutVAT?: number | null;
             /** Format: double */
             retailPrice?: number | null;
-            /** Format: int32 */
-            categoryId: number;
+            /** Format: uuid */
+            categoryId: string;
         };
         "Fei.Is.Api.Features.Products.Commands.UpdateProduct.Request": {
             pluCode: string;
@@ -1298,8 +1321,8 @@ export interface components {
             discountedPriceWithoutVAT?: number | null;
             /** Format: double */
             retailPrice?: number | null;
-            /** Format: int32 */
-            categoryId: number;
+            /** Format: uuid */
+            categoryId: string;
         };
         "Fei.Is.Api.Features.Products.Queries.GetProductById.Response": {
             pluCode: string;
@@ -1316,8 +1339,8 @@ export interface components {
             discountedPriceWithoutVAT?: number | null;
             /** Format: double */
             retailPrice?: number | null;
-            /** Format: int32 */
-            categoryId: number;
+            /** Format: uuid */
+            categoryId: string;
         };
         "Fei.Is.Api.Features.Products.Queries.GetProducts.Response": {
             /** Format: uuid */
@@ -1924,6 +1947,35 @@ export interface operations {
             };
         };
     };
+    GetCategoryById: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.ProductCategories.Queries.GetCategoryById.Response"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     GetCommandById: {
         parameters: {
             query?: never;
@@ -2220,11 +2272,11 @@ export interface operations {
     };
     UpdateProduct: {
         parameters: {
-            query: {
-                pluCode: string;
-            };
+            query?: never;
             header?: never;
-            path?: never;
+            path: {
+                id: string;
+            };
             cookie?: never;
         };
         requestBody: {
@@ -2248,6 +2300,33 @@ export interface operations {
                 content: {
                     "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
                 };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DeleteProduct: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Not Found */
             404: {
@@ -2334,7 +2413,7 @@ export interface operations {
             };
         };
     };
-    DeleteDeviceTemplate: {
+    DeleteProduct: {
         parameters: {
             query?: never;
             header?: never;

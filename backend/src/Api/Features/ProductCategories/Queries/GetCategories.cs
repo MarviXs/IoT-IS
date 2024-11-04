@@ -60,5 +60,5 @@ public static class GetProductCategories
         }
     }
 
-    public record Response(int Id, string Name);
+    public record Response(Guid Id, string Name);
 }

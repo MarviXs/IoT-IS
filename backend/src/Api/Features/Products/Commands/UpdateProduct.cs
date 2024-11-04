@@ -9,6 +9,7 @@ using FluentResults;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
 
 namespace Fei.Is.Api.Features.Products.Commands;
 
@@ -25,7 +26,7 @@ public static class UpdateProduct
         decimal? pricePerPiecePackVAT,
         decimal? discountedPriceWithoutVAT,
         decimal? RetailPrice,
-        int CategoryId
+        Guid CategoryId
     );
 
     public sealed class Endpoint : ICarterModule
@@ -33,10 +34,10 @@ public static class UpdateProduct
         public void AddRoutes(IEndpointRouteBuilder app)
         {
             app.MapPut(
-                    "products/{id:PLUCode}",
-                    async Task<Results<NotFound, ValidationProblem, NoContent>> (IMediator mediator, String pluCode, Request request) =>
+                    "products/{id:Guid}",
+                    async Task<Results<NotFound, ValidationProblem, NoContent>> (IMediator mediator, Guid id, Request request) =>
                     {
-                        var command = new Command(request, pluCode);
+                        var command = new Command(request, id);
 
                         var result = await mediator.Send(command);
 
@@ -62,7 +63,7 @@ public static class UpdateProduct
         }
     }
 
-    public record Command(Request Request, String PLUCode) : IRequest<Result>;
+    public record Command(Request Request, Guid Id) : IRequest<Result>;
 
     public sealed class Handler(AppDbContext context, IValidator<Command> validator) : IRequestHandler<Command, Result>
     {
@@ -74,10 +75,38 @@ public static class UpdateProduct
                 return Result.Fail(new ValidationError(result));
             }
 
-            var product = await context.Products.FindAsync([message.PLUCode], cancellationToken);
-            if (product == null)
+            var query = context.Products
+                .Include(p => p.Category)
+                .Where(p => p.Id == message.Id);
+
+            if (!await query.AnyAsync(cancellationToken))
             {
                 return Result.Fail(new NotFoundError());
+            }
+
+            var product = await query.FirstAsync(cancellationToken);
+
+            product.PLUCode = message.Request.PLUCode;
+            product.Code = message.Request.Code;
+            product.LatinName = message.Request.LatinName;
+            product.CzechName = message.Request.CzechName;
+            product.FlowerLeafDescription = message.Request.FlowerLeafDescription;
+            product.PotDiameterPack = message.Request.PotDiameterPack;
+            product.PricePerPiecePack = message.Request.pricePerPiecePack;
+            product.PricePerPiecePackVAT = message.Request.pricePerPiecePackVAT;
+            product.DiscountedPriceWithoutVAT = message.Request.discountedPriceWithoutVAT;
+            product.RetailPrice = message.Request.RetailPrice;
+
+
+            if (message.Request.CategoryId != product.Category.Id)
+            {
+                var category = await context.Categories.FindAsync([message.Request.CategoryId], cancellationToken);
+                if (category == null)
+                {
+                    return Result.Fail(new NotFoundError());
+                }
+
+                product.Category = category;
             }
 
             await context.SaveChangesAsync(cancellationToken);
@@ -92,7 +121,6 @@ public static class UpdateProduct
     {
         public Validator()
         {
-            RuleFor(r => r.PLUCode).NotEmpty().WithMessage("PLUCode is required");
             RuleFor(r => r.Request.LatinName).NotEmpty().WithMessage("LatinName is required");
             RuleFor(r => r.Request.CategoryId).NotEmpty().WithMessage("CategoryId is required");
         }

@@ -8,6 +8,10 @@ class CategoryService {
   async getCategories(queryParams: CategoryQueryParams) {
     return await client.GET('/product-categories', { params: { query: queryParams } });
   }
+
+  async getCategory(categoryId: string) {
+    return await client.GET('/product-categories/{id}', { params: { path: { id: categoryId } } });
+  }
 }
 
 export default new CategoryService();

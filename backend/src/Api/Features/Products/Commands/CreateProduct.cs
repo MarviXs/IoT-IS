@@ -25,7 +25,7 @@ public static class CreateProduct
         decimal? pricePerPiecePackVAT,
         decimal? discountedPriceWithoutVAT,
         decimal? RetailPrice,
-        int CategoryId
+        Guid CategoryId
     );
 
     public sealed class Endpoint : ICarterModule
@@ -88,7 +88,6 @@ public static class CreateProduct
                 PricePerPiecePackVAT = message.Request.pricePerPiecePackVAT,
                 DiscountedPriceWithoutVAT = message.Request.discountedPriceWithoutVAT,
                 RetailPrice = message.Request.RetailPrice,
-                CategoryId = message.Request.CategoryId,
                 Category = category
             };
 

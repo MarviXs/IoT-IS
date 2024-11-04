@@ -334,7 +334,19 @@
     "discounted_price_without_vat": "Discounted Price Without VAT",
     "retail_price": "Retail Price",
     "add_product": "Add Product",
-    "import_products": "Import Products"
+    "edit_product": "Edit Product",
+    "import_products": "Import Products",
+    "delete_product": "Delete Product",
+    "delete_product_desc": "Are you sure you want to delete this product?",
+    "toasts": {
+      "load_failed": "Loading products failed!",
+      "create_success": "Product created!",
+      "create_failed": "Creating product failed!",
+      "update_success": "Product updated!",
+      "update_failed": "Updating product failed!",
+      "delete_success": "Product deleted!",
+      "delete_failed": "Deleting product failed!"
+    }
   },
   "product_category": {
     "label": "Category"

@@ -2,21 +2,22 @@
 using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models;
+using Fei.Is.Api.Data.Models.InformationSystem;
 using FluentResults;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
-namespace Fei.Is.Api.Features.Products.Queries;
+namespace Fei.Is.Api.Features.ProductCategories.Queries;
 
-public static class GetProductById
+public static class GetCategoryById
 {
     public sealed class Endpoint : ICarterModule
     {
         public void AddRoutes(IEndpointRouteBuilder app)
         {
             app.MapGet(
-                    "products/{id:Guid}",
+                    "product-categories/{id:Guid}",
                     async Task<Results<Ok<Response>, NotFound, ForbidHttpResult>> (IMediator mediator, Guid id) =>
                     {
                         var query = new Query(id);
@@ -30,11 +31,11 @@ public static class GetProductById
                         return TypedResults.Ok(result.Value);
                     }
                 )
-                .WithName(nameof(GetProductById))
-                .WithTags(nameof(Device))
+                .WithName(nameof(GetCategoryById))
+                .WithTags(nameof(Category))
                 .WithOpenApi(o =>
                 {
-                    o.Summary = "Get a product by PLUCode";
+                    o.Summary = "Get a category by Id";
                     return o;
                 });
         }
@@ -46,27 +47,16 @@ public static class GetProductById
     {
         public async Task<Result<Response>> Handle(Query request, CancellationToken cancellationToken)
         {
-            var product = await context.Products.AsNoTracking()
-                .Include(p => p.Category)
-                .FirstOrDefaultAsync(product => product.Id == request.Id, cancellationToken);
+            var category = await context.Categories.AsNoTracking().FirstOrDefaultAsync(category => category.Id == request.Id, cancellationToken);
 
-            if (product == null)
+            if (category == null)
             {
                 return Result.Fail(new NotFoundError());
             }
 
             var response = new Response(
-                PLUCode: product.PLUCode,
-                Code: product.Code,
-                LatinName: product.LatinName,
-                CzechName: product.CzechName,
-                FlowerLeafDescription: product.FlowerLeafDescription,
-                PotDiameterPack: product.PotDiameterPack,
-                PricePerPiecePack: product.PricePerPiecePack,
-                PricePerPiecePackVAT: product.PricePerPiecePackVAT,
-                DiscountedPriceWithoutVAT: product.DiscountedPriceWithoutVAT,
-                RetailPrice: product.RetailPrice,
-                CategoryId: product.Category.Id
+                Id: category.Id,
+                Name: category.CategoryName
             );
 
             return Result.Ok(response);
@@ -74,16 +64,7 @@ public static class GetProductById
     }
 
     public record Response(
-        string PLUCode,
-        string Code,
-        string LatinName,
-        string? CzechName,
-        string? FlowerLeafDescription,
-        string? PotDiameterPack,
-        decimal? PricePerPiecePack,
-        decimal? PricePerPiecePackVAT,
-        decimal? DiscountedPriceWithoutVAT,
-        decimal? RetailPrice,
-        Guid CategoryId
+        Guid Id,
+        string Name
     );
 }
