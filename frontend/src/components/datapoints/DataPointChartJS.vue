@@ -43,6 +43,17 @@
         no-caps
         color="grey-7"
         text-color="grey-5"
+        class="options-btn"
+        @click="download(csvConfig)(generateCSVData())"
+      >
+        <div class="text-grey-9">{{ t('chart.export_csv') }}</div>
+      </q-btn>
+      <q-btn
+        padding="0.5rem 1rem"
+        outline
+        no-caps
+        color="grey-7"
+        text-color="grey-5"
         class="options-btn col-grow col-lg-auto"
         @click="isGraphOptionsDialogOpen = true"
       >
@@ -82,6 +93,9 @@ import 'chartjs-adapter-date-fns';
 import zoomPlugin from 'chartjs-plugin-zoom';
 import { mdiRefresh } from '@quasar/extras/mdi-v7';
 import { useInterval } from '@/composables/useInterval';
+import { mkConfig, generateCsv, download } from 'export-to-csv';
+import { format } from 'date-fns/format';
+import { toast } from 'vue3-toastify';
 
 Chart.register(zoomPlugin);
 
@@ -425,6 +439,63 @@ onMounted(() => {
     },
   });
 });
+
+const csvConfig = mkConfig({
+  useKeysAsHeaders: true,
+  fieldSeparator: ';',
+});
+
+const generateCSVData = () => {
+  const aggregatedData = new Map<string, Record<string, any>>();
+
+  props.sensors.forEach((sensor) => {
+    const key = getSensorUniqueId(sensor);
+    // Only process sensors that are visible
+    if (!tickedNodes.value.includes(key)) return;
+
+    const sensorDataPoints = dataPoints.get(key) || [];
+    sensorDataPoints.forEach((dataPoint) => {
+      const timeKey = dataPoint.ts;
+      if (!aggregatedData.has(timeKey)) {
+        aggregatedData.set(timeKey, {
+          Time: format(new Date(dataPoint.ts), 'dd/MM/yyyy HH:mm:ss'),
+        });
+      }
+      const record = aggregatedData.get(timeKey)!;
+      record[sensor.name] = dataPoint.value ?? '';
+    });
+  });
+
+  const csvData = Array.from(aggregatedData.values()).sort((a, b) => {
+    const dateA = new Date(a.Time).getTime();
+    const dateB = new Date(b.Time).getTime();
+    return dateA - dateB;
+  });
+
+  // Include only visible sensor headers
+  const headers = ['Time'];
+  props.sensors.forEach((sensor) => {
+    if (tickedNodes.value.includes(getSensorUniqueId(sensor))) {
+      headers.push(`${sensor.name} (${sensor.unit || ''})`);
+    }
+  });
+
+  const formattedCsvData = csvData.map((row) => {
+    const formattedRow: Record<string, any> = { Time: row.Time };
+    props.sensors.forEach((sensor) => {
+      if (tickedNodes.value.includes(getSensorUniqueId(sensor))) {
+        formattedRow[`${sensor.name} (${sensor.unit || ''})`] = row[sensor.name] ?? '';
+      }
+    });
+    return formattedRow;
+  });
+
+  if (formattedCsvData.length === 0) {
+    toast.error('No data to export');
+  }
+
+  return generateCsv(csvConfig)(formattedCsvData);
+};
 
 const intervalMilliseconds = computed(() => graphOptions.value.refreshInterval * 1000);
 useInterval(() => {
