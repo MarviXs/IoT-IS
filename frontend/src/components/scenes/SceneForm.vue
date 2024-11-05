@@ -8,14 +8,14 @@
       </div>
     </q-card>
     <div class="q-mt-md">
-      <div class="card-name text-secondary">Conditions</div>
+      <div class="card-name text-dark-blue">Conditions</div>
       <q-card class="q-pa-lg shadow">
         <SceneRuleGroup v-model="scene.condition" :depth="0" :is-root="true" :devices="devices ?? []" />
         {{ scene.condition }}
       </q-card>
     </div>
     <div class="q-mt-md">
-      <div class="card-name text-secondary">Actions</div>
+      <div class="card-name text-dark-blue">Actions</div>
       <q-card class="q-pa-lg shadow">
         <SceneActions v-model="scene.actions" :devices="devices ?? []" />
       </q-card>

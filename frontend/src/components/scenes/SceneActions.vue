@@ -1,6 +1,9 @@
 <template>
   <div>
-    <q-btn label="Add action" class="q-mb-md" color="primary" unelevated @click="addAction" />
+    <q-btn label="Add action" color="primary q-mb-md" unelevated @click="addAction" />
+    <div v-if="actions.length == 0">
+      <div class="text-secondary">No actions yet</div>
+    </div>
     <div class="q-mt-sm" v-for="(action, index) in actions" :key="index">
       <SceneAction v-model="actions[index]" @remove="removeAction(index)" :devices="devices" />
     </div>

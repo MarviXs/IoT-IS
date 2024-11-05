@@ -42,6 +42,7 @@ public class AppDbContext
         modelBuilder.ApplyConfiguration(new DeviceTemplateConfiguration());
         modelBuilder.ApplyConfiguration(new DeviceConfiguration());
         modelBuilder.ApplyConfiguration(new CollectionItemConfiguration());
+        modelBuilder.ApplyConfiguration(new SceneConfiguration());
 
         //IS configurations
         modelBuilder.ApplyConfiguration(new AdditionalOrderConfiguration());
@@ -74,6 +75,7 @@ public class AppDbContext
     public DbSet<JobCommand> JobCommands { get; set; }
     public DbSet<DeviceCollection> DeviceCollections { get; set; }
     public DbSet<CollectionItem> CollectionItems { get; set; }
+    public DbSet<Scene> Scenes { get; set; }
 
     //IS tables
     public DbSet<RefreshToken> RefreshTokens { get; set; }
