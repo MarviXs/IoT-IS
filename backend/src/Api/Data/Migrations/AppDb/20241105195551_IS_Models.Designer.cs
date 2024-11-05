@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Fei.Is.Api.Data.Migrations.AppDb
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241105125558_IS_Models")]
+    [Migration("20241105195551_IS_Models")]
     partial class IS_Models
     {
         /// <inheritdoc />
