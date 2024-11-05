@@ -400,136 +400,136 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.HasData(
                         new
                         {
-                            Id = new Guid("7f0ad469-b458-4f45-9eb2-8b4a02621b1e"),
+                            Id = new Guid("d6f2d00e-e4e3-4a5c-8e3a-9c20a02f65c8"),
                             CategoryName = "BALKÓNOVÉ ROSTLINY, LETNIČKY, DVOULETKY, TRVALKY A TRÁVY",
-                            CreatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(4942),
-                            UpdatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(4945)
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
-                            Id = new Guid("3fcf4483-2d74-49da-8c13-83fbaaaf2abe"),
+                            Id = new Guid("88d5353b-c64d-46d5-9e66-d68dc4f170c7"),
                             CategoryName = "POKOJOVÉ A PŘENOSNÉ ROSTLINY",
-                            CreatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5032),
-                            UpdatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5032)
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
-                            Id = new Guid("812a5ae3-47a7-4122-83ee-9cdc446dc1b6"),
+                            Id = new Guid("e5c3fda8-9d48-4a39-83c5-47f4d4eb13b1"),
                             CategoryName = "OKURKY ROUBOVANÉ, Pravokořenné",
-                            CreatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5034),
-                            UpdatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5034)
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
-                            Id = new Guid("ea37a145-665b-47af-b600-30fdac0a22c3"),
+                            Id = new Guid("bc2e2baf-f5f3-43e4-bb3d-bd2c56374d93"),
                             CategoryName = "TYKVE - CUKETY",
-                            CreatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5036),
-                            UpdatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5036)
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
-                            Id = new Guid("d721b2f0-4dad-4e4f-8f32-9d280ee90212"),
+                            Id = new Guid("c88a047b-16b0-4425-8f7d-0f14c55f7b88"),
                             CategoryName = "RAJČATA, LILEK",
-                            CreatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5037),
-                            UpdatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5038)
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
-                            Id = new Guid("fb35fdce-8f70-400a-b0ae-df0d83156181"),
+                            Id = new Guid("8d0c7b8b-63ab-46f0-bc52-6f2950277e47"),
                             CategoryName = "Papriky",
-                            CreatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5039),
-                            UpdatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5039)
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
-                            Id = new Guid("5d96313a-46b8-4998-bae6-98e2527fdbdc"),
+                            Id = new Guid("0c1d6c90-4937-4b87-b8c8-7f6658eb0080"),
                             CategoryName = "LISTOVÁ ZELENINA",
-                            CreatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5040),
-                            UpdatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5041)
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
-                            Id = new Guid("44265d72-34a0-40fe-bc37-256aaac2120f"),
+                            Id = new Guid("2f681d09-3b67-4a6d-bde2-f3f5afef3c5a"),
                             CategoryName = "BYLINKY",
-                            CreatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5042),
-                            UpdatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5042)
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
-                            Id = new Guid("cfac1f57-04b7-45b7-934d-361a46ffe85b"),
+                            Id = new Guid("5a6ed8b2-4b2c-4d1e-bf9c-ef58c5c72a44"),
                             CategoryName = "CHRYZANTÉMY",
-                            CreatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5044),
-                            UpdatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5044)
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
-                            Id = new Guid("1804fc51-a765-417c-b390-9ffb957b75f6"),
+                            Id = new Guid("ee1b4b55-2a41-4e63-9754-3e1c9d676728"),
                             CategoryName = "Podzimní košík s květinami",
-                            CreatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5047),
-                            UpdatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5048)
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
-                            Id = new Guid("dfeaad02-9283-4617-83d0-c93e2dd5e569"),
+                            Id = new Guid("b62aa26f-b37b-42d5-8bcd-82d9159ac4b0"),
                             CategoryName = "Vřes",
-                            CreatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5049),
-                            UpdatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5049)
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
-                            Id = new Guid("7ef51fe1-4f14-4d36-a53e-aa327de57afe"),
+                            Id = new Guid("6b399ace-1882-4140-b42d-67f205d700d2"),
                             CategoryName = "Cibuloviny",
-                            CreatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5051),
-                            UpdatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5051)
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
-                            Id = new Guid("beb811f3-3e50-46d2-a25c-d48e7c2438ee"),
+                            Id = new Guid("1a36d5a7-85f5-43ff-a8a6-ea1b5d0b54dc"),
                             CategoryName = "Substráty, hnojiva a ostatní materiály",
-                            CreatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5052),
-                            UpdatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5053)
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
-                            Id = new Guid("2d43f4b3-c5f4-4097-a471-30996b0c9894"),
+                            Id = new Guid("ae3f5e2a-cb26-463c-bcb0-c1f4e094a013"),
                             CategoryName = "Osiva",
-                            CreatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5054),
-                            UpdatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5054)
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
-                            Id = new Guid("3525b3ad-e90f-4fd5-a588-5cb3dc5e2024"),
+                            Id = new Guid("ebc45d37-d80c-44e8-8e45-e86575f7c6ae"),
                             CategoryName = "Keře a stromy (Okrasné)",
-                            CreatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5056),
-                            UpdatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5056)
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
-                            Id = new Guid("3f43c95b-4a35-42ba-b542-be61e836a1b8"),
+                            Id = new Guid("4a0ef2f4-ec8f-48cb-8b88-f68c5e497227"),
                             CategoryName = "DENIVKY A IRISY",
-                            CreatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5057),
-                            UpdatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5058)
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
-                            Id = new Guid("a25fdc74-49be-4687-8bc5-c2249af04258"),
+                            Id = new Guid("58665a65-b5bc-4748-89b5-79e79cafe9bc"),
                             CategoryName = "Vazba a aranžmá",
-                            CreatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5059),
-                            UpdatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5059)
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
-                            Id = new Guid("be0f2f69-9fa7-4cce-a71a-16180d140a51"),
+                            Id = new Guid("b6fbb1f0-c86c-4c09-8c47-8973a536e818"),
                             CategoryName = "Keře a stromy (Ovocné)",
-                            CreatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5062),
-                            UpdatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5063)
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
-                            Id = new Guid("56aefbe5-813d-4089-a291-382bc7c0bc9f"),
+                            Id = new Guid("11a4b47e-65c6-42eb-a1a0-b8e11a1f6c6e"),
                             CategoryName = "Nástroje a nářadí",
-                            CreatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5064),
-                            UpdatedAt = new DateTime(2024, 11, 4, 19, 4, 25, 375, DateTimeKind.Utc).AddTicks(5064)
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         });
                 });
 
