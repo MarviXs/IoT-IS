@@ -33,6 +33,7 @@
     </template>
   </PageLayout>
   <CreateProductDialog v-model="isCreateDialogOpen" @on-create="getProducts(pagination)" />
+  <ImportProductDialog v-model="importDialogOpen" />
 </template>
 
 <script setup lang="ts">
@@ -47,9 +48,12 @@ import { handleError } from '@/utils/error-handler';
 import { mdiPlus, mdiImport } from '@quasar/extras/mdi-v7';
 import CreateProductDialog from '@/components/products/CreateProductDialog.vue';
 import DeleteProductDialog from '@/components/products/DeleteProductDialog.vue';
+import ImportProductDialog from '@/components/products/ImportProductDialog.vue';
 
 const { t } = useI18n();
 const filter = ref('');
+
+const importDialogOpen = ref(true);
 
 const pagination = ref<PaginationClient>({
   sortBy: 'name',
