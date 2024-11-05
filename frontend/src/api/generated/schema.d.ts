@@ -383,7 +383,7 @@ export interface paths {
         put: operations["UpdateDeviceTemplate"];
         post?: never;
         /** Delete a device template */
-        delete: operations["DeleteProduct"];
+        delete: operations["DeleteDeviceTemplate"];
         options?: never;
         head?: never;
         patch?: never;
@@ -795,6 +795,41 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/scenes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get all scenes */
+        get: operations["GetScenes"];
+        put?: never;
+        /** Create a scene */
+        post: operations["CreateScene"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/scenes/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete a scene */
+        delete: operations["DeleteScene"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/device-templates/{templateId}/sensors": {
         parameters: {
             query?: never;
@@ -944,6 +979,19 @@ export interface components {
             readonly hasNext: boolean;
             items: components["schemas"]["Fei.Is.Api.Features.Recipes.Queries.GetRecipes.Response"][];
         };
+        "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Scenes.Queries.GetScenes.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+            /** Format: int32 */
+            currentPage: number;
+            /** Format: int32 */
+            totalPages: number;
+            /** Format: int32 */
+            pageSize: number;
+            /** Format: int32 */
+            totalCount: number;
+            readonly hasPrevious: boolean;
+            readonly hasNext: boolean;
+            items: components["schemas"]["Fei.Is.Api.Features.Scenes.Queries.GetScenes.Response"][];
+        };
         "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.UserManagement.Queries.GetUsers.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
             /** Format: int32 */
             currentPage: number;
@@ -961,6 +1009,8 @@ export interface components {
         "Fei.Is.Api.Data.Enums.JobStatusEnum": "JOB_QUEUED" | "JOB_IN_PROGRESS" | "JOB_PAUSED" | "JOB_SUCCEEDED" | "JOB_REJECTED" | "JOB_FAILED" | "JOB_TIMED_OUT" | "JOB_CANCELED";
         /** @enum {string} */
         "Fei.Is.Api.Data.Enums.Role": "Admin" | "User";
+        /** @enum {string} */
+        "Fei.Is.Api.Data.Enums.SceneActionType": "JOB" | "NOTIFICATION";
         "Fei.Is.Api.Features.AdminUserManagement.Commands.UpdateUserEmail.Request": {
             email: string;
         };
@@ -1409,6 +1459,31 @@ export interface components {
             /** Format: uuid */
             id: string;
             name: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        "Fei.Is.Api.Features.Scenes.Commands.CreateScene.Request": {
+            name: string;
+            description?: string | null;
+            isEnabled: boolean;
+            condition?: string | null;
+            actions: components["schemas"]["Fei.Is.Api.Features.Scenes.Commands.CreateScene.SceneActionRequest"][];
+        };
+        "Fei.Is.Api.Features.Scenes.Commands.CreateScene.SceneActionRequest": {
+            type: components["schemas"]["Fei.Is.Api.Data.Enums.SceneActionType"];
+            /** Format: uuid */
+            deviceId?: string | null;
+            /** Format: uuid */
+            recipeId?: string | null;
+            notificationMessage?: string | null;
+        };
+        "Fei.Is.Api.Features.Scenes.Queries.GetScenes.Response": {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            isEnabled: boolean;
+            /** Format: date-time */
+            createdAt: string;
             /** Format: date-time */
             updatedAt: string;
         };
@@ -2419,7 +2494,7 @@ export interface operations {
             };
         };
     };
-    DeleteProduct: {
+    DeleteDeviceTemplate: {
         parameters: {
             query?: never;
             header?: never;
@@ -3542,6 +3617,101 @@ export interface operations {
                 content: {
                     "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
                 };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GetScenes: {
+        parameters: {
+            query?: {
+                SortBy?: string;
+                Descending?: boolean;
+                SearchTerm?: string;
+                PageNumber?: number;
+                PageSize?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Scenes.Queries.GetScenes.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+        };
+    };
+    CreateScene: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.Scenes.Commands.CreateScene.Request"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+        };
+    };
+    DeleteScene: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Not Found */
             404: {

@@ -15,7 +15,7 @@
     <template #default>
       <q-table
         v-model:pagination="pagination"
-        :rows="[]"
+        :rows="scenes"
         :columns="columns"
         :loading="loadingScenes"
         flat
@@ -57,6 +57,7 @@
       </q-table>
     </template>
   </PageLayout>
+  <DeleteSceneDialog v-model="deleteDialogOpen" :scene-id="deleteSceneId" @onDeleted="getScenes(pagination)" />
 </template>
 
 <script setup lang="ts">
@@ -70,6 +71,7 @@ import { DeviceTemplatesQueryParams, DeviceTemplatesResponse } from '@/api/servi
 import { QTableProps } from 'quasar';
 import { watchDebounced } from '@vueuse/core';
 import SceneService from '@/api/services/SceneService';
+import DeleteSceneDialog from '@/components/scenes/DeleteSceneDialog.vue';
 
 const { t, locale } = useI18n();
 const filter = ref('');
@@ -86,7 +88,7 @@ const scenes = computed(() => scenesPaginated.value?.items ?? []);
 
 const loadingScenes = ref(false);
 const deleteDialogOpen = ref(false);
-const deleteSceneId = ref<string>();
+const deleteSceneId = ref<string>('');
 
 async function getScenes(paginationTable: PaginationTable) {
   const paginationQuery: DeviceTemplatesQueryParams = {

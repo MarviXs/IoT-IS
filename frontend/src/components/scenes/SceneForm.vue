@@ -2,9 +2,10 @@
   <q-form @submit="emit('onSubmit')" ref="formRef" greedy>
     <q-btn type="submit" style="display: none" />
     <q-card class="q-pa-lg shadow">
-      <div class="row items-center q-col-gutter-x-xl q-col-gutter-y-md">
-        <q-input v-model="scene.name" :label="t('global.name')" class="col-12" />
+      <div class="row items-center q-col-gutter-x-xl">
+        <q-input v-model="scene.name" :label="t('global.name')" class="col-12" :rules="nameRules" />
         <q-input v-model="scene.description" :label="t('global.description')" class="col-12" type="textarea" autogrow />
+        <q-checkbox dense v-model="scene.isEnabled" label="Enabled" class="q-mt-lg" />
       </div>
     </q-card>
     <div class="q-mt-md">
@@ -49,6 +50,15 @@ async function getDevices() {
   devices.value = data;
 }
 getDevices();
+
+const nameRules = [(val: string) => (val && val.length > 0) || t('global.rules.required')];
+
+const formRef = ref();
+async function validate() {
+  return await formRef.value?.validate();
+}
+
+defineExpose({ validate });
 </script>
 
 <style scoped>

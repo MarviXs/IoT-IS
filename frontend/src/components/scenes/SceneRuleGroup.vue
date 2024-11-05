@@ -27,12 +27,12 @@ import { computed, PropType, ref } from 'vue';
 import SceneRule from './SceneRule.vue';
 import { mdiCloseCircleOutline } from '@quasar/extras/mdi-v7';
 import { getRuleColor } from '@/utils/rule-colors';
-import { DevicesWithSensorsResponse } from '@/api/services/DeviceService';
+import { SceneDevice } from '@/api/services/DeviceService';
 
 const props = defineProps({
   isRoot: { type: Boolean, required: true },
   depth: { type: Number, required: true },
-  devices: { type: Array as PropType<DevicesWithSensorsResponse>, required: true },
+  devices: { type: Array as PropType<SceneDevice>, required: true },
 });
 const emit = defineEmits(['remove']);
 

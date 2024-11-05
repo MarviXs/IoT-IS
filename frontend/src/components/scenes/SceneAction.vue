@@ -12,7 +12,7 @@
       emit-value
       map-options
     />
-    <div v-if="action.type == 'notification'" class="row">
+    <div v-if="action.type == 'NOTIFICATION'" class="row">
       <q-input
         v-model="action.notificationMessage"
         label="Message"
@@ -21,7 +21,7 @@
         :rules="notificationMessageRules"
       />
     </div>
-    <div v-else-if="action.type == 'job'" class="row">
+    <div v-else-if="action.type == 'JOB'" class="row">
       <q-select
         v-model="action.deviceId"
         label="Device"
