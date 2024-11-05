@@ -414,5 +414,28 @@
   },
   "products": {
     "label": "Product | Products"
+  },
+  "order": {
+    "label": "Order | Orders",
+    "id": "ID",
+    "customer": "Customer",
+    "delivery_week": "Delivery week",
+    "contact_phone": "Contact phone",
+    "note": "Note",
+    "add_order": "Add order",
+    "order_date":"Order date",
+    "customer_id":"Customer ID",
+    "payment_method":{
+      "label":"Payment method",
+      "cash":"Cash",
+      "card":"Card",
+      "transfer":"Transfer"
+
+    }
+
+
+    
+
+
   }
 }
