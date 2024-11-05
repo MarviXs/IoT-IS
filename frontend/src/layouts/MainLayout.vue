@@ -90,9 +90,7 @@ import {
   mdiAccountGroup,
   mdiContentCopy,
   mdiMemory,
-  mdiFileTree,
   mdiFileTreeOutline,
-  mdiVariable,
   mdiCubeOutline,
   mdiWrench,
 } from '@quasar/extras/mdi-v7';

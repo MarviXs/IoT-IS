@@ -5,14 +5,14 @@
       <div class="row items-center q-col-gutter-x-xl">
         <q-input v-model="scene.name" :label="t('global.name')" class="col-12" :rules="nameRules" />
         <q-input v-model="scene.description" :label="t('global.description')" class="col-12" type="textarea" autogrow />
-        <q-checkbox dense v-model="scene.isEnabled" label="Enabled" class="q-mt-lg" />
+        <q-toggle dense v-model="scene.isEnabled" label="Active" class="q-mt-lg" />
       </div>
     </q-card>
     <div class="q-mt-md">
       <div class="card-name text-dark-blue">Conditions</div>
       <q-card class="q-pa-lg shadow">
         <SceneRuleGroup v-model="scene.condition" :depth="0" :is-root="true" :devices="devices ?? []" />
-        {{ scene.condition }}
+        <!-- {{ scene.condition }} -->
       </q-card>
     </div>
     <div class="q-mt-md">

@@ -65,8 +65,8 @@ const props = defineProps({
 const action = defineModel<SceneAction>({ required: true });
 
 const actionTypeOptions = ref([
-  { label: 'Notification', value: 'notification' },
-  { label: 'Run job', value: 'job' },
+  { label: 'Notification', value: 'NOTIFICATION' },
+  { label: 'Run job', value: 'JOB' },
 ]);
 
 const deviceOptions = computed(() => {

@@ -37,8 +37,8 @@ const route = useRoute();
 
 const scene = ref<Scene>({
   name: '',
+  description: '',
   isEnabled: true,
-  triggerType: 'conditional',
   condition: { and: [] },
   actions: [],
 });
@@ -52,8 +52,9 @@ async function createScene() {
 
   const sceneRequest: CreateSceneData = {
     name: scene.value.name,
+    description: scene.value.description,
     isEnabled: scene.value.isEnabled,
-    condition: scene.value.condition.toString(),
+    condition: JSON.stringify(scene.value.condition),
     actions: scene.value.actions,
   };
 

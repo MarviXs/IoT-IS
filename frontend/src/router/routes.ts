@@ -107,6 +107,10 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/scenes/CreateScenePage.vue'),
       },
       {
+        path: '/scenes/:id',
+        component: () => import('pages/scenes/UpdateScenePage.vue'),
+      },
+      {
         path: '/products',
         component: () => import('pages/products/AllProductsPage.vue'),
       },

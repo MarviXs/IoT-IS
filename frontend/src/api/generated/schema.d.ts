@@ -795,6 +795,25 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/scenes/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a scene by id */
+        get: operations["GetSceneById"];
+        /** Update a scene */
+        put: operations["UpdateScene"];
+        post?: never;
+        /** Delete a scene */
+        delete: operations["DeleteScene"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/scenes": {
         parameters: {
             query?: never;
@@ -808,23 +827,6 @@ export interface paths {
         /** Create a scene */
         post: operations["CreateScene"];
         delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/scenes/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** Delete a scene */
-        delete: operations["DeleteScene"];
         options?: never;
         head?: never;
         patch?: never;
@@ -1470,6 +1472,36 @@ export interface components {
             actions: components["schemas"]["Fei.Is.Api.Features.Scenes.Commands.CreateScene.SceneActionRequest"][];
         };
         "Fei.Is.Api.Features.Scenes.Commands.CreateScene.SceneActionRequest": {
+            type: components["schemas"]["Fei.Is.Api.Data.Enums.SceneActionType"];
+            /** Format: uuid */
+            deviceId?: string | null;
+            /** Format: uuid */
+            recipeId?: string | null;
+            notificationMessage?: string | null;
+        };
+        "Fei.Is.Api.Features.Scenes.Commands.UpdateScene.Request": {
+            name: string;
+            description?: string | null;
+            isEnabled: boolean;
+            condition?: string | null;
+            actions: components["schemas"]["Fei.Is.Api.Features.Scenes.Commands.UpdateScene.SceneActionRequest"][];
+        };
+        "Fei.Is.Api.Features.Scenes.Commands.UpdateScene.SceneActionRequest": {
+            type: components["schemas"]["Fei.Is.Api.Data.Enums.SceneActionType"];
+            /** Format: uuid */
+            deviceId?: string | null;
+            /** Format: uuid */
+            recipeId?: string | null;
+            notificationMessage?: string | null;
+        };
+        "Fei.Is.Api.Features.Scenes.Queries.GetSceneById.Response": {
+            name: string;
+            description?: string | null;
+            isEnabled: boolean;
+            condition?: string | null;
+            actions: components["schemas"]["Fei.Is.Api.Features.Scenes.Queries.GetSceneById.SceneActionResponse"][];
+        };
+        "Fei.Is.Api.Features.Scenes.Queries.GetSceneById.SceneActionResponse": {
             type: components["schemas"]["Fei.Is.Api.Data.Enums.SceneActionType"];
             /** Format: uuid */
             deviceId?: string | null;
@@ -3627,6 +3659,97 @@ export interface operations {
             };
         };
     };
+    GetSceneById: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.Scenes.Queries.GetSceneById.Response"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UpdateScene: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.Scenes.Commands.UpdateScene.Request"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+        };
+    };
+    DeleteScene: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     GetScenes: {
         parameters: {
             query?: {
@@ -3692,33 +3815,6 @@ export interface operations {
                 content: {
                     "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
                 };
-            };
-        };
-    };
-    DeleteScene: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };

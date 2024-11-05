@@ -24,9 +24,10 @@ const props = defineProps({
 
 function addAction() {
   actions.value.push({
-    type: 'notification',
+    type: 'NOTIFICATION',
     notificationMessage: '',
-    recipeId: '',
+    deviceId: null,
+    recipeId: null,
   });
 }
 

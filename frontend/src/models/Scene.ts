@@ -2,9 +2,9 @@ import { RulesLogic } from 'json-logic-js';
 
 interface SceneAction {
   type: 'JOB' | 'NOTIFICATION';
-  deviceId?: string;
-  recipeId?: string;
-  notificationMessage?: string;
+  deviceId?: string | null;
+  recipeId?: string | null;
+  notificationMessage?: string | null;
 }
 
 interface Scene {
@@ -12,7 +12,6 @@ interface Scene {
   name: string;
   description?: string;
   isEnabled: boolean;
-  triggerType: 'scheduled' | 'conditional';
   condition: RulesLogic;
   actions: SceneAction[];
 }
