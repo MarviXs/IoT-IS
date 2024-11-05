@@ -106,6 +106,10 @@ const routes: RouteRecordRaw[] = [
         path: '/scenes/create',
         component: () => import('pages/scenes/CreateScenePage.vue'),
       },
+      {
+        path: '/orders',
+        component: () => import('pages/orders/AllOrdersPage.vue'),
+      },
     ],
   },
   {

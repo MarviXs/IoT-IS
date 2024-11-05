@@ -428,5 +428,22 @@
       "processing_successful": "No se ha podido procesar la notificación.",
       "proccessing_failed": "No se ha podido procesar la notificación."
     }
+  },
+  "order": {
+    "label": "Pedido | Pedidos",
+    "id": "ID",
+    "customer": "Cliente",
+    "delivery_week": "Semana de entrega",
+    "contact_phone": "Número de teléfono",
+    "note": "Nota",
+    "add_order": "Añadir pedido",
+    "order_date": "Fecha del pedido",
+    "customer_id": "ID del cliente",
+    "payment_method": {
+      "label": "Método de pago",
+      "cash": "Efectivo",
+      "card": "Tarjeta",
+      "transfer": "Transferencia"
+    }
   }
 }
