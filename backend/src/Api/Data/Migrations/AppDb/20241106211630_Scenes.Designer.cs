@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Fei.Is.Api.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Fei.Is.Api.Data.Migrations.AppDb
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241106211630_Scenes")]
+    partial class Scenes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1252,9 +1255,6 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.Property<string>("Condition")
                         .HasColumnType("text");
 
-                    b.Property<long>("CooldownAfterTriggerTime")
-                        .HasColumnType("bigint");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -1281,7 +1281,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.ToTable("Scenes");
                 });
 
-            modelBuilder.Entity("Fei.Is.Api.Data.Models.SceneSensorTrigger", b =>
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.SceneSensorActivator", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -1310,7 +1310,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.HasIndex("SceneId", "DeviceId", "SensorTag")
                         .IsUnique();
 
-                    b.ToTable("SceneSensorTriggers");
+                    b.ToTable("SceneSensorActivators");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.Sensor", b =>
@@ -1840,7 +1840,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.Navigation("Owner");
                 });
 
-            modelBuilder.Entity("Fei.Is.Api.Data.Models.SceneSensorTrigger", b =>
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.SceneSensorActivator", b =>
                 {
                     b.HasOne("Fei.Is.Api.Data.Models.Device", "Device")
                         .WithMany()

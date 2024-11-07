@@ -1,7 +1,14 @@
 <template>
   <div>
     <div v-if="isGroup(rule)">
-      <SceneRuleGroup v-model="rule" :is-root="false" :depth="depth" :devices="devices" @remove="emit('remove')" />
+      <SceneRuleGroup
+        class="q-mb-md"
+        v-model="rule"
+        :is-root="false"
+        :depth="depth"
+        :devices="devices"
+        @remove="emit('remove')"
+      />
     </div>
     <div class="row items-center" v-else>
       <q-btn
@@ -17,14 +24,14 @@
       <q-select
         v-model="comparisonOperator"
         :options="compareOptions"
-        label="Operand"
+        label="Operator"
         outlined
         :rules="operatorRules"
         class="q-mr-sm"
         emit-value
         map-options
       />
-      <SceneConstantOperand v-model="rightCompare" />
+      <SceneConstantOperand v-model="rightCompare" :unit="getUnit(leftCompare)" />
     </div>
   </div>
 </template>
@@ -58,6 +65,17 @@ const compareOptions = computed(() => {
     { label: 'is not equal to', value: '!=' },
   ];
 });
+
+function getUnit(compare: any) {
+  if (!compare || !compare.var) {
+    return '';
+  }
+  const deviceId = compare.var.split('.')[1];
+  const tag = compare.var.split('.')[2];
+  const device = props.devices.find((device) => device.id === deviceId);
+  const tagInfo = device?.sensors.find((tagInfo) => tagInfo.tag === tag);
+  return tagInfo?.unit;
+}
 
 const leftCompare = computed({
   get: () => {

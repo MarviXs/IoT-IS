@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
 
 namespace Fei.Is.Api.Features.Scenes.Queries;
+
 public static class GetSceneById
 {
     public sealed class Endpoint : ICarterModule
@@ -72,7 +73,8 @@ public static class GetSceneById
                 scene.Condition,
                 scene
                     .Actions.Select(action => new SceneActionResponse(action.Type, action.DeviceId, action.RecipeId, action.NotificationMessage))
-                    .ToList()
+                    .ToList(),
+                scene.CooldownAfterTriggerTime
             );
 
             return Result.Ok(response);
@@ -81,5 +83,12 @@ public static class GetSceneById
 
     public record SceneActionResponse(SceneActionType Type, Guid? DeviceId, Guid? RecipeId, string? NotificationMessage);
 
-    public record Response(string Name, string? Description, bool IsEnabled, string? Condition, List<SceneActionResponse> Actions);
+    public record Response(
+        string Name,
+        string? Description,
+        bool IsEnabled,
+        string? Condition,
+        List<SceneActionResponse> Actions,
+        long CooldownAfterTriggerTime = 0
+    );
 }

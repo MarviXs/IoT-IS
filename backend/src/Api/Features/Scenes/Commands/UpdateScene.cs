@@ -5,6 +5,7 @@ using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
+using Fei.Is.Api.Features.Scenes.Utils;
 using FluentResults;
 using FluentValidation;
 using MediatR;
@@ -17,7 +18,7 @@ public static class UpdateScene
 {
     public record SceneActionRequest(SceneActionType Type, Guid? DeviceId, Guid? RecipeId, string? NotificationMessage);
 
-    public record Request(string Name, string? Description, bool IsEnabled, string? Condition, List<SceneActionRequest> Actions);
+    public record Request(string Name, string? Description, bool IsEnabled, string? Condition, List<SceneActionRequest> Actions, long CooldownAfterTriggerTime);
 
     public sealed class Endpoint : ICarterModule
     {
@@ -75,6 +76,7 @@ public static class UpdateScene
             scene.Description = message.Request.Description;
             scene.IsEnabled = message.Request.IsEnabled;
             scene.Condition = message.Request.Condition;
+            scene.CooldownAfterTriggerTime = message.Request.CooldownAfterTriggerTime;
             scene.Actions = message
                 .Request.Actions.Select(x => new SceneAction
                 {
@@ -84,6 +86,21 @@ public static class UpdateScene
                     NotificationMessage = x.NotificationMessage
                 })
                 .ToList();
+
+            var existingTriggers = context.SceneSensorTriggers.Where(x => x.SceneId == scene.Id).ToList();
+            context.SceneSensorTriggers.RemoveRange(existingTriggers);
+
+            var triggers = SceneConditionUtils.ParseCondition(message.Request.Condition).Value;
+            foreach (var trigger in triggers)
+            {
+                var sceneSensorTrigger = new SceneSensorTrigger
+                {
+                    SceneId = scene.Id,
+                    DeviceId = trigger.DeviceId,
+                    SensorTag = trigger.Tag
+                };
+                await context.SceneSensorTriggers.AddAsync(sceneSensorTrigger, cancellationToken);
+            }
 
             await context.SaveChangesAsync(cancellationToken);
 

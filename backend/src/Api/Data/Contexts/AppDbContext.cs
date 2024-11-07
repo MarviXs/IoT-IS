@@ -43,6 +43,7 @@ public class AppDbContext
         modelBuilder.ApplyConfiguration(new DeviceConfiguration());
         modelBuilder.ApplyConfiguration(new CollectionItemConfiguration());
         modelBuilder.ApplyConfiguration(new SceneConfiguration());
+        modelBuilder.ApplyConfiguration(new SceneSensorTriggerConfiguration());
 
         //IS configurations
         modelBuilder.ApplyConfiguration(new AdditionalOrderConfiguration());
@@ -76,7 +77,7 @@ public class AppDbContext
     public DbSet<DeviceCollection> DeviceCollections { get; set; }
     public DbSet<CollectionItem> CollectionItems { get; set; }
     public DbSet<Scene> Scenes { get; set; }
-    public DbSet<SceneSensorActivator> SceneSensorActivators { get; set; }
+    public DbSet<SceneSensorTrigger> SceneSensorTriggers { get; set; }
 
     //IS tables
     public DbSet<RefreshToken> RefreshTokens { get; set; }

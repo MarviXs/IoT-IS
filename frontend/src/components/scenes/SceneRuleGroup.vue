@@ -1,13 +1,20 @@
 <template>
   <div class="rule-group" :class="{ 'root-group': isRoot, 'sub-group': !isRoot }">
-    <div class="row gap-md">
-      <q-btn v-if="!isRoot" :icon="mdiCloseCircleOutline" color="red" round dense flat @click="emit('remove')">
+    <div class="row items-center">
+      <q-btn
+        v-if="!isRoot"
+        :icon="mdiCloseCircleOutline"
+        color="red"
+        class="q-mr-md"
+        round
+        dense
+        flat
+        @click="emit('remove')"
+      >
         <q-tooltip>Remove Group</q-tooltip>
       </q-btn>
-      <q-btn label="Add Rule" color="primary" unelevated @click="addRule" />
-      <q-btn label="Add Group" color="primary" unelevated @click="addGroup" />
+      <q-select v-model="condition" :options="conditionOptions" outlined class="col-grow" emit-value map-options />
     </div>
-    <q-select v-model="condition" :options="conditionOptions" outlined class="q-mt-md" emit-value map-options />
     <div class="q-mt-md">
       <SceneRule
         v-for="(rule, index) in getRules()"
@@ -18,6 +25,10 @@
         @remove="removeRule(getRules()[index])"
       />
     </div>
+    <div class="row gap-md">
+      <q-btn label="Add Rule" color="primary" :icon="mdiPlus" dense flat unelevated @click="addRule" />
+      <q-btn label="Add Group" color="primary" :icon="mdiPlus" dense flat unelevated @click="addGroup" />
+    </div>
   </div>
 </template>
 
@@ -25,7 +36,7 @@
 import { ReservedOperations, RulesLogic } from 'json-logic-js';
 import { computed, PropType, ref } from 'vue';
 import SceneRule from './SceneRule.vue';
-import { mdiCloseCircleOutline } from '@quasar/extras/mdi-v7';
+import { mdiCloseCircleOutline, mdiPlus } from '@quasar/extras/mdi-v7';
 import { getRuleColor } from '@/utils/rule-colors';
 import { SceneDevice } from '@/api/services/DeviceService';
 

@@ -41,6 +41,7 @@ const scene = ref<Scene>({
   isEnabled: true,
   condition: { and: [] },
   actions: [],
+  cooldownAfterTriggerTime: 0,
 });
 
 const sceneForm = ref();
@@ -56,6 +57,7 @@ async function createScene() {
     isEnabled: scene.value.isEnabled,
     condition: JSON.stringify(scene.value.condition),
     actions: scene.value.actions,
+    cooldownAfterTriggerTime: scene.value.cooldownAfterTriggerTime,
   };
 
   const recipeResponse = await SceneService.createScene(sceneRequest);

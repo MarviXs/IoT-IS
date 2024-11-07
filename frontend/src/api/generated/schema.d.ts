@@ -1470,6 +1470,8 @@ export interface components {
             isEnabled: boolean;
             condition?: string | null;
             actions: components["schemas"]["Fei.Is.Api.Features.Scenes.Commands.CreateScene.SceneActionRequest"][];
+            /** Format: int64 */
+            cooldownAfterTriggerTime: number;
         };
         "Fei.Is.Api.Features.Scenes.Commands.CreateScene.SceneActionRequest": {
             type: components["schemas"]["Fei.Is.Api.Data.Enums.SceneActionType"];
@@ -1485,6 +1487,8 @@ export interface components {
             isEnabled: boolean;
             condition?: string | null;
             actions: components["schemas"]["Fei.Is.Api.Features.Scenes.Commands.UpdateScene.SceneActionRequest"][];
+            /** Format: int64 */
+            cooldownAfterTriggerTime: number;
         };
         "Fei.Is.Api.Features.Scenes.Commands.UpdateScene.SceneActionRequest": {
             type: components["schemas"]["Fei.Is.Api.Data.Enums.SceneActionType"];

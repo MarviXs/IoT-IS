@@ -14,6 +14,7 @@ interface Scene {
   isEnabled: boolean;
   condition: RulesLogic;
   actions: SceneAction[];
+  cooldownAfterTriggerTime: number;
 }
 
 export type { Scene, SceneAction };

@@ -5,6 +5,12 @@
       <div class="row items-center q-col-gutter-x-xl">
         <q-input v-model="scene.name" :label="t('global.name')" class="col-12" :rules="nameRules" />
         <q-input v-model="scene.description" :label="t('global.description')" class="col-12" type="textarea" autogrow />
+        <q-input
+          v-model="scene.cooldownAfterTriggerTime"
+          label="Cooldown after trigger (seconds)"
+          class="col-12 q-mt-md"
+          :rules="triggerDeactivateRules"
+        />
         <q-toggle dense v-model="scene.isEnabled" label="Active" class="q-mt-lg" />
       </div>
     </q-card>
@@ -52,6 +58,10 @@ async function getDevices() {
 getDevices();
 
 const nameRules = [(val: string) => (val && val.length > 0) || t('global.rules.required')];
+const triggerDeactivateRules = [
+  (val: string) => (val && val.length > 0) || t('global.rules.required'),
+  (val: string) => (!isNaN(Number(val)) && Number(val) > 0) || t('global.rules.number'),
+];
 
 const formRef = ref();
 async function validate() {

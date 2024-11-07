@@ -16,7 +16,9 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    OwnerId = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
+                    IsEnabled = table.Column<bool>(type: "boolean", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: true),
                     Condition = table.Column<string>(type: "text", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -26,6 +28,12 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Scenes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Scenes_AspNetUsers_OwnerId",
+                        column: x => x.OwnerId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -34,7 +42,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     SceneId = table.Column<Guid>(type: "uuid", nullable: false),
-                    SensorId = table.Column<Guid>(type: "uuid", nullable: false),
+                    SensorTag = table.Column<string>(type: "text", nullable: false),
                     DeviceId = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
@@ -54,12 +62,6 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                         principalTable: "Scenes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_SceneSensorActivators_Sensors_SensorId",
-                        column: x => x.SensorId,
-                        principalTable: "Sensors",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -68,14 +70,15 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                 column: "DeviceId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_SceneSensorActivators_SceneId",
+                name: "IX_SceneSensorActivators_SceneId_DeviceId_SensorTag",
                 table: "SceneSensorActivators",
-                column: "SceneId");
+                columns: new[] { "SceneId", "DeviceId", "SensorTag" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_SceneSensorActivators_SensorId",
-                table: "SceneSensorActivators",
-                column: "SensorId");
+                name: "IX_Scenes_OwnerId",
+                table: "Scenes",
+                column: "OwnerId");
         }
 
         /// <inheritdoc />

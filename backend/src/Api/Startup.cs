@@ -4,6 +4,7 @@ using Fei.Is.Api.BackgroundServices;
 using Fei.Is.Api.Common.OpenAPI;
 using Fei.Is.Api.Extensions;
 using Fei.Is.Api.Features.Auth;
+using Fei.Is.Api.Features.Jobs.Services;
 using Fei.Is.Api.MqttClient;
 using Fei.Is.Api.MqttClient.Publish;
 using Fei.Is.Api.MqttClient.Subscribe;
@@ -54,6 +55,7 @@ public class Startup(IConfiguration configuration)
         });
 
         // Add services
+        services.AddScoped<JobService>();
         services.AddScoped<TokenService>();
         services.AddSingleton<RedisService>();
 
@@ -83,7 +85,7 @@ public class Startup(IConfiguration configuration)
             app.UseSwaggerUI();
             app.UseDeveloperExceptionPage();
         }
-        
+
         app.UseCors("CorsPolicy");
 
         app.UseStatusCodePages();

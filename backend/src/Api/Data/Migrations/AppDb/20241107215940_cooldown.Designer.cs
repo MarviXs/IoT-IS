@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Fei.Is.Api.Data.Migrations.AppDb
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241105132941_SceneOwner")]
-    partial class SceneOwner
+    [Migration("20241107215940_cooldown")]
+    partial class cooldown
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1255,11 +1255,17 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.Property<string>("Condition")
                         .HasColumnType("text");
 
+                    b.Property<long>("CooldownAfterTriggerTime")
+                        .HasColumnType("bigint");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
                         .HasColumnType("text");
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -1278,7 +1284,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.ToTable("Scenes");
                 });
 
-            modelBuilder.Entity("Fei.Is.Api.Data.Models.SceneSensorActivator", b =>
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.SceneSensorTrigger", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -1293,8 +1299,9 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.Property<Guid>("SceneId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("SensorId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("SensorTag")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -1303,11 +1310,10 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("DeviceId");
 
-                    b.HasIndex("SceneId");
+                    b.HasIndex("SceneId", "DeviceId", "SensorTag")
+                        .IsUnique();
 
-                    b.HasIndex("SensorId");
-
-                    b.ToTable("SceneSensorActivators");
+                    b.ToTable("SceneSensorTriggers");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.Sensor", b =>
@@ -1837,7 +1843,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.Navigation("Owner");
                 });
 
-            modelBuilder.Entity("Fei.Is.Api.Data.Models.SceneSensorActivator", b =>
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.SceneSensorTrigger", b =>
                 {
                     b.HasOne("Fei.Is.Api.Data.Models.Device", "Device")
                         .WithMany()
@@ -1851,17 +1857,9 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Fei.Is.Api.Data.Models.Sensor", "Sensor")
-                        .WithMany()
-                        .HasForeignKey("SensorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Device");
 
                     b.Navigation("Scene");
-
-                    b.Navigation("Sensor");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.Sensor", b =>

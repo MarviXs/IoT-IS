@@ -5,6 +5,7 @@ using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
+using Fei.Is.Api.Features.Scenes.Utils;
 using FluentResults;
 using FluentValidation;
 using MediatR;
@@ -16,7 +17,7 @@ public static class CreateScene
 {
     public record SceneActionRequest(SceneActionType Type, Guid? DeviceId, Guid? RecipeId, string? NotificationMessage);
 
-    public record Request(string Name, string? Description, bool IsEnabled, string? Condition, List<SceneActionRequest> Actions);
+    public record Request(string Name, string? Description, bool IsEnabled, string? Condition, List<SceneActionRequest> Actions, long CooldownAfterTriggerTime);
 
     public sealed class Endpoint : ICarterModule
     {
@@ -66,6 +67,8 @@ public static class CreateScene
                 Name = message.Request.Name,
                 Description = message.Request.Description,
                 Condition = message.Request.Condition,
+                IsEnabled = message.Request.IsEnabled,
+                CooldownAfterTriggerTime = message.Request.CooldownAfterTriggerTime,
                 Actions = message
                     .Request.Actions.Select(x => new SceneAction
                     {
@@ -76,8 +79,23 @@ public static class CreateScene
                     })
                     .ToList()
             };
-
             await context.Scenes.AddAsync(createdScene, cancellationToken);
+
+            var existingTriggers = context.SceneSensorTriggers.Where(x => x.SceneId == createdScene.Id).ToList();
+            context.SceneSensorTriggers.RemoveRange(existingTriggers);
+
+            var triggers = SceneConditionUtils.ParseCondition(message.Request.Condition).Value;
+            foreach (var trigger in triggers)
+            {
+                var sceneSensorTrigger = new SceneSensorTrigger
+                {
+                    SceneId = createdScene.Id,
+                    DeviceId = trigger.DeviceId,
+                    SensorTag = trigger.Tag
+                };
+                await context.SceneSensorTriggers.AddAsync(sceneSensorTrigger, cancellationToken);
+            }
+
             await context.SaveChangesAsync(cancellationToken);
 
             return Result.Ok(createdScene.Id);

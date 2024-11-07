@@ -5,25 +5,24 @@
 namespace Fei.Is.Api.Data.Migrations.AppDb
 {
     /// <inheritdoc />
-    public partial class SceneActive : Migration
+    public partial class cooldown : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<bool>(
-                name: "IsEnabled",
+            migrationBuilder.RenameColumn(
+                name: "DeactivateAfterTriggerDuration",
                 table: "Scenes",
-                type: "boolean",
-                nullable: false,
-                defaultValue: false);
+                newName: "CooldownAfterTriggerTime");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "IsEnabled",
-                table: "Scenes");
+            migrationBuilder.RenameColumn(
+                name: "CooldownAfterTriggerTime",
+                table: "Scenes",
+                newName: "DeactivateAfterTriggerDuration");
         }
     }
 }

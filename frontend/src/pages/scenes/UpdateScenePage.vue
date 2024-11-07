@@ -59,6 +59,7 @@ async function getScene() {
     description: data.description ?? '',
     isEnabled: data.isEnabled,
     condition: parsedCondition,
+    cooldownAfterTriggerTime: data.cooldownAfterTriggerTime,
     actions:
       data.actions.map((action) => ({
         type: action.type,
@@ -85,6 +86,7 @@ async function updateScene() {
     isEnabled: scene.value.isEnabled,
     condition: JSON.stringify(scene.value.condition),
     actions: scene.value.actions,
+    cooldownAfterTriggerTime: scene.value.cooldownAfterTriggerTime,
   };
 
   const recipeResponse = await SceneService.updateScene(sceneId, sceneRequest);
