@@ -78,6 +78,7 @@ public class AppDbContext
     public DbSet<CollectionItem> CollectionItems { get; set; }
     public DbSet<Scene> Scenes { get; set; }
     public DbSet<SceneSensorTrigger> SceneSensorTriggers { get; set; }
+    public DbSet<SceneNotification> SceneNotifications { get; set; }
 
     //IS tables
     public DbSet<RefreshToken> RefreshTokens { get; set; }

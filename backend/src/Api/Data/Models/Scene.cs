@@ -10,4 +10,5 @@ public class Scene : BaseModel
     public string? Condition { get; set; }
     public List<SceneAction> Actions { get; set; } = [];
     public long CooldownAfterTriggerTime { get; set; } = 0;
+    public List<SceneSensorTrigger> SensorTriggers { get; set; } = [];
 }

@@ -11,5 +11,6 @@ public class SceneAction
     public Guid? RecipeId { get; set; }
 
     // Notification type
+    public NotificationSeverity NotificationSeverity { get; set; } = NotificationSeverity.Info;
     public string? NotificationMessage { get; set; }
 }

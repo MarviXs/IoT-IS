@@ -11,7 +11,7 @@
           class="col-12 q-mt-md"
           :rules="triggerDeactivateRules"
         />
-        <q-toggle dense v-model="scene.isEnabled" label="Active" class="q-mt-lg" />
+        <q-toggle dense v-model="scene.isEnabled" label="Active" class="q-mt-sm" />
       </div>
     </q-card>
     <div class="q-mt-md">
