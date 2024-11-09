@@ -69,7 +69,7 @@ async function shareDevice() {
     return;
   }
 
-  toast.success(t('device.share.share_success'));
+  toast.success(t('device.toasts.share.share_success'));
   emailToShare.value = '';
 
   getSharedUsers();
