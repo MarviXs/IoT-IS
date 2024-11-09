@@ -24,7 +24,7 @@ public static class ShareDeviceToUser
         {
             app.MapPost(
                     "devices/{deviceId:guid}/share",
-                    async Task<Results<Created<Guid>, NotFound, ValidationProblem>> (
+                    async Task<Results<Created<Guid>, NotFound, ForbidHttpResult, ValidationProblem>> (
                         IMediator mediator,
                         ClaimsPrincipal user,
                         Request request,
@@ -74,7 +74,7 @@ public static class ShareDeviceToUser
             {
                 return Result.Fail(new NotFoundError());
             }
-            if (device.IsOwner(message.User))
+            if (!device.IsOwner(message.User))
             {
                 return Result.Fail(new ForbiddenError());
             }
