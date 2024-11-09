@@ -8,7 +8,7 @@
 </template>
 
 <script setup lang="ts">
-import { PropType, ref } from 'vue';
+import { PropType } from 'vue';
 import { SceneAction as SceneActionModel } from '@/models/Scene';
 import SceneAction from './SceneAction.vue';
 import { SceneDevice } from '@/api/services/DeviceService';
@@ -24,6 +24,7 @@ function addAction() {
   actions.value.push({
     type: 'NOTIFICATION',
     notificationMessage: '',
+    notificationSeverity: 'Info',
     deviceId: null,
     recipeId: null,
   });

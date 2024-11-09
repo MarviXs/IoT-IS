@@ -65,6 +65,7 @@ async function getScene() {
         type: action.type,
         deviceId: action.deviceId,
         recipeId: action.recipeId,
+        notificationSeverity: action.notificationSeverity,
         notificationMessage: action.notificationMessage,
       })) ?? [],
   };

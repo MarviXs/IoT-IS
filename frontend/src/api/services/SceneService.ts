@@ -1,12 +1,13 @@
 import { client } from '@/api/client';
 import type { paths } from '@/api/generated/schema.d.ts';
 
-export type ScenesQueryParames = paths['/scenes']['get']['parameters']['query'];
+export type ScenesQueryParams = paths['/scenes']['get']['parameters']['query'];
+export type ScenesPaginatedResponse = paths['/scenes']['get']['responses']['200']['content']['application/json'];
 export type CreateSceneData = paths['/scenes']['post']['requestBody']['content']['application/json'];
 export type UpdateSceneData = paths['/scenes/{id}']['put']['requestBody']['content']['application/json'];
 
 class SceneService {
-  async getScenes(query: ScenesQueryParames) {
+  async getScenes(query: ScenesQueryParams) {
     return await client.GET('/scenes', { params: { query: query } });
   }
 

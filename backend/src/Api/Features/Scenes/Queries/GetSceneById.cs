@@ -72,7 +72,13 @@ public static class GetSceneById
                 scene.IsEnabled,
                 scene.Condition,
                 scene
-                    .Actions.Select(action => new SceneActionResponse(action.Type, action.DeviceId, action.RecipeId, action.NotificationMessage))
+                    .Actions.Select(action => new SceneActionResponse(
+                        action.Type,
+                        action.DeviceId,
+                        action.RecipeId,
+                        action.NotificationSeverity,
+                        action.NotificationMessage
+                    ))
                     .ToList(),
                 scene.CooldownAfterTriggerTime
             );
@@ -81,7 +87,13 @@ public static class GetSceneById
         }
     }
 
-    public record SceneActionResponse(SceneActionType Type, Guid? DeviceId, Guid? RecipeId, string? NotificationMessage);
+    public record SceneActionResponse(
+        SceneActionType Type,
+        Guid? DeviceId,
+        Guid? RecipeId,
+        NotificationSeverity? NotificationSeverity,
+        string? NotificationMessage
+    );
 
     public record Response(
         string Name,

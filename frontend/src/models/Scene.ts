@@ -5,6 +5,7 @@ interface SceneAction {
   deviceId?: string | null;
   recipeId?: string | null;
   notificationMessage?: string | null;
+  notificationSeverity?: 'Info' | 'Warning' | 'Serious' | 'Critical' | null;
 }
 
 interface Scene {

@@ -70,7 +70,7 @@ import { handleError } from '@/utils/error-handler';
 import { DeviceTemplatesQueryParams, DeviceTemplatesResponse } from '@/api/services/DeviceTemplateService';
 import { QTableProps } from 'quasar';
 import { watchDebounced } from '@vueuse/core';
-import SceneService, { ScenesQueryParames } from '@/api/services/SceneService';
+import SceneService, { ScenesPaginatedResponse, ScenesQueryParams } from '@/api/services/SceneService';
 import DeleteSceneDialog from '@/components/scenes/DeleteSceneDialog.vue';
 
 const { t, locale } = useI18n();
@@ -83,7 +83,7 @@ const pagination = ref<PaginationClient>({
   rowsPerPage: 10,
   rowsNumber: 0,
 });
-const scenesPaginated = ref<DeviceTemplatesResponse>();
+const scenesPaginated = ref<ScenesPaginatedResponse>();
 const scenes = computed(() => scenesPaginated.value?.items ?? []);
 
 const loadingScenes = ref(false);
@@ -91,7 +91,7 @@ const deleteDialogOpen = ref(false);
 const deleteSceneId = ref<string>('');
 
 async function getScenes(paginationTable: PaginationTable) {
-  const paginationQuery: ScenesQueryParames = {
+  const paginationQuery: ScenesQueryParams = {
     SortBy: paginationTable.sortBy,
     Descending: paginationTable.descending,
     SearchTerm: filter.value,

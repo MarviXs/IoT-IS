@@ -15,9 +15,22 @@ namespace Fei.Is.Api.Features.Scenes.Commands;
 
 public static class CreateScene
 {
-    public record SceneActionRequest(SceneActionType Type, Guid? DeviceId, Guid? RecipeId, string? NotificationMessage);
+    public record SceneActionRequest(
+        SceneActionType Type,
+        Guid? DeviceId,
+        Guid? RecipeId,
+        NotificationSeverity? NotificationSeverity,
+        string? NotificationMessage
+    );
 
-    public record Request(string Name, string? Description, bool IsEnabled, string? Condition, List<SceneActionRequest> Actions, long CooldownAfterTriggerTime);
+    public record Request(
+        string Name,
+        string? Description,
+        bool IsEnabled,
+        string? Condition,
+        List<SceneActionRequest> Actions,
+        long CooldownAfterTriggerTime
+    );
 
     public sealed class Endpoint : ICarterModule
     {
@@ -75,6 +88,7 @@ public static class CreateScene
                         Type = x.Type,
                         DeviceId = x.DeviceId,
                         RecipeId = x.RecipeId,
+                        NotificationSeverity = x.NotificationSeverity ?? NotificationSeverity.Info,
                         NotificationMessage = x.NotificationMessage
                     })
                     .ToList()

@@ -13,6 +13,16 @@
       map-options
     />
     <div v-if="action.type == 'NOTIFICATION'" class="row">
+      <q-select
+        v-model="action.notificationSeverity"
+        label="Severity"
+        outlined
+        :options="notificationSeverityOptions"
+        emit-value
+        map-options
+        style="min-width: 150px"
+        class="q-mr-sm"
+      />
       <q-input
         v-model="action.notificationMessage"
         label="Message"
@@ -67,6 +77,13 @@ const action = defineModel<SceneAction>({ required: true });
 const actionTypeOptions = ref([
   { label: 'Notification', value: 'NOTIFICATION' },
   { label: 'Run job', value: 'JOB' },
+]);
+
+const notificationSeverityOptions = ref([
+  { label: 'Info', value: 'Info' },
+  { label: 'Warning', value: 'Warning' },
+  { label: 'Serious', value: 'Serious' },
+  { label: 'Critical', value: 'Critical' },
 ]);
 
 const deviceOptions = computed(() => {

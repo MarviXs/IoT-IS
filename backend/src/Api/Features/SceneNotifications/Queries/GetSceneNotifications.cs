@@ -76,18 +76,18 @@ public static class GetSceneNotifications
 
             var notifications = await query
                 .Paginate(queryParameters)
-                .Select(notification => new Response(notification.Id, notification.Scene != null ? notification.Scene.Name : null, notification.Message, notification.Severity, notification.CreatedAt))
+                .Select(notification => new Response(notification.Id, notification.SceneId, notification.Scene != null ? notification.Scene.Name : null, notification.Message, notification.Severity, notification.CreatedAt))
                 .ToListAsync(cancellationToken);
 
             return Result.Ok(notifications.ToPagedList(totalCount, queryParameters.PageNumber, queryParameters.PageSize));
         }
     }
 
-    public record Response(Guid Id, string? SceneName, string Message, NotificationSeverity Severity, DateTime CreatedAt);
+    public record Response(Guid Id, Guid SceneId, string? SceneName, string Message, NotificationSeverity Severity, DateTime CreatedAt);
 
     public sealed class ParametersValidator : AbstractValidator<QueryParameters>
     {
-        private static readonly string[] ValidSortByFields = [nameof(SceneNotification.CreatedAt)];
+        private static readonly string[] ValidSortByFields = [nameof(SceneNotification.CreatedAt), nameof(SceneNotification.Severity), nameof(SceneNotification.Message)];
 
         public ParametersValidator()
         {

@@ -901,6 +901,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/scene-notifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get paginated scene notifications */
+        get: operations["GetSceneNotifications"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/device-templates/{templateId}/sensors": {
         parameters: {
             query?: never;
@@ -1011,6 +1028,19 @@ export interface components {
             readonly hasNext: boolean;
             items: components["schemas"]["Fei.Is.Api.Features.Jobs.Queries.GetJobsOnDevice.Response"][];
         };
+        "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Notifications.Queries.GetSceneNotifications.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+            /** Format: int32 */
+            currentPage: number;
+            /** Format: int32 */
+            totalPages: number;
+            /** Format: int32 */
+            pageSize: number;
+            /** Format: int32 */
+            totalCount: number;
+            readonly hasPrevious: boolean;
+            readonly hasNext: boolean;
+            items: components["schemas"]["Fei.Is.Api.Features.Notifications.Queries.GetSceneNotifications.Response"][];
+        };
         "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Orders.Queries.GetOrders.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
             /** Format: int32 */
             currentPage: number;
@@ -1095,6 +1125,8 @@ export interface components {
         "Fei.Is.Api.Data.Enums.DeviceSharePermission": "Editor" | "Viewer";
         /** @enum {string} */
         "Fei.Is.Api.Data.Enums.JobStatusEnum": "JOB_QUEUED" | "JOB_IN_PROGRESS" | "JOB_PAUSED" | "JOB_SUCCEEDED" | "JOB_REJECTED" | "JOB_FAILED" | "JOB_TIMED_OUT" | "JOB_CANCELED";
+        /** @enum {string} */
+        "Fei.Is.Api.Data.Enums.NotificationSeverity": "Info" | "Warning" | "Serious" | "Critical";
         /** @enum {string} */
         "Fei.Is.Api.Data.Enums.Role": "Admin" | "User";
         /** @enum {string} */
@@ -1434,6 +1466,17 @@ export interface components {
             /** Format: date-time */
             updatedAt?: string | null;
         };
+        "Fei.Is.Api.Features.Notifications.Queries.GetSceneNotifications.Response": {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            sceneId: string;
+            sceneName?: string | null;
+            message: string;
+            severity: components["schemas"]["Fei.Is.Api.Data.Enums.NotificationSeverity"];
+            /** Format: date-time */
+            createdAt: string;
+        };
         "Fei.Is.Api.Features.Orders.Commands.CreateOrder.Request": {
             /** Format: int32 */
             customerId: number;
@@ -1600,6 +1643,7 @@ export interface components {
             deviceId?: string | null;
             /** Format: uuid */
             recipeId?: string | null;
+            notificationSeverity: components["schemas"]["Fei.Is.Api.Data.Enums.NotificationSeverity"];
             notificationMessage?: string | null;
         };
         "Fei.Is.Api.Features.Scenes.Commands.UpdateScene.Request": {
@@ -1617,6 +1661,7 @@ export interface components {
             deviceId?: string | null;
             /** Format: uuid */
             recipeId?: string | null;
+            notificationSeverity: components["schemas"]["Fei.Is.Api.Data.Enums.NotificationSeverity"];
             notificationMessage?: string | null;
         };
         "Fei.Is.Api.Features.Scenes.Queries.GetSceneById.Response": {
@@ -1625,6 +1670,8 @@ export interface components {
             isEnabled: boolean;
             condition?: string | null;
             actions: components["schemas"]["Fei.Is.Api.Features.Scenes.Queries.GetSceneById.SceneActionResponse"][];
+            /** Format: int64 */
+            cooldownAfterTriggerTime: number;
         };
         "Fei.Is.Api.Features.Scenes.Queries.GetSceneById.SceneActionResponse": {
             type: components["schemas"]["Fei.Is.Api.Data.Enums.SceneActionType"];
@@ -1632,6 +1679,7 @@ export interface components {
             deviceId?: string | null;
             /** Format: uuid */
             recipeId?: string | null;
+            notificationSeverity: components["schemas"]["Fei.Is.Api.Data.Enums.NotificationSeverity"];
             notificationMessage?: string | null;
         };
         "Fei.Is.Api.Features.Scenes.Queries.GetScenes.Response": {
@@ -4102,6 +4150,41 @@ export interface operations {
                 };
                 content: {
                     "application/json": string;
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+        };
+    };
+    GetSceneNotifications: {
+        parameters: {
+            query?: {
+                SortBy?: string;
+                Descending?: boolean;
+                SearchTerm?: string;
+                PageNumber?: number;
+                PageSize?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Notifications.Queries.GetSceneNotifications.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"];
                 };
             };
             /** @description Bad Request */

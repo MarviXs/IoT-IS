@@ -1,6 +1,7 @@
 using System.Text.Json.Nodes;
 using EFCore.BulkExtensions;
 using Fei.Is.Api.Data.Contexts;
+using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Redis;
 using Json.Logic;
@@ -72,7 +73,7 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
                             .Include(s => s.SensorTriggers)
                             .ToListAsync(cancellationToken);
 
-                        await EvaluateScenes(dataPoints, scenes, redis, timescale);
+                        await EvaluateScenes(dataPoints, scenes, redis, timescale, dbContext);
 
                         var messageIds = messages.Select(m => m.Id).ToArray();
                         await redis.Db.StreamAcknowledgeAsync(StreamName, GroupName, messageIds);
@@ -88,7 +89,13 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
         }
     }
 
-    private async Task EvaluateScenes(List<DataPoint> dataPoints, List<Scene> scenes, RedisService redis, TimeScaleDbContext timescale)
+    private async Task EvaluateScenes(
+        List<DataPoint> dataPoints,
+        List<Scene> scenes,
+        RedisService redis,
+        TimeScaleDbContext timescale,
+        AppDbContext dbContext
+    )
     {
         foreach (var scene in scenes)
         {
@@ -115,7 +122,7 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
 
                     if (result is JsonValue booleanResult && booleanResult.TryGetValue<bool>(out var isTriggered) && isTriggered)
                     {
-                        // TODO Triggered scene
+                        await HandleTriggeredScene(scene, dbContext);
                     }
                 }
             }
@@ -124,6 +131,27 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
                 logger.LogError($"Error evaluating scene: {scene.Id}, Exception: {ex.Message}");
             }
         }
+    }
+
+    private async Task HandleTriggeredScene(Scene scene, AppDbContext dbContext)
+    {
+        var actions = scene.Actions;
+
+        foreach (var action in actions)
+        {
+            if (action.Type == SceneActionType.NOTIFICATION)
+            {
+                var notification = new SceneNotification
+                {
+                    SceneId = scene.Id,
+                    Message = action.NotificationMessage ?? "Scene triggered",
+                    Severity = action.NotificationSeverity
+                };
+                dbContext.SceneNotifications.Add(notification);
+            }
+        }
+
+        await dbContext.SaveChangesAsync();
     }
 
     private static async Task<DataPoint?> GetDataPointFromRedis(SceneSensorTrigger trigger, RedisService redis)
