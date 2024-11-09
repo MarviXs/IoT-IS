@@ -4,10 +4,12 @@ using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
+using Fei.Is.Api.Features.Devices.Extensions;
 using FluentResults;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
 
 namespace Fei.Is.Api.Features.Devices.Commands;
 
@@ -70,13 +72,12 @@ public static class UpdateDevice
                 return Result.Fail(new ValidationError(result));
             }
 
-            var device = await context.Devices.FindAsync([message.DeviceId], cancellationToken);
+            var device = await context.Devices.Include(d => d.SharedWithUsers).FirstOrDefaultAsync(d => d.Id == message.DeviceId, cancellationToken);
             if (device == null)
             {
                 return Result.Fail(new NotFoundError());
             }
-            
-            if (device.OwnerId != message.User.GetUserId())
+            if (!device.CanEdit(message.User))
             {
                 return Result.Fail(new ForbiddenError());
             }

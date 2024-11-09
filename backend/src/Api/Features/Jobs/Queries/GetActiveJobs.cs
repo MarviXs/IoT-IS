@@ -5,6 +5,7 @@ using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
+using Fei.Is.Api.Features.Devices.Extensions;
 using Fei.Is.Api.Features.Jobs.Extensions;
 using FluentResults;
 using MediatR;
@@ -55,13 +56,13 @@ public static class GetActiveJobs
     {
         public async Task<Result<List<Response>>> Handle(Query request, CancellationToken cancellationToken)
         {
-            var device = await context.Devices.AsNoTracking().Where(d => d.Id == request.DeviceId).SingleOrDefaultAsync(cancellationToken);
+            var device = await context.Devices.AsNoTracking().Where(d => d.Id == request.DeviceId).Include(d => d.SharedWithUsers).SingleOrDefaultAsync(cancellationToken);
 
             if (device == null)
             {
                 return Result.Fail(new NotFoundError());
             }
-            if (device.OwnerId != request.User.GetUserId())
+            if (!device.CanView(request.User))
             {
                 return Result.Fail(new ForbiddenError());
             }

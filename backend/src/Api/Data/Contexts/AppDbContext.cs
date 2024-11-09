@@ -74,6 +74,7 @@ public class AppDbContext
     public DbSet<JobCommand> JobCommands { get; set; }
     public DbSet<DeviceCollection> DeviceCollections { get; set; }
     public DbSet<CollectionItem> CollectionItems { get; set; }
+    public DbSet<DeviceShare> DeviceShares { get; set; }
 
     //IS tables
     public DbSet<RefreshToken> RefreshTokens { get; set; }

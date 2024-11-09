@@ -16,21 +16,15 @@
         />
         <div>
           <div class="text-shared q-my-md">{{ t('device.shared_with') }}</div>
-          <q-list bordered separator>
-            <q-item>
-              <div class="row justify-center items-center">
-                <div>{{ device.owner.email }}</div>
-                <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
-                <div>&nbsp; ({{ t('global.owner') }})</div>
-              </div>
-            </q-item>
-            <q-item v-for="user in sharedWithUsers" :key="user.id">
-              <q-item-section>{{ user.email }}</q-item-section>
+          <q-list v-if="sharedUsers.length > 0" bordered separator>
+            <q-item v-for="user in sharedUsers" :key="user.email">
+              <q-item-section>{{ user.email }} ({{ user.permission }})</q-item-section>
               <q-item-section side>
-                <q-btn round flat dense :icon="mdiClose" @click="removeSharedUser(user)" />
+                <q-btn round flat dense :icon="mdiClose" @click="removeSharedUser(user.email)" />
               </q-item-section>
             </q-item>
           </q-list>
+          <div v-else class="text-caption">{{ t('device.no_shared_users') }}</div>
         </div>
       </q-card-section>
       <q-card-actions align="right" class="text-primary">
@@ -41,19 +35,18 @@
 </template>
 
 <script setup lang="ts">
-import { PropType, ref } from 'vue';
+import { ref } from 'vue';
 import { handleError } from '@/utils/error-handler';
 import { computed } from 'vue';
 import { toast } from 'vue3-toastify';
-import DeviceService from '@/api/services/DeviceService';
-import { User } from '@/models/User';
 import { useI18n } from 'vue-i18n';
 import { mdiClose } from '@quasar/extras/mdi-v7';
+import DeviceSharingService, { SharedUsers } from '@/api/services/DeviceSharingService';
 
 const isDialogOpen = defineModel<boolean>();
 const props = defineProps({
-  device: {
-    type: Object as PropType<Device>,
+  deviceId: {
+    type: String,
     required: true,
   },
 });
@@ -61,51 +54,47 @@ const props = defineProps({
 const { t } = useI18n();
 
 const emailToShare = ref('');
-const sharedWithUsers = ref<User[]>([]);
+
 const shareInProgress = ref(false);
 async function shareDevice() {
-  if (isAlreadySharedWithUser.value) {
-    toast.error(t('device.toasts.share.already_shared'));
+  shareInProgress.value = true;
+  const { data, error } = await DeviceSharingService.shareDevice(
+    { email: emailToShare.value, permission: 'Editor' },
+    props.deviceId,
+  );
+  shareInProgress.value = false;
+
+  if (error) {
+    handleError(error, "Couldn't share device");
     return;
   }
-  try {
-    shareInProgress.value = true;
-    await DeviceService.shareDevice(props.device.id, emailToShare.value);
-    getSharedUsers();
-    emailToShare.value = '';
-    toast.success(t('device.toasts.share.share_success'));
-  } catch (error) {
-    handleError(error, t('device.toasts.share.share_failed'));
-  } finally {
-    shareInProgress.value = false;
-  }
+
+  toast.success(t('device.share.share_success'));
+  emailToShare.value = '';
+
+  getSharedUsers();
 }
 
-async function removeSharedUser(user: User) {
-  try {
-    await DeviceService.removeSharedUser(props.device.id, user.id);
-    sharedWithUsers.value = sharedWithUsers.value.filter((u) => u.id !== user.id);
-    getSharedUsers();
-    toast.success(t('device.toasts.share.user_remove_success'));
-  } catch (error) {
-    handleError(error, t('device.toasts.share.user_remove_failed'));
+async function removeSharedUser(email: string) {
+  const { error } = await DeviceSharingService.unshareDevice({ email }, props.deviceId);
+  if (error) {
+    handleError(error, "Couldn't remove shared user");
+    return;
   }
+  getSharedUsers();
 }
+
+const sharedUsers = ref<SharedUsers>([]);
 
 async function getSharedUsers() {
-  try {
-    sharedWithUsers.value = await DeviceService.getSharedUsers(props.device.id);
-  } catch (error) {
-    handleError(error, t('device.toasts.share.shared_users_load_failed'));
+  const { data, error } = await DeviceSharingService.getSharedUsers(props.deviceId);
+  if (error) {
+    handleError(error, "Couldn't get shared users");
+    return;
   }
+  sharedUsers.value = data;
 }
 getSharedUsers();
-
-const isAlreadySharedWithUser = computed(() => {
-  if (!emailToShare.value) return false;
-  if (props.device.owner.email === emailToShare.value) return true;
-  return sharedWithUsers.value.some((u) => u.email === emailToShare.value);
-});
 </script>
 
 <style lang="scss" scoped>

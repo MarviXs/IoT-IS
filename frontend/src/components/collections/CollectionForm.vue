@@ -11,6 +11,7 @@
         :label="t('global.save')"
         no-caps
         padding="6px 20px"
+        type="submit"
         :loading="props.isLoading"
       />
     </q-card-actions>

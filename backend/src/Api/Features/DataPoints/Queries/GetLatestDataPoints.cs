@@ -5,6 +5,7 @@ using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
+using Fei.Is.Api.Features.Devices.Extensions;
 using Fei.Is.Api.Redis;
 using FluentResults;
 using MediatR;
@@ -64,12 +65,12 @@ public static class GetLatestDataPoints
         {
             var user = message.User;
 
-            var device = appContext.Devices.Where(d => d.Id == message.DeviceId).FirstOrDefault();
+            var device = appContext.Devices.Where(d => d.Id == message.DeviceId).Include(d => d.SharedWithUsers).FirstOrDefault();
             if (device == null)
             {
                 return Result.Fail(new NotFoundError());
             }
-            if (device.OwnerId != user.GetUserId())
+            if (!device.CanView(user))
             {
                 return Result.Fail(new ForbiddenError());
             }
