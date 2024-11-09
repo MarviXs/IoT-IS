@@ -9,6 +9,7 @@
           v-model="scene.cooldownAfterTriggerTime"
           label="Cooldown after trigger (seconds)"
           class="col-12 q-mt-md"
+          type="number"
           :rules="triggerDeactivateRules"
         />
         <q-toggle dense v-model="scene.isEnabled" label="Active" class="q-mt-sm" />
@@ -58,10 +59,7 @@ async function getDevices() {
 getDevices();
 
 const nameRules = [(val: string) => (val && val.length > 0) || t('global.rules.required')];
-const triggerDeactivateRules = [
-  (val: string) => (val && val.length > 0) || t('global.rules.required'),
-  (val: string) => (!isNaN(Number(val)) && Number(val) > 0) || t('global.rules.number'),
-];
+const triggerDeactivateRules = [(val: string) => (!isNaN(Number(val)) && Number(val) > 0) || t('global.rules.number')];
 
 const formRef = ref();
 async function validate() {

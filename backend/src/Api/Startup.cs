@@ -64,6 +64,7 @@ public class Startup(IConfiguration configuration)
 
         services.AddHostedService<StoreDataPointsBatchService>();
         services.AddHostedService<JobTimeOutService>();
+        services.AddHostedService<SceneEvaluateService>();
 
         //MQTT Services
         services.AddScoped<JobStatusReceived>();

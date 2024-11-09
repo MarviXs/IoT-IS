@@ -8,6 +8,7 @@ using FluentResults;
 using Google.FlatBuffers;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using StackExchange.Redis;
 
 namespace Fei.Is.Api.MqttClient.Subscribe;
 
@@ -55,9 +56,12 @@ public class DataPointReceived(AppDbContext appContext, RedisService redis, IHub
             maxLength: 500000
         );
 
-        redis.Db.StringSetAsync($"device:{deviceId}:connected", "1", TimeSpan.FromMinutes(30));
-        redis.Db.StringSetAsync($"device:{deviceId}:lastSeen", DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString());
-        redis.Db.StringSetAsync($"device:{deviceId}:{datapoint.Tag}:last", datapoint.Value, TimeSpan.FromHours(1));
+        
+
+        await redis.Db.StringSetAsync($"device:{deviceId}:connected", "1", TimeSpan.FromMinutes(30), flags: CommandFlags.FireAndForget);
+        await redis.Db.StringSetAsync($"device:{deviceId}:lastSeen", DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), flags: CommandFlags.FireAndForget);
+        await redis.Db.StringSetAsync($"device:{deviceId}:{datapoint.Tag}:last", datapoint.Value, TimeSpan.FromHours(1), flags: CommandFlags.FireAndForget);
+
         await hubContext.Clients.Group(deviceId).ReceiveSensorLastDataPoint(new SensorLastDataPointDto(deviceId, datapoint.Tag.ToString(), datapoint.Value));
 
         return Result.Ok();
