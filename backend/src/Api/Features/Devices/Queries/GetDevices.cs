@@ -4,8 +4,10 @@ using Carter;
 using Fei.Is.Api.Common.Pagination;
 using Fei.Is.Api.Common.Utils;
 using Fei.Is.Api.Data.Contexts;
+using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
+using Fei.Is.Api.Features.Devices.Extensions;
 using Fei.Is.Api.Redis;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -51,7 +53,7 @@ public static class GetDevices
 
             var query = context
                 .Devices.AsNoTracking()
-                .Where(d => d.OwnerId == message.User.GetUserId())
+                .WhereOwnedOrShared(message.User.GetUserId())
                 .Where(d => d.Name.ToLower().Contains(StringUtils.Normalized(deviceParameters.SearchTerm)))
                 .Sort(deviceParameters.SortBy ?? nameof(Device.UpdatedAt), deviceParameters.Descending);
 
@@ -67,7 +69,7 @@ public static class GetDevices
             // Fetch online status and last seen from Redis
             var onlineStatuses = await redis.Db.StringGetAsync(onlineKeys);
             var lastSeenTimestamps = await redis.Db.StringGetAsync(lastSeenKeys);
-            
+
             // Map Redis data to devices
             var responseDevices = devices
                 .Select(
@@ -80,7 +82,7 @@ public static class GetDevices
                         {
                             lastSeen = DateTimeOffset.FromUnixTimeSeconds(timestamp);
                         }
-                        return new Response(device.Id, device.Name, online, lastSeen);
+                        return new Response(device.Id, device.Name, online, device.GetPermission(message.User), lastSeen);
                     }
                 )
                 .ToList();
@@ -89,5 +91,5 @@ public static class GetDevices
         }
     }
 
-    public record Response(Guid Id, string Name, bool Connected, DateTimeOffset? LastSeen = null);
+    public record Response(Guid Id, string Name, bool Connected, DevicePermission Permission, DateTimeOffset? LastSeen = null);
 }

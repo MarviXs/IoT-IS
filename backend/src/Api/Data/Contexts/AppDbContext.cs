@@ -76,6 +76,7 @@ public class AppDbContext
     public DbSet<JobCommand> JobCommands { get; set; }
     public DbSet<DeviceCollection> DeviceCollections { get; set; }
     public DbSet<CollectionItem> CollectionItems { get; set; }
+    public DbSet<DeviceShare> DeviceShares { get; set; }
     public DbSet<Scene> Scenes { get; set; }
     public DbSet<SceneSensorTrigger> SceneSensorTriggers { get; set; }
     public DbSet<SceneNotification> SceneNotifications { get; set; }

@@ -65,26 +65,28 @@
           <q-btn :icon="mdiDotsVertical" color="grey-color" flat round>
             <q-menu anchor="bottom right" self="top right">
               <q-list>
-                <q-item v-close-popup clickable @click.stop="openDeleteDialog(propsActions.row.id)">
+                <q-item
+                  v-if="propsActions.row.permission == 'Owner'"
+                  v-close-popup
+                  clickable
+                  @click.stop="openDeleteDialog(propsActions.row.id)"
+                >
                   <div class="row items-center q-gutter-sm">
                     <q-icon color="grey-9" size="24px" :name="mdiTrashCan" />
                     <div>{{ t('global.delete') }}</div>
                   </div>
                 </q-item>
-
-                <!-- <q-item
+                <q-item
+                  v-if="propsActions.row.permission == 'Owner'"
                   v-close-popup
                   clickable
-                  @click="
-                    shareDialog = true;
-                    deviceToShare = propsActions.row;
-                  "
+                  @click="openShareDialog(propsActions.row.id)"
                 >
                   <div class="row items-center q-gutter-sm">
                     <q-icon color="grey-9" size="24px" :name="mdiShare" />
                     <div>{{ t('device.share_device') }}</div>
                   </div>
-                </q-item> -->
+                </q-item>
               </q-list>
             </q-menu>
           </q-btn>
@@ -104,13 +106,13 @@
       @on-update="emit('onChange')"
     />
 
-    <!-- <ShareDeviceDialog v-if="deviceToShare" v-model="shareDialog" :device="deviceToShare" /> -->
+    <ShareDeviceDialog v-if="deviceToShare" v-model="shareDialog" :device-id="deviceToShare" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { QTableProps } from 'quasar';
-// import ShareDeviceDialog from './ShareDeviceDialog.vue';
+import ShareDeviceDialog from './ShareDeviceDialog.vue';
 import { PropType, computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth-store';
@@ -121,6 +123,7 @@ import {
   mdiEye,
   mdiOpenInNew,
   mdiPencil,
+  mdiShare,
   mdiTrashCan,
   mdiTrashCanOutline,
 } from '@quasar/extras/mdi-v7';
@@ -167,7 +170,11 @@ function openUpdateDialog(deviceId: string) {
 }
 
 const shareDialog = ref(false);
-// const deviceToShare = ref<Device>();
+const deviceToShare = ref<string>();
+function openShareDialog(deviceId: string) {
+  shareDialog.value = true;
+  deviceToShare.value = deviceId;
+}
 
 // const getPermissions = (device: Device) => {
 //   if (DeviceService.isOwner(device)) {

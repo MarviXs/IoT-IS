@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Fei.Is.Api.Data.Contexts;
+using Fei.Is.Api.Features.Devices.Extensions;
 using Fei.Is.Api.SignalR.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
@@ -12,12 +13,12 @@ public class IsHub(ILogger<IsHub> logger, AppDbContext dbContext) : Hub<INotific
 {
     public async Task SubscribeToDevice(Guid deviceId)
     {
-        var device = await dbContext.Devices.AsNoTracking().Where(d => d.Id == deviceId).SingleOrDefaultAsync();
+        var device = await dbContext.Devices.Include(d => d.SharedWithUsers).AsNoTracking().Where(d => d.Id == deviceId).SingleOrDefaultAsync();
         if (device == null)
         {
             return;
         }
-        if (device.OwnerId != GetUserId())
+        if (Context.User == null || !device.CanView(Context.User))
         {
             return;
         }
@@ -27,11 +28,5 @@ public class IsHub(ILogger<IsHub> logger, AppDbContext dbContext) : Hub<INotific
     public async Task UnsubscribeFromDevice(Guid deviceId)
     {
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, deviceId.ToString());
-    }
-
-    private Guid GetUserId()
-    {
-        var userIdString = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? throw new Exception("User not authenticated");
-        return Guid.Parse(userIdString);
     }
 }

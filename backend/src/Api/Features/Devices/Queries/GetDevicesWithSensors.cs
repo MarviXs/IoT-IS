@@ -6,6 +6,7 @@ using Fei.Is.Api.Common.Utils;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
+using Fei.Is.Api.Features.Devices.Extensions;
 using Fei.Is.Api.Redis;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -51,7 +52,7 @@ public static class GetDevicesWithSensors
 
             var query = context
                 .Devices.AsNoTracking()
-                .Where(d => d.OwnerId == message.User.GetUserId())
+                .WhereOwnedOrShared(message.User.GetUserId())
                 .Where(d => d.Name.ToLower().Contains(StringUtils.Normalized(deviceParameters.SearchTerm)))
                 .Include(d => d.DeviceTemplate)
                 .ThenInclude(dt => dt.Sensors)

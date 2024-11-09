@@ -5,59 +5,53 @@ using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
-using Fei.Is.Api.Features.Devices.Extensions;
-using Fei.Is.Api.Features.Jobs.EventHandlers;
-using Fei.Is.Api.Features.Jobs.Services;
 using FluentResults;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace Fei.Is.Api.Features.Jobs.Commands;
+namespace Fei.Is.Api.Features.DeviceSharing.Commands;
 
-public static class CreateJob
+public static class UnshareDeviceToUser
 {
-    public record Request(Guid RecipeId, int Cycles);
+    public record Request(string Email);
 
     public sealed class Endpoint : ICarterModule
     {
         public void AddRoutes(IEndpointRouteBuilder app)
         {
             app.MapPost(
-                    "devices/{deviceId:guid}/jobs",
-                    async Task<Results<Created<Guid>, NotFound,ForbidHttpResult, ValidationProblem>> (
+                    "devices/{deviceId:guid}/unshare",
+                    async Task<Results<Created<Guid>, ValidationProblem, NotFound>> (
                         IMediator mediator,
                         ClaimsPrincipal user,
-                        Request request,
+                        [FromBody] Request request,
                         Guid deviceId
                     ) =>
                     {
                         var command = new Command(request, deviceId, user);
+
                         var result = await mediator.Send(command);
 
-                        if (result.HasError<NotFoundError>())
-                        {
-                            return TypedResults.NotFound();
-                        }
-                        else if (result.HasError<ValidationError>())
+                        if (result.HasError<ValidationError>())
                         {
                             return TypedResults.ValidationProblem(result.ToValidationErrors());
                         }
-                        else if (result.HasError<ForbiddenError>())
+                        if (result.HasError<NotFoundError>())
                         {
-                            return TypedResults.Forbid();
+                            return TypedResults.NotFound();
                         }
 
                         return TypedResults.Created(result.Value.ToString(), result.Value);
                     }
                 )
-                .WithName(nameof(CreateJob))
-                .WithTags(nameof(Job))
+                .WithName(nameof(UnshareDeviceToUser))
+                .WithTags(nameof(DeviceShare))
                 .WithOpenApi(o =>
                 {
-                    o.Summary = "Create a job";
-                    o.Description = "Create a job for a device from a recipe.";
+                    o.Summary = "Unshare a device with a user by email";
                     return o;
                 });
         }
@@ -65,7 +59,7 @@ public static class CreateJob
 
     public record Command(Request Request, Guid DeviceId, ClaimsPrincipal User) : IRequest<Result<Guid>>;
 
-    public sealed class Handler(AppDbContext context, JobService jobService, IValidator<Command> validator) : IRequestHandler<Command, Result<Guid>>
+    public sealed class Handler(AppDbContext context, IValidator<Command> validator) : IRequestHandler<Command, Result<Guid>>
     {
         public async Task<Result<Guid>> Handle(Command message, CancellationToken cancellationToken)
         {
@@ -75,33 +69,44 @@ public static class CreateJob
                 return Result.Fail(new ValidationError(result));
             }
 
-            var device = await context.Devices.Include(d => d.SharedWithUsers).FirstOrDefaultAsync(device => device.Id == message.DeviceId, cancellationToken);
+            var device = await context.Devices.FirstOrDefaultAsync(x => x.Id == message.DeviceId, cancellationToken);
             if (device == null)
             {
                 return Result.Fail(new NotFoundError());
             }
-            if (!device.CanEdit(message.User))
+            if (device.OwnerId != message.User.GetUserId())
             {
                 return Result.Fail(new ForbiddenError());
             }
 
-            var job = await jobService.CreateJobFromRecipe(message.DeviceId, message.Request.RecipeId, message.Request.Cycles, cancellationToken);
-            if (job.IsFailed)
+            var sharedUser = await context.Users.FirstOrDefaultAsync(x => x.Email == message.Request.Email, cancellationToken);
+            if (sharedUser == null)
             {
-                return Result.Fail(job.Errors);
+                return Result.Fail(new NotFoundError());
             }
+
+            var deviceShare = await context.DeviceShares.FirstOrDefaultAsync(
+                x => x.DeviceId == message.DeviceId && x.SharedToUserId == sharedUser.Id,
+                cancellationToken
+            );
+
+            if (deviceShare == null)
+            {
+                return Result.Fail(new NotFoundError());
+            }
+
+            context.DeviceShares.Remove(deviceShare);
             await context.SaveChangesAsync(cancellationToken);
 
-            return Result.Ok(job.Value.Id);
+            return Result.Ok(deviceShare.Id);
         }
     }
 
-    public class Validator : AbstractValidator<Command>
+    public sealed class Validator : AbstractValidator<Command>
     {
         public Validator()
         {
-            RuleFor(x => x.Request.RecipeId).NotEmpty().WithMessage("Recipe ID is required");
-            RuleFor(x => x.Request.Cycles).GreaterThan(0).WithMessage("Cycles must be greater than 0");
+            RuleFor(x => x.Request.Email).NotEmpty().WithMessage("Email is required");
         }
     }
 }

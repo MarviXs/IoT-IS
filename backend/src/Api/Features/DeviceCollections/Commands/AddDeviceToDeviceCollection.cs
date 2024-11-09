@@ -4,6 +4,7 @@ using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
+using Fei.Is.Api.Features.Devices.Extensions;
 using FluentResults;
 using FluentValidation;
 using MediatR;
@@ -60,12 +61,15 @@ public static class AddDeviceToDeviceCollection
                 return Result.Fail(new ForbiddenError());
             }
 
-            var device = await context.Devices.FindAsync([message.DeviceId], cancellationToken: cancellationToken);
+            var device = await context
+                .Devices.Include(d => d.SharedWithUsers)
+                .AsNoTracking()
+                .SingleOrDefaultAsync(d => d.Id == message.DeviceId, cancellationToken);
             if (device == null)
             {
                 return Result.Fail(new NotFoundError());
             }
-            if (device.OwnerId != message.User.GetUserId())
+            if (!device.CanEdit(message.User))
             {
                 return Result.Fail(new ForbiddenError());
             }

@@ -5,6 +5,7 @@ using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
+using Fei.Is.Api.Features.Devices.Extensions;
 using FluentResults;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -94,15 +95,14 @@ public static class GetSensorDataPoints
     {
         public async Task<Result<List<Response>>> Handle(Query message, CancellationToken cancellationToken)
         {
-            var user = message.User;
             var parameters = message.Parameters;
 
-            var device = appContext.Devices.Where(d => d.Id == message.DeviceId).FirstOrDefault();
+            var device = appContext.Devices.Where(d => d.Id == message.DeviceId).Include(d => d.SharedWithUsers).FirstOrDefault();
             if (device == null)
             {
                 return Result.Fail(new NotFoundError());
             }
-            if (device.OwnerId != user.GetUserId())
+            if (!device.CanView(message.User))
             {
                 return Result.Fail(new ForbiddenError());
             }

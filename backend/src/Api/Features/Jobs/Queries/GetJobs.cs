@@ -72,7 +72,10 @@ public static class GetJobsOnDevice
                 return Result.Fail(new ValidationError(result));
             }
 
-            var query = context.Jobs.AsNoTracking().Include(j => j.Device).Where(j => j.Device!.OwnerId == message.User.GetUserId());
+            var query = context.Jobs.AsNoTracking()
+            .Include(j => j.Device)
+            .ThenInclude(d => d!.SharedWithUsers)
+            .Where(j => j.Device!.OwnerId == message.User.GetUserId() || j.Device!.SharedWithUsers.Any(u => u.SharedToUserId == message.User.GetUserId()));
 
             if (message.queryParameters.SortBy == "DeviceName")
             {

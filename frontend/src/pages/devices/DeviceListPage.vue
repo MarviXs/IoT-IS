@@ -41,7 +41,7 @@ import { mdiPlus } from '@quasar/extras/mdi-v7';
 import PageLayout from '@/layouts/PageLayout.vue';
 import { ref } from 'vue';
 import SearchBar from '@/components/core/SearchBar.vue';
-import { useStorage } from '@vueuse/core';
+import { useStorage, watchDebounced } from '@vueuse/core';
 import AutoRefreshButton from '@/components/core/AutoRefreshButton.vue';
 import { PaginationClient, PaginationTable } from '@/models/Pagination';
 import DeviceService from '@/api/services/DeviceService';
@@ -97,4 +97,6 @@ async function getDevices(paginationTable: PaginationTable) {
 getDevices(pagination.value);
 
 const isCreateDialogOpen = ref(false);
+
+watchDebounced(filter, () => getDevices(pagination.value), { debounce: 400 });
 </script>

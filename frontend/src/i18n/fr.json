@@ -429,5 +429,22 @@
       "processing_successful": "Le traitement de la notification a été effectué avec succès.",
       "proccessing_failed": "Le traitement de la notification n'a pas abouti."
     }
+  },
+  "order": {
+    "label": "Commande | Commandes",
+    "id": "ID",
+    "customer": "Client",
+    "delivery_week": "Semaine de livraison",
+    "contact_phone": "Numéro de téléphone",
+    "note": "Remarque",
+    "add_order": "Ajouter une commande",
+    "order_date": "Date de commande",
+    "customer_id": "ID du client",
+    "payment_method": {
+      "label": "Mode de paiement",
+      "cash": "Espèces",
+      "card": "Carte",
+      "transfer": "Virement"
+    }
   }
 }

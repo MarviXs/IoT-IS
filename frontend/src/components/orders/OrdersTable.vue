@@ -1,0 +1,127 @@
+<template>
+  <!-- Obal pre horizontálne posúvanie -->
+  <div class="scroll-container">
+    <q-table
+      v-model:pagination="pagination"
+      :rows="ordersFiltered"
+      :columns="columns"
+      :loading="props.loading"
+      flat
+      :rows-per-page-options="[10, 20, 50]"
+      :no-data-label="t('table.no_data_label')"
+      :loading-label="t('table.loading_label')"
+      :rows-per-page-label="t('table.rows_per_page_label')"
+      binary-state-sort
+      @request="emit('onRequest', $event)"
+    >
+      <template #no-data="{ message }">
+        <div class="full-width column flex-center q-pa-lg nothing-found-text">
+          <q-icon :name="mdiFileSearchOutline" class="q-mb-md" size="50px"></q-icon>
+          {{ message }}
+        </div>
+      </template>
+    </q-table>
+  </div>
+</template>
+
+<script setup lang="ts">
+import {  QTableProps, date } from 'quasar';
+import { PropType, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { mdiFileSearchOutline } from '@quasar/extras/mdi-v7';
+import { PaginationClient } from '@/models/Pagination';
+import { OrdersResponse } from '@/api/services/OrdersService';
+
+const props = defineProps({
+  orders: {
+    type: Object as PropType<OrdersResponse>,
+    required: false,
+    default: null,
+  },
+  loading: {
+    type: Boolean,
+    required: true,
+  },
+});
+
+const pagination = defineModel<PaginationClient>('pagination');
+
+const ordersFiltered = computed(() => props.orders?.items ?? []);
+
+const emit = defineEmits(['onChange', 'onRequest']);
+
+const { t } = useI18n();
+
+// Funkcia na formátovanie dátumu a času pomocou Quasar date utility
+function formatDateTime(dateString: string | Date): string {
+  if (!dateString) {
+    return '';
+  }
+  return date.formatDate(dateString, 'YYYY-MM-DD HH:mm:ss');
+}
+
+
+const columns = computed<QTableProps['columns']>(() => [
+  {
+    name: 'id',
+    label: t('order.id'),
+    field: 'id',
+    align: 'left',
+    sortable: true,
+  },
+  {
+    name: 'customer',
+    label: t('order.customer'),
+    field: 'customerName',
+    align: 'left',
+    sortable: true,
+  },
+  {
+    name: 'orderDate',
+    label: t('order.order_date'),
+    field: 'orderDate',
+    align: 'left',
+    sortable: true,
+    format: (val) => formatDateTime(val),
+  },
+  {
+    name: 'deliveryWeek',
+    label: t('order.delivery_week'),
+    field: 'deliveryWeek',
+    align: 'left',
+    sortable: true,
+  },
+  {
+    name: 'paymentMethod',
+    label: t('order.payment_method.label'),
+    field: 'paymentMethod',
+    align: 'left',
+    sortable: true,
+  },
+  {
+    name: 'contactPhone',
+    label: t('order.contact_phone'),
+    field: 'contactPhone',
+    align: 'left',
+    sortable: true,
+  },
+  {
+    name: 'note',
+    label: t('order.note'),
+    field: 'note',
+    align: 'left',
+    sortable: false,
+  },
+]);
+</script>
+
+<style scoped>
+.scroll-container {
+  overflow-x: auto; /* Povolenie horizontálneho posúvania */
+  white-space: nowrap; /* Zabráni zalamovaniu riadkov v tabuľke */
+}
+
+.q-table__container {
+  display: inline-block; /* Umožní horizontálne posúvanie tabuľky */
+}
+</style>

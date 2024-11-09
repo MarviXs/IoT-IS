@@ -531,6 +531,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/devices/{id}/shared-users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a list of users with whom the device is shared */
+        get: operations["GetDeviceSharedUsers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/devices/{deviceId}/share": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Share a device with a user by email */
+        post: operations["ShareDeviceToUser"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/devices/{deviceId}/unshare": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Unshare a device with a user by email */
+        post: operations["UnshareDeviceToUser"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/device-templates": {
         parameters: {
             query?: never;
@@ -714,6 +765,24 @@ export interface paths {
          */
         put: operations["SkipStep"];
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get paginated orders */
+        get: operations["GetOrders"];
+        put?: never;
+        /** Create an order */
+        post: operations["CreateOrder"];
         delete?: never;
         options?: never;
         head?: never;
@@ -942,6 +1011,19 @@ export interface components {
             readonly hasNext: boolean;
             items: components["schemas"]["Fei.Is.Api.Features.Jobs.Queries.GetJobsOnDevice.Response"][];
         };
+        "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Orders.Queries.GetOrders.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+            /** Format: int32 */
+            currentPage: number;
+            /** Format: int32 */
+            totalPages: number;
+            /** Format: int32 */
+            pageSize: number;
+            /** Format: int32 */
+            totalCount: number;
+            readonly hasPrevious: boolean;
+            readonly hasNext: boolean;
+            items: components["schemas"]["Fei.Is.Api.Features.Orders.Queries.GetOrders.Response"][];
+        };
         "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.ProductCategories.Queries.GetProductCategories.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
             /** Format: int32 */
             currentPage: number;
@@ -1007,6 +1089,10 @@ export interface components {
             readonly hasNext: boolean;
             items: components["schemas"]["Fei.Is.Api.Features.UserManagement.Queries.GetUsers.Response"][];
         };
+        /** @enum {string} */
+        "Fei.Is.Api.Data.Enums.DevicePermission": "Owner" | "Editor" | "Viewer";
+        /** @enum {string} */
+        "Fei.Is.Api.Data.Enums.DeviceSharePermission": "Editor" | "Viewer";
         /** @enum {string} */
         "Fei.Is.Api.Data.Enums.JobStatusEnum": "JOB_QUEUED" | "JOB_IN_PROGRESS" | "JOB_PAUSED" | "JOB_SUCCEEDED" | "JOB_REJECTED" | "JOB_FAILED" | "JOB_TIMED_OUT" | "JOB_CANCELED";
         /** @enum {string} */
@@ -1168,6 +1254,17 @@ export interface components {
             id: string;
             name: string;
         };
+        "Fei.Is.Api.Features.DeviceSharing.Commands.ShareDeviceToUser.Request": {
+            email: string;
+            permission: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceSharePermission"];
+        };
+        "Fei.Is.Api.Features.DeviceSharing.Commands.UnshareDeviceToUser.Request": {
+            email: string;
+        };
+        "Fei.Is.Api.Features.DeviceSharing.Queries.GetDeviceSharedUsers.Response": {
+            email: string;
+            permission: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceSharePermission"];
+        };
         "Fei.Is.Api.Features.DeviceTemplates.Commands.CreateDeviceTemplate.Request": {
             name: string;
         };
@@ -1233,6 +1330,7 @@ export interface components {
             id: string;
             name: string;
             connected: boolean;
+            permission: components["schemas"]["Fei.Is.Api.Data.Enums.DevicePermission"];
             /** Format: date-time */
             lastSeen?: string | null;
         };
@@ -1335,6 +1433,29 @@ export interface components {
             createdAt?: string | null;
             /** Format: date-time */
             updatedAt?: string | null;
+        };
+        "Fei.Is.Api.Features.Orders.Commands.CreateOrder.Request": {
+            /** Format: int32 */
+            customerId: number;
+            /** Format: date-time */
+            orderDate: string;
+            /** Format: int32 */
+            deliveryWeek: number;
+            paymentMethod: string;
+            contactPhone: string;
+            note?: string | null;
+        };
+        "Fei.Is.Api.Features.Orders.Queries.GetOrders.Response": {
+            /** Format: int32 */
+            id: number;
+            customerName: string;
+            /** Format: date-time */
+            orderDate: string;
+            /** Format: int32 */
+            deliveryWeek: number;
+            paymentMethod: string;
+            contactPhone: string;
+            note: string;
         };
         "Fei.Is.Api.Features.ProductCategories.Queries.GetCategoryById.Response": {
             /** Format: uuid */
@@ -2986,6 +3107,119 @@ export interface operations {
             };
         };
     };
+    GetDeviceSharedUsers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.DeviceSharing.Queries.GetDeviceSharedUsers.Response"][];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ShareDeviceToUser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                deviceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.DeviceSharing.Commands.ShareDeviceToUser.Request"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UnshareDeviceToUser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                deviceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.DeviceSharing.Commands.UnshareDeviceToUser.Request"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     GetDeviceTemplates: {
         parameters: {
             query?: {
@@ -3390,6 +3624,65 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    GetOrders: {
+        parameters: {
+            query?: {
+                SortBy?: string;
+                Descending?: boolean;
+                SearchTerm?: string;
+                PageNumber?: number;
+                PageSize?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Orders.Queries.GetOrders.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"];
+                };
+            };
+        };
+    };
+    CreateOrder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.Orders.Commands.CreateOrder.Request"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": number;
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
             };
         };
     };

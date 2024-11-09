@@ -429,5 +429,23 @@
       "processing_successful": "Spracovanie notifikácie bolo úspešné.",
       "proccessing_failed": "Spracovanie notifikácie bolo neúspešné."
     }
-  }
+  },
+  "order": {
+    "label": "Objednávka | Objednávky",
+    "id": "ID",
+    "customer": "Zákazník",
+    "delivery_week": "Týždeň doručenia",
+    "contact_phone": "Telefónne číslo",
+    "note": "Poznámka",
+    "add_order": "Pridať objednávku",
+    "order_date": "Dátum objednávky",
+    "customer_id": "ID zákazníka",
+    "payment_method": {
+      "label": "Spôsob platby",
+      "cash": "Hotovosť",
+      "card": "Karta",
+      "transfer": "Prevod"
+    }
+}
+
 }
