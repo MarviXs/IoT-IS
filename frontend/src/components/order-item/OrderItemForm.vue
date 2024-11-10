@@ -1,9 +1,11 @@
 <template>
   <q-form @submit="onSubmit" ref="itemForm">
     <q-card-section class="q-pt-none column q-gutter-md">
-      <q-input
+      <q-select
         v-model="props.orderItem.productNumber"
-        @input="console.log('Product Number:', orderItem.productNumber)"
+        :options="products"
+        option-value="id"        
+        option-label="czechName"  
         :label="t('order_item.product_number')"
         :rules="productNumberRules"
       />
@@ -36,8 +38,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
+import ProductService from '@/api/services/ProductService';
 
 export interface OrderItemFormData {
   orderId: number;
@@ -46,24 +49,36 @@ export interface OrderItemFormData {
   quantity: number;
 }
 
+interface Product {
+  id: string;
+  czechName?: string | null;
+}
+
+const products = ref<Product[]>([]);
+
+onMounted(async () => {
+  try {
+    const response = await ProductService.getProducts({});
+    if (response.data) {
+      products.value = response.data.items.map(item => ({
+        id: item.id,
+        czechName: item.czechName,
+      }));
+    }
+  } catch (error) {
+    console.error("Chyba pri načítaní produktov:", error);
+  }
+});
+
 // Prijímame len `orderId` ako prop, ak sa má položka automaticky priradiť k určitej objednávke
 const props = defineProps<{
   orderId: number;
   loading?: boolean;
-  orderItem: OrderItemFormData; // Pridajte orderItem ako vstupný parameter
+  orderItem: OrderItemFormData;
 }>();
 
-
-
 const emit = defineEmits(['update:modelValue', 'onSubmit']);
-
 const { t } = useI18n();
-
-// Directly reference props.modelValue to initialize `item`
-// Inicializácia `orderItem` s počiatočnými hodnotami
-
-
-// Watch for changes in props.orderId to keep item.orderId updated
 
 watch(() => props.orderId, (newValue) => {
   props.orderItem.orderId = newValue;
@@ -76,12 +91,9 @@ const quantityRules = [(val: number) => (val && val > 0) || t('global.rules.requ
 
 const itemForm = ref();
 
-/// Function to handle form submission
 async function onSubmit() {
-  // Validate form before submission
   const isValid = await itemForm.value?.validate();
   if (isValid) {
-    // Emit the order item data back to the parent component
     emit('onSubmit', props.orderItem);
   }
 }

@@ -47,10 +47,13 @@ const orderItem = ref<AddOrderItemRequest>({
 
 // Funkcia pre pridanie položky do objednávky
 async function addItemToOrder() {
-  // Pripravte createRequest s individuálnymi hodnotami z orderItem
+  const productNumber = typeof orderItem.value.productNumber === 'object' && orderItem.value.productNumber !== null
+  ? (orderItem.value.productNumber as { id: string }).id
+    : orderItem.value.productNumber;
+  
   const addItemRequest: AddOrderItemRequest = {
     orderId: Number(props.orderId),
-    productNumber: orderItem.value.productNumber,
+    productNumber: productNumber,  // Nastavíme iba ID
     varietyName: orderItem.value.varietyName,
     quantity: orderItem.value.quantity,
   };
