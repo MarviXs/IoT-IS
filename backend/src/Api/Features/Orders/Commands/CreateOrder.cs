@@ -14,7 +14,14 @@ namespace Fei.Is.Api.Features.Orders.Commands;
 public static class CreateOrder
 {
     // Record to represent the request for creating an order
-    public record Request(int CustomerId, DateTime OrderDate, int DeliveryWeek, string PaymentMethod, string ContactPhone, string? Note);
+    public record Request(
+        int CustomerId, 
+        DateTime OrderDate, 
+        int DeliveryWeek, 
+        string PaymentMethod, 
+        string ContactPhone, 
+        string? Note
+    );
 
     // Endpoint definition for handling the creation of orders
     public sealed class Endpoint : ICarterModule
@@ -69,11 +76,11 @@ public static class CreateOrder
 
             // Find the customer in the database by CustomerId
             var customer = await context.Companies.FindAsync(new object[] { message.Request.CustomerId }, cancellationToken);
-            // if (customer == null)
-            // {
-            //     // If customer is not found, return a NotFoundError
-            //     return Result.Fail(new NotFoundError("Customer not found"));
-            // }
+            if (customer == null)
+            {
+                // If customer is not found, return a NotFoundError
+                return Result.Fail(new NotFoundError());
+            }
 
             // Create a new Order entity and populate it with data from the request
             var order = new Order

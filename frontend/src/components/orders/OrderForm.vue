@@ -3,6 +3,7 @@
     <q-card-section class="q-pt-none column q-gutter-md">
       <!-- Changed customerName to customerId to match backend requirements -->
       <q-input v-model="order.customerId" :rules="customerIdRules" autofocus :label="t('order.customer_id')" type="number" />
+      
       <q-input v-model="order.contactPhone" :rules="phoneRules" :label="t('order.contact_phone')" />
       
       

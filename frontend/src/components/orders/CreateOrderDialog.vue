@@ -2,7 +2,12 @@
   <dialog-common v-model="isDialogOpen">
     <template #title>{{ t('order.add_order') }}</template>
     <template #default>
-      <OrderForm ref="orderForm" v-model="order" @on-submit="createOrder" :loading="creatingOrder" />
+      <OrderForm 
+      ref="orderForm" 
+      v-model="order" 
+      @on-submit="createOrder" 
+      :loading="creatingOrder" 
+      />
     </template>
   </dialog-common>
 </template>

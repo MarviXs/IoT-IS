@@ -771,6 +771,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/orders/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get order by ID */
+        get: operations["GetOrderById"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/orders": {
         parameters: {
             query?: never;
@@ -783,6 +800,24 @@ export interface paths {
         put?: never;
         /** Create an order */
         post: operations["CreateOrder"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orders/{orderId}/items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get paginated order items by order ID */
+        get: operations["GetOrderItems"];
+        put?: never;
+        /** Add an item to an order */
+        post: operations["AddItemToOrder"];
         delete?: never;
         options?: never;
         head?: never;
@@ -973,6 +1008,19 @@ export interface components {
             readonly hasPrevious: boolean;
             readonly hasNext: boolean;
             items: components["schemas"]["Fei.Is.Api.Features.Jobs.Queries.GetJobsOnDevice.Response"][];
+        };
+        "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.OrderItems.Queries.GetOrderItems.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+            /** Format: int32 */
+            currentPage: number;
+            /** Format: int32 */
+            totalPages: number;
+            /** Format: int32 */
+            pageSize: number;
+            /** Format: int32 */
+            totalCount: number;
+            readonly hasPrevious: boolean;
+            readonly hasNext: boolean;
+            items: components["schemas"]["Fei.Is.Api.Features.OrderItems.Queries.GetOrderItems.Response"][];
         };
         "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Orders.Queries.GetOrders.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
             /** Format: int32 */
@@ -1376,6 +1424,26 @@ export interface components {
             /** Format: date-time */
             updatedAt?: string | null;
         };
+        "Fei.Is.Api.Features.OrderItems.Commands.AddItemToOrder.Request": {
+            /** Format: int32 */
+            orderId: number;
+            /** Format: uuid */
+            productNumber: string;
+            varietyName: string;
+            /** Format: int32 */
+            quantity: number;
+        };
+        "Fei.Is.Api.Features.OrderItems.Queries.GetOrderItems.Response": {
+            /** Format: int32 */
+            id: number;
+            /** Format: int32 */
+            orderId: number;
+            /** Format: uuid */
+            productNumber: string;
+            varietyName: string;
+            /** Format: int32 */
+            quantity: number;
+        };
         "Fei.Is.Api.Features.Orders.Commands.CreateOrder.Request": {
             /** Format: int32 */
             customerId: number;
@@ -1386,6 +1454,18 @@ export interface components {
             paymentMethod: string;
             contactPhone: string;
             note?: string | null;
+        };
+        "Fei.Is.Api.Features.Orders.Queries.GetOrderById.Response": {
+            /** Format: int32 */
+            id: number;
+            customerName: string;
+            /** Format: date-time */
+            orderDate: string;
+            /** Format: int32 */
+            deliveryWeek: number;
+            paymentMethod: string;
+            contactPhone: string;
+            note: string;
         };
         "Fei.Is.Api.Features.Orders.Queries.GetOrders.Response": {
             /** Format: int32 */
@@ -3510,6 +3590,35 @@ export interface operations {
             };
         };
     };
+    GetOrderById: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.Orders.Queries.GetOrderById.Response"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     GetOrders: {
         parameters: {
             query?: {
@@ -3546,6 +3655,69 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["Fei.Is.Api.Features.Orders.Commands.CreateOrder.Request"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": number;
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+        };
+    };
+    GetOrderItems: {
+        parameters: {
+            query?: {
+                SortBy?: string;
+                Descending?: boolean;
+                SearchTerm?: string;
+                PageNumber?: number;
+                PageSize?: number;
+            };
+            header?: never;
+            path: {
+                orderId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.OrderItems.Queries.GetOrderItems.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"];
+                };
+            };
+        };
+    };
+    AddItemToOrder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orderId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.OrderItems.Commands.AddItemToOrder.Request"];
             };
         };
         responses: {

@@ -431,6 +431,15 @@
       "cash": "Cash",
       "card": "Card",
       "transfer": "Transfer"
-    }
+    },
+    "details": "Order details"
+  },
+  "order_item": {
+    "id": "ID",
+    "product_number": "Product Number",
+    "variety_name": "Variety Name",
+    "quantity": "Quantity",
+    "add_item": "Add item"
   }
+  
 }
