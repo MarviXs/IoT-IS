@@ -1,8 +1,8 @@
 <template>
-  <dialog-common v-model="isDialogOpen">
+  <dialog-common v-model="isDialogOpen" min-width="40rem" @hide="init">
     <template #title>{{ t('product.edit_product') }}</template>
     <template #default>
-      <div class="upload-container">
+      <div class="tw-flex tw-gap-4 tw-justify-between tw-items-baseline tw-ml-2">
         <q-file filled bottom-slots v-model="file" label="Label" counter class="col-12">
           <template v-slot:prepend>
             <q-icon :name="mdiCloudUpload" @click.stop.prevent />
@@ -10,19 +10,23 @@
           <template v-slot:append>
             <q-icon :name="mdiClose" @click.stop.prevent="file = null" class="cursor-pointer" />
           </template>
-          <template v-slot:hint> Field hint </template>
         </q-file>
-        <q-btn unelevated color="primary" class="" label="Process" no-caps @click="processFile" />
+        <ProductCategorySelect v-model="category" />
       </div>
       <q-table
         :rows="productsPreview"
         :columns="columns"
         :loading="previewLoading"
         flat
+        hide-pagination
         :no-data-label="t('table.no_data_label')"
         :loading-label="t('table.loading_label')"
       >
       </q-table>
+      <div class="tw-flex tw-justify-end">
+        <q-btn flat :label="t('global.cancel')" no-caps @click="closeDialog" />
+        <q-btn unelevated color="primary" class="tw-align" label="Process" no-caps @click="processFile" />
+      </div>
     </template>
   </dialog-common>
 </template>
@@ -35,13 +39,28 @@ import { mdiCloudUpload, mdiClose } from '@quasar/extras/mdi-v7';
 import { QTableProps } from 'quasar';
 //@ts-ignore
 import Papa from 'papaparse';
-import type { ParseResult } from 'node_modules/@types/papaparse';
+import type { ParseResult } from 'node_modules//@types/papaparse';
+import ProductCategorySelect from './ProductCategorySelect.vue';
+import { CategorySelectData } from '../categories/CategorySelect.vue';
+import ProductService, { ProductRequest } from '@/api/services/ProductService';
 
 const isDialogOpen = defineModel<boolean>();
 
 const file = ref<File | null>(null);
+const category = ref<CategorySelectData | null>(null);
 
 const { t } = useI18n();
+
+function closeDialog() {
+  init();
+  isDialogOpen.value = false;
+}
+
+function init() {
+  file.value = null;
+  productsPreview.value = [];
+  category.value = null;
+}
 
 watch(file, () => {
   if (!file.value) {
@@ -52,8 +71,8 @@ watch(file, () => {
 
   //@ts-ignore
   Papa.parse(file.value, {
-    preview: 10,
-    complete: (result: ParseResult<PreviewProduct>) => {
+    preview: 5,
+    complete: (result: ParseResult<String>) => {
       productsPreview.value = result.data;
       previewLoading.value = false;
     },
@@ -62,25 +81,41 @@ watch(file, () => {
 
 const previewLoading = ref(false);
 
-interface PreviewProduct {
-  pluCode: string;
-  code: string;
-  latinName: string;
-  czechName: string;
-  flowerLeafDescription: string;
-  potDiameterPack: string;
-  pricePerPiecePack: string;
-  pricePerPiecePackVAT: string;
-  discountedPriceWithoutVAT: string;
-  retailPrice: string;
-}
-
-const productsPreview = ref<PreviewProduct[]>([]);
+const productsPreview = ref<Array<String>>([]);
 
 function processFile() {
   if (!file.value) {
     return;
   }
+
+  //@ts-ignore
+  Papa.parse(file.value, {
+    complete: (result: ParseResult<String>) => {
+      ProductService.createProductsFromList({
+        products: result.data.map((product) => ({
+          pluCode: product[0],
+          code: product[1],
+          latinName: product[2],
+          czechName: product[3],
+          flowerLeafDescription: product[4],
+          potDiameterPack: product[5],
+          pricePerPiecePack: parseNumber(product[6]),
+          pricePerPiecePackVAT: parseNumber(product[7]),
+          discountedPriceWithoutVAT: parseNumber(product[8]),
+          retailPrice: parseNumber(product[9]),
+        })) as Array<ProductRequest>,
+        categoryId: category.value!.id,
+      });
+    },
+  });
+}
+
+function parseNumber(value: String) {
+  if (!value) {
+    return null;
+  }
+  const match = value.match(/[\d,]+/);
+  return match ? parseFloat(match[0].replace(',', '.')) : null;
 }
 
 const columns = computed<QTableProps['columns']>(() => [
@@ -146,16 +181,3 @@ const columns = computed<QTableProps['columns']>(() => [
   },
 ]);
 </script>
-
-<style scoped>
-.upload-container {
-  display: flex;
-  flex-direction: row;
-  gap: 1rem;
-  align-items: center;
-}
-
-.upload-container .q-button {
-  max-height: 4rem;
-}
-</style>

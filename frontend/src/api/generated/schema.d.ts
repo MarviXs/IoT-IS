@@ -383,7 +383,7 @@ export interface paths {
         put: operations["UpdateDeviceTemplate"];
         post?: never;
         /** Delete a device template */
-        delete: operations["DeleteProduct"];
+        delete: operations["DeleteDeviceTemplate"];
         options?: never;
         head?: never;
         patch?: never;
@@ -732,6 +732,23 @@ export interface paths {
         put?: never;
         /** Create a product */
         post: operations["CreateProduct"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/products-by-list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create products from list */
+        post: operations["CreateProductsFromList"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1306,6 +1323,27 @@ export interface components {
             /** Format: uuid */
             categoryId: string;
         };
+        "Fei.Is.Api.Features.Products.Commands.CreateProductsFromList.ProductRequest": {
+            pluCode: string;
+            code: string;
+            latinName: string;
+            czechName?: string | null;
+            flowerLeafDescription?: string | null;
+            potDiameterPack?: string | null;
+            /** Format: double */
+            pricePerPiecePack?: number | null;
+            /** Format: double */
+            pricePerPiecePackVAT?: number | null;
+            /** Format: double */
+            discountedPriceWithoutVAT?: number | null;
+            /** Format: double */
+            retailPrice?: number | null;
+        };
+        "Fei.Is.Api.Features.Products.Commands.CreateProductsFromList.Request": {
+            products: components["schemas"]["Fei.Is.Api.Features.Products.Commands.CreateProductsFromList.ProductRequest"][];
+            /** Format: uuid */
+            categoryId: string;
+        };
         "Fei.Is.Api.Features.Products.Commands.UpdateProduct.Request": {
             pluCode: string;
             code: string;
@@ -1345,6 +1383,7 @@ export interface components {
         "Fei.Is.Api.Features.Products.Queries.GetProducts.Response": {
             /** Format: uuid */
             id: string;
+            code: string;
             pluCode: string;
             czechName?: string | null;
             /** Format: double */
@@ -2413,7 +2452,7 @@ export interface operations {
             };
         };
     };
-    DeleteProduct: {
+    DeleteDeviceTemplate: {
         parameters: {
             query?: never;
             header?: never;
@@ -3322,6 +3361,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": string;
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+        };
+    };
+    CreateProductsFromList: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.Products.Commands.CreateProductsFromList.Request"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": number;
                 };
             };
             /** @description Bad Request */

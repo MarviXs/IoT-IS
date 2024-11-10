@@ -47,14 +47,31 @@ public static class GetProducts
     {
         public async Task<PagedList<Response>> Handle(Query message, CancellationToken cancellationToken)
         {
-            var query = context
-                .Products.AsNoTracking()
-                .Select((product) => new Response(product.Id, product.PLUCode, product.CzechName, product.RetailPrice))
-                .Paginate(message.Parameters);
+            var query = context.Products.AsNoTracking();
 
-            return query.ToPagedList(query.Count(), message.Parameters.PageNumber, message.Parameters.PageSize);
+            if (message.Parameters.SearchTerm is not null)
+            {
+                if (decimal.TryParse(message.Parameters.SearchTerm, out decimal _))
+                {
+                    query = query.Where(product =>
+                        product.PLUCode.Contains(message.Parameters.SearchTerm) || product.Code.Contains(message.Parameters.SearchTerm)
+                    );
+                }
+                else
+                {
+                    query = query.Where(product => product.CzechName != null ? product.CzechName.Contains(message.Parameters.SearchTerm) : false);
+                }
+            }
+
+            var totalCount = await query.CountAsync(cancellationToken);
+
+            var pagedQuery = query
+                .Sort(message.Parameters.SortBy ?? nameof(Product.PLUCode), message.Parameters.Descending)
+                .Select((product) => new Response(product.Id, product.Code, product.PLUCode, product.CzechName, product.RetailPrice));
+
+            return pagedQuery.Paginate(message.Parameters).ToPagedList(totalCount, message.Parameters.PageNumber, message.Parameters.PageSize);
         }
     }
 
-    public record Response(Guid Id, string pluCode, string? czechName, decimal? retailPrice);
+    public record Response(Guid Id, string code, string pluCode, string? czechName, decimal? retailPrice);
 }
