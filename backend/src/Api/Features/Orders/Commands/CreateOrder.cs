@@ -78,7 +78,7 @@ public static class CreateOrder
             // Create a new Order entity and populate it with data from the request
             var order = new Order
             {
-                CustomerId = message.Request.CustomerId,
+                CustomerId = new Guid(message.Request.CustomerId.ToString()),//message.Request.CustomerId,
                 OrderDate = DateTime.SpecifyKind(message.Request.OrderDate, DateTimeKind.Utc),
                 DeliveryWeek = message.Request.DeliveryWeek,
                 PaymentMethod = message.Request.PaymentMethod,

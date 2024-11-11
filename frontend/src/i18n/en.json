@@ -432,10 +432,16 @@
       "transfer":"Transfer"
 
     }
-
-
-    
-
-
+  },
+  "company": {
+    "label": "Company | Companies",
+    "name": "Name",
+    "name2": "Name 2",
+    "IC": "IC",
+    "DIC": "DIC",
+    "street": "Street",
+    "city": "City",
+    "psc": "Postal code",
+    "add_company": "Add Company"
   }
 }

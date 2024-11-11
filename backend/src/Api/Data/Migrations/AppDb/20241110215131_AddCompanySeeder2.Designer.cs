@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Fei.Is.Api.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Fei.Is.Api.Data.Migrations.AppDb
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241110215131_AddCompanySeeder2")]
+    partial class AddCompanySeeder2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -535,9 +538,11 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Company", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("City")
                         .IsRequired()
@@ -579,75 +584,75 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.HasData(
                         new
                         {
-                            Id = new Guid("479b6c63-f552-4a6e-b706-62ec96edb896"),
+                            Id = 1,
                             City = "Příbram",
-                            CreatedAt = new DateTime(2024, 11, 10, 22, 49, 2, 50, DateTimeKind.Utc).AddTicks(5185),
+                            CreatedAt = new DateTime(2024, 11, 10, 21, 51, 30, 550, DateTimeKind.Utc).AddTicks(9346),
                             Dic = "CZ25735641",
                             Ic = "25735641",
                             Psc = "26101",
                             Title = "Petunia s.r.o.",
                             Ulice = "Třemošenská 658",
-                            UpdatedAt = new DateTime(2024, 11, 10, 22, 49, 2, 50, DateTimeKind.Utc).AddTicks(5185)
+                            UpdatedAt = new DateTime(2024, 11, 10, 21, 51, 30, 550, DateTimeKind.Utc).AddTicks(9346)
                         },
                         new
                         {
-                            Id = new Guid("7337c6db-43d7-4c10-aeb3-3ef2f853f7d3"),
+                            Id = 2,
                             City = "Stará Huť",
-                            CreatedAt = new DateTime(2024, 11, 10, 22, 49, 2, 50, DateTimeKind.Utc).AddTicks(5188),
+                            CreatedAt = new DateTime(2024, 11, 10, 21, 51, 30, 550, DateTimeKind.Utc).AddTicks(9349),
                             Dic = "CZ696123003",
                             Ic = "71070877",
                             Psc = "26202",
                             Title = "Štamberková Monika",
                             Ulice = "K Vršíčku 91",
-                            UpdatedAt = new DateTime(2024, 11, 10, 22, 49, 2, 50, DateTimeKind.Utc).AddTicks(5188)
+                            UpdatedAt = new DateTime(2024, 11, 10, 21, 51, 30, 550, DateTimeKind.Utc).AddTicks(9350)
                         },
                         new
                         {
-                            Id = new Guid("f51a5725-b267-4c19-9cf0-444bb7c32b6e"),
+                            Id = 3,
                             City = "Dřísy",
-                            CreatedAt = new DateTime(2024, 11, 10, 22, 49, 2, 50, DateTimeKind.Utc).AddTicks(5190),
+                            CreatedAt = new DateTime(2024, 11, 10, 21, 51, 30, 550, DateTimeKind.Utc).AddTicks(9352),
                             Dic = "CZ27469613",
                             Ic = "27469613",
                             Psc = "27714",
                             Title = "Arboeko s.r.o.",
                             Ulice = "Lhota 244",
-                            UpdatedAt = new DateTime(2024, 11, 10, 22, 49, 2, 50, DateTimeKind.Utc).AddTicks(5191)
+                            UpdatedAt = new DateTime(2024, 11, 10, 21, 51, 30, 550, DateTimeKind.Utc).AddTicks(9352)
                         },
                         new
                         {
-                            Id = new Guid("91827187-f264-44b2-b6e3-697a752aa968"),
+                            Id = 4,
                             City = "Olbramkostel",
-                            CreatedAt = new DateTime(2024, 11, 10, 22, 49, 2, 50, DateTimeKind.Utc).AddTicks(5193),
+                            CreatedAt = new DateTime(2024, 11, 10, 21, 51, 30, 550, DateTimeKind.Utc).AddTicks(9354),
                             Dic = "CZ28282711",
                             Ic = "28282711",
                             Psc = "67151",
                             Title = "Moravol s.r.o.",
                             Ulice = "Olbramkostel 41",
-                            UpdatedAt = new DateTime(2024, 11, 10, 22, 49, 2, 50, DateTimeKind.Utc).AddTicks(5193)
+                            UpdatedAt = new DateTime(2024, 11, 10, 21, 51, 30, 550, DateTimeKind.Utc).AddTicks(9354)
                         },
                         new
                         {
-                            Id = new Guid("be97065a-c6e9-4b03-a173-c1c85f9b42db"),
+                            Id = 5,
                             City = "Horní Benešov",
-                            CreatedAt = new DateTime(2024, 11, 10, 22, 49, 2, 50, DateTimeKind.Utc).AddTicks(5199),
+                            CreatedAt = new DateTime(2024, 11, 10, 21, 51, 30, 550, DateTimeKind.Utc).AddTicks(9355),
                             Dic = "CZ29296721",
                             Ic = "29296721",
                             Psc = "79312",
                             Title = "LM Agroton s.r.o.",
                             Ulice = "Mírová 407",
-                            UpdatedAt = new DateTime(2024, 11, 10, 22, 49, 2, 50, DateTimeKind.Utc).AddTicks(5199)
+                            UpdatedAt = new DateTime(2024, 11, 10, 21, 51, 30, 550, DateTimeKind.Utc).AddTicks(9356)
                         },
                         new
                         {
-                            Id = new Guid("3b29e227-bb97-441f-878e-d4b1111b3ebb"),
+                            Id = 6,
                             City = "Třebechovice pod Orebem",
-                            CreatedAt = new DateTime(2024, 11, 10, 22, 49, 2, 50, DateTimeKind.Utc).AddTicks(5201),
+                            CreatedAt = new DateTime(2024, 11, 10, 21, 51, 30, 550, DateTimeKind.Utc).AddTicks(9357),
                             Dic = "CZ6203071741",
                             Ic = "46212152",
                             Psc = "50346",
                             Title = "Jan Zatloukal - Zahradnictví Blešno",
                             Ulice = "Blešno 127",
-                            UpdatedAt = new DateTime(2024, 11, 10, 22, 49, 2, 50, DateTimeKind.Utc).AddTicks(5201)
+                            UpdatedAt = new DateTime(2024, 11, 10, 21, 51, 30, 550, DateTimeKind.Utc).AddTicks(9357)
                         });
                 });
 
@@ -660,8 +665,8 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("DeliveryNoteId")
-                        .HasColumnType("uuid");
+                    b.Property<int>("DeliveryNoteId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("PackSize")
                         .IsRequired()
@@ -703,15 +708,17 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.DeliveryNote", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("CustomerId")
-                        .HasColumnType("uuid");
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("DeliveryDate")
                         .HasColumnType("timestamp with time zone");
@@ -732,8 +739,8 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid>("SupplierId")
-                        .HasColumnType("uuid");
+                    b.Property<int>("SupplierId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Took")
                         .IsRequired()
@@ -771,8 +778,11 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<Guid>("CustomerId")
-                        .HasColumnType("uuid");
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("DueDate")
                         .HasColumnType("timestamp with time zone");
@@ -784,11 +794,14 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.Property<DateTime>("IssueDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("SupplierId")
-                        .HasColumnType("uuid");
+                    b.Property<int>("SupplierId")
+                        .HasColumnType("integer");
 
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("numeric");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -801,9 +814,11 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.InvoiceItem", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -850,11 +865,8 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("CustomerId")
-                        .HasColumnType("uuid");
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("integer");
 
                     b.Property<int>("DeliveryWeek")
                         .HasColumnType("integer");
@@ -869,9 +881,6 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.Property<string>("PaymentMethod")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -1134,11 +1143,8 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("CustomerId")
-                        .HasColumnType("uuid");
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("ReportDate")
                         .HasColumnType("timestamp with time zone");
@@ -1147,11 +1153,8 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid>("SupplierId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<int>("SupplierId")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
