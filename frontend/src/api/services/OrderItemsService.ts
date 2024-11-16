@@ -17,6 +17,9 @@ class OrderItemsService {
   async addItemToOrder(orderId: number, body: AddOrderItemRequest) {
     return await client.POST('/orders/{orderId}/items', { params: { path: { orderId } }, body });
   }
+  async deleteItemFromOrder(orderId: number, itemId: number) {
+    return await client.DELETE('/orders/{orderId}/items/{itemId}', { params: { path: { orderId, itemId } } });
+  }
 }
 
 export default new OrderItemsService();

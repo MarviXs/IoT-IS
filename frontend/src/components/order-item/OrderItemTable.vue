@@ -27,7 +27,7 @@
               {{ t('global.edit') }}
             </q-tooltip>
           </q-btn>
-          <q-btn :icon="mdiTrashCan" color="grey-color" flat round @click.stop="openDeleteDialog(propsActions.row.id)">
+          <q-btn :icon="mdiTrashCan" color="grey-color" flat round @click.stop="openDeleteDialog(propsActions.row.id, propsActions.row.orderId)">
             <q-tooltip content-style="font-size: 11px" :offset="[0, 4]">
               {{ t('global.delete') }}
             </q-tooltip>
@@ -48,6 +48,7 @@
     v-if="itemToDelete"
     v-model="isDeleteDialogOpen"
     :item-id="itemToDelete"
+    :order-id="orderIdForDelete"
     @on-deleted="emit('onChange')"
   />
 </template>
@@ -60,7 +61,7 @@ import { mdiFileSearchOutline, mdiPencil, mdiTrashCan } from '@quasar/extras/mdi
 import { PaginationClient } from '@/models/Pagination';
 import { OrderItemsResponse } from '@/api/services/OrderItemsService';
 //import EditOrderItemDialog from './EditOrderItemDialog.vue';
-//import DeleteOrderItemDialog from './DeleteOrderItemDialog.vue';
+import DeleteOrderItemDialog from './DeleteItemDialog.vue';
 
 const props = defineProps({
   orderItems: {
@@ -128,9 +129,11 @@ function openUpdateDialog(itemId: string) {
 }
 
 const isDeleteDialogOpen = ref(false);
-const itemToDelete = ref<string>();
-function openDeleteDialog(itemId: string) {
+const itemToDelete = ref<number | null>(null);
+const orderIdForDelete = ref<number>(0);
+function openDeleteDialog(itemId: number, orderId: number) {
   itemToDelete.value = itemId;
+  orderIdForDelete.value = orderId;
   isDeleteDialogOpen.value = true;
 }
 </script>
