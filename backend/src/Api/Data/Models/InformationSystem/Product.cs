@@ -5,6 +5,7 @@ public class Product : BaseModel
     public required string PLUCode { get; set; }
     public required string Code { get; set; }
     public required string LatinName { get; set; }
+    public string? Variety { get; set; }
     public string? CzechName { get; set; }
     public string? FlowerLeafDescription { get; set; }
     public string? PotDiameterPack { get; set; }

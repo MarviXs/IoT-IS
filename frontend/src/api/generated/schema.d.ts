@@ -806,24 +806,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/orders/{orderId}/items": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get paginated order items by order ID */
-        get: operations["GetOrderItems"];
-        put?: never;
-        /** Add an item to an order */
-        post: operations["AddItemToOrder"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/orders/{orderId}/items/{itemId}": {
         parameters: {
             query?: never;
@@ -836,6 +818,24 @@ export interface paths {
         post?: never;
         /** Delete an item from an order */
         delete: operations["DeleteItemFromOrder"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orders/{orderId}/container": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get paginated order item containers by order ID */
+        get: operations["GetOrderItemContainer"];
+        put?: never;
+        /** Add a container to an order */
+        post: operations["AddOrderContainer"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -1026,7 +1026,7 @@ export interface components {
             readonly hasNext: boolean;
             items: components["schemas"]["Fei.Is.Api.Features.Jobs.Queries.GetJobsOnDevice.Response"][];
         };
-        "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.OrderItems.Queries.GetOrderItems.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.OrderItemContainers.Queries.GetOrderItemContainer.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
             /** Format: int32 */
             currentPage: number;
             /** Format: int32 */
@@ -1037,7 +1037,7 @@ export interface components {
             totalCount: number;
             readonly hasPrevious: boolean;
             readonly hasNext: boolean;
-            items: components["schemas"]["Fei.Is.Api.Features.OrderItems.Queries.GetOrderItems.Response"][];
+            items: components["schemas"]["Fei.Is.Api.Features.OrderItemContainers.Queries.GetOrderItemContainer.Response"][];
         };
         "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Orders.Queries.GetOrders.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
             /** Format: int32 */
@@ -1441,25 +1441,39 @@ export interface components {
             /** Format: date-time */
             updatedAt?: string | null;
         };
-        "Fei.Is.Api.Features.OrderItems.Commands.AddItemToOrder.Request": {
+        "Fei.Is.Api.Features.OrderItemContainers.Commands.AddOrderContainer.Request": {
             /** Format: int32 */
             orderId: number;
-            /** Format: uuid */
-            productNumber: string;
-            varietyName: string;
+            name: string;
             /** Format: int32 */
             quantity: number;
+            /** Format: double */
+            pricePerContainer: number;
         };
-        "Fei.Is.Api.Features.OrderItems.Queries.GetOrderItems.Response": {
+        "Fei.Is.Api.Features.OrderItemContainers.Queries.GetOrderItemContainer.ProductResponse": {
+            pluCode: string;
+            latinName: string;
+            czechName: string;
+            variety: string;
+            potDiameterPack: string;
+            /** Format: double */
+            pricePerPiecePack: number;
+            /** Format: double */
+            pricePerPiecePackVAT: number;
+        };
+        "Fei.Is.Api.Features.OrderItemContainers.Queries.GetOrderItemContainer.Response": {
             /** Format: int32 */
             id: number;
             /** Format: int32 */
             orderId: number;
-            /** Format: uuid */
-            productNumber: string;
-            varietyName: string;
+            name: string;
             /** Format: int32 */
             quantity: number;
+            /** Format: double */
+            pricePerContainer: number;
+            /** Format: double */
+            totalPrice: number;
+            products: components["schemas"]["Fei.Is.Api.Features.OrderItemContainers.Queries.GetOrderItemContainer.ProductResponse"][];
         };
         "Fei.Is.Api.Features.Orders.Commands.CreateOrder.Request": {
             /** Format: int32 */
@@ -3695,69 +3709,6 @@ export interface operations {
             };
         };
     };
-    GetOrderItems: {
-        parameters: {
-            query?: {
-                SortBy?: string;
-                Descending?: boolean;
-                SearchTerm?: string;
-                PageNumber?: number;
-                PageSize?: number;
-            };
-            header?: never;
-            path: {
-                orderId: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.OrderItems.Queries.GetOrderItems.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"];
-                };
-            };
-        };
-    };
-    AddItemToOrder: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                orderId: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Fei.Is.Api.Features.OrderItems.Commands.AddItemToOrder.Request"];
-            };
-        };
-        responses: {
-            /** @description Created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": number;
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
-                };
-            };
-        };
-    };
     DeleteItemFromOrder: {
         parameters: {
             query?: never;
@@ -3783,6 +3734,69 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    GetOrderItemContainer: {
+        parameters: {
+            query?: {
+                SortBy?: string;
+                Descending?: boolean;
+                SearchTerm?: string;
+                PageNumber?: number;
+                PageSize?: number;
+            };
+            header?: never;
+            path: {
+                orderId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.OrderItemContainers.Queries.GetOrderItemContainer.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"];
+                };
+            };
+        };
+    };
+    AddOrderContainer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orderId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.OrderItemContainers.Commands.AddOrderContainer.Request"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": number;
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
             };
         };
     };

@@ -2,12 +2,17 @@ namespace Fei.Is.Api.Data.Models.InformationSystem;
 
 public class OrderItem
 {
-    public int Id { get; set; }
-    public int OrderId { get; set; }
-    public Guid ProductNumber { get; set; }
-    public string VarietyName { get; set; }
-    public int Quantity { get; set; }
+    public int Id { get; set; } // ID objednávkovej položky
+    public required int OrderId { get; set; } // ID objednávky
+    public required int ContainerId { get; set; } // ID kontajnera
 
-    public Order Order { get; set; }
-    public Product Product { get; set; }
+    // Produkt priamo ako objekt
+    public required Product Product { get; set; } // Objekt Product uložený priamo v OrderItem
+
+    // Atribúty mimo produktu
+    public required int Quantity { get; set; } // Počet kusov daného produktu
+    // Navigačné vlastnosti
+    public required Order Order { get; set; } // Navigácia na objednávku
+
+    public required OrderItemContainer Container { get; set; } // Navigácia na kontajner
 }

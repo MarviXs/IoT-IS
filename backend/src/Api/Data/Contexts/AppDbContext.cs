@@ -58,7 +58,9 @@ public class AppDbContext
         modelBuilder.ApplyConfiguration(new ProductionPlanConfiguration());
         modelBuilder.ApplyConfiguration(new SummaryConfiguration());
         modelBuilder.ApplyConfiguration(new WorkDayDetailConfiguration());
-        modelBuilder.ApplyConfiguration(new WorkReportConfiguration());
+        
+        modelBuilder.ApplyConfiguration(new OrderItemContainerConfiguration());
+
 
         modelBuilder.ApplyDataSeeds();
     }
@@ -92,6 +94,7 @@ public class AppDbContext
     public DbSet<Summary> Summaries { get; set; }
     public DbSet<WorkDayDetail> WorkDayDetails { get; set; }
     public DbSet<WorkReport> WorkReports { get; set; }
+    public DbSet<OrderItemContainer> OrderItemContainers { get; set; }
 
     public override int SaveChanges()
     {
