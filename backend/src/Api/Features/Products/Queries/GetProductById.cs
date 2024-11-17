@@ -2,6 +2,7 @@
 using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models;
+using Fei.Is.Api.Data.Models.InformationSystem;
 using FluentResults;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -46,7 +47,8 @@ public static class GetProductById
     {
         public async Task<Result<Response>> Handle(Query request, CancellationToken cancellationToken)
         {
-            var product = await context.Products.AsNoTracking()
+            var product = await context
+                .Products.AsNoTracking()
                 .Include(p => p.Category)
                 .FirstOrDefaultAsync(product => product.Id == request.Id, cancellationToken);
 
@@ -63,10 +65,12 @@ public static class GetProductById
                 FlowerLeafDescription: product.FlowerLeafDescription,
                 PotDiameterPack: product.PotDiameterPack,
                 PricePerPiecePack: product.PricePerPiecePack,
-                PricePerPiecePackVAT: product.PricePerPiecePackVAT,
                 DiscountedPriceWithoutVAT: product.DiscountedPriceWithoutVAT,
                 RetailPrice: product.RetailPrice,
-                CategoryId: product.Category.Id
+                CategoryId: product.Category.Id,
+                SupplierId: product.Supplier.Id,
+                Variety: product.Variety,
+                VATCategory: product.VATCategory
             );
 
             return Result.Ok(response);
@@ -75,15 +79,17 @@ public static class GetProductById
 
     public record Response(
         string PLUCode,
-        string Code,
+        string? Code,
         string LatinName,
         string? CzechName,
         string? FlowerLeafDescription,
         string? PotDiameterPack,
         decimal? PricePerPiecePack,
-        decimal? PricePerPiecePackVAT,
         decimal? DiscountedPriceWithoutVAT,
         decimal? RetailPrice,
-        Guid CategoryId
+        Guid CategoryId,
+        Guid SupplierId,
+        string? Variety,
+        EVatCategory? VATCategory
     );
 }

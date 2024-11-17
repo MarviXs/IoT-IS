@@ -9,16 +9,16 @@ using FluentResults;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
 
 namespace Fei.Is.Api.Features.Products.Commands;
 
 public static class CreateProductsFromList
 {
-    public record Request(List<ProductRequest> Products, Guid CategoryId);
+    public record Request(List<ProductRequest> Products);
 
     public record ProductRequest(
-        string PLUCode,
-        string Code,
+        string? Code,
         string LatinName,
         string? CzechName,
         string? FlowerLeafDescription,
@@ -26,7 +26,11 @@ public static class CreateProductsFromList
         decimal? pricePerPiecePack,
         decimal? pricePerPiecePackVAT,
         decimal? discountedPriceWithoutVAT,
-        decimal? RetailPrice
+        decimal? RetailPrice,
+        string CategoryName,
+        Guid SupplierId,
+        string Variety,
+        EVatCategory VATCategory
     );
 
     public sealed class Endpoint : ICarterModule
@@ -61,7 +65,8 @@ public static class CreateProductsFromList
 
     public record Command(Request Request, ClaimsPrincipal User) : IRequest<Result<int>>;
 
-    public sealed class Handler(AppDbContext context, IValidator<Command> validator) : IRequestHandler<Command, Result<int>>
+    public sealed class Handler(AppDbContext context, IValidator<Command> validator, PLUCodeService pluCodeService)
+        : IRequestHandler<Command, Result<int>>
     {
         public async Task<Result<int>> Handle(Command message, CancellationToken cancellationToken)
         {
@@ -71,33 +76,54 @@ public static class CreateProductsFromList
                 return Result.Fail(new ValidationError(result));
             }
 
-            var category = await context.Categories.FindAsync([message.Request.CategoryId, cancellationToken], cancellationToken: cancellationToken);
-            if (category is null)
+            var currentSuppliers = await context.Suppliers.AsNoTracking().ToListAsync(cancellationToken);
+
+            if (message.Request.Products.Any(product => currentSuppliers.Any(supplier => product.SupplierId != supplier.Id)))
             {
-                return Result.Fail(new NotFoundError());
+                return Result.Fail(new BadRequestError());
             }
 
             await context.Products.AddRangeAsync(
-                message.Request.Products.Select(
-                    (item) =>
+                message.Request.Products.Select(item =>
+                {
+                    var product = new Product()
                     {
-                        return new Product
-                        {
-                            PLUCode = item.PLUCode,
-                            Code = item.Code,
-                            LatinName = item.LatinName,
-                            CzechName = item.CzechName,
-                            FlowerLeafDescription = item.FlowerLeafDescription,
-                            PotDiameterPack = item.PotDiameterPack,
-                            PricePerPiecePack = item.pricePerPiecePack,
-                            PricePerPiecePackVAT = item.pricePerPiecePackVAT,
-                            DiscountedPriceWithoutVAT = item.discountedPriceWithoutVAT,
-                            RetailPrice = item.RetailPrice,
-                            Category = category
-                        };
+                        PLUCode = pluCodeService.GetPLUCode(),
+                        Code = item.Code,
+                        LatinName = item.LatinName,
+                        CzechName = item.CzechName,
+                        FlowerLeafDescription = item.FlowerLeafDescription,
+                        PotDiameterPack = item.PotDiameterPack,
+                        PricePerPiecePack = item.pricePerPiecePack,
+                        DiscountedPriceWithoutVAT = item.discountedPriceWithoutVAT,
+                        RetailPrice = item.RetailPrice,
+                        Variety = item.Variety,
+                        VATCategory = item.VATCategory,
+                        Supplier = currentSuppliers.First(supplier => supplier.Id == item.SupplierId)
+                    };
+
+                    var category = context.Categories.Where(category => category.CategoryName == item.CategoryName);
+                    if (!category.Any())
+                    {
+                        var entityEntry = context.Categories.Add(
+                            new Category
+                            {
+                                Id = Guid.NewGuid(),
+                                CategoryName = item.CategoryName,
+                                CreatedAt = DateTime.Now,
+                                UpdatedAt = DateTime.Now
+                            }
+                        );
+
+                        product.Category = entityEntry.Entity;
                     }
-                ),
-                cancellationToken
+                    else
+                    {
+                        product.Category = category.First();
+                    }
+
+                    return product;
+                })
             );
 
             int addedRows = await context.SaveChangesAsync(cancellationToken);
@@ -111,7 +137,19 @@ public static class CreateProductsFromList
         public Validator()
         {
             RuleFor(r => r.Request.Products).NotEmpty().WithMessage("Products can't be empty");
-            RuleFor(r => r.Request.CategoryId).NotEmpty().WithMessage("CategoryId is required");
+            RuleForEach(r => r.Request.Products).SetValidator(new ProductValidator());
+        }
+    }
+
+    public sealed class ProductValidator : AbstractValidator<ProductRequest>
+    {
+        public ProductValidator()
+        {
+            RuleFor(r => r.LatinName).NotEmpty().WithMessage("LatinName is required");
+            RuleFor(r => r.CategoryName).NotEmpty().WithMessage("CategoryName is required");
+            RuleFor(r => r.SupplierId).NotEmpty().WithMessage("SupplierId is required");
+            RuleFor(r => r.Variety).NotEmpty().WithMessage("Variety is required");
+            RuleFor(r => r.VATCategory).NotEmpty().IsInEnum().WithMessage("VAT Category has errors");
         }
     }
 }

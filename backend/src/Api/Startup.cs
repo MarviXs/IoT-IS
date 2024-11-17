@@ -4,6 +4,7 @@ using Fei.Is.Api.BackgroundServices;
 using Fei.Is.Api.Common.OpenAPI;
 using Fei.Is.Api.Extensions;
 using Fei.Is.Api.Features.Auth;
+using Fei.Is.Api.Features.Products;
 using Fei.Is.Api.MqttClient;
 using Fei.Is.Api.MqttClient.Publish;
 using Fei.Is.Api.MqttClient.Subscribe;
@@ -63,6 +64,8 @@ public class Startup(IConfiguration configuration)
         services.AddHostedService<StoreDataPointsBatchService>();
         services.AddHostedService<JobTimeOutService>();
 
+        services.AddScoped<PLUCodeService>();
+
         //MQTT Services
         services.AddScoped<JobStatusReceived>();
         services.AddScoped<OnDeviceDisconnected>();
@@ -83,7 +86,7 @@ public class Startup(IConfiguration configuration)
             app.UseSwaggerUI();
             app.UseDeveloperExceptionPage();
         }
-        
+
         app.UseCors("CorsPolicy");
 
         app.UseStatusCodePages();

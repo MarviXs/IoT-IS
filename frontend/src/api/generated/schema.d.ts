@@ -853,6 +853,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/suppliers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get paginated suppliers */
+        get: operations["GetSuppliers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/suppliers/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a supplier by Id */
+        get: operations["GetSupplierById"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -948,6 +982,19 @@ export interface components {
             readonly hasNext: boolean;
             items: components["schemas"]["Fei.Is.Api.Features.Products.Queries.GetProducts.Response"][];
         };
+        "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Products.Queries.GetSuppliers.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+            /** Format: int32 */
+            currentPage: number;
+            /** Format: int32 */
+            totalPages: number;
+            /** Format: int32 */
+            pageSize: number;
+            /** Format: int32 */
+            totalCount: number;
+            readonly hasPrevious: boolean;
+            readonly hasNext: boolean;
+            items: components["schemas"]["Fei.Is.Api.Features.Products.Queries.GetSuppliers.Response"][];
+        };
         "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Recipes.Queries.GetRecipes.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
             /** Format: int32 */
             currentPage: number;
@@ -978,6 +1025,11 @@ export interface components {
         "Fei.Is.Api.Data.Enums.JobStatusEnum": "JOB_QUEUED" | "JOB_IN_PROGRESS" | "JOB_PAUSED" | "JOB_SUCCEEDED" | "JOB_REJECTED" | "JOB_FAILED" | "JOB_TIMED_OUT" | "JOB_CANCELED";
         /** @enum {string} */
         "Fei.Is.Api.Data.Enums.Role": "Admin" | "User";
+        /**
+         * Format: int32
+         * @enum {integer}
+         */
+        "Fei.Is.Api.Data.Models.InformationSystem.EVatCategory": 0 | 1;
         "Fei.Is.Api.Features.AdminUserManagement.Commands.UpdateUserEmail.Request": {
             email: string;
         };
@@ -1305,8 +1357,12 @@ export interface components {
             id: string;
             name: string;
         };
+        "Fei.Is.Api.Features.ProductCategories.Queries.GetSupplierById.Response": {
+            /** Format: uuid */
+            id: string;
+            name: string;
+        };
         "Fei.Is.Api.Features.Products.Commands.CreateProduct.Request": {
-            pluCode: string;
             code: string;
             latinName: string;
             czechName?: string | null;
@@ -1320,12 +1376,14 @@ export interface components {
             discountedPriceWithoutVAT?: number | null;
             /** Format: double */
             retailPrice?: number | null;
+            categoryName: string;
             /** Format: uuid */
-            categoryId: string;
+            supplierId: string;
+            variety: string;
+            vatCategory: components["schemas"]["Fei.Is.Api.Data.Models.InformationSystem.EVatCategory"];
         };
         "Fei.Is.Api.Features.Products.Commands.CreateProductsFromList.ProductRequest": {
-            pluCode: string;
-            code: string;
+            code?: string | null;
             latinName: string;
             czechName?: string | null;
             flowerLeafDescription?: string | null;
@@ -1338,15 +1396,18 @@ export interface components {
             discountedPriceWithoutVAT?: number | null;
             /** Format: double */
             retailPrice?: number | null;
+            categoryName: string;
+            /** Format: uuid */
+            supplierId: string;
+            variety: string;
+            vatCategory: components["schemas"]["Fei.Is.Api.Data.Models.InformationSystem.EVatCategory"];
         };
         "Fei.Is.Api.Features.Products.Commands.CreateProductsFromList.Request": {
             products: components["schemas"]["Fei.Is.Api.Features.Products.Commands.CreateProductsFromList.ProductRequest"][];
-            /** Format: uuid */
-            categoryId: string;
         };
         "Fei.Is.Api.Features.Products.Commands.UpdateProduct.Request": {
             pluCode: string;
-            code: string;
+            code?: string | null;
             latinName: string;
             czechName?: string | null;
             flowerLeafDescription?: string | null;
@@ -1364,7 +1425,7 @@ export interface components {
         };
         "Fei.Is.Api.Features.Products.Queries.GetProductById.Response": {
             pluCode: string;
-            code: string;
+            code?: string | null;
             latinName: string;
             czechName?: string | null;
             flowerLeafDescription?: string | null;
@@ -1372,22 +1433,30 @@ export interface components {
             /** Format: double */
             pricePerPiecePack?: number | null;
             /** Format: double */
-            pricePerPiecePackVAT?: number | null;
-            /** Format: double */
             discountedPriceWithoutVAT?: number | null;
             /** Format: double */
             retailPrice?: number | null;
             /** Format: uuid */
             categoryId: string;
+            /** Format: uuid */
+            supplierId: string;
+            variety?: string | null;
+            vatCategory: components["schemas"]["Fei.Is.Api.Data.Models.InformationSystem.EVatCategory"];
         };
         "Fei.Is.Api.Features.Products.Queries.GetProducts.Response": {
             /** Format: uuid */
             id: string;
-            code: string;
+            code?: string | null;
             pluCode: string;
-            czechName?: string | null;
-            /** Format: double */
-            retailPrice?: number | null;
+            /** Format: uuid */
+            categoryId: string;
+            /** Format: uuid */
+            supplierId: string;
+        };
+        "Fei.Is.Api.Features.Products.Queries.GetSuppliers.Response": {
+            /** Format: uuid */
+            id: string;
+            name: string;
         };
         "Fei.Is.Api.Features.RecipeSteps.Commands.UpdateRecipeSteps.Request": {
             /** Format: uuid */
@@ -3815,6 +3884,61 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GetSuppliers: {
+        parameters: {
+            query?: {
+                SortBy?: string;
+                Descending?: boolean;
+                SearchTerm?: string;
+                PageNumber?: number;
+                PageSize?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Products.Queries.GetSuppliers.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"];
+                };
+            };
+        };
+    };
+    GetSupplierById: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.ProductCategories.Queries.GetSupplierById.Response"];
+                };
             };
             /** @description Not Found */
             404: {

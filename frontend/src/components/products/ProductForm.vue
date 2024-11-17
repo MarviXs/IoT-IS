@@ -82,9 +82,9 @@ import { useI18n } from 'vue-i18n';
 import CategorySelect, { CategorySelectData } from '../categories/CategorySelect.vue';
 
 export interface ProductFormData {
-  pluCode: string;
+  pluCode: string | null | undefined;
   code: string;
-  latinName: string;
+  latinName: string | null | undefined;
   czechName: string | null | undefined;
   flowerLeafDescription: string | null | undefined;
   potDiameterPack: string | null | undefined;
@@ -93,6 +93,7 @@ export interface ProductFormData {
   discountedPriceWithoutVAT: number | null | undefined;
   retailPrice: number | null | undefined;
   category?: CategorySelectData;
+  supplier;
 }
 
 const props = defineProps<{

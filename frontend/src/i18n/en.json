@@ -351,6 +351,9 @@
   "product_category": {
     "label": "Category"
   },
+  "supplier": {
+    "label": "Supplier | Suppliers"
+  },
   "command": {
     "label": "Command | Commands",
     "create_command": "Create command",
