@@ -5,8 +5,8 @@
       <OrderItemForm
         v-model:orderItem="orderItem"
         :orderId="Number(props.orderId)" 
-        @on-submit="addItemToOrder"
-        :loading="addingItem"
+        @on-submit="addContainerToOrder"
+        :loading="addingContainer"
       />
     </template>
   </dialog-common>
@@ -20,14 +20,14 @@ import { useI18n } from 'vue-i18n';
 import DialogCommon from '@/components/core/DialogCommon.vue';
 import OrderItemForm from '@/components/order-item/OrderItemForm.vue';
 import OrderItemsService from '@/api/services/OrderItemsService';
-import type { AddOrderItemRequest } from '@/api/services/OrderItemsService';
+import type { AddOrderContainerRequest } from '@/api/services/OrderItemsService';
 
 // Props pre prijatie orderId
 const props = defineProps<{ orderId: string }>();
 
 // State pre sledovanie viditeľnosti dialogu a načítanie stavu
 const isDialogOpen = ref<boolean>(false);
-const addingItem = ref(false);
+const addingContainer = ref(false);
 
 // Emit eventu, ktorý použijeme na aktualizáciu hlavného zoznamu po pridaní položky
 const emit = defineEmits(['onCreate']);
@@ -37,33 +37,30 @@ const { t } = useI18n();
 
 // Reactive state pre formulár položky objednávky s predvolenými hodnotami
 // Inicializujeme `orderItem` mimo `defineModel`
-const orderItem = ref<AddOrderItemRequest>({
+const orderItem = ref<AddOrderContainerRequest>({
   orderId: Number(props.orderId),
-  productNumber: '',
-  varietyName: '',
+  name: '',
   quantity: 1,
+  pricePerContainer: 0,
 });
 
 
 // Funkcia pre pridanie položky do objednávky
-async function addItemToOrder() {
-  const productNumber = typeof orderItem.value.productNumber === 'object' && orderItem.value.productNumber !== null
-  ? (orderItem.value.productNumber as { id: string }).id
-    : orderItem.value.productNumber;
+async function addContainerToOrder() {
   
-  const addItemRequest: AddOrderItemRequest = {
-    orderId: Number(props.orderId),
-    productNumber: productNumber,  // Nastavíme iba ID
-    varietyName: orderItem.value.varietyName,
+  const addContainerRequest: AddOrderContainerRequest = {
+    orderId: orderItem.value.orderId,
+    name: orderItem.value.name,
     quantity: orderItem.value.quantity,
+    pricePerContainer: orderItem.value.pricePerContainer,
   };
 
   // Nastavenie stavu načítania na true počas API volania
-  addingItem.value = true;
+  addingContainer.value = true;
 
   try {
     // Zavoláme službu na pridanie položky do objednávky
-    const { data, error } = await OrderItemsService.addItemToOrder(addItemRequest.orderId, addItemRequest);
+    const { data, error } = await OrderItemsService.addOrderContainer(addContainerRequest.orderId, addContainerRequest);
 
     if (error) {
       handleError(error, t('order_item.toasts.add_failed'));
@@ -83,7 +80,7 @@ async function addItemToOrder() {
     );
   } finally {
     // Vypneme stav načítania po ukončení API volania
-    addingItem.value = false;
+    addingContainer.value = false;
   }
 }
 

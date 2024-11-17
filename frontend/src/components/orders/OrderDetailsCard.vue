@@ -1,8 +1,36 @@
 <template>
   <q-card class="order-details-card">
-    <q-card-section>
-      <div class="text-h6">{{ t('order.details') }}</div>
-      <div class="text-subtitle2">Order #{{ order.id }}</div>
+    <q-card-section class="header-section">
+      <div>
+        <div class="text-h6">{{ t('order.details') }}</div>
+        <div class="text-subtitle2">Order #{{ order.id }}</div>
+      </div>
+      <div>
+        <q-btn
+          flat
+          round
+          size="md"
+          :icon="mdiPlusBox"
+          color="grey-color"
+          @click="addItemContainer(order.id)"
+        ></q-btn>
+        <q-btn
+          flat
+          round
+          size="md"
+          :icon="mdiPencil"
+          color="grey-color"
+          @click.stop="openUpdateDialog(order.id)"
+        ></q-btn>
+        <q-btn
+          flat
+          round
+          size="md"
+          :icon="mdiTrashCan"
+          color="grey-color"
+          @click.stop="openDeleteDialog(order.id)"
+        ></q-btn>
+      </div>
     </q-card-section>
 
     <q-separator />
@@ -21,7 +49,7 @@
         <span class="value">{{ order.deliveryWeek }}</span>
       </div>
       <div class="order-detail">
-        <span class="label">{{ t('order.payment_method') }}:</span>
+        <span class="label">{{ t('order.payment_method.label') }}:</span>
         <span class="value">{{ order.paymentMethod }}</span>
       </div>
       <div class="order-detail">
@@ -33,18 +61,15 @@
         <span class="value">{{ order.note }}</span>
       </div>
     </q-card-section>
-
-    <q-card-actions align="right">
-      <q-btn flat color="primary" @click="$emit('edit')" label="Edit" />
-    </q-card-actions>
   </q-card>
 </template>
 
 <script setup lang="ts">
 import { defineProps, defineEmits } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { mdiPlus, mdiMinus, mdiTrashCan, mdiPencil, mdiPlusBox } from '@quasar/extras/mdi-v7';
 
-// Definujeme typ pre objekt objednávky
+
 interface Order {
   id: number;
   customerName: string;
@@ -55,17 +80,15 @@ interface Order {
   note: string;
 }
 
-// Definujeme vlastnosti (props) komponentu
 const props = defineProps<{
   order: Order;
 }>();
 
-// Definujeme emisie udalostí komponentu
-const emit = defineEmits(['edit']);
+
+const emit = defineEmits(['edit', 'delete', 'addItemContainer']);
 
 const { t } = useI18n();
 
-// Funkcia na formátovanie dátumu
 function formatDate(dateString: string): string {
   if (!dateString) return '';
   const date = new Date(dateString);
@@ -75,28 +98,69 @@ function formatDate(dateString: string): string {
     day: 'numeric',
   });
 }
+function openUpdateDialog(orderId: number): void {
+  emit('edit', orderId);
+}
+
+function addItemContainer(orderId: number): void {
+  emit('addItemContainer', orderId);
+
+}
+
+function openDeleteDialog(orderId: number): void {
+  emit('delete', orderId);
+}
+
 </script>
 
 <style lang="scss" scoped>
 .order-details-card {
   width: 100%;
   margin: 20px auto;
+  border: 1px solid #ddd;
+  border-radius: 8px;
   background-color: #ffffff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background-color: #f5f5f5;
+  border-bottom: 1px solid #ddd;
+}
+
+.text-h6 {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #333;
+}
+
+.text-subtitle2 {
+  font-size: 0.9em;
+  color: #777;
 }
 
 .order-detail {
   display: flex;
   justify-content: space-between;
-  padding: 8px 0;
+  padding: 8px 16px;
+  border-bottom: 1px solid #eee;
 }
 
-.order-detail .label {
+.order-detail:last-child {
+  border-bottom: none;
+}
+
+.label {
   font-weight: 600;
-  color: #333;
+  color: #444;
 }
 
-.order-detail .value {
-  color: #555;
+.value {
+  font-weight: 400;
+  color: #666;
 }
 </style>

@@ -115,11 +115,11 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/orders/AllOrdersPage.vue'),
       },
       {
-        path: '/orders/:id', // Dynamický parameter pre ID objednávky
-        component: () => import('pages/orders/OrderDetailsPage.vue'), // Detailná stránka objednávky
-        name: 'OrderDetails', // Názov trasy, ktorý použijeme pre navigáciu
-  },
-    ],
+        path: '/orders/:id', 
+        component: () => import('pages/orders/OrderDetailsPage.vue'), 
+        name: 'OrderDetails', 
+      }
+    ]
   },
   {
     path: '/login',

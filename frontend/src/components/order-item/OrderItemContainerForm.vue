@@ -1,18 +1,11 @@
 <template>
-  <q-form @submit="onSubmit" ref="itemForm">
+  <q-form @submit="onSubmit" ref="itemContainerForm">
     <q-card-section class="q-pt-none column q-gutter-md">
-      <q-select
-        v-model="props.orderItem.productNumber"
-        :options="products"
-        option-value="id"        
-        option-label="czechName"  
-        :label="t('order_item.product_number')"
-        :rules="productNumberRules"
-      />
+      
       <q-input
-        v-model="props.orderItem.varietyName"
-        :label="t('order_item.variety_name')"
-        :rules="varietyNameRules"
+        v-model="props.orderItem.name"
+        :label="t('global.name')"
+        :rules="nameRules"
       />
       <q-input
         v-model="props.orderItem.quantity"
@@ -40,35 +33,16 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import ProductService from '@/api/services/ProductService';
 
 export interface OrderItemFormData {
   orderId: number;
-  productNumber: string;
-  varietyName: string;
-  quantity: number;
+  name: string;
+  quantity: number | 0;
+  pricePerContainer: number | 0;
+  total: number |0;
 }
 
-interface Product {
-  id: string;
-  czechName?: string | null;
-}
 
-const products = ref<Product[]>([]);
-
-onMounted(async () => {
-  try {
-    const response = await ProductService.getProducts({});
-    if (response.data) {
-      products.value = response.data.items.map(item => ({
-        id: item.id,
-        czechName: item.czechName,
-      }));
-    }
-  } catch (error) {
-    console.error("Chyba pri načítaní produktov:", error);
-  }
-});
 
 // Prijímame len `orderId` ako prop, ak sa má položka automaticky priradiť k určitej objednávke
 const props = defineProps<{
@@ -85,9 +59,8 @@ watch(() => props.orderId, (newValue) => {
 });
 
 // Validation rules
-const productNumberRules = [(val: string) => !!val || t('global.rules.required')];
-const varietyNameRules = [(val: string) => !!val || t('global.rules.required')];
-const quantityRules = [(val: number) => (val && val > 0) || t('global.rules.required')];
+const nameRules = [(val: string) => !!val || t('global.rules.required')];
+const quantityRules = [(val: number) => (val && val >= 0) || t('global.rules.required')];
 
 const itemForm = ref();
 

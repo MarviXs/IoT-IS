@@ -5,82 +5,56 @@
       { label: 'Order #' + orderId, to: `/orders/${orderId}` },
     ]"
   >
-    <template #actions>
-        <q-btn
-        class="shadow col-grow col-lg-auto"
-        color="primary"
-        unelevated
-        no-caps
-        size="15px"
-        :label="t('order_item.add_item')"
-        :icon="mdiPlus"
-        @click="isAddDialogOpen = true"
-      />
-    </template>
-  
-    <template #default>
+  <template #default>
       <OrderDetailsCard 
         v-if="order" 
         :order="order" 
-        @edit="isUpdateDialogOpen = true" />
+        @edit="isUpdateDialogOpen = true"
+        />
     <div>
       <OrderItemTable 
-        :orderItems="orderItems" 
-        :loading="loading" 
-        @onRequest="handleRequest" />
+      v-model:pagination="pagination"
+      :orders="ordersPaginated || []"
+      :containers="ordersPaginated || []"
+      :loading="isLoadingContainers"
+      class="shadow"
+      @on-change="getOrderItemContainers(pagination)"
+       />
     </div>
-  </template>
-
-</PageLayout>
-
-  <AddItemToOrderDialog v-model="isAddDialogOpen" :orderId="orderId.toString()" @onCreate="getOrderItems" />
-  <EditOrderDialog v-model="isUpdateDialogOpen" :order-id="orderId" @on-update="getOrder" />
+    </template>
+  </PageLayout>
 </template>
 
 <script setup lang="ts">
+import OrderItemTable from '@/components/order-item/OrderItemTable.vue';
 import { useRoute } from 'vue-router';
 import {  ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { mdiPlus } from '@quasar/extras/mdi-v7';
 import PageLayout from '@/layouts/PageLayout.vue';
 import OrderDetailsCard from '@/components/orders/OrderDetailsCard.vue';
-import OrderItemTable from '@/components/order-item/OrderItemTable.vue';
-import OrderItemsService from '@/api/services/OrderItemsService.ts';
+import { PaginationClient, PaginationTable } from '@/models/Pagination';
+
+import OrderItemsService, { OrderItemContainersQueryParams } from '@/api/services/OrderItemsService.ts';
 import OrderService from '@/api/services/OrdersService';
 import AddItemToOrderDialog from '@/components/order-item/AddItemToOrderDialog.vue';
-interface OrderItem {
-  id: number;
-  orderId: number;
-  productNumber: string;
-  varietyName: string;
-  quantity: number;
-}
-
-interface PaginatedOrderItems {
-  currentPage: number;
-  totalPages: number;
-  pageSize: number;
-  totalCount: number;
-  readonly hasPrevious: boolean;
-  readonly hasNext: boolean;
-  items: Array<OrderItem>;
-}
-
-const orderItems = ref<PaginatedOrderItems>({
-  currentPage: 0,
-  totalPages: 0,
-  pageSize: 0,
-  totalCount: 0,
-  hasPrevious: false,
-  hasNext: false,
-  items: []
-});
-const loading = ref(true);
-import { handleError } from '@/utils/error-handler';
+import { is } from 'quasar';
 
 const { t } = useI18n();
 const route = useRoute();
 const isAddDialogOpen = ref(false);
+const order = ref<Order | null>(null);
+const isUpdateDialogOpen = ref(false);
+const isLoadingContainers = ref(false);
+const ordersPaginated = ref<any>([]);
+
+const pagination = ref<PaginationClient>({
+  sortBy: 'name',
+  descending: false,
+  page: 1,
+  rowsPerPage: 10,
+  rowsNumber: 0,
+});
 const orderId = Number(route.params.id);
 interface Order {
   id: number;
@@ -92,8 +66,36 @@ interface Order {
   note: string;
 }
 
-const order = ref<Order | null>(null);
-const isUpdateDialogOpen = ref(false);
+async function getOrderItemContainers(paginationTable: PaginationTable) {
+  try {
+    const paginationQuery: OrderItemContainersQueryParams = {
+      SortBy: paginationTable.sortBy,
+      Descending: paginationTable.descending,
+      PageNumber: paginationTable.page,
+      PageSize: paginationTable.rowsPerPage,
+    };
+    isLoadingContainers.value = true;
+    const { data, error } = await OrderItemsService.getOrderItemContainers(orderId, paginationQuery);
+    isLoadingContainers.value = false;
+
+    if (error) {
+      console.error('Error loading containers:', error);
+      ordersPaginated.value = [];
+      return;
+    }
+    ordersPaginated.value = data.items.map(item => ({
+      ...item,
+      products: item.products || [], // Zabezpečíme, že `products` vždy existuje ako pole
+    }));
+  } catch (e) {
+    console.error('Unexpected error:', e);
+    isLoadingContainers.value = false;
+    ordersPaginated.value = [];
+  }
+}
+
+
+
 
 // Načítanie údajov o objednávke
 async function getOrder() {
@@ -102,29 +104,10 @@ async function getOrder() {
     handleError(error, t('order.toasts.loading_failed'));
     return;
   }
+  console.log('Loaded order:', data);
   order.value = data;
   
 }
-async function getOrderItems() {
-  loading.value = true;
-  const queryParams = {
-    SortBy: 'VarietyName',
-    Descending: false,
-    PageNumber: 1,
-    PageSize: 10,
-  };
-
-  const { data, error } = await OrderItemsService.getOrderItems(orderId, queryParams);
-  loading.value = false;
-
-  if (error) {
-    console.error('Error fetching order items:', error);
-    return;
-  }
-
-  orderItems.value = data;
-}
-
 // Funkcia na spracovanie požiadavky
 function handleRequest() {
   // Implementácia spracovania požiadavky
@@ -132,10 +115,22 @@ function handleRequest() {
 }
 
 // Spustenie načítania položiek objednávky
-getOrderItems();
 getOrder();
+getOrderItemContainers(pagination.value);
+
+function handleError(error: any, message: string) {
+  console.error(message, error);
+  
+}
 </script>
 
-<style lang="scss" scoped>
-/* Môžete pridať vlastné štýly pre stránku objednávok */
+<style scoped>
+.order-details-page {
+  padding: 20px;
+}
+
+h1 {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
 </style>

@@ -1,152 +1,191 @@
 <template>
-  <!-- Obal pre horizontálne posúvanie -->
-  <div class="scroll-container">
+  <div class="order-item-table">
     <q-table
-      v-model:pagination="pagination"
-      :rows="orderItemsFiltered"
-      :columns="columns"
-      :loading="props.loading"
+      :rows="containers"
+      :columns="parentColumns"
+      row-key="id"
       flat
-      :rows-per-page-options="[10, 20, 50]"
-      :no-data-label="t('table.no_data_label')"
-      :loading-label="t('table.loading_label')"
-      :rows-per-page-label="t('table.rows_per_page_label')"
-      binary-state-sort
-      @request="emit('onRequest', $event)"
+      dense
+      separator="horizontal"
     >
-      <template #no-data="{ message }">
-        <div class="full-width column flex-center q-pa-lg nothing-found-text">
-          <q-icon :name="mdiFileSearchOutline" class="q-mb-md" size="50px"></q-icon>
-          {{ message }}
-        </div>
-      </template>
-      <template #body-cell-actions="propsActions">
-        <q-td auto-width :props="propsActions">
-          <q-btn :icon="mdiPencil" color="grey-color" flat round @click.stop="openUpdateDialog(propsActions.row.id)">
-            <q-tooltip content-style="font-size: 11px" :offset="[0, 4]">
-              {{ t('global.edit') }}
-            </q-tooltip>
-          </q-btn>
-          <q-btn :icon="mdiTrashCan" color="grey-color" flat round @click.stop="openDeleteDialog(propsActions.row.id, propsActions.row.orderId)">
-            <q-tooltip content-style="font-size: 11px" :offset="[0, 4]">
-              {{ t('global.delete') }}
-            </q-tooltip>
-          </q-btn>
-        </q-td>
+      <template #body="props">
+        <q-tr :props="props" class="parent-row">
+          <q-td :props="props" key="id">{{ props.row.id }}</q-td>
+          <q-td :props="props" key="name">{{ props.row.name }}</q-td>
+          <q-td :props="props" key="quantity">{{ props.row.quantity }}</q-td>
+          <q-td :props="props" key="actions" class="action-column">
+            <div class="product-quantity-actions">
+              <q-btn
+                flat
+                dense
+                round
+                size="sm"
+                :icon="minusIcon"
+                @click="decreaseQuantity(props.row.id)"
+              />
+              <q-btn
+                flat
+                dense
+                round
+                size="sm"
+                :icon="plusIcon"
+                @click="increaseQuantity(props.row.id)"
+              />
+            </div>
+          </q-td>
+          <q-td :props="props" key="oneContainer">{{ calculateoneContainer(props.row) }}</q-td>
+          <q-td :props="props" key="total">{{ calculateTotal(props.row) }}</q-td>
+          <q-td class="final-actions">
+            <div class="product-quantity-actions">
+            <q-btn
+              flat
+              round
+              size="sm"
+              :icon="mdiPlusBox"
+              color="grey-color"
+              @click="addItem(props.row.id)"
+            >
+              <q-tooltip>{{ $t('order_item.add_item') }}</q-tooltip>
+            </q-btn>
+            <q-btn
+              flat
+              round
+              size="sm"
+              :icon="mdiPencil"
+              color="grey-color"
+              @click.stop="openUpdateDialog(props.row.id)"
+            >
+              <q-tooltip>{{ $t('global.edit') }}</q-tooltip>
+            </q-btn>
+            <q-btn
+              flat
+              round
+              size="sm"
+              :icon="mdiTrashCan"
+              color="grey-color"
+              @click.stop="openDeleteDialog(props.row.id)"
+            >
+              <q-tooltip>{{ $t('global.delete') }}</q-tooltip>
+            </q-btn>
+            </div>
+          </q-td>
+        </q-tr>
+
+        <q-tr class="nested-row">
+          <q-td :colspan="parentColumns.length" class="nested-table-cell">
+            <q-table
+              :rows="props.row.products"
+              :columns="nestedColumns"
+              flat
+              dense
+              separator="horizontal"
+              row-key="PLU"
+              no-data-label="{{ $t('table.no_data_label') }}"
+              hide-bottom
+              class="nested-table"
+            >
+            </q-table>
+          </q-td>
+        </q-tr>
       </template>
     </q-table>
   </div>
-  
-  <!-- Dialogy pre úpravu a vymazanie položky -->
-  <EditOrderItemDialog
-    v-if="itemToUpdate"
-    v-model="isUpdateDialogOpen"
-    :item-id="itemToUpdate"
-    @on-update="emit('onChange')"
-  />
-  <DeleteOrderItemDialog
-    v-if="itemToDelete"
-    v-model="isDeleteDialogOpen"
-    :item-id="itemToDelete"
-    :order-id="orderIdForDelete"
-    @on-deleted="emit('onChange')"
-  />
 </template>
 
-<script setup lang="ts">
-import { QTableProps } from 'quasar';
-import { PropType, computed, ref } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { mdiFileSearchOutline, mdiPencil, mdiTrashCan } from '@quasar/extras/mdi-v7';
-import { PaginationClient } from '@/models/Pagination';
-import { OrderItemsResponse } from '@/api/services/OrderItemsService';
-//import EditOrderItemDialog from './EditOrderItemDialog.vue';
-import DeleteOrderItemDialog from './DeleteItemDialog.vue';
+<script>
+import { mdiPlus, mdiMinus, mdiTrashCan, mdiPencil, mdiPlusBox } from '@quasar/extras/mdi-v7';
 
-const props = defineProps({
-  orderItems: {
-    type: Object as PropType<OrderItemsResponse>, // Predpokladáme, že máte OrderItemsResponse definovaný vo vašich službách
-    required: false,
-    default: null,
+export default {
+  name: "OrderItemTable",
+  props: {
+    containers: {
+      type: Array,
+      required: true,
+    },
   },
-  loading: {
-    type: Boolean,
-    required: true,
+  data() {
+    return {
+      plusIcon: mdiPlus,
+      minusIcon: mdiMinus,
+      mdiTrashCan: mdiTrashCan,
+      mdiPencil: mdiPencil,
+      mdiPlusBox: mdiPlusBox,
+      parentColumns: [
+        { name: "id", label: this.$t('order_item.id'), field: "id", align: "left" },
+        { name: "name", label: this.$t('global.name'), field: "name", align: "left" },
+        { name: "quantity", label: this.$t('order_item.quantity'), field: "quantity", align: "center" },
+        { name: "actions", label: "", align: "center" },
+        { name: "oneContainer", label: this.$t('order_item.oneContainer'), align: "right" },
+        { name: "total", label: this.$t('order_item.total'), align: "right" },
+        { name: "finalActions", label: this.$t('global.actions'), align: "center" },
+      ],
+      nestedColumns: [
+        { name: "pluCode", label: this.$t('product.plu_code'), field: "pluCode", align: "left" },
+        { name: "latinName", label: this.$t('product.latin_name'), field: "latinName", align: "left" },
+        { name: "czechName", label: this.$t('product.czech_name'), field: "czechName", align: "left" },
+        { name: "variety", label: this.$t('product.variety'), field: "variety", align: "left" },
+        { name: "potDiameterPack", label: this.$t('product.pot_diameter_pack'), field: "potDiameterPack", align: "left" },
+        { name: "quantity", label: this.$t('order_item.quantity'), field: "quantity", align: "right" },
+        { name: "pricePerPiecePack", label: this.$t('product.price_per_piece_pack'), field: "pricePerPiecePack", align: "right" },
+        { name: "pricePerPiecePackVAT", label: this.$t('product.price_per_piece_pack_vat'), field: "pricePerPiecePackVAT", align: "right" },
+],
+    };
   },
-});
-
-const pagination = defineModel<PaginationClient>('pagination');
-
-const orderItemsFiltered = computed(() => props.orderItems?.items ?? []);
-
-const emit = defineEmits(['onChange', 'onRequest']);
-const { t } = useI18n();
-
-const columns = computed<QTableProps['columns']>(() => [
-  {
-    name: 'id',
-    label: t('order_item.id'),
-    field: 'id',
-    align: 'left',
-    sortable: true,
+  methods: {
+    increaseQuantity(containerId) {
+      const container = this.containers.find((c) => c.id === containerId);
+      if (container) container.quantity += 1;
+    },
+    decreaseQuantity(containerId) {
+      const container = this.containers.find((c) => c.id === containerId);
+      if (container && container.quantity > 0) container.quantity -= 1;
+    },
+    addItem(containerId) {
+      alert(this.$t('order_item.toasts.add_success'));
+    },
+    openUpdateDialog(containerId) {
+      alert(this.$t('global.edit'));
+    },
+    openDeleteDialog(containerId) {
+      alert(this.$t('order_item.toasts.delete_success'));
+    },
+    calculateoneContainer(container) {
+      if (!container.products.length) return "0.00";
+      const total = container.products.reduce((sum, product) => sum + parseFloat(product.cenaSDPH || 0), 0);
+      return (total / container.products.length).toFixed(2);
+    },
+    calculateTotal(container) {
+      if (!container.products.length) return "0.00";
+      return (
+        container.quantity *
+        container.products.reduce((sum, product) => sum + parseFloat(product.cenaSDPH || 0) * product.pocet, 0)
+      ).toFixed(2);
+    },
   },
-  {
-    name: 'productNumber',
-    label: t('order_item.product_number'),
-    field: 'productNumber',
-    align: 'left',
-    sortable: true,
-  },
-  {
-    name: 'varietyName',
-    label: t('order_item.variety_name'),
-    field: 'varietyName',
-    align: 'left',
-    sortable: true,
-  },
-  {
-    name: 'quantity',
-    label: t('order_item.quantity'),
-    field: 'quantity',
-    align: 'right',
-    sortable: true,
-  },
-  {
-    name: 'actions',
-    label: '',
-    field: '',
-    align: 'center',
-    sortable: false,
-  },
-]);
-
-// Premenné pre dialógy na úpravu a vymazanie položky
-const isUpdateDialogOpen = ref(false);
-const itemToUpdate = ref<string>();
-function openUpdateDialog(itemId: string) {
-  itemToUpdate.value = itemId;
-  isUpdateDialogOpen.value = true;
-}
-
-const isDeleteDialogOpen = ref(false);
-const itemToDelete = ref<number | null>(null);
-const orderIdForDelete = ref<number>(0);
-function openDeleteDialog(itemId: number, orderId: number) {
-  itemToDelete.value = itemId;
-  orderIdForDelete.value = orderId;
-  isDeleteDialogOpen.value = true;
-}
+};
 </script>
 
 <style scoped>
-.scroll-container {
-  overflow-x: auto;
-  white-space: nowrap;
-  width: 100%;
+.action-column {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
 }
 
-.q-table__container {
-  width: 100%;
-  display: inline-block;
+.product-quantity-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.final-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.q-btn {
+  font-size: 16px;
 }
 </style>
