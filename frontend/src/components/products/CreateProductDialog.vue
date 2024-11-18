@@ -33,6 +33,8 @@ const product = ref<ProductFormData>({
   discountedPriceWithoutVAT: undefined,
   retailPrice: undefined,
   category: undefined,
+  supplier: undefined,
+  variety: undefined,
 });
 const productForm = ref();
 

@@ -49,7 +49,7 @@ async function onScroll({ to, ref }: { to: number; ref: QSelect | null }) {
   if (isLoading.value || nextPage.value > lastPage.value || lastIndex != to) return;
 
   const paginationQuery: SuppliersListQueryParams = {
-    SortBy: 'CategoryName',
+    SortBy: 'Name',
     Descending: false,
     SearchTerm: filter.value,
     PageNumber: nextPage.value,

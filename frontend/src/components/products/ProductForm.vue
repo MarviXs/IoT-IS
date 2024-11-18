@@ -8,6 +8,7 @@
         :label="t('product.plu_code')"
         clearable
         :rules="pluCodeRules"
+        :hint="t('product.plu_code_hint')"
       />
       <q-input
         v-model="product.latinName"
@@ -59,7 +60,9 @@
         type="number"
         clearable
       />
+      <q-input v-model="product.variety" class="col-12" :label="t('product.variety')" type="text" clearable />
       <CategorySelect v-model="product.category" />
+      <SuppliersSelect v-model="product.supplier" />
     </q-card-section>
     <q-card-actions align="right" class="text-primary">
       <q-btn v-close-popup flat :label="t('global.cancel')" no-caps />
@@ -80,20 +83,22 @@
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import CategorySelect, { CategorySelectData } from '../categories/CategorySelect.vue';
+import SuppliersSelect, { SupplierSelectData } from '../suppliers/SuppliersSelect.vue';
 
 export interface ProductFormData {
-  pluCode: string | null | undefined;
-  code: string;
-  latinName: string | null | undefined;
-  czechName: string | null | undefined;
-  flowerLeafDescription: string | null | undefined;
-  potDiameterPack: string | null | undefined;
-  pricePerPiecePack: number | null | undefined;
-  pricePerPiecePackVAT: number | null | undefined;
-  discountedPriceWithoutVAT: number | null | undefined;
-  retailPrice: number | null | undefined;
-  category?: CategorySelectData;
-  supplier;
+  pluCode: string | undefined;
+  code: string | undefined;
+  latinName: string | undefined;
+  czechName: string | undefined;
+  flowerLeafDescription: string | undefined;
+  potDiameterPack: string | undefined;
+  pricePerPiecePack: number | undefined;
+  pricePerPiecePackVAT: number | undefined;
+  discountedPriceWithoutVAT: number | undefined;
+  retailPrice: number | undefined;
+  variety: string | undefined;
+  category: CategorySelectData | undefined;
+  supplier: SupplierSelectData | undefined;
 }
 
 const props = defineProps<{
@@ -104,7 +109,7 @@ const emit = defineEmits(['onSubmit']);
 
 const { t } = useI18n();
 
-const product = defineModel<ProductFormData>({ default: () => ({ pluCode: '', code: '' }) });
+const product = defineModel<ProductFormData>({ default: () => ({ code: '', variety: '' }) });
 
 const productForm = ref();
 
