@@ -17,7 +17,7 @@ namespace Fei.Is.Api.Features.VATCategory.Queries;
 
 public static class GetVATCategories
 {
-    public class QueryParameters : SearchParameters { }
+    public class QueryParameters { }
 
     public sealed class Endpoint : ICarterModule
     {

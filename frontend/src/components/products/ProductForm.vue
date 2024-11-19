@@ -63,6 +63,7 @@
       <q-input v-model="product.variety" class="col-12" :label="t('product.variety')" type="text" clearable />
       <CategorySelect v-model="product.category" />
       <SuppliersSelect v-model="product.supplier" />
+      <VATCategoriesSelect v-model="product.vatCategory" />
     </q-card-section>
     <q-card-actions align="right" class="text-primary">
       <q-btn v-close-popup flat :label="t('global.cancel')" no-caps />
@@ -84,6 +85,7 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import CategorySelect, { CategorySelectData } from '../categories/CategorySelect.vue';
 import SuppliersSelect, { SupplierSelectData } from '../suppliers/SuppliersSelect.vue';
+import VATCategoriesSelect, { VATCategorySelectData } from '../vatCategories/VATCategoriesSelect.vue';
 
 export interface ProductFormData {
   pluCode: string | undefined;
@@ -99,6 +101,7 @@ export interface ProductFormData {
   variety: string | undefined;
   category: CategorySelectData | undefined;
   supplier: SupplierSelectData | undefined;
+  vatCategory: VATCategorySelectData | undefined;
 }
 
 const props = defineProps<{

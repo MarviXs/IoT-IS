@@ -35,6 +35,7 @@ const product = ref<ProductFormData>({
   category: undefined,
   supplier: undefined,
   variety: undefined,
+  vatCategory: undefined,
 });
 const productForm = ref();
 
@@ -55,7 +56,7 @@ async function createProduct() {
     retailPrice: product.value.retailPrice,
     categoryId: product.value.category!.id,
     supplierId: product.value.supplier!.id,
-    vatCategory: 1,
+    vatCategory: product.value.vatCategory?.id as 0 | 1,
   };
 
   creatingProduct.value = true;
@@ -73,5 +74,3 @@ async function createProduct() {
   toast.success(t('device.toasts.create_success'));
 }
 </script>
-
-<style lang="scss" scoped></style>

@@ -3073,13 +3073,7 @@ export interface operations {
     };
     GetVATCategories: {
         parameters: {
-            query?: {
-                SortBy?: string;
-                Descending?: boolean;
-                SearchTerm?: string;
-                PageNumber?: number;
-                PageSize?: number;
-            };
+            query?: never;
             header?: never;
             path?: never;
             cookie?: never;
