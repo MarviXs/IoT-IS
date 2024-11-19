@@ -22,9 +22,9 @@ const emit = defineEmits(['onCreate']);
 const { t } = useI18n();
 
 const product = ref<ProductFormData>({
-  pluCode: '',
-  code: '',
-  latinName: '',
+  pluCode: undefined,
+  code: undefined,
+  latinName: undefined,
   czechName: undefined,
   flowerLeafDescription: undefined,
   potDiameterPack: undefined,
@@ -43,8 +43,9 @@ const creatingProduct = ref(false);
 async function createProduct() {
   const createRequest: CreateProductParams = {
     pluCode: product.value.pluCode,
-    code: product.value.code,
-    latinName: product.value.latinName,
+    code: product.value.code!,
+    variety: product.value.variety!,
+    latinName: product.value.latinName!,
     czechName: product.value.czechName,
     flowerLeafDescription: product.value.flowerLeafDescription,
     potDiameterPack: product.value.potDiameterPack,
@@ -53,6 +54,8 @@ async function createProduct() {
     discountedPriceWithoutVAT: product.value.discountedPriceWithoutVAT,
     retailPrice: product.value.retailPrice,
     categoryId: product.value.category!.id,
+    supplierId: product.value.supplier!.id,
+    vatCategory: 1,
   };
 
   creatingProduct.value = true;

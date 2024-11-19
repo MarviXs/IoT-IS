@@ -549,6 +549,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/vat-category": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get VAT categories */
+        get: operations["GetVATCategories"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/devices/{deviceId}/jobs/active": {
         parameters: {
             query?: never;
@@ -1364,6 +1381,7 @@ export interface components {
         };
         "Fei.Is.Api.Features.Products.Commands.CreateProduct.Request": {
             code: string;
+            pluCode?: string | null;
             latinName: string;
             czechName?: string | null;
             flowerLeafDescription?: string | null;
@@ -1376,7 +1394,8 @@ export interface components {
             discountedPriceWithoutVAT?: number | null;
             /** Format: double */
             retailPrice?: number | null;
-            categoryName: string;
+            /** Format: uuid */
+            categoryId: string;
             /** Format: uuid */
             supplierId: string;
             variety: string;
@@ -1570,6 +1589,13 @@ export interface components {
             /** Format: date-time */
             registrationDate: string;
             roles: string[];
+        };
+        "Fei.Is.Api.Features.VATCategory.Queries.GetVATCategories.Response": {
+            /** Format: int32 */
+            id: number;
+            name: string;
+            /** Format: double */
+            amount: number;
         };
         "Microsoft.AspNetCore.Http.HttpValidationProblemDetails": {
             type?: string | null;
@@ -3041,6 +3067,32 @@ export interface operations {
                 };
                 content: {
                     "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+        };
+    };
+    GetVATCategories: {
+        parameters: {
+            query?: {
+                SortBy?: string;
+                Descending?: boolean;
+                SearchTerm?: string;
+                PageNumber?: number;
+                PageSize?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.VATCategory.Queries.GetVATCategories.Response"][];
                 };
             };
         };
