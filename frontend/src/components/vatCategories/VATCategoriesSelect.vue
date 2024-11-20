@@ -26,7 +26,7 @@ export interface VATCategorySelectData {
 
 const { t } = useI18n();
 
-const selected = defineModel<VATCategorySelectData>({ required: false });
+const selected = defineModel<VATCategorySelectData | null>({ required: false });
 
 const items = ref<VATCategoryResponse>([]);
 

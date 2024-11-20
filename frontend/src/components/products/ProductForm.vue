@@ -39,13 +39,14 @@
         type="number"
         clearable
       />
-      <q-input
+      <!-- TODO vyratavat auto a needitovatelne -->
+      <!-- <q-input
         v-model="product.pricePerPiecePackVAT"
         class="col-12"
         :label="t('product.price_per_piece_pack_vat')"
         type="number"
         clearable
-      />
+      /> -->
       <q-input
         v-model="product.discountedPriceWithoutVAT"
         class="col-12"
@@ -88,20 +89,19 @@ import SuppliersSelect, { SupplierSelectData } from '../suppliers/SuppliersSelec
 import VATCategoriesSelect, { VATCategorySelectData } from '../vatCategories/VATCategoriesSelect.vue';
 
 export interface ProductFormData {
-  pluCode: string | undefined;
-  code: string | undefined;
-  latinName: string | undefined;
-  czechName: string | undefined;
-  flowerLeafDescription: string | undefined;
-  potDiameterPack: string | undefined;
-  pricePerPiecePack: number | undefined;
-  pricePerPiecePackVAT: number | undefined;
-  discountedPriceWithoutVAT: number | undefined;
-  retailPrice: number | undefined;
-  variety: string | undefined;
-  category: CategorySelectData | undefined;
-  supplier: SupplierSelectData | undefined;
-  vatCategory: VATCategorySelectData | undefined;
+  pluCode: string | null | undefined;
+  code: string | null | undefined;
+  latinName: string | null | undefined;
+  czechName: string | null | undefined;
+  flowerLeafDescription: string | null | undefined;
+  potDiameterPack: string | null | undefined;
+  pricePerPiecePack: number | null | undefined;
+  discountedPriceWithoutVAT: number | null | undefined;
+  retailPrice: number | null | undefined;
+  variety: string | null | undefined;
+  category: CategorySelectData | null | undefined;
+  supplier: SupplierSelectData | null | undefined;
+  vatCategory: VATCategorySelectData | null | undefined;
 }
 
 const props = defineProps<{

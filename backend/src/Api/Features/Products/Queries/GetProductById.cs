@@ -67,8 +67,8 @@ public static class GetProductById
                 PricePerPiecePack: product.PricePerPiecePack,
                 DiscountedPriceWithoutVAT: product.DiscountedPriceWithoutVAT,
                 RetailPrice: product.RetailPrice,
-                CategoryId: product.Category.Id,
-                SupplierId: product.Supplier.Id,
+                Category: new CategoryModel(product.Category.Id, product.Category.CategoryName),
+                Supplier: new SupplierModel(product.Supplier.Id, product.Supplier.Name),
                 Variety: product.Variety,
                 VATCategory: product.VATCategory
             );
@@ -87,9 +87,19 @@ public static class GetProductById
         decimal? PricePerPiecePack,
         decimal? DiscountedPriceWithoutVAT,
         decimal? RetailPrice,
-        Guid CategoryId,
-        Guid SupplierId,
+        CategoryModel Category,
+        SupplierModel Supplier,
         string? Variety,
         EVatCategory? VATCategory
+    );
+
+    public record CategoryModel(
+        Guid Id,
+        string CategoryName
+    );
+
+    public record SupplierModel(
+        Guid Id,
+        string Name
     );
 }

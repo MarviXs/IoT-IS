@@ -1442,6 +1442,11 @@ export interface components {
             /** Format: uuid */
             categoryId: string;
         };
+        "Fei.Is.Api.Features.Products.Queries.GetProductById.CategoryModel": {
+            /** Format: uuid */
+            id: string;
+            categoryName: string;
+        };
         "Fei.Is.Api.Features.Products.Queries.GetProductById.Response": {
             pluCode: string;
             code?: string | null;
@@ -1455,12 +1460,15 @@ export interface components {
             discountedPriceWithoutVAT?: number | null;
             /** Format: double */
             retailPrice?: number | null;
-            /** Format: uuid */
-            categoryId: string;
-            /** Format: uuid */
-            supplierId: string;
+            category: components["schemas"]["Fei.Is.Api.Features.Products.Queries.GetProductById.CategoryModel"];
+            supplier: components["schemas"]["Fei.Is.Api.Features.Products.Queries.GetProductById.SupplierModel"];
             variety?: string | null;
             vatCategory: components["schemas"]["Fei.Is.Api.Data.Models.InformationSystem.EVatCategory"];
+        };
+        "Fei.Is.Api.Features.Products.Queries.GetProductById.SupplierModel": {
+            /** Format: uuid */
+            id: string;
+            name: string;
         };
         "Fei.Is.Api.Features.Products.Queries.GetProducts.Response": {
             /** Format: uuid */
