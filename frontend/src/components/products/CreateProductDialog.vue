@@ -22,7 +22,6 @@ const emit = defineEmits(['onCreate']);
 const { t } = useI18n();
 
 const product = ref<ProductFormData>({
-  pluCode: '',
   code: '',
   latinName: '',
   czechName: undefined,
@@ -33,6 +32,7 @@ const product = ref<ProductFormData>({
   discountedPriceWithoutVAT: undefined,
   retailPrice: undefined,
   category: undefined,
+  supplier: undefined,
 });
 const productForm = ref();
 
@@ -40,7 +40,6 @@ const creatingProduct = ref(false);
 
 async function createProduct() {
   const createRequest: CreateProductParams = {
-    pluCode: product.value.pluCode,
     code: product.value.code,
     latinName: product.value.latinName,
     czechName: product.value.czechName,
@@ -50,7 +49,8 @@ async function createProduct() {
     pricePerPiecePackVAT: product.value.pricePerPiecePackVAT,
     discountedPriceWithoutVAT: product.value.discountedPriceWithoutVAT,
     retailPrice: product.value.retailPrice,
-    categoryId: product.value.category!.id,
+    categoryName: product.value.category?.name!,
+    vatCategory,
   };
 
   creatingProduct.value = true;

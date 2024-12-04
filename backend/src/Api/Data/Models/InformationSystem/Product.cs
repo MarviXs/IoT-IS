@@ -14,5 +14,5 @@ public class Product : BaseModel
     public Category Category { get; set; }
     public string Variety { get; set; }
     public Supplier Supplier { get; set; }
-    public EVatCategory VATCategory { get; set; }
+    public VATCategory VATCategory { get; set; }
 }

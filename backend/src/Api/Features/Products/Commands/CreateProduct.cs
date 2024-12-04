@@ -28,7 +28,7 @@ public static class CreateProduct
         string CategoryName,
         Guid SupplierId,
         string Variety,
-        EVatCategory VATCategory
+        Guid VATCategoryId
     );
 
     public sealed class Endpoint : ICarterModule
@@ -80,6 +80,12 @@ public static class CreateProduct
                 return Result.Fail(new BadRequestError("Supplier does not exists"));
             }
 
+            var vatCategory = context.VATCategories.Where(vatCategory => vatCategory.Id == message.Request.VATCategoryId);
+            if (!await vatCategory.AnyAsync(cancellationToken))
+            {
+                return Result.Fail(new BadRequestError("VAT Category does not exists"));
+            }
+
             var product = new Product
             {
                 PLUCode = await pluCodeService.GetPLUCodeAsync(cancellationToken),
@@ -93,7 +99,7 @@ public static class CreateProduct
                 RetailPrice = message.Request.RetailPrice,
                 Supplier = await supplier.FirstAsync(cancellationToken),
                 Variety = message.Request.Variety,
-                VATCategory = message.Request.VATCategory
+                VATCategory = await vatCategory.FirstAsync(cancellationToken)
             };
 
             var category = context.Categories.Where(category => category.CategoryName == message.Request.CategoryName);
@@ -118,7 +124,7 @@ public static class CreateProduct
             RuleFor(r => r.Request.CategoryName).NotEmpty().WithMessage("CategoryName is required");
             RuleFor(r => r.Request.SupplierId).NotEmpty().WithMessage("SupplierId is required");
             RuleFor(r => r.Request.Variety).NotEmpty().WithMessage("Variety is required");
-            RuleFor(r => r.Request.VATCategory).NotEmpty().WithMessage("VAT Category is required");
+            RuleFor(r => r.Request.VATCategoryId).NotEmpty().WithMessage("VAT Category Id is required");
         }
     }
 }

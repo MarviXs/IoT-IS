@@ -70,7 +70,7 @@ public static class GetProductById
                 CategoryId: product.Category.Id,
                 SupplierId: product.Supplier.Id,
                 Variety: product.Variety,
-                VATCategory: product.VATCategory
+                VATCategoryId: product.VATCategory.Id
             );
 
             return Result.Ok(response);
@@ -90,6 +90,6 @@ public static class GetProductById
         Guid CategoryId,
         Guid SupplierId,
         string? Variety,
-        EVatCategory? VATCategory
+        Guid VATCategoryId
     );
 }

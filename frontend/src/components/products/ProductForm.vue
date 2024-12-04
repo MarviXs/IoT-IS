@@ -3,13 +3,6 @@
     <q-card-section class="q-pt-none column q-gutter-md">
       <q-input v-model="product.code" class="col-12" :label="t('product.code')" clearable />
       <q-input
-        v-model="product.pluCode"
-        class="col-12"
-        :label="t('product.plu_code')"
-        clearable
-        :rules="pluCodeRules"
-      />
-      <q-input
         v-model="product.latinName"
         class="col-12"
         :label="t('product.latin_name')"
@@ -60,6 +53,7 @@
         clearable
       />
       <CategorySelect v-model="product.category" />
+      <SuppliersSelect v-model="product.supplier" />
     </q-card-section>
     <q-card-actions align="right" class="text-primary">
       <q-btn v-close-popup flat :label="t('global.cancel')" no-caps />
@@ -80,11 +74,12 @@
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import CategorySelect, { CategorySelectData } from '../categories/CategorySelect.vue';
+import { SupplierSelectData } from '../suppliers/SuppliersSelect.vue';
+import SuppliersSelect from '../suppliers/SuppliersSelect.vue';
 
 export interface ProductFormData {
-  pluCode: string | null | undefined;
   code: string;
-  latinName: string | null | undefined;
+  latinName: string;
   czechName: string | null | undefined;
   flowerLeafDescription: string | null | undefined;
   potDiameterPack: string | null | undefined;
@@ -92,8 +87,8 @@ export interface ProductFormData {
   pricePerPiecePackVAT: number | null | undefined;
   discountedPriceWithoutVAT: number | null | undefined;
   retailPrice: number | null | undefined;
-  category?: CategorySelectData;
-  supplier;
+  category: CategorySelectData | undefined;
+  supplier: SupplierSelectData | undefined;
 }
 
 const props = defineProps<{
@@ -115,6 +110,5 @@ function onSubmit() {
   emit('onSubmit');
 }
 
-const pluCodeRules = [(val: string) => (val && val.length > 0) || t('global.rules.required')];
 const latinNameRules = [(val: string) => (val && val.length > 0) || t('global.rules.required')];
 </script>

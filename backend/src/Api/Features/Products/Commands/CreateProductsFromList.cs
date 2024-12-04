@@ -30,7 +30,7 @@ public static class CreateProductsFromList
         string CategoryName,
         Guid SupplierId,
         string Variety,
-        EVatCategory VATCategory
+        Guid VATCategoryId
     );
 
     public sealed class Endpoint : ICarterModule
@@ -98,7 +98,6 @@ public static class CreateProductsFromList
                         DiscountedPriceWithoutVAT = item.discountedPriceWithoutVAT,
                         RetailPrice = item.RetailPrice,
                         Variety = item.Variety,
-                        VATCategory = item.VATCategory,
                         Supplier = currentSuppliers.First(supplier => supplier.Id == item.SupplierId)
                     };
 
@@ -120,6 +119,16 @@ public static class CreateProductsFromList
                     else
                     {
                         product.Category = category.First();
+                    }
+
+                    var vatCategory = context.VATCategories.Where(vatCategory => vatCategory.Id == item.VATCategoryId);
+                    if (vatCategory.Any())
+                    {
+                        product.VATCategory = vatCategory.First();
+                    }
+                    else
+                    {
+                        product.VATCategory = context.VATCategories.First();
                     }
 
                     return product;
@@ -149,7 +158,7 @@ public static class CreateProductsFromList
             RuleFor(r => r.CategoryName).NotEmpty().WithMessage("CategoryName is required");
             RuleFor(r => r.SupplierId).NotEmpty().WithMessage("SupplierId is required");
             RuleFor(r => r.Variety).NotEmpty().WithMessage("Variety is required");
-            RuleFor(r => r.VATCategory).NotEmpty().IsInEnum().WithMessage("VAT Category has errors");
+            RuleFor(r => r.VATCategoryId).NotEmpty().WithMessage("VAT Category is required");
         }
     }
 }
