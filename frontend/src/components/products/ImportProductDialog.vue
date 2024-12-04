@@ -39,7 +39,7 @@ import { mdiCloudUpload, mdiClose } from '@quasar/extras/mdi-v7';
 import { QTableProps } from 'quasar';
 //@ts-ignore
 import Papa from 'papaparse';
-import type { ParseResult } from 'node_modules//@types/papaparse';
+import type { ParseResult } from 'node_modules/@types/papaparse';
 import ProductCategorySelect from './ProductCategorySelect.vue';
 import { CategorySelectData } from '../categories/CategorySelect.vue';
 import ProductService, { ProductRequest } from '@/api/services/ProductService';

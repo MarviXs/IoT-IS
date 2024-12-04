@@ -31,13 +31,14 @@
         type="number"
         clearable
       />
-      <q-input
+      <!-- TODO vyratavat auto a needitovatelne -->
+      <!-- <q-input
         v-model="product.pricePerPiecePackVAT"
         class="col-12"
         :label="t('product.price_per_piece_pack_vat')"
         type="number"
         clearable
-      />
+      /> -->
       <q-input
         v-model="product.discountedPriceWithoutVAT"
         class="col-12"
@@ -52,6 +53,7 @@
         type="number"
         clearable
       />
+      <q-input v-model="product.variety" class="col-12" :label="t('product.variety')" type="text" clearable />
       <CategorySelect v-model="product.category" />
       <SuppliersSelect v-model="product.supplier" />
     </q-card-section>
@@ -84,7 +86,6 @@ export interface ProductFormData {
   flowerLeafDescription: string | null | undefined;
   potDiameterPack: string | null | undefined;
   pricePerPiecePack: number | null | undefined;
-  pricePerPiecePackVAT: number | null | undefined;
   discountedPriceWithoutVAT: number | null | undefined;
   retailPrice: number | null | undefined;
   category: CategorySelectData | undefined;
@@ -99,7 +100,7 @@ const emit = defineEmits(['onSubmit']);
 
 const { t } = useI18n();
 
-const product = defineModel<ProductFormData>({ default: () => ({ pluCode: '', code: '' }) });
+const product = defineModel<ProductFormData>({ default: () => ({ code: '', variety: '' }) });
 
 const productForm = ref();
 

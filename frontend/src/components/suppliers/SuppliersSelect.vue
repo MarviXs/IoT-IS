@@ -28,7 +28,7 @@ export interface SupplierSelectData {
 
 const { t } = useI18n();
 
-const selected = defineModel<SupplierSelectData>({ required: false });
+const selected = defineModel<SupplierSelectData | null>({ required: false });
 
 const items = ref<SuppliersListResponse['items']>([]);
 const isLoading = ref(false);
@@ -49,7 +49,7 @@ async function onScroll({ to, ref }: { to: number; ref: QSelect | null }) {
   if (isLoading.value || nextPage.value > lastPage.value || lastIndex != to) return;
 
   const paginationQuery: SuppliersListQueryParams = {
-    SortBy: 'CategoryName',
+    SortBy: 'Name',
     Descending: false,
     SearchTerm: filter.value,
     PageNumber: nextPage.value,

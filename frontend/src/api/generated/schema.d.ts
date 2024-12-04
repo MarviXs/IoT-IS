@@ -549,6 +549,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/vat-category": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get VAT categories */
+        get: operations["GetVATCategories"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/devices/{deviceId}/jobs/active": {
         parameters: {
             query?: never;
@@ -1364,6 +1381,7 @@ export interface components {
         };
         "Fei.Is.Api.Features.Products.Commands.CreateProduct.Request": {
             code: string;
+            pluCode?: string | null;
             latinName: string;
             czechName?: string | null;
             flowerLeafDescription?: string | null;
@@ -1376,7 +1394,8 @@ export interface components {
             discountedPriceWithoutVAT?: number | null;
             /** Format: double */
             retailPrice?: number | null;
-            categoryName: string;
+            /** Format: uuid */
+            categoryId: string;
             /** Format: uuid */
             supplierId: string;
             variety: string;
@@ -1423,6 +1442,11 @@ export interface components {
             /** Format: uuid */
             categoryId: string;
         };
+        "Fei.Is.Api.Features.Products.Queries.GetProductById.CategoryModel": {
+            /** Format: uuid */
+            id: string;
+            categoryName: string;
+        };
         "Fei.Is.Api.Features.Products.Queries.GetProductById.Response": {
             pluCode: string;
             code?: string | null;
@@ -1436,12 +1460,15 @@ export interface components {
             discountedPriceWithoutVAT?: number | null;
             /** Format: double */
             retailPrice?: number | null;
-            /** Format: uuid */
-            categoryId: string;
-            /** Format: uuid */
-            supplierId: string;
+            category: components["schemas"]["Fei.Is.Api.Features.Products.Queries.GetProductById.CategoryModel"];
+            supplier: components["schemas"]["Fei.Is.Api.Features.Products.Queries.GetProductById.SupplierModel"];
             variety?: string | null;
             vatCategory: components["schemas"]["Fei.Is.Api.Data.Models.InformationSystem.EVatCategory"];
+        };
+        "Fei.Is.Api.Features.Products.Queries.GetProductById.SupplierModel": {
+            /** Format: uuid */
+            id: string;
+            name: string;
         };
         "Fei.Is.Api.Features.Products.Queries.GetProducts.Response": {
             /** Format: uuid */
@@ -1570,6 +1597,13 @@ export interface components {
             /** Format: date-time */
             registrationDate: string;
             roles: string[];
+        };
+        "Fei.Is.Api.Features.VATCategory.Queries.GetVATCategories.Response": {
+            /** Format: int32 */
+            id: number;
+            name: string;
+            /** Format: double */
+            amount: number;
         };
         "Microsoft.AspNetCore.Http.HttpValidationProblemDetails": {
             type?: string | null;
@@ -3041,6 +3075,26 @@ export interface operations {
                 };
                 content: {
                     "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+        };
+    };
+    GetVATCategories: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.VATCategory.Queries.GetVATCategories.Response"][];
                 };
             };
         };

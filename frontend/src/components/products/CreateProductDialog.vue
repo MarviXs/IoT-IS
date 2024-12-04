@@ -28,7 +28,6 @@ const product = ref<ProductFormData>({
   flowerLeafDescription: undefined,
   potDiameterPack: undefined,
   pricePerPiecePack: undefined,
-  pricePerPiecePackVAT: undefined,
   discountedPriceWithoutVAT: undefined,
   retailPrice: undefined,
   category: undefined,
@@ -46,7 +45,6 @@ async function createProduct() {
     flowerLeafDescription: product.value.flowerLeafDescription,
     potDiameterPack: product.value.potDiameterPack,
     pricePerPiecePack: product.value.pricePerPiecePack,
-    pricePerPiecePackVAT: product.value.pricePerPiecePackVAT,
     discountedPriceWithoutVAT: product.value.discountedPriceWithoutVAT,
     retailPrice: product.value.retailPrice,
     categoryName: product.value.category?.name!,
@@ -68,5 +66,3 @@ async function createProduct() {
   toast.success(t('device.toasts.create_success'));
 }
 </script>
-
-<style lang="scss" scoped></style>

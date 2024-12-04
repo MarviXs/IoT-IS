@@ -17,6 +17,7 @@ public static class CreateProduct
 {
     public record Request(
         string Code,
+        string? PLUCode,
         string LatinName,
         string? CzechName,
         string? FlowerLeafDescription,
@@ -25,7 +26,7 @@ public static class CreateProduct
         decimal? pricePerPiecePackVAT,
         decimal? discountedPriceWithoutVAT,
         decimal? RetailPrice,
-        string CategoryName,
+        Guid CategoryId,
         Guid SupplierId,
         string Variety,
         Guid VATCategoryId
@@ -74,6 +75,11 @@ public static class CreateProduct
                 return Result.Fail(new ValidationError(result));
             }
 
+            if(context.Products.Any(p => p.Code == message.Request.Code))
+            { 
+                return Result.Fail(new BadRequestError("Product with this code already exists"));
+            }
+
             var supplier = context.Suppliers.Where(supplier => supplier.Id == message.Request.SupplierId);
             if (!await supplier.AnyAsync(cancellationToken))
             {
@@ -88,7 +94,7 @@ public static class CreateProduct
 
             var product = new Product
             {
-                PLUCode = await pluCodeService.GetPLUCodeAsync(cancellationToken),
+                PLUCode = message.Request.PLUCode ?? await pluCodeService.GetPLUCodeAsync(cancellationToken),
                 Code = message.Request.Code,
                 LatinName = message.Request.LatinName,
                 CzechName = message.Request.CzechName,
@@ -102,7 +108,7 @@ public static class CreateProduct
                 VATCategory = await vatCategory.FirstAsync(cancellationToken)
             };
 
-            var category = context.Categories.Where(category => category.CategoryName == message.Request.CategoryName);
+            var category = context.Categories.Where(category => category.Id == message.Request.CategoryId);
             if (!await category.AnyAsync(cancellationToken))
             {
                 return Result.Fail(new BadRequestError("Category does not exists"));
@@ -121,7 +127,7 @@ public static class CreateProduct
     {
         public Validator()
         {
-            RuleFor(r => r.Request.CategoryName).NotEmpty().WithMessage("CategoryName is required");
+            RuleFor(r => r.Request.CategoryId).NotEmpty().WithMessage("CategoryId is required");
             RuleFor(r => r.Request.SupplierId).NotEmpty().WithMessage("SupplierId is required");
             RuleFor(r => r.Request.Variety).NotEmpty().WithMessage("Variety is required");
             RuleFor(r => r.Request.VATCategoryId).NotEmpty().WithMessage("VAT Category Id is required");

@@ -44,9 +44,9 @@ async function getProduct() {
     flowerLeafDescription: data.flowerLeafDescription,
     potDiameterPack: data.potDiameterPack,
     pricePerPiecePack: data.pricePerPiecePack,
-    pricePerPiecePackVAT: data.pricePerPiecePackVAT,
     discountedPriceWithoutVAT: data.discountedPriceWithoutVAT,
     retailPrice: data.retailPrice,
+    category: data.category as ProductFormData['category'],
   };
 
   CategoryService.getCategory(data.categoryId)
