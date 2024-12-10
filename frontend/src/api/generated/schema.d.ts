@@ -780,7 +780,8 @@ export interface paths {
         };
         /** Get order by ID */
         get: operations["GetOrderById"];
-        put?: never;
+        /** Update an order */
+        put: operations["UpdateOrder"];
         post?: never;
         delete?: never;
         options?: never;
@@ -1488,10 +1489,23 @@ export interface components {
             contactPhone: string;
             note?: string | null;
         };
+        "Fei.Is.Api.Features.Orders.Commands.UpdateOrder.Request": {
+            /** Format: int32 */
+            customerId: number;
+            /** Format: date-time */
+            orderDate: string;
+            /** Format: int32 */
+            deliveryWeek: number;
+            paymentMethod: string;
+            contactPhone: string;
+            note?: string | null;
+        };
         "Fei.Is.Api.Features.Orders.Queries.GetOrderById.Response": {
             /** Format: int32 */
             id: number;
             customerName: string;
+            /** Format: int32 */
+            customerId: number;
             /** Format: date-time */
             orderDate: string;
             /** Format: int32 */
@@ -3641,6 +3655,48 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Fei.Is.Api.Features.Orders.Queries.GetOrderById.Response"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UpdateOrder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.Orders.Commands.UpdateOrder.Request"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": number;
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
                 };
             };
             /** @description Not Found */

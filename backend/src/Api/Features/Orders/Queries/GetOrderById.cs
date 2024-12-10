@@ -46,6 +46,7 @@ public static class GetOrderById
                 .Select(order => new Response(
                     order.Id,
                     order.Customer.Title,  // Prístup k názvu zákazníka cez navigačnú vlastnosť
+                    order.Customer.Id,
                     order.OrderDate,
                     order.DeliveryWeek,
                     order.PaymentMethod,
@@ -58,5 +59,5 @@ public static class GetOrderById
         }
     }
 
-    public record Response(int Id, string CustomerName, DateTime OrderDate, int DeliveryWeek, string PaymentMethod, string ContactPhone, string Note);
+    public record Response(int Id, string CustomerName, int CustomerId, DateTime OrderDate, int DeliveryWeek, string PaymentMethod, string ContactPhone, string Note);
 }

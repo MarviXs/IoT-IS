@@ -10,7 +10,7 @@ export type OrderResponse = paths['/orders/{id}']['get']['responses']['200']['co
 export type CreateOrderRequest = paths['/orders']['post']['requestBody']['content']['application/json'];
 export type CreateOrderResponse = paths['/orders']['post']['responses']['201']['content']['application/json'];
 
-//export type UpdateOrderRequest = paths['/orders/{id}']['put']['requestBody']['content']['application/json'];
+export type UpdateOrderRequest = paths['/orders/{id}']['put']['requestBody']['content']['application/json'];
 
 class OrdersService {
   // Načítanie zoznamu objednávok s použitím parametrov dotazu
@@ -26,6 +26,9 @@ class OrdersService {
   // Vytvorenie novej objednávky
   async createOrder(body: CreateOrderRequest) {
     return await client.POST('/orders', { body });
+  }
+  async updateOrder(orderId: number, body: UpdateOrderRequest) {
+    return await client.PUT('/orders/{id}', { params: { path: { id: Number(orderId) } },  body });
   }
 
   // Aktualizácia objednávky podľa ID

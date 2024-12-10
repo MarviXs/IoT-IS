@@ -67,6 +67,13 @@
       v-model="isAddContainerDialogOpen"
       @onCreate="handleContainerCreated"
     />
+
+    <!-- Update dialog -->
+    <UpdateOrderDialog
+      v-model="isUpdateDialogOpen"
+      :orderId="order.id"
+      @onUpdate="handleOrderUpdated"
+    />
   </q-card>
 </template>
 
@@ -76,6 +83,7 @@ import { defineProps, defineEmits } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { mdiPlusBox, mdiPencil, mdiTrashCan } from '@quasar/extras/mdi-v7';
 import AddContainerDialog from '../order-item/AddContainerDialog.vue';
+import UpdateOrderDialog from './UpdateOrderDialog.vue'; // Nový komponent pre update dialóg
 
 interface Order {
   id: number;
@@ -94,6 +102,7 @@ const props = defineProps<{
 const emit = defineEmits(['edit', 'delete']);
 const { t } = useI18n();
 const isAddContainerDialogOpen = ref(false);
+const isUpdateDialogOpen = ref(false);
 
 function formatDate(dateString: string): string {
   if (!dateString) return '';
@@ -106,7 +115,7 @@ function formatDate(dateString: string): string {
 }
 
 function openUpdateDialog(orderId: number): void {
-  emit('edit', orderId);
+  isUpdateDialogOpen.value = true;
 }
 
 function openAddContainerDialog() {
@@ -119,7 +128,11 @@ function openDeleteDialog(orderId: number): void {
 
 function handleContainerCreated(newContainerId: number) {
   console.log('Nový kontajner pridaný s ID:', newContainerId);
-  // Tu môžete znovu načítať kontajnery alebo aktualizovať stav
+}
+
+function handleOrderUpdated(updatedOrder: any) {
+  console.log('Objednávka aktualizovaná:', updatedOrder);
+  // Tu môžete napr. znovu načítať dáta objednávky
 }
 </script>
 
