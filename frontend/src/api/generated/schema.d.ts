@@ -1460,6 +1460,8 @@ export interface components {
             pricePerPiecePack: number;
             /** Format: double */
             pricePerPiecePackVAT: number;
+            /** Format: int32 */
+            quantity: number;
         };
         "Fei.Is.Api.Features.OrderItemContainers.Queries.GetOrderItemContainer.Response": {
             /** Format: int32 */

@@ -12,7 +12,7 @@
           size="md"
           :icon="mdiPlusBox"
           color="grey-color"
-          @click="addItemContainer(order.id)"
+          @click="openAddContainerDialog"
         ></q-btn>
         <q-btn
           flat
@@ -61,14 +61,21 @@
         <span class="value">{{ order.note }}</span>
       </div>
     </q-card-section>
+
+    <AddContainerDialog
+      :orderId="order.id"
+      v-model="isAddContainerDialogOpen"
+      @onCreate="handleContainerCreated"
+    />
   </q-card>
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
 import { defineProps, defineEmits } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { mdiPlus, mdiMinus, mdiTrashCan, mdiPencil, mdiPlusBox } from '@quasar/extras/mdi-v7';
-
+import { mdiPlusBox, mdiPencil, mdiTrashCan } from '@quasar/extras/mdi-v7';
+import AddContainerDialog from '../order-item/AddContainerDialog.vue';
 
 interface Order {
   id: number;
@@ -84,10 +91,9 @@ const props = defineProps<{
   order: Order;
 }>();
 
-
-const emit = defineEmits(['edit', 'delete', 'addItemContainer']);
-
+const emit = defineEmits(['edit', 'delete']);
 const { t } = useI18n();
+const isAddContainerDialogOpen = ref(false);
 
 function formatDate(dateString: string): string {
   if (!dateString) return '';
@@ -98,19 +104,23 @@ function formatDate(dateString: string): string {
     day: 'numeric',
   });
 }
+
 function openUpdateDialog(orderId: number): void {
   emit('edit', orderId);
 }
 
-function addItemContainer(orderId: number): void {
-  emit('addItemContainer', orderId);
-
+function openAddContainerDialog() {
+  isAddContainerDialogOpen.value = true;
 }
 
 function openDeleteDialog(orderId: number): void {
   emit('delete', orderId);
 }
 
+function handleContainerCreated(newContainerId: number) {
+  console.log('Nový kontajner pridaný s ID:', newContainerId);
+  // Tu môžete znovu načítať kontajnery alebo aktualizovať stav
+}
 </script>
 
 <style lang="scss" scoped>

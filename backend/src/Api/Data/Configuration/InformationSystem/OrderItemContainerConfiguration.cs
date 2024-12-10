@@ -8,21 +8,26 @@ public class OrderItemContainerConfiguration : IEntityTypeConfiguration<OrderIte
 {
     public void Configure(EntityTypeBuilder<OrderItemContainer> builder)
     {
+        // Primárny kľúč
         builder.HasKey(oic => oic.Id);
+
+        // Nastavíme ID ako identity column
+        builder.Property(oic => oic.Id)
+            .UseIdentityByDefaultColumn(); // použite metódu pre PostgreSQL identity columns
 
         builder.Property(oic => oic.Name)
             .IsRequired()
-            .HasMaxLength(255); // Maximálna dĺžka názvu
+            .HasMaxLength(255);
 
         builder.Property(oic => oic.PricePerContainer)
-            .HasPrecision(18, 2); // Presnosť pre desatinné hodnoty
+            .HasPrecision(18, 2);
 
         builder.Property(oic => oic.TotalPrice)
-            .HasPrecision(18, 2); // Presnosť pre celkovú cenu
+            .HasPrecision(18, 2);
 
-        // Nastavenie vzťahu s produktmi
+        // Vzťahy
         builder.HasMany(oic => oic.Products)
-            .WithOne() // Žiadna navigácia späť z Product na OrderItemContainer
-            .OnDelete(DeleteBehavior.Cascade); // Pri mazaní kontajnera sa zmažú jeho produkty
+            .WithOne()
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
