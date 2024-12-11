@@ -549,23 +549,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/vat-category": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get VAT categories */
-        get: operations["GetVATCategories"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/devices/{deviceId}/jobs/active": {
         parameters: {
             query?: never;
@@ -904,6 +887,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/vat-category": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get VAT categories */
+        get: operations["GetVATCategories"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/vat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get VAT categories */
+        get: operations["GetVatList"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1042,11 +1059,6 @@ export interface components {
         "Fei.Is.Api.Data.Enums.JobStatusEnum": "JOB_QUEUED" | "JOB_IN_PROGRESS" | "JOB_PAUSED" | "JOB_SUCCEEDED" | "JOB_REJECTED" | "JOB_FAILED" | "JOB_TIMED_OUT" | "JOB_CANCELED";
         /** @enum {string} */
         "Fei.Is.Api.Data.Enums.Role": "Admin" | "User";
-        /**
-         * Format: int32
-         * @enum {integer}
-         */
-        "Fei.Is.Api.Data.Models.InformationSystem.EVatCategory": 0 | 1;
         "Fei.Is.Api.Features.AdminUserManagement.Commands.UpdateUserEmail.Request": {
             email: string;
         };
@@ -1380,7 +1392,7 @@ export interface components {
             name: string;
         };
         "Fei.Is.Api.Features.Products.Commands.CreateProduct.Request": {
-            code: string;
+            code?: string | null;
             pluCode?: string | null;
             latinName: string;
             czechName?: string | null;
@@ -1399,7 +1411,8 @@ export interface components {
             /** Format: uuid */
             supplierId: string;
             variety: string;
-            vatCategory: components["schemas"]["Fei.Is.Api.Data.Models.InformationSystem.EVatCategory"];
+            /** Format: uuid */
+            vatCategoryId: string;
         };
         "Fei.Is.Api.Features.Products.Commands.CreateProductsFromList.ProductRequest": {
             code?: string | null;
@@ -1419,7 +1432,8 @@ export interface components {
             /** Format: uuid */
             supplierId: string;
             variety: string;
-            vatCategory: components["schemas"]["Fei.Is.Api.Data.Models.InformationSystem.EVatCategory"];
+            /** Format: uuid */
+            vatCategoryId: string;
         };
         "Fei.Is.Api.Features.Products.Commands.CreateProductsFromList.Request": {
             products: components["schemas"]["Fei.Is.Api.Features.Products.Commands.CreateProductsFromList.ProductRequest"][];
@@ -1430,6 +1444,7 @@ export interface components {
             latinName: string;
             czechName?: string | null;
             flowerLeafDescription?: string | null;
+            variety: string;
             potDiameterPack?: string | null;
             /** Format: double */
             pricePerPiecePack?: number | null;
@@ -1441,11 +1456,15 @@ export interface components {
             retailPrice?: number | null;
             /** Format: uuid */
             categoryId: string;
+            /** Format: uuid */
+            supplierId?: string | null;
+            /** Format: uuid */
+            vatCategoryId?: string | null;
         };
         "Fei.Is.Api.Features.Products.Queries.GetProductById.CategoryModel": {
             /** Format: uuid */
             id: string;
-            categoryName: string;
+            name: string;
         };
         "Fei.Is.Api.Features.Products.Queries.GetProductById.Response": {
             pluCode: string;
@@ -1462,13 +1481,20 @@ export interface components {
             retailPrice?: number | null;
             category: components["schemas"]["Fei.Is.Api.Features.Products.Queries.GetProductById.CategoryModel"];
             supplier: components["schemas"]["Fei.Is.Api.Features.Products.Queries.GetProductById.SupplierModel"];
-            variety?: string | null;
-            vatCategory: components["schemas"]["Fei.Is.Api.Data.Models.InformationSystem.EVatCategory"];
+            variety: string;
+            vatCategory: components["schemas"]["Fei.Is.Api.Features.Products.Queries.GetProductById.VatCategoryModel"];
         };
         "Fei.Is.Api.Features.Products.Queries.GetProductById.SupplierModel": {
             /** Format: uuid */
             id: string;
             name: string;
+        };
+        "Fei.Is.Api.Features.Products.Queries.GetProductById.VatCategoryModel": {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            /** Format: double */
+            rate: number;
         };
         "Fei.Is.Api.Features.Products.Queries.GetProducts.Response": {
             /** Format: uuid */
@@ -1484,6 +1510,13 @@ export interface components {
             /** Format: uuid */
             id: string;
             name: string;
+        };
+        "Fei.Is.Api.Features.Products.Queries.GetVatList.Response": {
+            /** Format: uuid */
+            guid: string;
+            name: string;
+            /** Format: double */
+            rate: number;
         };
         "Fei.Is.Api.Features.RecipeSteps.Commands.UpdateRecipeSteps.Request": {
             /** Format: uuid */
@@ -1599,11 +1632,11 @@ export interface components {
             roles: string[];
         };
         "Fei.Is.Api.Features.VATCategory.Queries.GetVATCategories.Response": {
-            /** Format: int32 */
-            id: number;
+            /** Format: uuid */
+            id: string;
             name: string;
             /** Format: double */
-            amount: number;
+            rate: number;
         };
         "Microsoft.AspNetCore.Http.HttpValidationProblemDetails": {
             type?: string | null;
@@ -3079,26 +3112,6 @@ export interface operations {
             };
         };
     };
-    GetVATCategories: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Features.VATCategory.Queries.GetVATCategories.Response"][];
-                };
-            };
-        };
-    };
     GetActiveJobs: {
         parameters: {
             query?: never;
@@ -3992,6 +4005,53 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Fei.Is.Api.Features.ProductCategories.Queries.GetSupplierById.Response"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GetVATCategories: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.VATCategory.Queries.GetVATCategories.Response"][];
+                };
+            };
+        };
+    };
+    GetVatList: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.Products.Queries.GetVatList.Response"][];
                 };
             };
             /** @description Not Found */

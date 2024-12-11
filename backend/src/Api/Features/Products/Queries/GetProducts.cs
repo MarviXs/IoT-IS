@@ -49,7 +49,7 @@ public static class GetProducts
         {
             var query = context.Products.AsNoTracking();
 
-            if (message.Parameters.SearchTerm is not null)
+            if (!string.IsNullOrEmpty(message.Parameters.SearchTerm))
             {
                 if (decimal.TryParse(message.Parameters.SearchTerm, out decimal _))
                 {

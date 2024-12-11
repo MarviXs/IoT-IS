@@ -11,6 +11,7 @@
     @filter="filterFn"
     @virtual-scroll="onScroll"
     :rules="categoryRules"
+    new-value-mode="add-unique"
   />
 </template>
 

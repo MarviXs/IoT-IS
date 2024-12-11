@@ -356,6 +356,9 @@
   "supplier": {
     "label": "Supplier | Suppliers"
   },
+  "vat_category": {
+    "label": "VAT Category | VAT Categories"
+  },
   "command": {
     "label": "Command | Commands",
     "create_command": "Create command",

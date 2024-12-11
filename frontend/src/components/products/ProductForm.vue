@@ -2,6 +2,7 @@
   <q-form @submit="onSubmit" ref="productForm">
     <q-card-section class="q-pt-none column q-gutter-md">
       <q-input v-model="product.code" class="col-12" :label="t('product.code')" clearable />
+      <q-input v-model="product.pluCode" class="col-12" :label="t('product.pluCode')" clearable />
       <q-input
         v-model="product.latinName"
         class="col-12"
@@ -17,6 +18,7 @@
         type="number"
         clearable
       />
+      <q-input v-model="product.variety" class="col-12" :label="t('product.variety')" clearable />
       <q-input
         v-model="product.potDiameterPack"
         class="col-12"
@@ -53,9 +55,9 @@
         type="number"
         clearable
       />
-      <q-input v-model="product.variety" class="col-12" :label="t('product.variety')" type="text" clearable />
       <CategorySelect v-model="product.category" />
       <SuppliersSelect v-model="product.supplier" />
+      <VATCategoriesSelect v-model="product.vatCategory" />
     </q-card-section>
     <q-card-actions align="right" class="text-primary">
       <q-btn v-close-popup flat :label="t('global.cancel')" no-caps />
@@ -78,18 +80,22 @@ import { useI18n } from 'vue-i18n';
 import CategorySelect, { CategorySelectData } from '../categories/CategorySelect.vue';
 import { SupplierSelectData } from '../suppliers/SuppliersSelect.vue';
 import SuppliersSelect from '../suppliers/SuppliersSelect.vue';
+import VATCategoriesSelect, { VATCategorySelectData } from '../vatCategories/VATCategoriesSelect.vue';
 
 export interface ProductFormData {
-  code: string;
+  code: string | null | undefined;
+  pluCode: string | null | undefined;
   latinName: string;
   czechName: string | null | undefined;
   flowerLeafDescription: string | null | undefined;
+  variety: string;
   potDiameterPack: string | null | undefined;
   pricePerPiecePack: number | null | undefined;
   discountedPriceWithoutVAT: number | null | undefined;
   retailPrice: number | null | undefined;
   category: CategorySelectData | undefined;
   supplier: SupplierSelectData | undefined;
+  vatCategory: VATCategorySelectData | undefined;
 }
 
 const props = defineProps<{

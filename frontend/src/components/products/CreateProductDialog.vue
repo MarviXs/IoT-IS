@@ -23,15 +23,18 @@ const { t } = useI18n();
 
 const product = ref<ProductFormData>({
   code: '',
+  pluCode: undefined,
   latinName: '',
   czechName: undefined,
   flowerLeafDescription: undefined,
+  variety: '',
   potDiameterPack: undefined,
   pricePerPiecePack: undefined,
   discountedPriceWithoutVAT: undefined,
   retailPrice: undefined,
   category: undefined,
   supplier: undefined,
+  vatCategory: undefined,
 });
 const productForm = ref();
 
@@ -39,7 +42,8 @@ const creatingProduct = ref(false);
 
 async function createProduct() {
   const createRequest: CreateProductParams = {
-    code: product.value.code,
+    code: product.value.code!,
+    pluCode: product.value.pluCode,
     latinName: product.value.latinName,
     czechName: product.value.czechName,
     flowerLeafDescription: product.value.flowerLeafDescription,
@@ -47,8 +51,10 @@ async function createProduct() {
     pricePerPiecePack: product.value.pricePerPiecePack,
     discountedPriceWithoutVAT: product.value.discountedPriceWithoutVAT,
     retailPrice: product.value.retailPrice,
-    categoryName: product.value.category?.name!,
-    vatCategory,
+    variety: product.value.variety,
+    categoryId: product.value.category?.id!,
+    vatCategoryId: product.value.vatCategory?.id!,
+    supplierId: product.value.supplier?.id!,
   };
 
   creatingProduct.value = true;

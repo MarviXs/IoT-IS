@@ -33,7 +33,7 @@ public static class GetVATCategories
                     }
                 )
                 .WithName(nameof(GetVATCategories))
-                .WithTags(nameof(EVatCategory))
+                .WithTags(nameof(VATCategory))
                 .WithOpenApi(o =>
                 {
                     o.Summary = "Get VAT categories";
@@ -48,15 +48,10 @@ public static class GetVATCategories
     {
         public async Task<List<Response>> Handle(Query message, CancellationToken cancellationToken)
         {
-            var retVal = Enum.GetValues<EVatCategory>().Select(vatCategory => 
-                {
-                    decimal.TryParse(configuration[$"BusinessConfiguration:Vat:{vatCategory}"], out decimal parsedValue);
-                    return new Response((int)vatCategory, vatCategory.ToString(), parsedValue);
-                }
-            );
-            return retVal.ToList();
+            var query = context.VATCategories.AsNoTracking().Select(vatCategory => new Response(vatCategory.Id, vatCategory.Name, vatCategory.Rate));
+            return await query.ToListAsync(cancellationToken);
         }
     }
 
-    public record Response(int Id, string Name, decimal Amount);
+    public record Response(Guid Id, string Name, decimal Rate);
 }

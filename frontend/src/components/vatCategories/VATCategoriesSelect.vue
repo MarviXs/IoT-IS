@@ -1,13 +1,14 @@
 <template>
   <q-select
     v-model="selected"
-    :label="t('supplier.label')"
+    :label="t('vat_category.label')"
     :options="options"
     use-input
     option-label="name"
     option-value="id"
     :input-debounce="400"
     :rules="selectRules"
+    :display-value="selected ? `${selected.name} (${selected.rate}%)` : ''"
   />
 </template>
 
@@ -19,9 +20,9 @@ import { QSelect } from 'quasar';
 import VATCategoryService, { VATCategoryResponse } from '@/api/services/VATCategoryService';
 
 export interface VATCategorySelectData {
-  id: number;
+  id: string;
   name: string;
-  amnout: number;
+  rate: number;
 }
 
 const { t } = useI18n();
@@ -34,6 +35,7 @@ const options = computed(() => {
   return items.value?.map((i) => ({
     name: i.name,
     id: i.id,
+    rate: i.rate,
   }));
 });
 

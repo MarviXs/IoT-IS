@@ -18,7 +18,5 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.Property(p => p.Code).IsRequired();
 
         builder.Property(p => p.LatinName).IsRequired();
-
-        builder.Property(p => p.VATCategory).IsRequired();
     }
 }

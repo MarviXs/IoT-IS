@@ -52,11 +52,28 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: false)
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Suppliers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "VATCategories",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Rate = table.Column<decimal>(type: "numeric", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_VATCategories", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -194,7 +211,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     CategoryId = table.Column<Guid>(type: "uuid", nullable: false),
                     Variety = table.Column<string>(type: "text", nullable: false),
                     SupplierId = table.Column<Guid>(type: "uuid", nullable: false),
-                    VATCategory = table.Column<string>(type: "text", nullable: false),
+                    VATCategoryId = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
@@ -211,6 +228,12 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                         name: "FK_Products_Suppliers_SupplierId",
                         column: x => x.SupplierId,
                         principalTable: "Suppliers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Products_VATCategories_VATCategoryId",
+                        column: x => x.VATCategoryId,
+                        principalTable: "VATCategories",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -410,15 +433,33 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                 });
 
             migrationBuilder.InsertData(
-                table: "Suppliers",
-                columns: new[] { "Id", "Name" },
+                table: "Categories",
+                columns: new[] { "Id", "CategoryName", "CreatedAt", "UpdatedAt" },
                 values: new object[,]
                 {
-                    { new Guid("412ceb2b-ca6a-43c9-80e1-6eb1cb16164a"), "Internal" },
-                    { new Guid("4fd1cbf4-bef4-4fee-b72f-fac1b15c8357"), "Bennials" },
-                    { new Guid("7df5fe3b-1bbf-4dc8-a108-5c6f931e0db4"), "Syngenta" },
-                    { new Guid("94052ccf-6797-4351-ad43-5130cb6c4fbe"), "Schneider" },
-                    { new Guid("e8391bf0-9dc4-4d2e-a3f0-d028833ce902"), "Volmary" }
+                    { new Guid("6bf2fd3c-1185-47c4-870f-32738d045f36"), "Nejaka burina", new DateTime(2024, 12, 11, 21, 31, 43, 182, DateTimeKind.Utc).AddTicks(3943), new DateTime(2024, 12, 11, 21, 31, 43, 182, DateTimeKind.Utc).AddTicks(3945) },
+                    { new Guid("7905728d-ce7d-486b-a981-2882232f1b6b"), "Nejaky strom", new DateTime(2024, 12, 11, 21, 31, 43, 182, DateTimeKind.Utc).AddTicks(3956), new DateTime(2024, 12, 11, 21, 31, 43, 182, DateTimeKind.Utc).AddTicks(3956) }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Suppliers",
+                columns: new[] { "Id", "CreatedAt", "Name", "UpdatedAt" },
+                values: new object[,]
+                {
+                    { new Guid("412ceb2b-ca6a-43c9-80e1-6eb1cb16164a"), new DateTime(2024, 12, 11, 21, 31, 43, 182, DateTimeKind.Utc).AddTicks(4076), "Internal", new DateTime(2024, 12, 11, 21, 31, 43, 182, DateTimeKind.Utc).AddTicks(4076) },
+                    { new Guid("4fd1cbf4-bef4-4fee-b72f-fac1b15c8357"), new DateTime(2024, 12, 11, 21, 31, 43, 182, DateTimeKind.Utc).AddTicks(4072), "Bennials", new DateTime(2024, 12, 11, 21, 31, 43, 182, DateTimeKind.Utc).AddTicks(4072) },
+                    { new Guid("7df5fe3b-1bbf-4dc8-a108-5c6f931e0db4"), new DateTime(2024, 12, 11, 21, 31, 43, 182, DateTimeKind.Utc).AddTicks(4075), "Syngenta", new DateTime(2024, 12, 11, 21, 31, 43, 182, DateTimeKind.Utc).AddTicks(4075) },
+                    { new Guid("94052ccf-6797-4351-ad43-5130cb6c4fbe"), new DateTime(2024, 12, 11, 21, 31, 43, 182, DateTimeKind.Utc).AddTicks(4073), "Schneider", new DateTime(2024, 12, 11, 21, 31, 43, 182, DateTimeKind.Utc).AddTicks(4073) },
+                    { new Guid("e8391bf0-9dc4-4d2e-a3f0-d028833ce902"), new DateTime(2024, 12, 11, 21, 31, 43, 182, DateTimeKind.Utc).AddTicks(4070), "Volmary", new DateTime(2024, 12, 11, 21, 31, 43, 182, DateTimeKind.Utc).AddTicks(4071) }
+                });
+
+            migrationBuilder.InsertData(
+                table: "VATCategories",
+                columns: new[] { "Id", "CreatedAt", "Name", "Rate", "UpdatedAt" },
+                values: new object[,]
+                {
+                    { new Guid("37b1c257-1401-4d79-9c4f-a206b0937fd2"), new DateTime(2024, 12, 11, 21, 31, 43, 182, DateTimeKind.Utc).AddTicks(4191), "Reduced", 19m, new DateTime(2024, 12, 11, 21, 31, 43, 182, DateTimeKind.Utc).AddTicks(4192) },
+                    { new Guid("5bfc3ed5-8874-4452-9043-22065fc00e29"), new DateTime(2024, 12, 11, 21, 31, 43, 182, DateTimeKind.Utc).AddTicks(4188), "Normal", 21m, new DateTime(2024, 12, 11, 21, 31, 43, 182, DateTimeKind.Utc).AddTicks(4188) }
                 });
 
             migrationBuilder.CreateIndex(
@@ -493,6 +534,11 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                 column: "SupplierId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Products_VATCategoryId",
+                table: "Products",
+                column: "VATCategoryId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Summaries_ProductNumber",
                 table: "Summaries",
                 column: "ProductNumber");
@@ -552,6 +598,9 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
             migrationBuilder.DropTable(
                 name: "Suppliers");
+
+            migrationBuilder.DropTable(
+                name: "VATCategories");
 
             migrationBuilder.DropTable(
                 name: "Companies");

@@ -21,12 +21,15 @@ public static class UpdateProduct
         string LatinName,
         string? CzechName,
         string? FlowerLeafDescription,
+        string Variety,
         string? PotDiameterPack,
         decimal? pricePerPiecePack,
         decimal? pricePerPiecePackVAT,
         decimal? discountedPriceWithoutVAT,
         decimal? RetailPrice,
-        Guid CategoryId
+        Guid CategoryId,
+        Guid? SupplierId,
+        Guid? VATCategoryId
     );
 
     public sealed class Endpoint : ICarterModule
@@ -97,6 +100,7 @@ public static class UpdateProduct
             product.LatinName = message.Request.LatinName;
             product.CzechName = message.Request.CzechName;
             product.FlowerLeafDescription = message.Request.FlowerLeafDescription;
+            product.Variety = message.Request.Variety;
             product.PotDiameterPack = message.Request.PotDiameterPack;
             product.PricePerPiecePack = message.Request.pricePerPiecePack;
             product.DiscountedPriceWithoutVAT = message.Request.discountedPriceWithoutVAT;
@@ -111,6 +115,28 @@ public static class UpdateProduct
                 }
 
                 product.Category = category.First();
+            }
+
+            if (message.Request.SupplierId != null && message.Request.SupplierId != product.Supplier?.Id)
+            {
+                var supplier = context.Suppliers.Where((item) => item.Id == message.Request.SupplierId);
+                if (supplier == null)
+                {
+                    return Result.Fail(new NotFoundError());
+                }
+
+                product.Supplier = supplier.First();
+            }
+
+            if (message.Request.VATCategoryId != null && message.Request.VATCategoryId != product.VATCategory?.Id)
+            {
+                var vatCategory = context.VATCategories.Where((item) => item.Id == message.Request.VATCategoryId);
+                if (vatCategory == null)
+                {
+                    return Result.Fail(new NotFoundError());
+                }
+
+                product.VATCategory = vatCategory.First();
             }
 
             await context.SaveChangesAsync(cancellationToken);

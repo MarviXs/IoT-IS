@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Fei.Is.Api.Data.Migrations.AppDb
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241117192457_IS_Models")]
+    [Migration("20241211213143_IS_Models")]
     partial class IS_Models
     {
         /// <inheritdoc />
@@ -399,6 +399,22 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.HasKey("Id");
 
                     b.ToTable("Categories");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("6bf2fd3c-1185-47c4-870f-32738d045f36"),
+                            CategoryName = "Nejaka burina",
+                            CreatedAt = new DateTime(2024, 12, 11, 21, 31, 43, 182, DateTimeKind.Utc).AddTicks(3943),
+                            UpdatedAt = new DateTime(2024, 12, 11, 21, 31, 43, 182, DateTimeKind.Utc).AddTicks(3945)
+                        },
+                        new
+                        {
+                            Id = new Guid("7905728d-ce7d-486b-a981-2882232f1b6b"),
+                            CategoryName = "Nejaky strom",
+                            CreatedAt = new DateTime(2024, 12, 11, 21, 31, 43, 182, DateTimeKind.Utc).AddTicks(3956),
+                            UpdatedAt = new DateTime(2024, 12, 11, 21, 31, 43, 182, DateTimeKind.Utc).AddTicks(3956)
+                        });
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Company", b =>
@@ -731,9 +747,8 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("VATCategory")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<Guid>("VATCategoryId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Variety")
                         .IsRequired()
@@ -747,6 +762,8 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                         .IsUnique();
 
                     b.HasIndex("SupplierId");
+
+                    b.HasIndex("VATCategoryId");
 
                     b.ToTable("Products");
                 });
@@ -866,9 +883,15 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -878,27 +901,79 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                         new
                         {
                             Id = new Guid("e8391bf0-9dc4-4d2e-a3f0-d028833ce902"),
-                            Name = "Volmary"
+                            CreatedAt = new DateTime(2024, 12, 11, 21, 31, 43, 182, DateTimeKind.Utc).AddTicks(4070),
+                            Name = "Volmary",
+                            UpdatedAt = new DateTime(2024, 12, 11, 21, 31, 43, 182, DateTimeKind.Utc).AddTicks(4071)
                         },
                         new
                         {
                             Id = new Guid("4fd1cbf4-bef4-4fee-b72f-fac1b15c8357"),
-                            Name = "Bennials"
+                            CreatedAt = new DateTime(2024, 12, 11, 21, 31, 43, 182, DateTimeKind.Utc).AddTicks(4072),
+                            Name = "Bennials",
+                            UpdatedAt = new DateTime(2024, 12, 11, 21, 31, 43, 182, DateTimeKind.Utc).AddTicks(4072)
                         },
                         new
                         {
                             Id = new Guid("94052ccf-6797-4351-ad43-5130cb6c4fbe"),
-                            Name = "Schneider"
+                            CreatedAt = new DateTime(2024, 12, 11, 21, 31, 43, 182, DateTimeKind.Utc).AddTicks(4073),
+                            Name = "Schneider",
+                            UpdatedAt = new DateTime(2024, 12, 11, 21, 31, 43, 182, DateTimeKind.Utc).AddTicks(4073)
                         },
                         new
                         {
                             Id = new Guid("7df5fe3b-1bbf-4dc8-a108-5c6f931e0db4"),
-                            Name = "Syngenta"
+                            CreatedAt = new DateTime(2024, 12, 11, 21, 31, 43, 182, DateTimeKind.Utc).AddTicks(4075),
+                            Name = "Syngenta",
+                            UpdatedAt = new DateTime(2024, 12, 11, 21, 31, 43, 182, DateTimeKind.Utc).AddTicks(4075)
                         },
                         new
                         {
                             Id = new Guid("412ceb2b-ca6a-43c9-80e1-6eb1cb16164a"),
-                            Name = "Internal"
+                            CreatedAt = new DateTime(2024, 12, 11, 21, 31, 43, 182, DateTimeKind.Utc).AddTicks(4076),
+                            Name = "Internal",
+                            UpdatedAt = new DateTime(2024, 12, 11, 21, 31, 43, 182, DateTimeKind.Utc).AddTicks(4076)
+                        });
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.VATCategory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("Rate")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("VATCategories");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("5bfc3ed5-8874-4452-9043-22065fc00e29"),
+                            CreatedAt = new DateTime(2024, 12, 11, 21, 31, 43, 182, DateTimeKind.Utc).AddTicks(4188),
+                            Name = "Normal",
+                            Rate = 21m,
+                            UpdatedAt = new DateTime(2024, 12, 11, 21, 31, 43, 182, DateTimeKind.Utc).AddTicks(4188)
+                        },
+                        new
+                        {
+                            Id = new Guid("37b1c257-1401-4d79-9c4f-a206b0937fd2"),
+                            CreatedAt = new DateTime(2024, 12, 11, 21, 31, 43, 182, DateTimeKind.Utc).AddTicks(4191),
+                            Name = "Reduced",
+                            Rate = 19m,
+                            UpdatedAt = new DateTime(2024, 12, 11, 21, 31, 43, 182, DateTimeKind.Utc).AddTicks(4192)
                         });
                 });
 
@@ -1531,9 +1606,17 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Fei.Is.Api.Data.Models.InformationSystem.VATCategory", "VATCategory")
+                        .WithMany("Products")
+                        .HasForeignKey("VATCategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Category");
 
                     b.Navigation("Supplier");
+
+                    b.Navigation("VATCategory");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.ProductionPlan", b =>
@@ -1774,6 +1857,11 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Order", b =>
                 {
                     b.Navigation("OrderItems");
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.VATCategory", b =>
+                {
+                    b.Navigation("Products");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.WorkReport", b =>

@@ -50,6 +50,8 @@ public static class GetProductById
             var product = await context
                 .Products.AsNoTracking()
                 .Include(p => p.Category)
+                .Include(p => p.Supplier)
+                .Include(p => p.VATCategory)
                 .FirstOrDefaultAsync(product => product.Id == request.Id, cancellationToken);
 
             if (product == null)
@@ -69,8 +71,8 @@ public static class GetProductById
                 RetailPrice: product.RetailPrice,
                 Category: new CategoryModel(product.Category.Id, product.Category.CategoryName),
                 Supplier: new SupplierModel(product.Supplier.Id, product.Supplier.Name),
-                Variety: product.Variety,
-                VATCategoryId: product.VATCategory.Id
+                VATCategory: new VatCategoryModel(product.VATCategory.Id, product.VATCategory.Name, product.VATCategory.Rate),
+                Variety: product.Variety
             );
 
             return Result.Ok(response);
@@ -89,17 +91,23 @@ public static class GetProductById
         decimal? RetailPrice,
         CategoryModel Category,
         SupplierModel Supplier,
-        string? Variety,
-        Guid VATCategoryId
+        string Variety,
+        VatCategoryModel VATCategory
     );
 
     public record CategoryModel(
         Guid Id,
-        string CategoryName
+        string Name
     );
 
     public record SupplierModel(
         Guid Id,
         string Name
+    );
+
+    public record VatCategoryModel(
+        Guid Id,
+        string Name,
+        decimal Rate
     );
 }

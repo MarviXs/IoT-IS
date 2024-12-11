@@ -16,7 +16,7 @@ namespace Fei.Is.Api.Features.Products.Commands;
 public static class CreateProduct
 {
     public record Request(
-        string Code,
+        string? Code,
         string? PLUCode,
         string LatinName,
         string? CzechName,
@@ -75,8 +75,8 @@ public static class CreateProduct
                 return Result.Fail(new ValidationError(result));
             }
 
-            if(context.Products.Any(p => p.Code == message.Request.Code))
-            { 
+            if (context.Products.Any(p => p.Code == message.Request.Code))
+            {
                 return Result.Fail(new BadRequestError("Product with this code already exists"));
             }
 
@@ -92,9 +92,17 @@ public static class CreateProduct
                 return Result.Fail(new BadRequestError("VAT Category does not exists"));
             }
 
+            var pluCode = string.IsNullOrEmpty(message.Request.PLUCode) ? await pluCodeService.GetPLUCodeAsync(cancellationToken) : message.Request.PLUCode;
+
+            var category = context.Categories.Where(category => category.Id == message.Request.CategoryId);
+            if (!await category.AnyAsync(cancellationToken))
+            {
+                return Result.Fail(new BadRequestError("Category does not exists"));
+            }
+
             var product = new Product
             {
-                PLUCode = message.Request.PLUCode ?? await pluCodeService.GetPLUCodeAsync(cancellationToken),
+                PLUCode = pluCode,
                 Code = message.Request.Code,
                 LatinName = message.Request.LatinName,
                 CzechName = message.Request.CzechName,
@@ -105,16 +113,9 @@ public static class CreateProduct
                 RetailPrice = message.Request.RetailPrice,
                 Supplier = await supplier.FirstAsync(cancellationToken),
                 Variety = message.Request.Variety,
-                VATCategory = await vatCategory.FirstAsync(cancellationToken)
+                VATCategory = await vatCategory.FirstAsync(cancellationToken),
+                Category = await category.FirstAsync(cancellationToken)
             };
-
-            var category = context.Categories.Where(category => category.Id == message.Request.CategoryId);
-            if (!await category.AnyAsync(cancellationToken))
-            {
-                return Result.Fail(new BadRequestError("Category does not exists"));
-            }
-
-            product.Category = await category.FirstAsync(cancellationToken);
 
             await context.Products.AddAsync(product, cancellationToken);
             await context.SaveChangesAsync(cancellationToken);
