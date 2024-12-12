@@ -51,16 +51,11 @@ public static class GetProducts
 
             if (!string.IsNullOrEmpty(message.Parameters.SearchTerm))
             {
-                if (decimal.TryParse(message.Parameters.SearchTerm, out decimal _))
-                {
-                    query = query.Where(product =>
-                        product.PLUCode.Contains(message.Parameters.SearchTerm) || product.Code.Contains(message.Parameters.SearchTerm)
-                    );
-                }
-                else
-                {
-                    query = query.Where(product => product.CzechName != null ? product.CzechName.Contains(message.Parameters.SearchTerm) : false);
-                }
+                query = query.Where(product =>
+                    product.PLUCode.Contains(message.Parameters.SearchTerm)
+                    || (product.Code != null ? product.Code.Contains(message.Parameters.SearchTerm) : false)
+                    || (product.CzechName != null ? product.CzechName.Contains(message.Parameters.SearchTerm) : false)
+                );
             }
 
             var totalCount = await query.CountAsync(cancellationToken);
