@@ -1,7 +1,7 @@
 <template>
   <q-select
     v-model="selected"
-    :label="t('product_category.label')"
+    :label="t('supplier.label')"
     :options="options"
     :loading="isLoading"
     use-input
@@ -10,8 +10,7 @@
     :input-debounce="400"
     @filter="filterFn"
     @virtual-scroll="onScroll"
-    :rules="categoryRules"
-    new-value-mode="add-unique"
+    :rules="suppliersRules"
   />
 </template>
 
@@ -20,18 +19,18 @@ import { computed, nextTick, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { handleError } from '@/utils/error-handler';
 import { QSelect } from 'quasar';
-import CategoryService, { CategoryQueryParams, CategoryResponse } from '@/api/services/CategoryService';
+import SupplierService, { SuppliersListQueryParams, SuppliersListResponse } from '@/api/services/SupplierService';
 
-export interface CategorySelectData {
+export interface SupplierSelectData {
   id: string;
   name: string;
 }
 
 const { t } = useI18n();
 
-const selected = defineModel<CategorySelectData | null>({ required: false });
+const selected = defineModel<SupplierSelectData>({ required: false });
 
-const items = ref<CategoryResponse['items']>([]);
+const items = ref<SuppliersListResponse['items']>([]);
 const isLoading = ref(false);
 const filter = ref('');
 const nextPage = ref(1);
@@ -49,7 +48,7 @@ async function onScroll({ to, ref }: { to: number; ref: QSelect | null }) {
 
   if (isLoading.value || nextPage.value > lastPage.value || lastIndex != to) return;
 
-  const paginationQuery: CategoryQueryParams = {
+  const paginationQuery: SuppliersListQueryParams = {
     SortBy: 'CategoryName',
     Descending: false,
     SearchTerm: filter.value,
@@ -58,11 +57,11 @@ async function onScroll({ to, ref }: { to: number; ref: QSelect | null }) {
   };
 
   isLoading.value = true;
-  const { data, error } = await CategoryService.getCategories(paginationQuery);
+  const { data, error } = await SupplierService.getSuppliersList(paginationQuery);
   isLoading.value = false;
 
   if (error) {
-    handleError(error, 'Loading templates failed');
+    handleError(error, 'Loading suppliers failed');
     return;
   }
 
@@ -97,5 +96,5 @@ async function filterFn(
   doneFn(() => {});
 }
 
-const categoryRules = [(val: CategorySelectData) => !!val || t('global.rules.required')];
+const suppliersRules = [(val: SupplierSelectData) => !!val || t('global.rules.required')];
 </script>

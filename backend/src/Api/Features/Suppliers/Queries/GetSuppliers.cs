@@ -14,7 +14,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fei.Is.Api.Features.Products.Queries;
 
-public static class GetProducts
+public static class GetSuppliers
 {
     public class QueryParameters : SearchParameters { }
 
@@ -23,7 +23,7 @@ public static class GetProducts
         public void AddRoutes(IEndpointRouteBuilder app)
         {
             app.MapGet(
-                    "products",
+                    "suppliers",
                     async Task<Ok<PagedList<Response>>> (IMediator mediator, ClaimsPrincipal user, [AsParameters] QueryParameters parameters) =>
                     {
                         var query = new Query(user, parameters);
@@ -31,11 +31,11 @@ public static class GetProducts
                         return TypedResults.Ok(result);
                     }
                 )
-                .WithName(nameof(GetProducts))
-                .WithTags(nameof(Product))
+                .WithName(nameof(GetSuppliers))
+                .WithTags(nameof(Supplier))
                 .WithOpenApi(o =>
                 {
-                    o.Summary = "Get paginated products";
+                    o.Summary = "Get paginated suppliers";
                     return o;
                 });
         }
@@ -47,31 +47,22 @@ public static class GetProducts
     {
         public async Task<PagedList<Response>> Handle(Query message, CancellationToken cancellationToken)
         {
-            var query = context.Products.AsNoTracking();
+            var query = context.Suppliers.AsNoTracking();
 
-            if (!string.IsNullOrEmpty(message.Parameters.SearchTerm))
+            if (message.Parameters.SearchTerm is not null)
             {
-                if (decimal.TryParse(message.Parameters.SearchTerm, out decimal _))
-                {
-                    query = query.Where(product =>
-                        product.PLUCode.Contains(message.Parameters.SearchTerm) || product.Code.Contains(message.Parameters.SearchTerm)
-                    );
-                }
-                else
-                {
-                    query = query.Where(product => product.CzechName != null ? product.CzechName.Contains(message.Parameters.SearchTerm) : false);
-                }
+                query = query.Where(supplier => supplier.Name != null ? supplier.Name.Contains(message.Parameters.SearchTerm) : false);
             }
 
             var totalCount = await query.CountAsync(cancellationToken);
 
             var pagedQuery = query
-                .Sort(message.Parameters.SortBy ?? nameof(Product.PLUCode), message.Parameters.Descending)
-                .Select((product) => new Response(product.Id, product.Code, product.PLUCode, product.Category.Id, product.Supplier.Id));
+                .Sort(message.Parameters.SortBy ?? nameof(Supplier.Name), message.Parameters.Descending)
+                .Select((supplier) => new Response(supplier.Id, supplier.Name));
 
             return pagedQuery.Paginate(message.Parameters).ToPagedList(totalCount, message.Parameters.PageNumber, message.Parameters.PageSize);
         }
     }
 
-    public record Response(Guid Id, string? code, string pluCode, Guid categoryId, Guid supplierId);
+    public record Response(Guid Id, string Name);
 }
