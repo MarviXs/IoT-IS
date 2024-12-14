@@ -349,42 +349,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("SharingUserId");
 
-                    b.ToTable("DeviceShares");
-                });
-
-            modelBuilder.Entity("Fei.Is.Api.Data.Models.DeviceShare", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("DeviceId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("Permission")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid>("SharedToUserId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("SharingUserId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DeviceId");
-
-                    b.HasIndex("SharedToUserId");
-
-                    b.HasIndex("SharingUserId");
-
-                    b.ToTable("DeviceShares");
+                    b.ToTable("DeviceShares", (string)null);
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.DeviceTemplate", b =>
@@ -832,13 +797,6 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("VATCategoryId");
 
-                    b.HasIndex("PLUCode")
-                        .IsUnique();
-
-                    b.HasIndex("SupplierId");
-
-                    b.HasIndex("VATCategoryId");
-
                     b.ToTable("Products", (string)null);
                 });
 
@@ -969,7 +927,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasKey("Id");
 
-                    b.ToTable("Suppliers");
+                    b.ToTable("Suppliers", (string)null);
 
                     b.HasData(
                         new
@@ -1030,107 +988,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasKey("Id");
 
-                    b.ToTable("VATCategories");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("5bfc3ed5-8874-4452-9043-22065fc00e29"),
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Normal",
-                            Rate = 21m,
-                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            Id = new Guid("37b1c257-1401-4d79-9c4f-a206b0937fd2"),
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Reduced",
-                            Rate = 19m,
-                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        });
-                });
-
-            modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Supplier", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Suppliers");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("e8391bf0-9dc4-4d2e-a3f0-d028833ce902"),
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Volmary",
-                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            Id = new Guid("4fd1cbf4-bef4-4fee-b72f-fac1b15c8357"),
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Bennials",
-                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            Id = new Guid("94052ccf-6797-4351-ad43-5130cb6c4fbe"),
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Schneider",
-                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            Id = new Guid("7df5fe3b-1bbf-4dc8-a108-5c6f931e0db4"),
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Syngenta",
-                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            Id = new Guid("412ceb2b-ca6a-43c9-80e1-6eb1cb16164a"),
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Internal",
-                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        });
-                });
-
-            modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.VATCategory", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<decimal>("Rate")
-                        .HasColumnType("numeric");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("VATCategories");
+                    b.ToTable("VATCategories", (string)null);
 
                     b.HasData(
                         new

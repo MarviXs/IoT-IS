@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Fei.Is.Api.Data.Migrations.AppDb
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241214170542_SeedingFix")]
+    [Migration("20241214173528_SeedingFix")]
     partial class SeedingFix
     {
         /// <inheritdoc />
