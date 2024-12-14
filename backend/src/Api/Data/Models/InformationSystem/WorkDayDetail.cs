@@ -1,9 +1,7 @@
 namespace Fei.Is.Api.Data.Models.InformationSystem;
 
-public class WorkDayDetail
+public class WorkDayDetail : BaseModel
 {
-    public int Id { get; set; }
-    public int ReportId { get; set; }
     public DateTime WorkDate { get; set; }
     public int TaskNumber { get; set; }
     public string WorkLocation { get; set; }
@@ -16,6 +14,4 @@ public class WorkDayDetail
     public decimal TotalB { get; set; }
     public string Equipment { get; set; }
     public decimal TotalEquipment { get; set; }
-    
-    public WorkReport WorkReport { get; set; }
 }

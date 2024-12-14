@@ -1,6 +1,6 @@
 namespace Fei.Is.Api.Data.Models.InformationSystem;
 
-public class OrderItem
+public class OrderItem : BaseModel
 {
     public int Id { get; set; } // ID objednávkovej položky
     public required int OrderId { get; set; } // ID objednávky

@@ -1,4 +1,4 @@
-using System.Security.Claims;
+/*using System.Security.Claims;
 using Carter;
 using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
@@ -41,15 +41,16 @@ public static class DeleteItemFromOrder
         }
     }
 
-    public record Command(ClaimsPrincipal User, int OrderId, int ItemId) : IRequest<Result>;
+    public record Command(ClaimsPrincipal User, Guid OrderId, int ItemId) : IRequest<Result>;
 
     public sealed class Handler(AppDbContext context) : IRequestHandler<Command, Result>
     {
         public async Task<Result> Handle(Command message, CancellationToken cancellationToken)
         {
             // Vyhľadáme položku na základe kombinácie OrderId a Id
-            var orderItem = await context.OrderItems
-                .FirstOrDefaultAsync(oi => oi.OrderId == message.OrderId && oi.Id == message.ItemId, cancellationToken);
+            var orderItem = await context
+                .OrderItems.Where(oi => oi.Order.Id == message.OrderId && oi.Order.Id == message.ItemId)
+                .FirstOrDefaultAsync(cancellationToken);
 
             // Ak položka neexistuje, vrátime NotFound
             if (orderItem == null)
@@ -66,3 +67,4 @@ public static class DeleteItemFromOrder
         }
     }
 }
+*/

@@ -17,16 +17,19 @@ public static class UpdateProduct
 {
     public record Request(
         string PLUCode,
-        string Code,
+        string? Code,
         string LatinName,
         string? CzechName,
         string? FlowerLeafDescription,
+        string Variety,
         string? PotDiameterPack,
         decimal? pricePerPiecePack,
         decimal? pricePerPiecePackVAT,
         decimal? discountedPriceWithoutVAT,
         decimal? RetailPrice,
-        Guid CategoryId
+        Guid CategoryId,
+        Guid? SupplierId,
+        Guid? VATCategoryId
     );
 
     public sealed class Endpoint : ICarterModule
@@ -75,9 +78,7 @@ public static class UpdateProduct
                 return Result.Fail(new ValidationError(result));
             }
 
-            var query = context.Products
-                .Include(p => p.Category)
-                .Where(p => p.Id == message.Id);
+            var query = context.Products.Include(p => p.Category).Where(p => p.Id == message.Id);
 
             if (!await query.AnyAsync(cancellationToken))
             {
@@ -86,27 +87,56 @@ public static class UpdateProduct
 
             var product = await query.FirstAsync(cancellationToken);
 
+            if (product.PLUCode != message.Request.PLUCode)
+            {
+                if (await context.Products.AnyAsync(p => p.PLUCode == message.Request.PLUCode, cancellationToken))
+                {
+                    return Result.Fail(new BadRequestError("Product with this PLU code already exists"));
+                }
+            }
+
             product.PLUCode = message.Request.PLUCode;
             product.Code = message.Request.Code;
             product.LatinName = message.Request.LatinName;
             product.CzechName = message.Request.CzechName;
             product.FlowerLeafDescription = message.Request.FlowerLeafDescription;
+            product.Variety = message.Request.Variety;
             product.PotDiameterPack = message.Request.PotDiameterPack;
             product.PricePerPiecePack = message.Request.pricePerPiecePack;
-            product.PricePerPiecePackVAT = message.Request.pricePerPiecePackVAT;
             product.DiscountedPriceWithoutVAT = message.Request.discountedPriceWithoutVAT;
             product.RetailPrice = message.Request.RetailPrice;
 
-
             if (message.Request.CategoryId != product.Category.Id)
             {
-                var category = await context.Categories.FindAsync([message.Request.CategoryId], cancellationToken);
+                var category = context.Categories.Where((item) => item.Id == message.Request.CategoryId);
                 if (category == null)
                 {
                     return Result.Fail(new NotFoundError());
                 }
 
-                product.Category = category;
+                product.Category = category.First();
+            }
+
+            if (message.Request.SupplierId != null && message.Request.SupplierId != product.Supplier?.Id)
+            {
+                var supplier = context.Suppliers.Where((item) => item.Id == message.Request.SupplierId);
+                if (supplier == null)
+                {
+                    return Result.Fail(new NotFoundError());
+                }
+
+                product.Supplier = supplier.First();
+            }
+
+            if (message.Request.VATCategoryId != null && message.Request.VATCategoryId != product.VATCategory?.Id)
+            {
+                var vatCategory = context.VATCategories.Where((item) => item.Id == message.Request.VATCategoryId);
+                if (vatCategory == null)
+                {
+                    return Result.Fail(new NotFoundError());
+                }
+
+                product.VATCategory = vatCategory.First();
             }
 
             await context.SaveChangesAsync(cancellationToken);
@@ -123,6 +153,7 @@ public static class UpdateProduct
         {
             RuleFor(r => r.Request.LatinName).NotEmpty().WithMessage("LatinName is required");
             RuleFor(r => r.Request.CategoryId).NotEmpty().WithMessage("CategoryId is required");
+            RuleFor(r => r.Request.PLUCode).NotEmpty().WithMessage("PLUCode is required");
         }
     }
 }

@@ -1,10 +1,8 @@
 namespace Fei.Is.Api.Data.Models.InformationSystem;
 
-public class ProductionPlan
+public class ProductionPlan : BaseModel
 {
-    public int Id { get; set; }
     public int Year { get; set; }
-    public Guid ProductNumber { get; set; }
     public int DeliveryWeek { get; set; }
     public int OrderedQuantity { get; set; }
     public int StrQuantity { get; set; }

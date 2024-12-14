@@ -57,10 +57,12 @@ public class AppDbContext
         modelBuilder.ApplyConfiguration(new CategoryConfiguration());
         modelBuilder.ApplyConfiguration(new ProductionPlanConfiguration());
         modelBuilder.ApplyConfiguration(new SummaryConfiguration());
+        modelBuilder.ApplyConfiguration(new SupplierConfiguration());
         modelBuilder.ApplyConfiguration(new WorkDayDetailConfiguration());
         
         modelBuilder.ApplyConfiguration(new OrderItemContainerConfiguration());
 
+        modelBuilder.ApplyConfiguration(new VATCategoryConfiguration());
 
         modelBuilder.ApplyDataSeeds();
     }
@@ -90,8 +92,10 @@ public class AppDbContext
     public DbSet<Order> Orders { get; set; }
     public DbSet<OrderItem> OrderItems { get; set; }
     public DbSet<Product> Products { get; set; }
+    public DbSet<VATCategory> VATCategories { get; set; }
     public DbSet<ProductionPlan> ProductionPlans { get; set; }
     public DbSet<Summary> Summaries { get; set; }
+    public DbSet<Supplier> Suppliers { get; set; }
     public DbSet<WorkDayDetail> WorkDayDetails { get; set; }
     public DbSet<WorkReport> WorkReports { get; set; }
     public DbSet<OrderItemContainer> OrderItemContainers { get; set; }

@@ -2,13 +2,7 @@
   <q-form @submit="onSubmit" ref="productForm">
     <q-card-section class="q-pt-none column q-gutter-md">
       <q-input v-model="product.code" class="col-12" :label="t('product.code')" clearable />
-      <q-input
-        v-model="product.pluCode"
-        class="col-12"
-        :label="t('product.plu_code')"
-        clearable
-        :rules="pluCodeRules"
-      />
+      <q-input v-model="product.pluCode" class="col-12" :label="t('product.pluCode')" clearable />
       <q-input
         v-model="product.latinName"
         class="col-12"
@@ -24,6 +18,7 @@
         type="number"
         clearable
       />
+      <q-input v-model="product.variety" class="col-12" :label="t('product.variety')" clearable />
       <q-input
         v-model="product.potDiameterPack"
         class="col-12"
@@ -38,13 +33,14 @@
         type="number"
         clearable
       />
-      <q-input
+      <!-- TODO vyratavat auto a needitovatelne -->
+      <!-- <q-input
         v-model="product.pricePerPiecePackVAT"
         class="col-12"
         :label="t('product.price_per_piece_pack_vat')"
         type="number"
         clearable
-      />
+      /> -->
       <q-input
         v-model="product.discountedPriceWithoutVAT"
         class="col-12"
@@ -60,6 +56,8 @@
         clearable
       />
       <CategorySelect v-model="product.category" />
+      <SuppliersSelect v-model="product.supplier" />
+      <VATCategoriesSelect v-model="product.vatCategory" />
     </q-card-section>
     <q-card-actions align="right" class="text-primary">
       <q-btn v-close-popup flat :label="t('global.cancel')" no-caps />
@@ -80,19 +78,24 @@
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import CategorySelect, { CategorySelectData } from '../categories/CategorySelect.vue';
+import { SupplierSelectData } from '../suppliers/SuppliersSelect.vue';
+import SuppliersSelect from '../suppliers/SuppliersSelect.vue';
+import VATCategoriesSelect, { VATCategorySelectData } from '../vatCategories/VATCategoriesSelect.vue';
 
 export interface ProductFormData {
-  pluCode: string;
-  code: string;
+  code: string | null | undefined;
+  pluCode: string | null | undefined;
   latinName: string;
   czechName: string | null | undefined;
   flowerLeafDescription: string | null | undefined;
+  variety: string;
   potDiameterPack: string | null | undefined;
   pricePerPiecePack: number | null | undefined;
-  pricePerPiecePackVAT: number | null | undefined;
   discountedPriceWithoutVAT: number | null | undefined;
   retailPrice: number | null | undefined;
-  category?: CategorySelectData;
+  category: CategorySelectData | undefined;
+  supplier: SupplierSelectData | undefined;
+  vatCategory: VATCategorySelectData | undefined;
 }
 
 const props = defineProps<{
@@ -103,7 +106,7 @@ const emit = defineEmits(['onSubmit']);
 
 const { t } = useI18n();
 
-const product = defineModel<ProductFormData>({ default: () => ({ pluCode: '', code: '' }) });
+const product = defineModel<ProductFormData>({ default: () => ({ code: '', variety: '' }) });
 
 const productForm = ref();
 
@@ -114,6 +117,5 @@ function onSubmit() {
   emit('onSubmit');
 }
 
-const pluCodeRules = [(val: string) => (val && val.length > 0) || t('global.rules.required')];
 const latinNameRules = [(val: string) => (val && val.length > 0) || t('global.rules.required')];
 </script>

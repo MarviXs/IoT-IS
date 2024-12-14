@@ -1,7 +1,7 @@
 <template>
   <PageLayout :breadcrumbs="[{ label: t('products.label', 2) }]">
     <template #actions>
-      <SearchBar v-model="filter" class="col-grow col-lg-auto" />
+      <SearchBar v-model="filter" class="col-grow col-lg-auto" @update:model-value="getProducts(pagination)" />
       <q-btn
         class="shadow col-grow col-lg-auto"
         color="secondary"
@@ -10,6 +10,7 @@
         size="15px"
         :label="t('product.import_products')"
         :icon="mdiImport"
+        @click="importDialogOpen = true"
       />
       <q-btn
         class="shadow col-grow col-lg-auto"
@@ -25,7 +26,7 @@
     <template #default>
       <ProductsTable
         v-model:pagination="pagination"
-        :devices="productsPaginated"
+        v-model:products="productsPaginated"
         :loading="isLoadingProducts"
         @on-change="getProducts(pagination)"
         @on-request="onRequest"
@@ -33,6 +34,7 @@
     </template>
   </PageLayout>
   <CreateProductDialog v-model="isCreateDialogOpen" @on-create="getProducts(pagination)" />
+  <ImportProductDialog v-model="importDialogOpen" />
 </template>
 
 <script setup lang="ts">
@@ -46,13 +48,15 @@ import ProductService, { ProductsQueryParams } from '@/api/services/ProductServi
 import { handleError } from '@/utils/error-handler';
 import { mdiPlus, mdiImport } from '@quasar/extras/mdi-v7';
 import CreateProductDialog from '@/components/products/CreateProductDialog.vue';
-import DeleteProductDialog from '@/components/products/DeleteProductDialog.vue';
+import ImportProductDialog from '@/components/products/ImportProductDialog.vue';
 
 const { t } = useI18n();
 const filter = ref('');
 
+const importDialogOpen = ref(false);
+
 const pagination = ref<PaginationClient>({
-  sortBy: 'name',
+  sortBy: 'PLUCode',
   descending: false,
   page: 1,
   rowsPerPage: 10,
@@ -83,7 +87,7 @@ async function getProducts(paginationTable: PaginationTable) {
     return;
   }
 
-  productsPaginated.value = data;
+  productsPaginated.value = data.items;
   pagination.value.rowsNumber = data.totalCount ?? 0;
   pagination.value.sortBy = paginationTable.sortBy;
   pagination.value.descending = paginationTable.descending;

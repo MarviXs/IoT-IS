@@ -326,6 +326,7 @@
   "product": {
     "label": "Product | Products",
     "plu_code": "PLU Code",
+    "plu_code_hint": "Leave blank to generate automatically",
     "czech_name": "Czech Name",
     "latin_name": "Latin Name",
     "code": "Code",
@@ -336,6 +337,7 @@
     "price_per_piece_pack_vat": "Price Per Piece Pack VAT",
     "discounted_price_without_vat": "Discounted Price Without VAT",
     "retail_price": "Retail Price",
+    "variety": "Variety",
     "add_product": "Add Product",
     "edit_product": "Edit Product",
     "import_products": "Import Products",
@@ -353,6 +355,12 @@
   },
   "product_category": {
     "label": "Category"
+  },
+  "supplier": {
+    "label": "Supplier | Suppliers"
+  },
+  "vat_category": {
+    "label": "VAT Category | VAT Categories"
   },
   "command": {
     "label": "Command | Commands",
@@ -452,5 +460,16 @@
       "add_failed": "Failed to add item",
       "delete_failed": "Failed to delete item"
     }
+  },
+  "company": {
+    "label": "Company | Companies",
+    "name": "Name",
+    "name2": "Name 2",
+    "IC": "IC",
+    "DIC": "DIC",
+    "street": "Street",
+    "city": "City",
+    "psc": "Postal code",
+    "add_company": "Add Company"
   }
 }
