@@ -13,7 +13,5 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
         builder.Property(c => c.Id).ValueGeneratedOnAdd();
 
         builder.Property(c => c.CategoryName).IsRequired();
-
-        builder.HasMany(c => c.Products).WithOne(p => p.Category);
     }
 }

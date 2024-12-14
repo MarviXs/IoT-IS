@@ -6,6 +6,7 @@ using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
+using Fei.Is.Api.Features.Devices.Extensions;
 using Fei.Is.Api.Features.Jobs.Extensions;
 using FluentResults;
 using MediatR;
@@ -59,6 +60,7 @@ public static class GetJobById
             var jobWithOwnerId = await context
                 .Jobs.Where(j => j.Id == message.JobId)
                 .Include(j => j.Device)
+                .ThenInclude(d => d!.SharedWithUsers)
                 .Include(j => j.Commands.OrderBy(c => c.Order))
                 .AsNoTracking()
                 .SingleOrDefaultAsync(cancellationToken);
@@ -70,7 +72,7 @@ public static class GetJobById
             {
                 return Result.Fail(new NotFoundError());
             }
-            if (ownerId != message.User.GetUserId())
+            if (jobWithOwnerId?.Device == null || jobWithOwnerId?.Device.CanView(message.User) == false)
             {
                 return Result.Fail(new ForbiddenError());
             }

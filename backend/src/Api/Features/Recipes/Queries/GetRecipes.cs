@@ -76,9 +76,14 @@ public static class GetRecipes
 
             var query = context
                 .Recipes.AsNoTracking()
+                .AsSplitQuery()
                 .Include(d => d.DeviceTemplate)
                 .Include(d => d.DeviceTemplate!.Devices)
-                .Where(d => d.DeviceTemplate!.OwnerId == message.User.GetUserId())
+                .ThenInclude(device => device.SharedWithUsers)
+                .Where(d =>
+                    d.DeviceTemplate!.OwnerId == message.User.GetUserId()
+                    || d.DeviceTemplate!.Devices.Any(device => device.SharedWithUsers.Any(u => u.SharedToUserId == message.User.GetUserId()))
+                )
                 .Where(d => d.Name.ToLower().Contains(StringUtils.Normalized(queryParameters.SearchTerm)))
                 .Where(d => queryParameters.DeviceTemplateId == null || d.DeviceTemplateId == queryParameters.DeviceTemplateId)
                 .Where(d => queryParameters.DeviceId == null || d.DeviceTemplate!.Devices.Any(device => device.Id == queryParameters.DeviceId));

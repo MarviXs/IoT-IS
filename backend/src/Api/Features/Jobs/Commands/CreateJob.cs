@@ -5,6 +5,7 @@ using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
+using Fei.Is.Api.Features.Devices.Extensions;
 using Fei.Is.Api.Features.Jobs.EventHandlers;
 using FluentResults;
 using FluentValidation;
@@ -24,7 +25,7 @@ public static class CreateJob
         {
             app.MapPost(
                     "devices/{deviceId:guid}/jobs",
-                    async Task<Results<Created<Guid>, NotFound, ValidationProblem>> (
+                    async Task<Results<Created<Guid>, NotFound,ForbidHttpResult, ValidationProblem>> (
                         IMediator mediator,
                         ClaimsPrincipal user,
                         Request request,
@@ -41,6 +42,10 @@ public static class CreateJob
                         else if (result.HasError<ValidationError>())
                         {
                             return TypedResults.ValidationProblem(result.ToValidationErrors());
+                        }
+                        else if (result.HasError<ForbiddenError>())
+                        {
+                            return TypedResults.Forbid();
                         }
 
                         return TypedResults.Created(result.Value.ToString(), result.Value);
@@ -69,12 +74,12 @@ public static class CreateJob
                 return Result.Fail(new ValidationError(result));
             }
 
-            var device = await context.Devices.FirstOrDefaultAsync(device => device.Id == message.DeviceId, cancellationToken);
+            var device = await context.Devices.Include(d => d.SharedWithUsers).FirstOrDefaultAsync(device => device.Id == message.DeviceId, cancellationToken);
             if (device == null)
             {
                 return Result.Fail(new NotFoundError());
             }
-            if (device.OwnerId != message.User.GetUserId())
+            if (!device.CanEdit(message.User))
             {
                 return Result.Fail(new ForbiddenError());
             }

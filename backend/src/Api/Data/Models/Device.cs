@@ -11,7 +11,8 @@ public class Device : BaseModel
     public required string Name { get; set; }
     public string? Mac { get; set; }
     public required string AccessToken { get; set; }
-    
+
     public ICollection<Job> Jobs { get; set; } = [];
     public ICollection<CollectionItem> CollectionItems { get; set; } = [];
+    public ICollection<DeviceShare> SharedWithUsers { get; set; } = [];
 }

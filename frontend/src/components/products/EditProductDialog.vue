@@ -15,7 +15,6 @@ import { useI18n } from 'vue-i18n';
 import DialogCommon from '@/components/core/DialogCommon.vue';
 import ProductForm, { ProductFormData } from './ProductForm.vue';
 import ProductService, { UpdateProductRequest } from '@/api/services/ProductService';
-import CategoryService from '@/api/services/CategoryService';
 
 const isDialogOpen = defineModel<boolean>();
 const props = defineProps({
@@ -42,25 +41,15 @@ async function getProduct() {
     latinName: data.latinName,
     czechName: data.czechName,
     flowerLeafDescription: data.flowerLeafDescription,
+    variety: data.variety,
     potDiameterPack: data.potDiameterPack,
     pricePerPiecePack: data.pricePerPiecePack,
-    pricePerPiecePackVAT: data.pricePerPiecePackVAT,
     discountedPriceWithoutVAT: data.discountedPriceWithoutVAT,
     retailPrice: data.retailPrice,
+    category: data.category as ProductFormData['category'],
+    supplier: data.supplier as ProductFormData['supplier'],
+    vatCategory: data.vatCategory as ProductFormData['vatCategory'],
   };
-
-  CategoryService.getCategory(data.categoryId)
-    .then((response) => {
-      if (response.data) {
-        product.value.category = {
-          id: response.data.id,
-          name: response.data.name,
-        };
-      }
-    })
-    .catch((error) => {
-      handleError(error, t('product.toasts.load_failed'));
-    });
 }
 
 const updatingProduct = ref(false);
@@ -68,17 +57,19 @@ const productForm = ref();
 
 async function updateProduct() {
   const updateRequest: UpdateProductRequest = {
+    pluCode: product.value.pluCode!,
     code: product.value.code,
-    pluCode: product.value.pluCode,
     latinName: product.value.latinName,
     czechName: product.value.czechName,
     flowerLeafDescription: product.value.flowerLeafDescription,
+    variety: product.value.variety,
     potDiameterPack: product.value.potDiameterPack,
     pricePerPiecePack: product.value.pricePerPiecePack,
-    pricePerPiecePackVAT: product.value.pricePerPiecePackVAT,
     discountedPriceWithoutVAT: product.value.discountedPriceWithoutVAT,
     retailPrice: product.value.retailPrice,
     categoryId: product.value.category!.id,
+    supplierId: product.value.supplier!.id,
+    vatCategoryId: product.value.vatCategory!.id,
   };
 
   updatingProduct.value = true;

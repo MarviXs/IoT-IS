@@ -2,6 +2,7 @@
 using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models;
+using Fei.Is.Api.Data.Models.InformationSystem;
 using FluentResults;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -46,8 +47,11 @@ public static class GetProductById
     {
         public async Task<Result<Response>> Handle(Query request, CancellationToken cancellationToken)
         {
-            var product = await context.Products.AsNoTracking()
+            var product = await context
+                .Products.AsNoTracking()
                 .Include(p => p.Category)
+                .Include(p => p.Supplier)
+                .Include(p => p.VATCategory)
                 .FirstOrDefaultAsync(product => product.Id == request.Id, cancellationToken);
 
             if (product == null)
@@ -63,10 +67,12 @@ public static class GetProductById
                 FlowerLeafDescription: product.FlowerLeafDescription,
                 PotDiameterPack: product.PotDiameterPack,
                 PricePerPiecePack: product.PricePerPiecePack,
-                PricePerPiecePackVAT: product.PricePerPiecePackVAT,
                 DiscountedPriceWithoutVAT: product.DiscountedPriceWithoutVAT,
                 RetailPrice: product.RetailPrice,
-                CategoryId: product.Category.Id
+                Category: new CategoryModel(product.Category.Id, product.Category.CategoryName),
+                Supplier: new SupplierModel(product.Supplier.Id, product.Supplier.Name),
+                VATCategory: new VatCategoryModel(product.VATCategory.Id, product.VATCategory.Name, product.VATCategory.Rate),
+                Variety: product.Variety
             );
 
             return Result.Ok(response);
@@ -75,15 +81,33 @@ public static class GetProductById
 
     public record Response(
         string PLUCode,
-        string Code,
+        string? Code,
         string LatinName,
         string? CzechName,
         string? FlowerLeafDescription,
         string? PotDiameterPack,
         decimal? PricePerPiecePack,
-        decimal? PricePerPiecePackVAT,
         decimal? DiscountedPriceWithoutVAT,
         decimal? RetailPrice,
-        Guid CategoryId
+        CategoryModel Category,
+        SupplierModel Supplier,
+        string Variety,
+        VatCategoryModel VATCategory
+    );
+
+    public record CategoryModel(
+        Guid Id,
+        string Name
+    );
+
+    public record SupplierModel(
+        Guid Id,
+        string Name
+    );
+
+    public record VatCategoryModel(
+        Guid Id,
+        string Name,
+        decimal Rate
     );
 }
