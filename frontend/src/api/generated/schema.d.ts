@@ -291,6 +291,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/companies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get paginated companies */
+        get: operations["GetCompanies"];
+        put?: never;
+        /** Create a company */
+        post: operations["CreateCompany"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/companies/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a company by Id */
+        get: operations["GetCompanyById"];
+        /** Update a company */
+        put: operations["UpdateCompany"];
+        post?: never;
+        /** Delete a company */
+        delete: operations["DeleteCompany"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/devices/{deviceId}/sensors/{sensorTag}/data/latest": {
         parameters: {
             query?: never;
@@ -1007,6 +1044,19 @@ export interface components {
             readonly hasNext: boolean;
             items: components["schemas"]["Fei.Is.Api.Features.Commands.Queries.GetCommands.Response"][];
         };
+        "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Companies.Queries.GetCompanies.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+            /** Format: int32 */
+            currentPage: number;
+            /** Format: int32 */
+            totalPages: number;
+            /** Format: int32 */
+            pageSize: number;
+            /** Format: int32 */
+            totalCount: number;
+            readonly hasPrevious: boolean;
+            readonly hasNext: boolean;
+            items: components["schemas"]["Fei.Is.Api.Features.Companies.Queries.GetCompanies.Response"][];
+        };
         "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollections.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
             /** Format: int32 */
             currentPage: number;
@@ -1221,6 +1271,36 @@ export interface components {
             displayName: string;
             name: string;
             params: number[];
+        };
+        "Fei.Is.Api.Features.Companies.Commands.CreateCompany.Request": {
+            title: string;
+            ic: string;
+            dic?: string | null;
+            street?: string | null;
+            psc?: string | null;
+            city?: string | null;
+        };
+        "Fei.Is.Api.Features.Companies.Commands.UpdateCompany.Request": {
+            title: string;
+            ic: string;
+            dic?: string | null;
+            street?: string | null;
+            psc?: string | null;
+            city?: string | null;
+        };
+        "Fei.Is.Api.Features.Companies.Queries.GetCompanies.Response": {
+            /** Format: uuid */
+            id: string;
+            title: string;
+            ic: string;
+        };
+        "Fei.Is.Api.Features.Companies.Queries.GetCompanyById.Response": {
+            title: string;
+            ic: string;
+            dic?: string | null;
+            street?: string | null;
+            psc?: string | null;
+            city?: string | null;
         };
         "Fei.Is.Api.Features.DataPoints.Commands.CreateDataPoints.Request": {
             tag: string;
@@ -1486,8 +1566,8 @@ export interface components {
             note?: string | null;
         };
         "Fei.Is.Api.Features.Orders.Queries.GetOrders.Response": {
-            /** Format: int32 */
-            id: number;
+            /** Format: uuid */
+            id: string;
             customerName: string;
             /** Format: date-time */
             orderDate: string;
@@ -2427,6 +2507,161 @@ export interface operations {
                 content: {
                     "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
                 };
+            };
+        };
+    };
+    GetCompanies: {
+        parameters: {
+            query?: {
+                SortBy?: string;
+                Descending?: boolean;
+                SearchTerm?: string;
+                PageNumber?: number;
+                PageSize?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Companies.Queries.GetCompanies.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"];
+                };
+            };
+        };
+    };
+    CreateCompany: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.Companies.Commands.CreateCompany.Request"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+        };
+    };
+    GetCompanyById: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.Companies.Queries.GetCompanyById.Response"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UpdateCompany: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.Companies.Commands.UpdateCompany.Request"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DeleteCompany: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -3730,7 +3965,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": number;
+                    "application/json": string;
                 };
             };
             /** @description Bad Request */

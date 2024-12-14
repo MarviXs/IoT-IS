@@ -56,12 +56,10 @@ public static class GetOrders
                     Customer = new Company
                     {
                         Id = Guid.Parse("3f1fa498-d863-473c-a8c0-b8c545df9cfd"),
-                        //Id = 9,
                         Title = "Město Volyně",
-                        Title2 = null,
                         Ic = "00252000",
                         Dic = "CZ00252000",
-                        Ulice = "náměstí Svobody 41",
+                        Street = "náměstí Svobody 41",
                         Psc = "387 01",
                         City = "Volyně"
                     },
@@ -77,12 +75,10 @@ public static class GetOrders
                     Customer = new Company
                     {
                         Id = Guid.Parse("2a904cef-5184-4809-bdba-9a5a24171618"),
-                        //Id = 8,
                         Title = "Technické služby města Volyně",
-                        Title2 = null,
                         Ic = "00252000",
                         Dic = "CZ00252000",
-                        Ulice = "náměstí Hrdinů 70",
+                        Street = "náměstí Hrdinů 70",
                         Psc = "387 01",
                         City = "Volyně"
                     },
@@ -98,12 +94,10 @@ public static class GetOrders
                     Customer = new Company
                     {
                         Id = Guid.Parse("55d77bd2-f7eb-4387-a008-d212f6aaecb5"),
-                        //Id = 7,
                         Title = "PRIMA akciová společnost",
-                        Title2 = null,
                         Ic = "47239743",
                         Dic = "CZ47239743",
-                        Ulice = "Raisova 1004",
+                        Street = "Raisova 1004",
                         Psc = "387 47",
                         City = "Strakonice"
                     }

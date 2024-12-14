@@ -16,7 +16,7 @@ import DialogCommon from '@/components/core/DialogCommon.vue';
 import CompanyForm, { CompanyFormData } from './CompanyForm.vue';
 import CompanyService, { UpdateCompanyRequest } from '@/api/services/CompanyService';
 
-const isDialogOpen = ref<boolean>(false);
+const isDialogOpen = defineModel<boolean>();
 const props = defineProps({
   companyId: {
     type: String,
@@ -29,17 +29,16 @@ const { t } = useI18n();
 
 const company = ref<CompanyFormData>({
   title: '',
-  title2: '',
   ic: '',
-  dic: '',
-  street: '',
-  psc: '',
-  city: '',
+  dic: undefined,
+  street: undefined,
+  psc: undefined,
+  city: undefined,
 });
 const companyForm = ref();
 
 async function getCompany() {
-  const { data, error } = await CompanyService.getCompany(Number(props.companyId));
+  const { data, error } = await CompanyService.getCompany(props.companyId);
   if (error) {
     handleError(error, t('company.toasts.load_failed'));
     return;
@@ -47,7 +46,6 @@ async function getCompany() {
 
   company.value = {
     title: data.title,
-    title2: data.title2,
     ic: data.ic,
     dic: data.dic,
     street: data.street,
@@ -61,7 +59,6 @@ const updatingCompany = ref(false);
 async function updateCompany() {
   const updateRequest: UpdateCompanyRequest = {
     title: company.value.title,
-    title2: company.value.title2,
     ic: company.value.ic,
     dic: company.value.dic,
     street: company.value.street,
@@ -70,7 +67,7 @@ async function updateCompany() {
   };
 
   updatingCompany.value = true;
-  const { data, error } = await CompanyService.updateCompany(Number(props.companyId), updateRequest);
+  const { data, error } = await CompanyService.updateCompany(props.companyId, updateRequest);
   updatingCompany.value = false;
 
   if (error) {
@@ -94,5 +91,3 @@ watch(
   { immediate: true },
 );
 </script>
-
-<style lang="scss" scoped></style>
