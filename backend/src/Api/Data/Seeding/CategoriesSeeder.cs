@@ -13,12 +13,16 @@ namespace Fei.Is.Api.Data.Seeding
                     new Category()
                     {
                         Id = new Guid("6bf2fd3c-1185-47c4-870f-32738d045f36"),
-                        CategoryName = "Nejaka burina"
+                        CategoryName = "Nejaka burina",
+                        CreatedAt = new DateTime(0),
+                        UpdatedAt = new DateTime(0)
                     },
                     new Category()
                     {
                         Id = new Guid("7905728d-ce7d-486b-a981-2882232f1b6b"),
-                        CategoryName = "Nejaky strom"
+                        CategoryName = "Nejaky strom",
+                        CreatedAt = new DateTime(0),
+                        UpdatedAt = new DateTime(0)
                     }
                 );
         }
