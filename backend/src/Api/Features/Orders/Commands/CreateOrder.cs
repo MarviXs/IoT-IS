@@ -23,7 +23,7 @@ public static class CreateOrder
         {
             app.MapPost(
                     "orders", // Define the route for creating an order
-                    async Task<Results<Created<int>, ValidationProblem>> (IMediator mediator, ClaimsPrincipal user, Request request) =>
+                    async Task<Results<Created<Guid>, ValidationProblem>> (IMediator mediator, ClaimsPrincipal user, Request request) =>
                     {
                         // Create a command with the incoming request and user information
                         var command = new Command(request, user);
@@ -52,12 +52,12 @@ public static class CreateOrder
     }
 
     // Command to encapsulate the request data and user for creating an order
-    public record Command(Request Request, ClaimsPrincipal User) : IRequest<Result<int>>;
+    public record Command(Request Request, ClaimsPrincipal User) : IRequest<Result<Guid>>;
 
     // Handler to process the command and create an order in the database
-    public sealed class Handler(AppDbContext context, IValidator<Command> validator) : IRequestHandler<Command, Result<int>>
+    public sealed class Handler(AppDbContext context, IValidator<Command> validator) : IRequestHandler<Command, Result<Guid>>
     {
-        public async Task<Result<int>> Handle(Command message, CancellationToken cancellationToken)
+        public async Task<Result<Guid>> Handle(Command message, CancellationToken cancellationToken)
         {
             // Validate the command using the provided validator
             var result = validator.Validate(message);
@@ -78,7 +78,6 @@ public static class CreateOrder
             // Create a new Order entity and populate it with data from the request
             var order = new Order
             {
-                CustomerId = new Guid(message.Request.CustomerId.ToString()),//message.Request.CustomerId,
                 OrderDate = DateTime.SpecifyKind(message.Request.OrderDate, DateTimeKind.Utc),
                 DeliveryWeek = message.Request.DeliveryWeek,
                 PaymentMethod = message.Request.PaymentMethod,

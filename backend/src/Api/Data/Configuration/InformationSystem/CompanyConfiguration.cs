@@ -10,13 +10,6 @@ public class CompanyConfiguration : IEntityTypeConfiguration<Company>
     {
         builder.HasKey(c => c.Id);
 
-        builder.Property(c => c.Title)
-            .IsRequired();
-
-        builder.HasMany(c => c.DeliveryNotes)
-            .WithOne(dn => dn.Supplier);
-
-        builder.HasMany(c => c.Invoices)
-            .WithOne(i => i.Supplier);
+        builder.Property(c => c.Title).IsRequired();
     }
 }
