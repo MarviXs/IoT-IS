@@ -8,18 +8,14 @@ using FluentResults;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
 
 namespace Fei.Is.Api.Features.OrderItemContainers.Commands;
 
 public static class AddOrderContainer
 {
     // Record to represent the request for adding an order container
-    public record Request(
-        int OrderId,
-        string Name,
-        int Quantity,
-        decimal PricePerContainer
-    );
+    public record Request(Guid OrderId, string Name, int Quantity, decimal PricePerContainer);
 
     // Endpoint definition for handling the addition of containers to orders
     public sealed class Endpoint : ICarterModule
@@ -28,7 +24,7 @@ public static class AddOrderContainer
         {
             app.MapPost(
                     "orders/{orderId}/container", // Define the route for adding an order container
-                    async Task<Results<Created<int>, ValidationProblem>> (IMediator mediator, ClaimsPrincipal user, int orderId, Request request) =>
+                    async Task<Results<Created<Guid>, ValidationProblem>> (IMediator mediator, ClaimsPrincipal user, Guid orderId, Request request) =>
                     {
                         // Create a command with the incoming request and user information
                         var command = new Command(request with { OrderId = orderId }, user);
@@ -57,12 +53,12 @@ public static class AddOrderContainer
     }
 
     // Command to encapsulate the request data and user for adding a container to an order
-    public record Command(Request Request, ClaimsPrincipal User) : IRequest<Result<int>>;
+    public record Command(Request Request, ClaimsPrincipal User) : IRequest<Result<Guid>>;
 
     // Handler to process the command and add the container to the specified order in the database
-    public sealed class Handler(AppDbContext context, IValidator<Command> validator) : IRequestHandler<Command, Result<int>>
+    public sealed class Handler(AppDbContext context, IValidator<Command> validator) : IRequestHandler<Command, Result<Guid>>
     {
-        public async Task<Result<int>> Handle(Command message, CancellationToken cancellationToken)
+        public async Task<Result<Guid>> Handle(Command message, CancellationToken cancellationToken)
         {
             // Validate the command using the provided validator
             var validationResult = validator.Validate(message);
@@ -73,8 +69,8 @@ public static class AddOrderContainer
             }
 
             // Find the order in the database by OrderId
-            var order = await context.Orders.FindAsync(new object[] { message.Request.OrderId }, cancellationToken);
-            if (order == null)
+            var orderQuery = context.Orders.Where(order => order.Id == message.Request.OrderId);
+            if (!await orderQuery.AnyAsync(cancellationToken))
             {
                 // If the order is not found, return a NotFoundError
                 return Result.Fail(new NotFoundError());
@@ -83,16 +79,15 @@ public static class AddOrderContainer
             // Create a new OrderItemContainer entity and populate it with data from the request
             var orderContainer = new OrderItemContainer
             {
-                OrderId = message.Request.OrderId,
                 Name = message.Request.Name,
                 Quantity = message.Request.Quantity,
                 PricePerContainer = message.Request.PricePerContainer,
-                Order = order, // Associate the order entity
-                TotalPrice = message.Request.Quantity * message.Request.PricePerContainer // Calculate the total price
+                TotalPrice = message.Request.Quantity * message.Request.PricePerContainer // TODO doratavat automaticky
             };
 
-            // Add the new order container to the database context
-            await context.OrderItemContainers.AddAsync(orderContainer, cancellationToken);
+            var order = await orderQuery.FirstAsync(cancellationToken);
+
+            order.ItemContainers.Add(orderContainer);
             // Save changes to persist the new order container in the database
             await context.SaveChangesAsync(cancellationToken);
 
@@ -106,8 +101,8 @@ public static class AddOrderContainer
     {
         public Validator()
         {
-            // OrderId must be greater than 0
-            RuleFor(r => r.Request.OrderId).GreaterThan(0).WithMessage("Order ID is required and must be greater than 0");
+            // OrderId is required
+            RuleFor(r => r.Request.OrderId).NotEmpty().WithMessage("Order ID is required");
             // Name is required
             RuleFor(r => r.Request.Name).NotEmpty().WithMessage("Container name is required");
             // Quantity must be greater than 0

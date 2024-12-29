@@ -20,7 +20,7 @@ class OrdersService {
 
   // Načítanie jednej objednávky podľa ID
   async getOrder(orderId: string) {
-    return await client.GET('/orders/{id}', { params: { path: { id: Number(orderId) } } });
+    return await client.GET('/orders/{id}', { params: { path: { id: orderId } } });
   }
 
   // Vytvorenie novej objednávky
@@ -28,7 +28,7 @@ class OrdersService {
     return await client.POST('/orders', { body });
   }
   async updateOrder(orderId: number, body: UpdateOrderRequest) {
-    return await client.PUT('/orders/{id}', { params: { path: { id: Number(orderId) } },  body });
+    return await client.PUT('/orders/{id}', { params: { path: { id: Number(orderId) } }, body });
   }
 
   // Aktualizácia objednávky podľa ID

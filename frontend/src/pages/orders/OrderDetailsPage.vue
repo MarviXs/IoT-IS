@@ -5,22 +5,18 @@
       { label: 'Order #' + orderId, to: `/orders/${orderId}` },
     ]"
   >
-  <template #default>
-      <OrderDetailsCard 
-        v-if="order" 
-        :order="order" 
-        @edit="isUpdateDialogOpen = true"
+    <template #default>
+      <OrderDetailsCard v-if="order" :order="order" @edit="isUpdateDialogOpen = true" />
+      <div>
+        <OrderItemTable
+          v-model:pagination="pagination"
+          :orders="ordersPaginated || []"
+          :containers="ordersPaginated || []"
+          :loading="isLoadingContainers"
+          class="shadow"
+          @on-change="getOrderItemContainers(pagination)"
         />
-    <div>
-      <OrderItemTable 
-      v-model:pagination="pagination"
-      :orders="ordersPaginated || []"
-      :containers="ordersPaginated || []"
-      :loading="isLoadingContainers"
-      class="shadow"
-      @on-change="getOrderItemContainers(pagination)"
-       />
-    </div>
+      </div>
     </template>
   </PageLayout>
 </template>
@@ -28,7 +24,7 @@
 <script setup lang="ts">
 import OrderItemTable from '@/components/order-item/OrderItemTable.vue';
 import { useRoute } from 'vue-router';
-import {  ref } from 'vue';
+import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { mdiPlus } from '@quasar/extras/mdi-v7';
 import PageLayout from '@/layouts/PageLayout.vue';
@@ -55,7 +51,7 @@ const pagination = ref<PaginationClient>({
   rowsPerPage: 10,
   rowsNumber: 0,
 });
-const orderId = Number(route.params.id);
+const orderId = route.params.id;
 interface Order {
   id: number;
   customerName: string;
@@ -83,7 +79,7 @@ async function getOrderItemContainers(paginationTable: PaginationTable) {
       ordersPaginated.value = [];
       return;
     }
-    ordersPaginated.value = data.items.map(item => ({
+    ordersPaginated.value = data.items.map((item) => ({
       ...item,
       products: item.products || [], // Zabezpečíme, že `products` vždy existuje ako pole
     }));
@@ -94,9 +90,6 @@ async function getOrderItemContainers(paginationTable: PaginationTable) {
   }
 }
 
-
-
-
 // Načítanie údajov o objednávke
 async function getOrder() {
   const { data, error } = await OrderService.getOrder(orderId.toString());
@@ -106,7 +99,6 @@ async function getOrder() {
   }
   console.log('Loaded order:', data);
   order.value = data;
-  
 }
 // Funkcia na spracovanie požiadavky
 function handleRequest() {
@@ -120,7 +112,6 @@ getOrderItemContainers(pagination.value);
 
 function handleError(error: any, message: string) {
   console.error(message, error);
-  
 }
 </script>
 

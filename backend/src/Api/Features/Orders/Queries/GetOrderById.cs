@@ -1,7 +1,9 @@
-/*using System.Security.Claims;
+using System.Security.Claims;
 using Carter;
+using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models.InformationSystem;
+using FluentResults;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
@@ -15,12 +17,18 @@ public static class GetOrderById
         public void AddRoutes(IEndpointRouteBuilder app)
         {
             app.MapGet(
-                    "orders/{id:int}",
-                    async Task<Results<NotFound, Ok<Response>>> (IMediator mediator, ClaimsPrincipal user, int id) =>
+                    "orders/{id}",
+                    async Task<Results<NotFound, Ok<Response>>> (IMediator mediator, ClaimsPrincipal user, Guid id) =>
                     {
                         var query = new Query(user, id);
                         var result = await mediator.Send(query);
-                        return result is null ? TypedResults.NotFound() : TypedResults.Ok(result);
+
+                        if (result.HasError<NotFoundError>())
+                        {
+                            return TypedResults.NotFound();
+                        }
+
+                        return TypedResults.Ok(result.Value);
                     }
                 )
                 .WithName(nameof(GetOrderById))
@@ -33,19 +41,26 @@ public static class GetOrderById
         }
     }
 
-    public record Query(ClaimsPrincipal User, int Id) : IRequest<Response?>;
+    public record Query(ClaimsPrincipal User, Guid Id) : IRequest<Result<Response>>;
 
-    public sealed class Handler(AppDbContext context) : IRequestHandler<Query, Response?>
+    public sealed class Handler(AppDbContext context) : IRequestHandler<Query, Result<Response>>
     {
-        public async Task<Response?> Handle(Query message, CancellationToken cancellationToken)
+        public async Task<Result<Response>> Handle(Query message, CancellationToken cancellationToken)
         {
-            var order = await context.Orders
-                .AsNoTracking()
+            var order = context
+                .Orders.AsNoTracking()
                 .Include(o => o.Customer) // Načítanie priradenej zákazníckej entity
-                .Where(o => o.Id == message.Id)
+                .Where(o => o.Id == message.Id);
+
+            if (!await order.AnyAsync())
+            {
+                return Result.Fail(new NotFoundError());
+            }
+
+            return await order
                 .Select(order => new Response(
                     order.Id,
-                    order.Customer.Title,  // Prístup k názvu zákazníka cez navigačnú vlastnosť
+                    order.Customer.Title, // Prístup k názvu zákazníka cez navigačnú vlastnosť
                     order.Customer.Id,
                     order.OrderDate,
                     order.DeliveryWeek,
@@ -53,12 +68,18 @@ public static class GetOrderById
                     order.ContactPhone,
                     order.Note
                 ))
-                .FirstOrDefaultAsync(cancellationToken);
-
-            return order;
+                .FirstAsync(cancellationToken);
         }
     }
 
-    public record Response(int Id, string CustomerName, int CustomerId, DateTime OrderDate, int DeliveryWeek, string PaymentMethod, string ContactPhone, string Note);
+    public record Response(
+        Guid Id,
+        string CustomerName,
+        Guid CustomerId,
+        DateTime OrderDate,
+        int DeliveryWeek,
+        string PaymentMethod,
+        string ContactPhone,
+        string? Note
+    );
 }
-*/

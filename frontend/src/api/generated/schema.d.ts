@@ -780,8 +780,7 @@ export interface paths {
         };
         /** Get order by ID */
         get: operations["GetOrderById"];
-        /** Update an order */
-        put: operations["UpdateOrder"];
+        put?: never;
         post?: never;
         delete?: never;
         options?: never;
@@ -807,23 +806,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/orders/{orderId}/items/{itemId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** Delete an item from an order */
-        delete: operations["DeleteItemFromOrder"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/orders/{orderId}/container": {
         parameters: {
             query?: never;
@@ -831,8 +813,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get paginated order item containers by order ID */
-        get: operations["GetOrderItemContainer"];
+        get?: never;
         put?: never;
         /** Add a container to an order */
         post: operations["AddOrderContainer"];
@@ -1111,19 +1092,6 @@ export interface components {
             readonly hasPrevious: boolean;
             readonly hasNext: boolean;
             items: components["schemas"]["Fei.Is.Api.Features.Jobs.Queries.GetJobsOnDevice.Response"][];
-        };
-        "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.OrderItemContainers.Queries.GetOrderItemContainer.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
-            /** Format: int32 */
-            currentPage: number;
-            /** Format: int32 */
-            totalPages: number;
-            /** Format: int32 */
-            pageSize: number;
-            /** Format: int32 */
-            totalCount: number;
-            readonly hasPrevious: boolean;
-            readonly hasNext: boolean;
-            items: components["schemas"]["Fei.Is.Api.Features.OrderItemContainers.Queries.GetOrderItemContainer.Response"][];
         };
         "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Orders.Queries.GetOrders.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
             /** Format: int32 */
@@ -1541,55 +1509,17 @@ export interface components {
             updatedAt?: string | null;
         };
         "Fei.Is.Api.Features.OrderItemContainers.Commands.AddOrderContainer.Request": {
-            /** Format: int32 */
-            orderId: number;
+            /** Format: uuid */
+            orderId: string;
             name: string;
             /** Format: int32 */
             quantity: number;
             /** Format: double */
             pricePerContainer: number;
-        };
-        "Fei.Is.Api.Features.OrderItemContainers.Queries.GetOrderItemContainer.ProductResponse": {
-            pluCode: string;
-            latinName: string;
-            czechName: string;
-            variety: string;
-            potDiameterPack: string;
-            /** Format: double */
-            pricePerPiecePack: number;
-            /** Format: double */
-            pricePerPiecePackVAT: number;
-            /** Format: int32 */
-            quantity: number;
-        };
-        "Fei.Is.Api.Features.OrderItemContainers.Queries.GetOrderItemContainer.Response": {
-            /** Format: int32 */
-            id: number;
-            /** Format: int32 */
-            orderId: number;
-            name: string;
-            /** Format: int32 */
-            quantity: number;
-            /** Format: double */
-            pricePerContainer: number;
-            /** Format: double */
-            totalPrice: number;
-            products: components["schemas"]["Fei.Is.Api.Features.OrderItemContainers.Queries.GetOrderItemContainer.ProductResponse"][];
         };
         "Fei.Is.Api.Features.Orders.Commands.CreateOrder.Request": {
-            /** Format: int32 */
-            customerId: number;
-            /** Format: date-time */
-            orderDate: string;
-            /** Format: int32 */
-            deliveryWeek: number;
-            paymentMethod: string;
-            contactPhone: string;
-            note?: string | null;
-        };
-        "Fei.Is.Api.Features.Orders.Commands.UpdateOrder.Request": {
-            /** Format: int32 */
-            customerId: number;
+            /** Format: uuid */
+            customerId: string;
             /** Format: date-time */
             orderDate: string;
             /** Format: int32 */
@@ -1599,22 +1529,22 @@ export interface components {
             note?: string | null;
         };
         "Fei.Is.Api.Features.Orders.Queries.GetOrderById.Response": {
-            /** Format: int32 */
-            id: number;
+            /** Format: uuid */
+            id: string;
             customerName: string;
-            /** Format: int32 */
-            customerId: number;
+            /** Format: uuid */
+            customerId: string;
             /** Format: date-time */
             orderDate: string;
             /** Format: int32 */
             deliveryWeek: number;
             paymentMethod: string;
             contactPhone: string;
-            note: string;
+            note?: string | null;
         };
         "Fei.Is.Api.Features.Orders.Queries.GetOrders.Response": {
-            /** Format: int32 */
-            id: number;
+            /** Format: uuid */
+            id: string;
             customerName: string;
             /** Format: date-time */
             orderDate: string;
@@ -1622,7 +1552,7 @@ export interface components {
             deliveryWeek: number;
             paymentMethod: string;
             contactPhone: string;
-            note: string;
+            note?: string | null;
         };
         "Fei.Is.Api.Features.ProductCategories.Queries.GetCategoryById.Response": {
             /** Format: uuid */
@@ -3817,7 +3747,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                id: number;
+                id: string;
             };
             cookie?: never;
         };
@@ -3830,48 +3760,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Fei.Is.Api.Features.Orders.Queries.GetOrderById.Response"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    UpdateOrder: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Fei.Is.Api.Features.Orders.Commands.UpdateOrder.Request"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": number;
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
                 };
             };
             /** @description Not Found */
@@ -3928,7 +3816,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": number;
+                    "application/json": string;
                 };
             };
             /** @description Bad Request */
@@ -3942,68 +3830,12 @@ export interface operations {
             };
         };
     };
-    DeleteItemFromOrder: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                orderId: number;
-                itemId: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    GetOrderItemContainer: {
-        parameters: {
-            query?: {
-                SortBy?: string;
-                Descending?: boolean;
-                SearchTerm?: string;
-                PageNumber?: number;
-                PageSize?: number;
-            };
-            header?: never;
-            path: {
-                orderId: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.OrderItemContainers.Queries.GetOrderItemContainer.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"];
-                };
-            };
-        };
-    };
     AddOrderContainer: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                orderId: number;
+                orderId: string;
             };
             cookie?: never;
         };
@@ -4019,7 +3851,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": number;
+                    "application/json": string;
                 };
             };
             /** @description Bad Request */

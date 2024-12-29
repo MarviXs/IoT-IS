@@ -1,12 +1,14 @@
-/*using System.Security.Claims;
+using System.Security.Claims;
 using Carter;
+using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Common.Pagination;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models.InformationSystem;
 using Fei.Is.Api.Extensions;
-using Microsoft.EntityFrameworkCore;
+using FluentResults;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
 
 namespace Fei.Is.Api.Features.OrderItemContainers.Queries;
 
@@ -20,11 +22,21 @@ public static class GetOrderItemContainer
         {
             app.MapGet(
                     "orders/{orderId}/container",
-                    async Task<Ok<PagedList<Response>>> (IMediator mediator, ClaimsPrincipal user, int orderId, [AsParameters] QueryParameters parameters) =>
+                    async Task<Results<NotFound, Ok<PagedList<Response>>>> (
+                        IMediator mediator,
+                        ClaimsPrincipal user,
+                        Guid orderId,
+                        [AsParameters] QueryParameters parameters
+                    ) =>
                     {
                         var query = new Query(user, orderId, parameters);
                         var result = await mediator.Send(query);
-                        return TypedResults.Ok(result);
+                        if (result.HasError<NotFoundError>())
+                        {
+                            return TypedResults.NotFound();
+                        }
+
+                        return TypedResults.Ok(result.Value);
                     }
                 )
                 .WithName(nameof(GetOrderItemContainer))
@@ -37,65 +49,54 @@ public static class GetOrderItemContainer
         }
     }
 
-    public record Query(ClaimsPrincipal User, int OrderId, QueryParameters Parameters) : IRequest<PagedList<Response>>;
+    public record Query(ClaimsPrincipal User, Guid OrderId, QueryParameters Parameters) : IRequest<Result<PagedList<Response>>>;
 
-    public sealed class Handler(AppDbContext context) : IRequestHandler<Query, PagedList<Response>>
+    public sealed class Handler(AppDbContext context) : IRequestHandler<Query, Result<PagedList<Response>>>
     {
-        public async Task<PagedList<Response>> Handle(Query message, CancellationToken cancellationToken)
+        public async Task<Result<PagedList<Response>>> Handle(Query message, CancellationToken cancellationToken)
         {
-            // Načítanie kontajnerov s prepojenými produktmi
-            var query = context.OrderItemContainers
-                .AsNoTracking()
-                .Where(oic => oic.OrderId == message.OrderId) // Filtrovanie podľa objednávky
-                .Select(container => new Response(
-                    container.Id,
-                    container.OrderId,
-                    container.Name,
-                    container.Quantity,
-                    container.PricePerContainer ?? 0m,
-                    container.TotalPrice ?? 0m,
-                    context.OrderItems // Načítanie produktov pre tento kontajner
-                        .Where(oi => oi.ContainerId == container.Id)
-                        .Select(oi => new ProductResponse(
-                            oi.Product.PLUCode,
-                            oi.Product.LatinName,
-                            oi.Product.CzechName ?? string.Empty,
-                            oi.Product.Variety ?? string.Empty,
-                            oi.Product.PotDiameterPack ?? string.Empty,
-                            oi.Product.PricePerPiecePack ?? 0m,
-                            oi.Product.PricePerPiecePackVAT ?? 0m,
-                            oi.Quantity
-                        )).ToList()
-                ));
+            var orderQuery = context.Orders.Include(o => o.ItemContainers).ThenInclude(ic => ic.Items).Where(o => o.Id == message.OrderId);
+
+            if (!await orderQuery.AnyAsync(cancellationToken))
+            {
+                return Result.Fail(new NotFoundError());
+            }
+
+            var order = await orderQuery.FirstAsync(cancellationToken);
+
+            var itemContainters = order.ItemContainers.Select(container => new Response(
+                container.Id,
+                container.Name,
+                container.Quantity,
+                container.PricePerContainer,
+                container.TotalPrice,
+                context.OrderItems.Select(oi => new ProductResponse(
+                    oi.Product.PLUCode,
+                    oi.Product.LatinName,
+                    oi.Product.CzechName,
+                    oi.Product.Variety,
+                    oi.Product.PotDiameterPack,
+                    oi.Product.PricePerPiecePack,
+                    oi.Product.PricePerPiecePack, //TODO doratavat vat
+                    oi.Quantity
+                ))
+            ));
 
             // Vytvorenie stránkovania
-            return query.ToPagedList(
-                await query.CountAsync(cancellationToken),
-                message.Parameters.PageNumber,
-                message.Parameters.PageSize
-            );
+            return itemContainters.ToPagedList(itemContainters.Count(), message.Parameters.PageNumber, message.Parameters.PageSize);
         }
     }
 
-    public record Response(
-        int Id,
-        int OrderId,
-        string Name,
-        int Quantity,
-        decimal PricePerContainer,
-        decimal TotalPrice,
-        List<ProductResponse> Products
-    );
+    public record Response(Guid Id, string Name, int Quantity, decimal? PricePerContainer, decimal? TotalPrice, IQueryable<ProductResponse> Products);
 
     public record ProductResponse(
         string PLUCode,
         string LatinName,
-        string CzechName,
+        string? CzechName,
         string Variety,
-        string PotDiameterPack,
-        decimal PricePerPiecePack,
-        decimal PricePerPiecePackVAT,
+        string? PotDiameterPack,
+        decimal? PricePerPiecePack,
+        decimal? PricePerPiecePackVAT,
         int Quantity
     );
 }
-*/

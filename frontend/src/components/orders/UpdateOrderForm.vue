@@ -1,10 +1,21 @@
 <template>
   <q-form @submit="onSubmit" ref="formRef">
     <q-card-section class="q-pt-none column q-gutter-md">
-      <q-input v-model="localOrder.customerId" :rules="customerIdRules" :label="t('order.customer_id')" type="number" />
+      <q-input v-model="localOrder.customerId" :rules="customerIdRules" :label="t('order.customer_id')" />
       <q-input v-model="localOrder.contactPhone" :rules="phoneRules" :label="t('order.contact_phone')" />
-      <q-input v-model="localOrder.orderDate" :label="t('order.order_date')" mask="####-##-##" hint="YYYY-MM-DD" type="date"/>
-      <q-input v-model="localOrder.deliveryWeek" :rules="deliveryWeekRules" :label="t('order.delivery_week')" type="number" />
+      <q-input
+        v-model="localOrder.orderDate"
+        :label="t('order.order_date')"
+        mask="####-##-##"
+        hint="YYYY-MM-DD"
+        type="date"
+      />
+      <q-input
+        v-model="localOrder.deliveryWeek"
+        :rules="deliveryWeekRules"
+        :label="t('order.delivery_week')"
+        type="number"
+      />
       <q-select
         v-model="localOrder.paymentMethod"
         :options="paymentMethods"
@@ -41,7 +52,7 @@ interface PaymentMethodOption {
 interface UpdateOrderFormData {
   customerId: number;
   contactPhone: string;
-  orderDate: string; 
+  orderDate: string;
   deliveryWeek: number;
   paymentMethod: string | PaymentMethodOption;
   note: string;
@@ -70,28 +81,32 @@ const formRef = ref();
 const localOrder = ref({
   customerId: props.order.customerId || 0,
   contactPhone: props.order.contactPhone,
-  orderDate: props.order.orderDate.slice(0,10), // ak je vo formáte ISO, odstránime časť
+  orderDate: props.order.orderDate.slice(0, 10), // ak je vo formáte ISO, odstránime časť
   deliveryWeek: props.order.deliveryWeek,
   paymentMethod: props.order.paymentMethod,
-  note: props.order.note
+  note: props.order.note,
 });
 
 // Keď sa zmení prop order, aktualizuj localOrder
-watch(() => props.order, (newVal) => {
-  localOrder.value = {
-    customerId: newVal.customerId || 0,
-    contactPhone: newVal.contactPhone,
-    orderDate: newVal.orderDate.slice(0,10),
-    deliveryWeek: newVal.deliveryWeek,
-    paymentMethod: newVal.paymentMethod,
-    note: newVal.note
-  }
-}, { immediate: true })
+watch(
+  () => props.order,
+  (newVal) => {
+    localOrder.value = {
+      customerId: newVal.customerId || 0,
+      contactPhone: newVal.contactPhone,
+      orderDate: newVal.orderDate.slice(0, 10),
+      deliveryWeek: newVal.deliveryWeek,
+      paymentMethod: newVal.paymentMethod,
+      note: newVal.note,
+    };
+  },
+  { immediate: true },
+);
 
 // Validation rules
 const customerIdRules = [(val: number) => (val && val > 0) || t('global.rules.required')];
 const phoneRules = [(val: string) => (val && val.length > 0) || t('global.rules.required')];
-const paymentMethodRules = [(val: string) => (!!val) || t('global.rules.required')];
+const paymentMethodRules = [(val: string) => !!val || t('global.rules.required')];
 const deliveryWeekRules = [(val: number) => (val && val > 0) || t('global.rules.required')];
 
 // Payment method options
@@ -112,7 +127,7 @@ function onSubmit() {
     paymentMethod: localOrder.value.paymentMethod,
     deliveryWeek: localOrder.value.deliveryWeek,
     orderDate: localOrder.value.orderDate,
-    note: localOrder.value.note
+    note: localOrder.value.note,
   });
 }
 </script>

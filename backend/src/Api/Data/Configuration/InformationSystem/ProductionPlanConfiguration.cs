@@ -9,9 +9,5 @@ public class ProductionPlanConfiguration : IEntityTypeConfiguration<ProductionPl
     public void Configure(EntityTypeBuilder<ProductionPlan> builder)
     {
         builder.HasKey(pp => pp.Id);
-
-        builder.Property(pp => pp.Year).IsRequired();
-
-        builder.Property(pp => pp.DeliveryWeek).IsRequired();
     }
 }

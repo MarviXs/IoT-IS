@@ -2,14 +2,24 @@
   <q-form @submit="onSubmit" ref="orderForm">
     <q-card-section class="q-pt-none column q-gutter-md">
       <!-- Changed customerName to customerId to match backend requirements -->
-      <q-input v-model="order.customerId" :rules="customerIdRules" autofocus :label="t('order.customer_id')" type="number" />
-      
-      <q-input v-model="order.contactPhone" :rules="phoneRules" :label="t('order.contact_phone')" />
-      
-      
-      <q-input v-model="order.orderDate" :label="t('order.order_date')" mask="####-##-##" hint="YYYY-MM-DD" type="date"/>
+      <q-input v-model="order.customerId" :rules="customerIdRules" autofocus :label="t('order.customer_id')" />
 
-      <q-input v-model="order.deliveryWeek" :rules="deliveryWeekRules" :label="t('order.delivery_week')" type="number" />
+      <q-input v-model="order.contactPhone" :rules="phoneRules" :label="t('order.contact_phone')" />
+
+      <q-input
+        v-model="order.orderDate"
+        :label="t('order.order_date')"
+        mask="####-##-##"
+        hint="YYYY-MM-DD"
+        type="date"
+      />
+
+      <q-input
+        v-model="order.deliveryWeek"
+        :rules="deliveryWeekRules"
+        :label="t('order.delivery_week')"
+        type="number"
+      />
 
       <q-select
         v-model="order.paymentMethod"
@@ -18,7 +28,6 @@
         :rules="paymentMethodRules"
       />
       <q-input v-model="order.note" :label="t('order.note')" type="textarea" />
-
 
       <!-- Additional fields can be added as needed based on the database model -->
     </q-card-section>
@@ -44,12 +53,12 @@ import { useI18n } from 'vue-i18n';
 import { isFormValid } from '@/utils/form-validation';
 
 export interface OrderFormData {
-    customerId: number; // Changed to customerId to match backend requirements
-    contactPhone: string;
-    deliveryWeek: number; // Added deliveryWeek to match backend requirements
-    orderDate: string; 
-    paymentMethod: string | { label: string; value: string };
-    note: string;
+  customerId: string; // Changed to customerId to match backend requirements
+  contactPhone: string;
+  deliveryWeek: number; // Added deliveryWeek to match backend requirements
+  orderDate: string;
+  paymentMethod: string | { label: string; value: string };
+  note: string;
 }
 
 const props = defineProps<{
@@ -62,9 +71,9 @@ const { t } = useI18n();
 const order = defineModel<OrderFormData>({ required: true });
 
 // Validation rules for each field
-const customerIdRules = [(val: number) => (val && val > 0) || t('global.rules.required')];
+const customerIdRules = [(val: string) => (val && val.length > 0) || t('global.rules.required')];
 const phoneRules = [(val: string) => (val && val.length > 0) || t('global.rules.required')];
-const paymentMethodRules = [(val: string) => (!!val) || t('global.rules.required')];
+const paymentMethodRules = [(val: string) => !!val || t('global.rules.required')];
 const deliveryWeekRules = [(val: number) => (val && val > 0) || t('global.rules.required')];
 
 // Payment method options (can be customized as needed)
