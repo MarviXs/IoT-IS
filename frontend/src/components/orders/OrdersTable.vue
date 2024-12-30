@@ -77,6 +77,7 @@ function goToCustomerPage(orderId: number) {
 
 
 const columns = computed<QTableProps['columns']>(() => [
+  /*
   {
     name: 'id',
     label: t('order.id'),
@@ -84,6 +85,7 @@ const columns = computed<QTableProps['columns']>(() => [
     align: 'left',
     sortable: true,
   },
+  */
   {
     name: 'customer',
     label: t('order.customer'),

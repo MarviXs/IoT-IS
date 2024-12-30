@@ -6,30 +6,11 @@
         <div class="text-subtitle2">Order #{{ order.id }}</div>
       </div>
       <div>
-        <q-btn
-          flat
-          round
-          size="md"
-          :icon="mdiPlusBox"
-          color="grey-color"
-          @click="openAddContainerDialog"
-        ></q-btn>
-        <q-btn
-          flat
-          round
-          size="md"
-          :icon="mdiPencil"
-          color="grey-color"
-          @click.stop="openUpdateDialog(order.id)"
-        ></q-btn>
-        <q-btn
-          flat
-          round
-          size="md"
-          :icon="mdiTrashCan"
-          color="grey-color"
-          @click.stop="openDeleteDialog(order.id)"
-        ></q-btn>
+        <q-btn flat round size="md" :icon="mdiPlusBox" color="grey-color" @click="openAddContainerDialog"></q-btn>
+        <q-btn flat round size="md" :icon="mdiPencil" color="grey-color"
+          @click.stop="openUpdateDialog(order.id)"></q-btn>
+        <q-btn flat round size="md" :icon="mdiTrashCan" color="grey-color"
+          @click.stop="openDeleteDialog(order.id)"></q-btn>
       </div>
     </q-card-section>
 
@@ -62,18 +43,15 @@
       </div>
     </q-card-section>
 
-    <AddContainerDialog
-      :orderId="order.id"
-      v-model="isAddContainerDialogOpen"
-      @onCreate="handleContainerCreated"
-    />
+    <AddContainerDialog :orderId="order.id" v-model="isAddContainerDialogOpen" @onCreate="handleContainerCreated" />
 
     <!-- Update dialog -->
-    <UpdateOrderDialog
-      v-model="isUpdateDialogOpen"
-      :orderId="order.id"
-      @onUpdate="handleOrderUpdated"
-    />
+    <UpdateOrderDialog v-model="isUpdateDialogOpen" :orderId="order.id" @onUpdate="handleOrderUpdated" />
+
+    <!-- Delete dialog -->
+    <DeleteOrderDialog v-model="isDeleteDialogOpen" :orderId="order.id" @onDeleted="handleOrderDeleted" />
+    
+
   </q-card>
 </template>
 
@@ -83,7 +61,8 @@ import { defineProps, defineEmits } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { mdiPlusBox, mdiPencil, mdiTrashCan } from '@quasar/extras/mdi-v7';
 import AddContainerDialog from '../order-item/AddContainerDialog.vue';
-import UpdateOrderDialog from './UpdateOrderDialog.vue'; // Nový komponent pre update dialóg
+import UpdateOrderDialog from './UpdateOrderDialog.vue';
+import DeleteOrderDialog from './DeleteOrderDialog.vue'; // Import nového komponentu
 
 interface Order {
   id: number;
@@ -101,8 +80,10 @@ const props = defineProps<{
 
 const emit = defineEmits(['edit', 'delete']);
 const { t } = useI18n();
+
 const isAddContainerDialogOpen = ref(false);
 const isUpdateDialogOpen = ref(false);
+const isDeleteDialogOpen = ref(false);
 
 function formatDate(dateString: string): string {
   if (!dateString) return '';
@@ -123,17 +104,18 @@ function openAddContainerDialog() {
 }
 
 function openDeleteDialog(orderId: number): void {
-  emit('delete', orderId);
+  isDeleteDialogOpen.value = true;
 }
 
 function handleContainerCreated(newContainerId: number) {
-  console.log('Nový kontajner pridaný s ID:', newContainerId);
 }
 
 function handleOrderUpdated(updatedOrder: any) {
-  console.log('Objednávka aktualizovaná:', updatedOrder);
-  // Tu môžete napr. znovu načítať dáta objednávky
 }
+
+function handleOrderDeleted() {
+}
+
 </script>
 
 <style lang="scss" scoped>

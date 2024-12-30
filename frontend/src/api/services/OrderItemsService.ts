@@ -18,11 +18,11 @@ class OrderItemsService {
 
 
   // Načítanie kontajnerov objednávky pre dané orderId s query parametrami
-  async getOrderItemContainers(orderId: number, queryParams?: OrderItemContainersQueryParams) {
+  async getOrderItemContainers(orderId: string, queryParams?: OrderItemContainersQueryParams) {
     return await client.GET('/orders/{orderId}/container', { params: { path: { orderId }} });
   }
   // Pridanie kontajnera k objednávke
-  async addOrderContainer(orderId: number, body: AddOrderContainerRequest) {
+  async addOrderContainer(orderId: string, body: AddOrderContainerRequest) {
   return await client.POST('/orders/{orderId}/container', { params: { path: { orderId } }, body });
 }
 }

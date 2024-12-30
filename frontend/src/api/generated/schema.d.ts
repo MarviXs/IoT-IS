@@ -780,7 +780,8 @@ export interface paths {
         };
         /** Get order by ID */
         get: operations["GetOrderById"];
-        put?: never;
+        /** Update an order */
+        put: operations["UpdateOrder"];
         post?: never;
         delete?: never;
         options?: never;
@@ -806,7 +807,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/orders/{orderId}/container": {
+    "/orders/{orderId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -814,6 +815,44 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Delete an order
+         * @description Deletes an order by its unique identifier.
+         */
+        delete: operations["DeleteOrder"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orders/{orderId}/items/{itemId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete an item from an order */
+        delete: operations["DeleteItemFromOrder"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orders/{orderId}/container": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get paginated order item containers by order ID */
+        get: operations["GetOrderItemContainer"];
         put?: never;
         /** Add a container to an order */
         post: operations["AddOrderContainer"];
@@ -1092,6 +1131,19 @@ export interface components {
             readonly hasPrevious: boolean;
             readonly hasNext: boolean;
             items: components["schemas"]["Fei.Is.Api.Features.Jobs.Queries.GetJobsOnDevice.Response"][];
+        };
+        "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.OrderItemContainers.Queries.GetOrderItemContainer.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+            /** Format: int32 */
+            currentPage: number;
+            /** Format: int32 */
+            totalPages: number;
+            /** Format: int32 */
+            pageSize: number;
+            /** Format: int32 */
+            totalCount: number;
+            readonly hasPrevious: boolean;
+            readonly hasNext: boolean;
+            items: components["schemas"]["Fei.Is.Api.Features.OrderItemContainers.Queries.GetOrderItemContainer.Response"][];
         };
         "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Orders.Queries.GetOrders.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
             /** Format: int32 */
@@ -1517,7 +1569,43 @@ export interface components {
             /** Format: double */
             pricePerContainer: number;
         };
+        "Fei.Is.Api.Features.OrderItemContainers.Queries.GetOrderItemContainer.ProductResponse": {
+            pluCode: string;
+            latinName: string;
+            czechName?: string | null;
+            variety: string;
+            potDiameterPack?: string | null;
+            /** Format: double */
+            pricePerPiecePack?: number | null;
+            /** Format: double */
+            pricePerPiecePackVAT?: number | null;
+            /** Format: int32 */
+            quantity: number;
+        };
+        "Fei.Is.Api.Features.OrderItemContainers.Queries.GetOrderItemContainer.Response": {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            /** Format: int32 */
+            quantity: number;
+            /** Format: double */
+            pricePerContainer?: number | null;
+            /** Format: double */
+            totalPrice?: number | null;
+            products: components["schemas"]["Fei.Is.Api.Features.OrderItemContainers.Queries.GetOrderItemContainer.ProductResponse"][];
+        };
         "Fei.Is.Api.Features.Orders.Commands.CreateOrder.Request": {
+            /** Format: uuid */
+            customerId: string;
+            /** Format: date-time */
+            orderDate: string;
+            /** Format: int32 */
+            deliveryWeek: number;
+            paymentMethod: string;
+            contactPhone: string;
+            note?: string | null;
+        };
+        "Fei.Is.Api.Features.Orders.Commands.UpdateOrder.Request": {
             /** Format: uuid */
             customerId: string;
             /** Format: date-time */
@@ -3771,6 +3859,46 @@ export interface operations {
             };
         };
     };
+    UpdateOrder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.Orders.Commands.UpdateOrder.Request"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     GetOrders: {
         parameters: {
             query?: {
@@ -3827,6 +3955,96 @@ export interface operations {
                 content: {
                     "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
                 };
+            };
+        };
+    };
+    DeleteOrder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orderId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DeleteItemFromOrder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orderId: number;
+                itemId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GetOrderItemContainer: {
+        parameters: {
+            query?: {
+                SortBy?: string;
+                Descending?: boolean;
+                SearchTerm?: string;
+                PageNumber?: number;
+                PageSize?: number;
+            };
+            header?: never;
+            path: {
+                orderId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.OrderItemContainers.Queries.GetOrderItemContainer.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

@@ -4,12 +4,9 @@ import type { paths } from '@/api/generated/schema.d.ts';
 // Definovanie typov pre Orders API
 export type OrdersQueryParams = paths['/orders']['get']['parameters']['query'];
 export type OrdersResponse = paths['/orders']['get']['responses']['200']['content']['application/json'];
-
 export type OrderResponse = paths['/orders/{id}']['get']['responses']['200']['content']['application/json'];
-
 export type CreateOrderRequest = paths['/orders']['post']['requestBody']['content']['application/json'];
 export type CreateOrderResponse = paths['/orders']['post']['responses']['201']['content']['application/json'];
-
 export type UpdateOrderRequest = paths['/orders/{id}']['put']['requestBody']['content']['application/json'];
 
 class OrdersService {
@@ -27,8 +24,8 @@ class OrdersService {
   async createOrder(body: CreateOrderRequest) {
     return await client.POST('/orders', { body });
   }
-  async updateOrder(orderId: number, body: UpdateOrderRequest) {
-    return await client.PUT('/orders/{id}', { params: { path: { id: Number(orderId) } }, body });
+  async updateOrder(orderId: string, body: UpdateOrderRequest) {
+    return await client.PUT('/orders/{id}', { params: { path: { id: orderId } }, body });
   }
 
   // Aktualizácia objednávky podľa ID
@@ -37,9 +34,21 @@ class OrdersService {
   // }
 
   // Odstránenie objednávky podľa ID
-  // async deleteOrder(orderId: string) {
-  //   return await client.DELETE('/orders/{id}', { params: { path: { id: orderId } } });
-  // }
+  
+  
+  
+  async deleteOrder(orderId: string) {
+  return await client.DELETE('/orders/{orderId}', {
+    params: {
+      path: { orderId }
+    }
+  });
+}
+
+  
+
+
+  
 }
 
 export default new OrdersService();

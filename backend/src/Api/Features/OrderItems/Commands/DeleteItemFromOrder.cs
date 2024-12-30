@@ -1,4 +1,4 @@
-/*using System.Security.Claims;
+using System.Security.Claims;
 using Carter;
 using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
@@ -18,7 +18,7 @@ public static class DeleteItemFromOrder
         {
             app.MapDelete(
                     "orders/{orderId:int}/items/{itemId:int}",
-                    async Task<Results<NoContent, NotFound, ForbidHttpResult>> (IMediator mediator, ClaimsPrincipal user, int orderId, int itemId) =>
+                    async Task<Results<NoContent, NotFound, ForbidHttpResult>> (IMediator mediator, ClaimsPrincipal user, Guid orderId, Guid itemId) =>
                     {
                         var command = new Command(user, orderId, itemId);
                         var result = await mediator.Send(command);
@@ -41,15 +41,15 @@ public static class DeleteItemFromOrder
         }
     }
 
-    public record Command(ClaimsPrincipal User, Guid OrderId, int ItemId) : IRequest<Result>;
+    public record Command(ClaimsPrincipal User, Guid OrderId, Guid ItemId) : IRequest<Result>;
 
     public sealed class Handler(AppDbContext context) : IRequestHandler<Command, Result>
     {
         public async Task<Result> Handle(Command message, CancellationToken cancellationToken)
         {
-            // Vyhľadáme položku na základe kombinácie OrderId a Id
-            var orderItem = await context
-                .OrderItems.Where(oi => oi.Order.Id == message.OrderId && oi.Order.Id == message.ItemId)
+            // Vyhľadáme položku na základe kombinácie OrderId a ItemId
+            var orderItem = await context.OrderItems
+                .Where(oi => oi.Id == message.OrderId && oi.Id == message.ItemId)
                 .FirstOrDefaultAsync(cancellationToken);
 
             // Ak položka neexistuje, vrátime NotFound
@@ -67,4 +67,4 @@ public static class DeleteItemFromOrder
         }
     }
 }
-*/
+

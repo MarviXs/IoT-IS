@@ -111,7 +111,7 @@ export default {
       mdiPencil: mdiPencil,
       mdiPlusBox: mdiPlusBox,
       parentColumns: [
-        { name: "id", label: this.$t('order_item.id'), field: "id", align: "left" },
+        //{ name: "id", label: this.$t('order_item.id'), field: "id", align: "left" },
         { name: "name", label: this.$t('global.name'), field: "name", align: "left" },
         { name: "quantity", label: this.$t('order_item.quantity'), field: "quantity", align: "center" },
         { name: "actions", label: "", align: "center" },
