@@ -862,6 +862,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/orders/{orderId}/container/{containerId}/item": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Add an item to an order container
+         * @description Adds an order item to a specified order container by container ID.
+         */
+        post: operations["AddItemToContainer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/products": {
         parameters: {
             query?: never;
@@ -1307,6 +1327,12 @@ export interface components {
             displayName: string;
             name: string;
             params: number[];
+        };
+        "Fei.Is.Api.Features.Containers.Commands.AddItemToContainer.AddItemRequest": {
+            /** Format: uuid */
+            productId: string;
+            /** Format: int32 */
+            quantity: number;
         };
         "Fei.Is.Api.Features.DataPoints.Commands.CreateDataPoints.Request": {
             tag: string;
@@ -4080,6 +4106,38 @@ export interface operations {
                 content: {
                     "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
                 };
+            };
+        };
+    };
+    AddItemToContainer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orderId: string;
+                containerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.Containers.Commands.AddItemToContainer.AddItemRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

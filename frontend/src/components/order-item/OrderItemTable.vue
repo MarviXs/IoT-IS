@@ -1,13 +1,6 @@
 <template>
   <div class="order-item-table">
-    <q-table
-      :rows="containers"
-      :columns="parentColumns"
-      row-key="id"
-      flat
-      dense
-      separator="horizontal"
-    >
+    <q-table :rows="containers" :columns="parentColumns" row-key="id" flat dense separator="horizontal">
       <template #body="props">
         <q-tr :props="props" class="parent-row">
           <q-td :props="props" key="id">{{ props.row.id }}</q-td>
@@ -15,88 +8,56 @@
           <q-td :props="props" key="quantity">{{ props.row.quantity }}</q-td>
           <q-td :props="props" key="actions" class="action-column">
             <div class="product-quantity-actions">
-              <q-btn
-                flat
-                dense
-                round
-                size="sm"
-                :icon="minusIcon"
-                @click="decreaseQuantity(props.row.id)"
-              />
-              <q-btn
-                flat
-                dense
-                round
-                size="sm"
-                :icon="plusIcon"
-                @click="increaseQuantity(props.row.id)"
-              />
+              <q-btn flat dense round size="sm" :icon="minusIcon" @click="decreaseQuantity(props.row.id)" />
+              <q-btn flat dense round size="sm" :icon="plusIcon" @click="increaseQuantity(props.row.id)" />
             </div>
           </q-td>
           <q-td :props="props" key="oneContainer">{{ calculateoneContainer(props.row) }}</q-td>
           <q-td :props="props" key="total">{{ calculateTotal(props.row) }}</q-td>
           <q-td class="final-actions">
             <div class="product-quantity-actions">
-            <q-btn
-              flat
-              round
-              size="sm"
-              :icon="mdiPlusBox"
-              color="grey-color"
-              @click="addItem(props.row.id)"
-            >
-              <q-tooltip>{{ $t('order_item.add_item') }}</q-tooltip>
-            </q-btn>
-            <q-btn
-              flat
-              round
-              size="sm"
-              :icon="mdiPencil"
-              color="grey-color"
-              @click.stop="openUpdateDialog(props.row.id)"
-            >
-              <q-tooltip>{{ $t('global.edit') }}</q-tooltip>
-            </q-btn>
-            <q-btn
-              flat
-              round
-              size="sm"
-              :icon="mdiTrashCan"
-              color="grey-color"
-              @click.stop="openDeleteDialog(props.row.id)"
-            >
-              <q-tooltip>{{ $t('global.delete') }}</q-tooltip>
-            </q-btn>
+              <q-btn flat round size="sm" :icon="mdiPlusBox" color="grey-color"
+                @click="openAddItemDialog(props.row.id)">
+                <q-tooltip>{{ $t('order_item.add_item') }}</q-tooltip>
+              </q-btn>
+              <q-btn flat round size="sm" :icon="mdiPencil" color="grey-color"
+                @click.stop="openUpdateDialog(props.row.id)">
+                <q-tooltip>{{ $t('global.edit') }}</q-tooltip>
+              </q-btn>
+              <q-btn flat round size="sm" :icon="mdiTrashCan" color="grey-color"
+                @click.stop="openDeleteDialog(props.row.id)">
+                <q-tooltip>{{ $t('global.delete') }}</q-tooltip>
+              </q-btn>
             </div>
           </q-td>
         </q-tr>
-
         <q-tr class="nested-row">
           <q-td :colspan="parentColumns.length" class="nested-table-cell">
-            <q-table
-              :rows="props.row.products"
-              :columns="nestedColumns"
-              flat
-              dense
-              separator="horizontal"
-              row-key="PLU"
-              no-data-label="{{ $t('table.no_data_label') }}"
-              hide-bottom
-              class="nested-table"
-            >
-            </q-table>
+            <q-table :rows="props.row.products" :columns="nestedColumns" flat dense separator="horizontal" row-key="PLU"
+              no-data-label="{{ $t('table.no_data_label') }}" hide-bottom class="nested-table" />
           </q-td>
         </q-tr>
       </template>
     </q-table>
+
+    <!-- AddItem Dialog -->
+
+    <AddItemToOrderDialog v-model="isAddItemDialogOpen" :orderId="currentOrderId" :containerId="selectedContainerId"
+      @onCreate="handleItemCreated" />
+
+    
+
+
   </div>
 </template>
 
 <script>
 import { mdiPlus, mdiMinus, mdiTrashCan, mdiPencil, mdiPlusBox } from '@quasar/extras/mdi-v7';
+import AddItemToOrderDialog from '@/components/order-item/AddItemToOrderDialog.vue';
 
 export default {
   name: "OrderItemTable",
+  components: { AddItemToOrderDialog },
   props: {
     containers: {
       type: Array,
@@ -110,6 +71,8 @@ export default {
       mdiTrashCan: mdiTrashCan,
       mdiPencil: mdiPencil,
       mdiPlusBox: mdiPlusBox,
+      isAddItemDialogOpen: false,
+      selectedOrderId: null,
       parentColumns: [
         //{ name: "id", label: this.$t('order_item.id'), field: "id", align: "left" },
         { name: "name", label: this.$t('global.name'), field: "name", align: "left" },
@@ -128,7 +91,8 @@ export default {
         { name: "quantity", label: this.$t('order_item.quantity'), field: "quantity", align: "right" },
         { name: "pricePerPiecePack", label: this.$t('product.price_per_piece_pack'), field: "pricePerPiecePack", align: "right" },
         { name: "pricePerPiecePackVAT", label: this.$t('product.price_per_piece_pack_vat'), field: "pricePerPiecePackVAT", align: "right" },
-],
+
+      ],
     };
   },
   methods: {
@@ -140,8 +104,14 @@ export default {
       const container = this.containers.find((c) => c.id === containerId);
       if (container && container.quantity > 0) container.quantity -= 1;
     },
-    addItem(containerId) {
-      alert(this.$t('order_item.toasts.add_success'));
+    openAddItemDialog(containerId) {
+      console.log('Opening AddItem dialog for container:', containerId);
+      this.selectedContainerId = containerId;
+      this.isAddItemDialogOpen = true;
+    },
+    handleItemCreated(newItem) {
+      this.isAddItemDialogOpen = false;
+      this.currentOrderId = null;
     },
     openUpdateDialog(containerId) {
       alert(this.$t('global.edit'));
@@ -188,4 +158,5 @@ export default {
 .q-btn {
   font-size: 16px;
 }
+
 </style>

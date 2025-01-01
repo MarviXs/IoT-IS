@@ -1,89 +1,120 @@
 <template>
-  <dialog-common v-model="isDialogOpen">
-    <template #title>{{ t('order_item.add_item') }}</template>
-    <template #default>
-      <OrderItemForm
-        v-model:orderItem="orderItem"
-        :orderId="Number(props.orderId)" 
-        @on-submit="addContainerToOrder"
-        :loading="addingContainer"
-      />
-    </template>
-  </dialog-common>
+  <q-dialog v-model="isOpen">
+    <q-card>
+      <q-card-section>
+        <div class="text-h6">{{ t('order_item.add_item') }}</div>
+      </q-card-section>
+
+      <q-card-section>
+        <!-- Komponent OrderItemForm -->
+        <OrderItemForm v-model:orderItem="orderItem" :loading="addingItem" @on-submit="onSubmit" />
+      </q-card-section>
+    </q-card>
+  </q-dialog>
 </template>
 
-<script setup lang="ts">
-import { ref, watch } from 'vue';
-import { handleError } from '@/utils/error-handler';
+<script setup>
 import { toast } from 'vue3-toastify';
+import 'vue3-toastify/dist/index.css';
+import { ref, defineProps, defineEmits, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import DialogCommon from '@/components/core/DialogCommon.vue';
+import { useRoute } from 'vue-router'; // Import the route object to get orderId from the URL
 import OrderItemForm from '@/components/order-item/OrderItemForm.vue';
 import OrderItemsService from '@/api/services/OrderItemsService';
-import type { AddOrderContainerRequest } from '@/api/services/OrderItemsService';
 
-// Props pre prijatie orderId
-const props = defineProps<{ orderId: string }>();
-
-// State pre sledovanie viditeľnosti dialogu a načítanie stavu
-const isDialogOpen = ref<boolean>(false);
-const addingContainer = ref(false);
-
-// Emit eventu, ktorý použijeme na aktualizáciu hlavného zoznamu po pridaní položky
-const emit = defineEmits(['onCreate']);
-
-// Lokalizácia
-const { t } = useI18n();
-
-// Reactive state pre formulár položky objednávky s predvolenými hodnotami
-// Inicializujeme `orderItem` mimo `defineModel`
-const orderItem = ref<AddOrderContainerRequest>({
-  orderId: Number(props.orderId),
-  name: '',
-  quantity: 1,
-  pricePerContainer: 0,
+const props = defineProps({
+  containerId: { type: String, required: true }
 });
 
+const emit = defineEmits(['update:modelValue', 'onCreate']);
+const { t } = useI18n();
+const route = useRoute();
 
-// Funkcia pre pridanie položky do objednávky
-async function addContainerToOrder() {
-  
-  const addContainerRequest: AddOrderContainerRequest = {
-    orderId: orderItem.value.orderId,
-    name: orderItem.value.name,
-    quantity: orderItem.value.quantity,
-    pricePerContainer: orderItem.value.pricePerContainer,
-  };
+const isOpen = ref(false);
+const loading = ref(false);
+const addingItem = ref(false);
 
-  // Nastavenie stavu načítania na true počas API volania
-  addingContainer.value = true;
+// Extract orderId from the URL
+var orderId = route.params.id;
+onMounted(() => {
+  orderId = route.params.id || '';
+  console.log('Extracted orderId from URL:', orderId.value);
+});
 
-  try {
-    // Zavoláme službu na pridanie položky do objednávky
-    const { data, error } = await OrderItemsService.addOrderContainer(addContainerRequest.orderId, addContainerRequest);
+// Objednávkový objekt pre formulár
+const orderItem = ref({
+  productId: '',
+  quantity: 1
+});
 
-    if (error) {
-      handleError(error, t('order_item.toasts.add_failed'));
-      return;
-    }
+// Synchronizácia s modelValue
+watch(
+  () => props.modelValue,
+  (newVal) => {
+    isOpen.value = newVal;
+  },
+  { immediate: true }
+);
 
-    // Emit event na aktualizáciu zoznamu položiek a zavrieme dialog
-    emit('onCreate', data);
-    isDialogOpen.value = false;
-
-    // Zobrazíme toast s úspešnou správou
-    toast.success(t('order_item.toasts.add_success'));
-  } catch (error) {
-    handleError(
-      error as { type?: string; title?: string; status?: number; detail?: string; instance?: string; errors: Record<string, any> },
-      t('order_item.toasts.add_failed')
-    );
-  } finally {
-    // Vypneme stav načítania po ukončení API volania
-    addingContainer.value = false;
-  }
+// Funkcia na zatvorenie dialógu
+function closeDialog() {
+  emit('update:modelValue', false);
 }
 
+// Aktualizácia objednávkového objektu
+function updateOrderItem(updatedItem) {
+  orderItem.value = updatedItem;
+}
+
+// Odoslanie formulára
+function handleFormSubmit() {
+  if (!orderItem.value.productId || !orderItem.value.quantity || orderItem.value.quantity <= 0) {
+    console.warn('Invalid order item:', orderItem.value);
+    return;
+  }
+
+  emit('onCreate', {
+    productId: orderItem.value.productId,
+    name: orderItem.value.name,
+    quantity: orderItem.value.quantity,
+  });
+
+  closeDialog();
+}
+
+async function onSubmit() {
+  if (!orderItem.value.productId || !orderItem.value.quantity) {
+    toast.error('Product and quantity are required');
+    return;
+  }
+
+  console.log('OrderId:', orderId);
+  console.log('ContainerId:', props.containerId);
+  console.log('ProductId:', orderItem.value.productId);
+  console.log('Quantity:', orderItem.value.quantity);
+
+  try {
+    await OrderItemsService.addItemToContainer(
+      orderId,
+      props.containerId,
+      {
+        productId: orderItem.value.productId,
+        quantity: Number(orderItem.value.quantity),
+      }
+    );
+
+    toast.success('Item added successfully');
+    emit('onCreate');
+  } catch (error) {
+    console.error('Failed to add item:', error);
+    toast.error('Failed to add item');
+  }
+}
 </script>
 
-<style lang="scss" scoped></style>
+<style scoped>
+.q-card {
+  width: 500px;
+  max-width: 90vw;
+}
+</style>

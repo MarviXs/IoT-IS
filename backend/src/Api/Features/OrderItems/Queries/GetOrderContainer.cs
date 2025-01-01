@@ -55,7 +55,11 @@ public static class GetOrderItemContainer
     {
         public async Task<Result<PagedList<Response>>> Handle(Query message, CancellationToken cancellationToken)
         {
-            var orderQuery = context.Orders.Include(o => o.ItemContainers).ThenInclude(ic => ic.Items).Where(o => o.Id == message.OrderId);
+            var orderQuery = context.Orders
+                .Include(o => o.ItemContainers)
+                    .ThenInclude(ic => ic.Items)
+                        .ThenInclude(i => i.Product)
+                .Where(o => o.Id == message.OrderId);
 
             if (!await orderQuery.AnyAsync(cancellationToken))
             {
@@ -64,26 +68,26 @@ public static class GetOrderItemContainer
 
             var order = await orderQuery.FirstAsync(cancellationToken);
 
-            var itemContainters = order.ItemContainers.Select(container => new Response(
+            var itemContainers = order.ItemContainers.Select(container => new Response(
                 container.Id,
                 container.Name,
                 container.Quantity,
                 container.PricePerContainer,
                 container.TotalPrice,
-                context.OrderItems.Select(oi => new ProductResponse(
+                container.Items.Select(oi => new ProductResponse(
                     oi.Product.PLUCode,
                     oi.Product.LatinName,
                     oi.Product.CzechName,
                     oi.Product.Variety,
                     oi.Product.PotDiameterPack,
                     oi.Product.PricePerPiecePack,
-                    oi.Product.PricePerPiecePack, //TODO doratavat vat
+                    oi.Product.PricePerPiecePack, // TODO: dorátať VAT
                     oi.Quantity
-                ))
+                )).AsQueryable()
             ));
 
             // Vytvorenie stránkovania
-            return itemContainters.ToPagedList(itemContainters.Count(), message.Parameters.PageNumber, message.Parameters.PageSize);
+            return itemContainers.ToPagedList(itemContainers.Count(), message.Parameters.PageNumber, message.Parameters.PageSize);
         }
     }
 
