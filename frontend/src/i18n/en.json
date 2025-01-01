@@ -451,5 +451,9 @@
     "city": "City",
     "psc": "Postal code",
     "add_company": "Add Company"
+  },
+  "lifecycle":{
+    "label": "Plant life cycle | Plant life cycles",
+    "add_plant": "Add plant"
   }
 }

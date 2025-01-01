@@ -1,7 +1,9 @@
 ﻿using Fei.Is.Api.Data.Configuration;
 using Fei.Is.Api.Data.Configuration.InformationSystem;
+using Fei.Is.Api.Data.Configuration.LifeCycleSystem;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Data.Models.InformationSystem;
+using Fei.Is.Api.Data.Models.LifeCycleSystem;
 using Fei.Is.Api.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
@@ -62,6 +64,10 @@ public class AppDbContext
         modelBuilder.ApplyConfiguration(new WorkReportConfiguration());
         modelBuilder.ApplyConfiguration(new VATCategoryConfiguration());
 
+        //Life-cycle configurations
+        modelBuilder.ApplyConfiguration(new PlantConfiguration());
+        modelBuilder.ApplyConfiguration(new PlantAnalysisConfiguration());
+
         modelBuilder.ApplyDataSeeds();
     }
 
@@ -96,6 +102,10 @@ public class AppDbContext
     public DbSet<Supplier> Suppliers { get; set; }
     public DbSet<WorkDayDetail> WorkDayDetails { get; set; }
     public DbSet<WorkReport> WorkReports { get; set; }
+
+    //Life-cycle tables
+    public DbSet<Plant> Plants { get; set; }
+    public DbSet<PlantAnalysis> PlantAnalyses { get; set; }
 
     public override int SaveChanges()
     {

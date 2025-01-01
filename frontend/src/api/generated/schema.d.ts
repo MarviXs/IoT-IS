@@ -789,6 +789,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/lifecycles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get paginated lifecycles */
+        get: operations["GetLifeCycles"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lifecycles/plant/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete a plant */
+        delete: operations["DeletePlant"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lifecycles/plant/{plantId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get all lifecycles by PlantId */
+        get: operations["GetLifeCyclesByPlantId"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/products": {
         parameters: {
             query?: never;
@@ -1059,6 +1110,19 @@ export interface components {
             readonly hasNext: boolean;
             items: components["schemas"]["Fei.Is.Api.Features.Jobs.Queries.GetJobsOnDevice.Response"][];
         };
+        "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.LifeCycles.Queries.GetLifeCycles.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+            /** Format: int32 */
+            currentPage: number;
+            /** Format: int32 */
+            totalPages: number;
+            /** Format: int32 */
+            pageSize: number;
+            /** Format: int32 */
+            totalCount: number;
+            readonly hasPrevious: boolean;
+            readonly hasNext: boolean;
+            items: components["schemas"]["Fei.Is.Api.Features.LifeCycles.Queries.GetLifeCycles.Response"][];
+        };
         "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Orders.Queries.GetOrders.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
             /** Format: int32 */
             currentPage: number;
@@ -1231,7 +1295,7 @@ export interface components {
         };
         "Fei.Is.Api.Features.DataPoints.Queries.GetLatestDataPoints.Response": {
             /** Format: double */
-            value: number | null;
+            value?: number | null;
         };
         /** @enum {string} */
         "Fei.Is.Api.Features.DataPoints.Queries.GetSensorDataPoints.DownsampleMethod": "Asap" | "Lttb";
@@ -1474,6 +1538,30 @@ export interface components {
             /** Format: date-time */
             updatedAt?: string | null;
         };
+        "Fei.Is.Api.Features.LifeCycles.Queries.GetLifeCycleById.Response": {
+            /** Format: uuid */
+            plantId: string;
+            /** Format: double */
+            leafCount?: number | null;
+            /** Format: double */
+            width?: number | null;
+            /** Format: double */
+            height?: number | null;
+            /** Format: double */
+            area?: number | null;
+            disease?: string | null;
+            health?: string | null;
+            /** Format: date-time */
+            analysisDate?: string | null;
+        };
+        "Fei.Is.Api.Features.LifeCycles.Queries.GetLifeCycles.Response": {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            type: string;
+            /** Format: date-time */
+            datePlanted: string;
+        };
         "Fei.Is.Api.Features.Orders.Commands.CreateOrder.Request": {
             /** Format: int32 */
             customerId: number;
@@ -1486,8 +1574,8 @@ export interface components {
             note?: string | null;
         };
         "Fei.Is.Api.Features.Orders.Queries.GetOrders.Response": {
-            /** Format: int32 */
-            id: number;
+            /** Format: uuid */
+            id: string;
             customerName: string;
             /** Format: date-time */
             orderDate: string;
@@ -1773,12 +1861,12 @@ export interface components {
             [key: string]: unknown;
         };
         "Microsoft.AspNetCore.Mvc.ProblemDetails": {
-            type: string | null;
-            title: string | null;
+            type?: string | null;
+            title?: string | null;
             /** Format: int32 */
-            status: number | null;
-            detail: string | null;
-            instance: string | null;
+            status?: number | null;
+            detail?: string | null;
+            instance?: string | null;
         } & {
             [key: string]: unknown;
         };
@@ -3730,7 +3818,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": number;
+                    "application/json": string;
                 };
             };
             /** @description Bad Request */
@@ -3740,6 +3828,81 @@ export interface operations {
                 };
                 content: {
                     "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+        };
+    };
+    GetLifeCycles: {
+        parameters: {
+            query?: {
+                SortBy?: string;
+                Descending?: boolean;
+                SearchTerm?: string;
+                PageNumber?: number;
+                PageSize?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.LifeCycles.Queries.GetLifeCycles.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"];
+                };
+            };
+        };
+    };
+    DeletePlant: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GetLifeCyclesByPlantId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plantId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.LifeCycles.Queries.GetLifeCycleById.Response"][];
                 };
             };
         };
