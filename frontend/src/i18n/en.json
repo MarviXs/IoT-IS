@@ -450,6 +450,9 @@
     "street": "Street",
     "city": "City",
     "psc": "Postal code",
-    "add_company": "Add Company"
+    "add_company": "Add Company",
+    "edit_company": "Edit Company",
+    "delete_company": "Delete Company",
+    "delete_company_desc": "Are you sure you want to delete this company?"
   }
 }
