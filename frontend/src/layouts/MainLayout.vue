@@ -42,7 +42,7 @@
     </q-header>
 
     <q-drawer v-model="leftDrawerOpen" show-if-above class="shadow bg-white">
-      <div class="column q-px-lg full-height">
+      <div class="column q-px-lg">
         <router-link class="q-my-lg q-mx-auto full-width" to="/">
           <q-img src="../assets/logo.png" height="3.7rem" fit="contain" no-spinner no-transition />
         </router-link>
