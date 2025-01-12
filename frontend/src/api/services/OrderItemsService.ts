@@ -39,10 +39,6 @@ class OrderItemsService {
     });
   }
   */
-  
-  
- 
- 
   async addItemToContainer(orderId: string, containerId: string, body: { productId: string, quantity: number }) {
     return await client.POST('/orders/{orderId}/container/{containerId}/item', {
         params: {
@@ -55,7 +51,24 @@ class OrderItemsService {
     });
 }
 
+async deleteContainerFromOrder(orderId: string, containerId: string) {
+    return await client.DELETE('/orders/{orderId}/container/{containerId}', {
+      params: { path: { orderId, containerId } },
+    });
+}
+  
+  async increaseContainerQuantity(orderId: string, containerId: string) {
+    return await client.POST('/orders/{orderId}/container/{containerId}/increase', {
+      params: { path: { orderId, containerId } },
+    });
+  }
 
+  // Decrease the quantity of a container
+  async decreaseContainerQuantity(orderId: string, containerId: string) {
+    return await client.POST('/orders/{orderId}/container/{containerId}/decrease', {
+      params: { path: { orderId, containerId } },
+    });
+  }
 
 
 

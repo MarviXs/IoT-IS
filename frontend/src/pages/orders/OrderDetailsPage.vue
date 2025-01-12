@@ -10,21 +10,31 @@
       <div>
         <OrderItemTable
           v-model:pagination="pagination"
+          :currentOrderId="orderId"
           :orders="ordersPaginated || []"
           :containers="ordersPaginated || []"
           :loading="isLoadingContainers"
+          :refreshTable="refreshTable"
           class="shadow"
           @on-change="getOrderItemContainers(pagination)"
+          @open-delete-dialog="openDeleteContainerDialog"
         />
       </div>
     </template>
   </PageLayout>
+  <!-- Delete Container Dialog -->
+  <DeleteContainerDialog
+    v-model="isDeleteDialogOpen"
+    :orderId="Array.isArray(orderId) ? orderId[0] : orderId"
+    :containerId="selectedContainerId || ''"
+    @onDeleted="refreshTable"
+  />
 </template>
 
 <script setup lang="ts">
 import OrderItemTable from '@/components/order-item/OrderItemTable.vue';
 import { useRoute } from 'vue-router';
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { mdiPlus } from '@quasar/extras/mdi-v7';
 import PageLayout from '@/layouts/PageLayout.vue';
@@ -34,7 +44,7 @@ import { PaginationClient, PaginationTable } from '@/models/Pagination';
 import OrderItemsService, { OrderItemContainersQueryParams } from '@/api/services/OrderItemsService.ts';
 import OrderService from '@/api/services/OrdersService';
 import AddItemToOrderDialog from '@/components/order-item/AddItemToOrderDialog.vue';
-import { is } from 'quasar';
+import DeleteContainerDialog from '@/components/order-item/DeleteContainerDialog.vue';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -43,6 +53,8 @@ const order = ref<Order | null>(null);
 const isUpdateDialogOpen = ref(false);
 const isLoadingContainers = ref(false);
 const ordersPaginated = ref<any>([]);
+const isDeleteDialogOpen = ref(false); // Stav otvorenia dialógu
+const selectedContainerId = ref<string | null>(null); // Aktuálne vybraný kontajner
 
 const pagination = ref<PaginationClient>({
   sortBy: 'name',
@@ -51,7 +63,7 @@ const pagination = ref<PaginationClient>({
   rowsPerPage: 10,
   rowsNumber: 0,
 });
-const orderId = route.params.id;
+
 interface Order {
   id: number;
   customerName: string;
@@ -61,6 +73,12 @@ interface Order {
   contactPhone: string;
   note: string ;
 }
+var orderId = String(Array.isArray(route.params.id) ? route.params.id[0] : route.params.id);
+
+onMounted(() => {
+  orderId = String(Array.isArray(route.params.id) ? route.params.id[0] : route.params.id);
+  refreshTable(); // Po úvodnom mount načítaj dáta
+});
 
 async function getOrderItemContainers(paginationTable: PaginationTable) {
   try {
@@ -71,7 +89,6 @@ async function getOrderItemContainers(paginationTable: PaginationTable) {
       PageSize: paginationTable.rowsPerPage,
     };
     isLoadingContainers.value = true;
-    const orderId = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id;
 
     const { data, error } = await OrderItemsService.getOrderItemContainers(orderId, paginationQuery);
     isLoadingContainers.value = false;
@@ -81,6 +98,7 @@ async function getOrderItemContainers(paginationTable: PaginationTable) {
       ordersPaginated.value = [];
       return;
     }
+
     ordersPaginated.value = data.items.map((item) => ({
       ...item,
       products: item.products || [], // Zabezpečíme, že `products` vždy existuje ako pole
@@ -92,53 +110,37 @@ async function getOrderItemContainers(paginationTable: PaginationTable) {
   }
 }
 
-// Načítanie údajov o objednávke
-// Načítanie údajov o objednávke
 async function getOrder() {
   try {
-    // Kontrola, či je orderId pole, a použitie správneho formátu
-    const validOrderId = Array.isArray(orderId) ? orderId[0] : orderId.toString();
-
-    // Načítanie údajov o objednávke
-    const { data, error } = await OrderService.getOrder(validOrderId);
+    const { data, error } = await OrderService.getOrder(orderId);
     if (error) {
-      handleError(error, t('order.toasts.loading_failed'));
+      console.error('Error loading order:', error);
       return;
     }
-
     if (data) {
-      console.log('Loaded order:', data);
-
-      // Transformácia dát tak, aby boli kompatibilné s rozhraním Order
       order.value = {
-        id: Number(data.id), // Konverzia `id` na číslo
+        id: Number(data.id),
         customerName: data.customerName,
         orderDate: data.orderDate,
         deliveryWeek: data.deliveryWeek,
         paymentMethod: data.paymentMethod,
         contactPhone: data.contactPhone,
-        note: data.note ?? '', // Zabezpečíme, že `note` nebude null ani undefined
+        note: data.note ?? '',
       };
     }
   } catch (e) {
-    // Spracovanie neočakávaných chýb
     console.error('Unexpected error while loading order:', e);
-    handleError(e, t('order.toasts.loading_failed'));
   }
 }
 
-// Funkcia na spracovanie požiadavky
-function handleRequest() {
-  // Implementácia spracovania požiadavky
-  console.log('Request handled');
+function refreshTable() {
+  getOrder(); // Znovu načíta detaily objednávky
+  getOrderItemContainers(pagination.value); // Znovu načíta kontajnery
 }
 
-// Spustenie načítania položiek objednávky
-getOrder();
-getOrderItemContainers(pagination.value);
-
-function handleError(error: any, message: string) {
-  console.error(message, error);
+function openDeleteContainerDialog(containerId: string) {
+  selectedContainerId.value = containerId;
+  isDeleteDialogOpen.value = true;
 }
 </script>
 

@@ -51,22 +51,15 @@ public static class AddItemToContainer
         }
     }
 
-    /// <summary>
-    /// DTO pre požiadavku na pridanie položky.
-    /// </summary>
+    
     public record AddItemRequest(
         Guid ProductId,
         int Quantity
     );
 
-    /// <summary>
-    /// Command pre pridanie položky do kontajnera.
-    /// </summary>
+
     public record Command(ClaimsPrincipal User, Guid ContainerId, AddItemRequest Request) : IRequest<Result>;
 
-    /// <summary>
-    /// Handler pre spracovanie pridania položky do kontajnera.
-    /// </summary>
     public sealed class Handler(AppDbContext context) : IRequestHandler<Command, Result>
     {
         public async Task<Result> Handle(Command message, CancellationToken cancellationToken)
@@ -100,6 +93,13 @@ public static class AddItemToContainer
 
             // Pridaj položku do kontajnera
             container.Items.Add(orderItem);
+
+            // Prepočet PricePerContainer a TotalPrice
+            var totalQuantity = container.Items.Sum(i => i.Quantity);
+            var totalPrice = container.Items.Sum(i => i.Product.PricePerPiecePack * i.Quantity);
+
+            container.PricePerContainer = totalQuantity > 0 ? totalPrice / totalQuantity : 0;
+            container.TotalPrice = totalPrice;
 
             // Ulož zmeny
             await context.SaveChangesAsync(cancellationToken);

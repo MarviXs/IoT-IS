@@ -74,7 +74,7 @@ async function addContainerToOrder() {
 
     // Reset formu
     containerData.value = {
-      orderId: props.orderId,
+      orderId: orderId,
       name: '',
       quantity: 1,
       pricePerContainer: 0

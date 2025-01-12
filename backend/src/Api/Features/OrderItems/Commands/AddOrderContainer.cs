@@ -77,7 +77,8 @@ public static class AddOrderContainer
             }
 
             // Create a new OrderItemContainer entity and populate it with data from the request
-            var orderContainer = new OrderItemContainer
+            var orderContainer = new Fei.Is.Api.Data.Models.InformationSystem.OrderItemContainer
+
             {
                 Name = message.Request.Name,
                 Quantity = message.Request.Quantity,

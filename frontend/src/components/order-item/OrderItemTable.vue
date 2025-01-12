@@ -12,8 +12,8 @@
               <q-btn flat dense round size="sm" :icon="plusIcon" @click="increaseQuantity(props.row.id)" />
             </div>
           </q-td>
-          <q-td :props="props" key="oneContainer">{{ calculateoneContainer(props.row) }}</q-td>
-          <q-td :props="props" key="total">{{ calculateTotal(props.row) }}</q-td>
+          <q-td :props="props" key="pricePerContainer">{{ props.row.pricePerContainer }}</q-td>
+          <q-td :props="props" key="totalPrice">{{ props.row.totalPrice }}</q-td>
           <q-td class="final-actions">
             <div class="product-quantity-actions">
               <q-btn flat round size="sm" :icon="mdiPlusBox" color="grey-color"
@@ -45,6 +45,13 @@
     <AddItemToOrderDialog v-model="isAddItemDialogOpen" :orderId="currentOrderId" :containerId="selectedContainerId"
       @onCreate="handleItemCreated" />
 
+    <!-- DeleteContainer Dialog -->
+    <DeleteContainerDialog
+      v-model="isDeleteDialogOpen"
+      :orderId="currentOrderId"
+      :containerId="selectedContainerId"
+      @onDeleted="handleContainerDeleted"
+    />
     
 
 
@@ -54,15 +61,32 @@
 <script>
 import { mdiPlus, mdiMinus, mdiTrashCan, mdiPencil, mdiPlusBox } from '@quasar/extras/mdi-v7';
 import AddItemToOrderDialog from '@/components/order-item/AddItemToOrderDialog.vue';
+import DeleteContainerDialog from '@/components/order-item/DeleteContainerDialog.vue';
+import OrderItemsService from '@/api/services/OrderItemsService';
+import { useRoute } from 'vue-router';
+import { toast } from 'vue3-toastify';
+
 
 export default {
   name: "OrderItemTable",
+  setup() {
+    const route = useRoute();
+    const currentOrderId = route.params.id; // Získanie orderId z URL
+
+    return {
+      currentOrderId,
+    };
+  },
   components: { AddItemToOrderDialog },
   props: {
     containers: {
       type: Array,
       required: true,
     },
+    refreshTable: {
+    type: Function, // Externá funkcia na obnovu tabuľky
+    required: true,
+  },
   },
   data() {
     return {
@@ -78,8 +102,8 @@ export default {
         { name: "name", label: this.$t('global.name'), field: "name", align: "left" },
         { name: "quantity", label: this.$t('order_item.quantity'), field: "quantity", align: "center" },
         { name: "actions", label: "", align: "center" },
-        { name: "oneContainer", label: this.$t('order_item.oneContainer'), align: "right" },
-        { name: "total", label: this.$t('order_item.total'), align: "right" },
+        { name: "pricePerContainer", label: this.$t('order_item.oneContainer'), align: "right" },
+        { name: "totalPrice", label: this.$t('order_item.total'), align: "right" },
         { name: "finalActions", label: this.$t('global.actions'), align: "center" },
       ],
       nestedColumns: [
@@ -96,39 +120,57 @@ export default {
     };
   },
   methods: {
-    increaseQuantity(containerId) {
-      const container = this.containers.find((c) => c.id === containerId);
-      if (container) container.quantity += 1;
+    async increaseQuantity(containerId) {
+      try {
+        await OrderItemsService.increaseContainerQuantity(this.currentOrderId, containerId);
+        const container = this.containers.find((c) => c.id === containerId);
+        if (container) {
+        }
+        toast.success(this.$t('container.toasts.increase_success'));
+        this.refreshTable();
+      } catch (error) {
+        console.error('Error increasing quantity:', error);
+        toast.error(this.$t('container.toasts.increase_error'));
+      }
     },
-    decreaseQuantity(containerId) {
-      const container = this.containers.find((c) => c.id === containerId);
-      if (container && container.quantity > 0) container.quantity -= 1;
+    async decreaseQuantity(containerId) {
+      try {
+        const container = this.containers.find((c) => c.id === containerId);
+        if (container && container.quantity > 0) {
+          await OrderItemsService.decreaseContainerQuantity(this.currentOrderId, containerId);
+          toast.success(this.$t('container.toasts.decrease_success'));
+          this.refreshTable();
+        } else {
+          toast.error(this.$t('container.toasts.minimum_quantity'));
+        }
+      } catch (error) {
+        console.error('Error decreasing quantity:', error);
+        toast.error(this.$t('container.toasts.decrease_error'));
+      }
     },
     openAddItemDialog(containerId) {
       this.selectedContainerId = containerId;
       this.isAddItemDialogOpen = true;
+      this.refreshTable();
     },
     handleItemCreated(newItem) {
       this.isAddItemDialogOpen = false;
       this.currentOrderId = null;
+      this.refreshTable();
     },
     openUpdateDialog(containerId) {
       alert(this.$t('global.edit'));
     },
     openDeleteDialog(containerId) {
-      alert(this.$t('order_item.toasts.delete_success'));
+      this.selectedContainerId = containerId;
+      this.isDeleteDialogOpen = true;
+      this.$emit('open-delete-dialog', containerId); // Emitovanie udalosti pre rodiča
+
     },
-    calculateoneContainer(container) {
-      if (!container.products.length) return "0.00";
-      const total = container.products.reduce((sum, product) => sum + parseFloat(product.cenaSDPH || 0), 0);
-      return (total / container.products.length).toFixed(2);
-    },
-    calculateTotal(container) {
-      if (!container.products.length) return "0.00";
-      return (
-        container.quantity *
-        container.products.reduce((sum, product) => sum + parseFloat(product.cenaSDPH || 0) * product.pocet, 0)
-      ).toFixed(2);
+    handleContainerDeleted() {
+      this.isDeleteDialogOpen = false;
+      this.$emit('onChange'); // Môžete znova načítať tabuľku, aby ste aktualizovali dáta
+      this.refreshTable();
     },
   },
 };
@@ -145,7 +187,7 @@ export default {
 .product-quantity-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  
 }
 
 .final-actions {
@@ -157,5 +199,63 @@ export default {
 .q-btn {
   font-size: 16px;
 }
+
+/* Zvýraznenie hlavičky tabuľky */
+.q-table thead {
+  background-color: #f5f5f5;
+  font-weight: bold;
+}
+
+/* Striedanie farieb pre riadky tabuľky */
+.q-table tbody .parent-row:nth-child(odd) {
+  background-color: #ffffff;
+}
+
+.q-table tbody .parent-row:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+/* Zvýraznenie riadku pri hoverovaní */
+.q-table tbody .parent-row:hover {
+  background-color: #e0f7fa; /* Svetlomodrá farba */
+  cursor: pointer;
+}
+
+/* Ohraničenie pre vnorené tabuľky */
+.nested-table {
+  border: 1px solid #e0e0e0;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+/* Zvýraznenie vnorených riadkov */
+.q-table .nested-row {
+  background-color: #fdfdfd;
+}
+
+/* Akcie v stĺpci sú zarovnané a prehľadné */
+.action-column,
+.final-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Pridanie jemného ohraničenia medzi bunkami */
+.q-table td {
+  border-bottom: 1px solid #ddd;
+  padding: 10px;
+}
+.q-table--dense .q-table thead tr, .q-table--dense .q-table tbody tr, .q-table--dense .q-table tbody td {
+    height: 30px;
+}
+
+
+
+
+
+
+
 
 </style>

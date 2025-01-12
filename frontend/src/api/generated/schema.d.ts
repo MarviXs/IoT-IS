@@ -844,6 +844,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/orders/{orderId}/container/{containerId}/decrease": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Decrease the quantity of a container by 1 */
+        post: operations["DecreaseQuantityContainer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orders/{orderId}/container/{containerId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete a container and its items from an order */
+        delete: operations["DeleteContainer"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orders/{orderId}/container/{containerId}/increase": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Increase the quantity of a container by 1 */
+        post: operations["IncreaseQuantityContainer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/orders/{orderId}/container": {
         parameters: {
             query?: never;
@@ -4039,6 +4090,97 @@ export interface operations {
             };
         };
     };
+    DecreaseQuantityContainer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orderId: string;
+                containerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DeleteContainer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orderId: string;
+                containerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    IncreaseQuantityContainer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orderId: string;
+                containerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     GetOrderItemContainer: {
         parameters: {
             query?: {
@@ -4114,7 +4256,6 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                orderId: string;
                 containerId: string;
             };
             cookie?: never;
