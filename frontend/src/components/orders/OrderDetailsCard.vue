@@ -3,7 +3,7 @@
     <q-card-section class="header-section">
       <div>
         <div class="text-h6">{{ t('order.details') }}</div>
-        <div class="text-subtitle2">Order #{{ order.id }}</div>
+        <div class="text-subtitle2">Order #{{ order.customerName}}</div>
       </div>
       <div>
         <q-btn flat round size="md" :icon="mdiPlusBox" color="grey-color" @click="openAddContainerDialog"></q-btn>
@@ -49,7 +49,7 @@
     <UpdateOrderDialog v-model="isUpdateDialogOpen" :orderId="order.id" @onUpdate="handleOrderUpdated" />
 
     <!-- Delete dialog -->
-    <DeleteOrderDialog v-model="isDeleteDialogOpen" :orderId="order.id" @onDeleted="handleOrderDeleted" />
+    <DeleteOrderDialog v-model="isDeleteDialogOpen" :orderId="order.id.toString()" @onDeleted="handleOrderDeleted" />
     
 
   </q-card>

@@ -51,7 +51,7 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 interface AddOrderContainerRequest {
-  orderId: number;
+  orderId: string;
   name: string;
   quantity: number;
   pricePerContainer: number;
@@ -62,7 +62,7 @@ const props = defineProps<{
   loading?: boolean;
 }>();
 
-const emit = defineEmits(['update:containerData', 'on-submit']);
+const emit = defineEmits(['update:containerData', 'on-submit', 'cancel']);
 const { t } = useI18n();
 
 const containerForm = ref<HTMLFormElement>();
@@ -95,7 +95,6 @@ function onSubmit() {
 }
 
 function cancel() {
-  // Tu môžete vyslať nejaký event na zatvorenie dialógu, ak chcete
-  // emit('cancel') alebo necháte nadradený komponent kontrolovať visible
+  emit('cancel');
 }
 </script>

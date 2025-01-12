@@ -2,7 +2,7 @@
   <PageLayout
     :breadcrumbs="[
       { label: t('order.label', 2), to: '/orders' },
-      { label: 'Order #' + orderId, to: `/orders/${orderId}` },
+      { label: order?.customerName || 'Order Details', to: `/orders/${orderId}` },
     ]"
   >
     <template #default>
@@ -59,7 +59,7 @@ interface Order {
   deliveryWeek: number;
   paymentMethod: string;
   contactPhone: string;
-  note: string;
+  note: string ;
 }
 
 async function getOrderItemContainers(paginationTable: PaginationTable) {
@@ -71,6 +71,8 @@ async function getOrderItemContainers(paginationTable: PaginationTable) {
       PageSize: paginationTable.rowsPerPage,
     };
     isLoadingContainers.value = true;
+    const orderId = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id;
+
     const { data, error } = await OrderItemsService.getOrderItemContainers(orderId, paginationQuery);
     isLoadingContainers.value = false;
 
@@ -91,15 +93,40 @@ async function getOrderItemContainers(paginationTable: PaginationTable) {
 }
 
 // Načítanie údajov o objednávke
+// Načítanie údajov o objednávke
 async function getOrder() {
-  const { data, error } = await OrderService.getOrder(orderId.toString());
-  if (error) {
-    handleError(error, t('order.toasts.loading_failed'));
-    return;
+  try {
+    // Kontrola, či je orderId pole, a použitie správneho formátu
+    const validOrderId = Array.isArray(orderId) ? orderId[0] : orderId.toString();
+
+    // Načítanie údajov o objednávke
+    const { data, error } = await OrderService.getOrder(validOrderId);
+    if (error) {
+      handleError(error, t('order.toasts.loading_failed'));
+      return;
+    }
+
+    if (data) {
+      console.log('Loaded order:', data);
+
+      // Transformácia dát tak, aby boli kompatibilné s rozhraním Order
+      order.value = {
+        id: Number(data.id), // Konverzia `id` na číslo
+        customerName: data.customerName,
+        orderDate: data.orderDate,
+        deliveryWeek: data.deliveryWeek,
+        paymentMethod: data.paymentMethod,
+        contactPhone: data.contactPhone,
+        note: data.note ?? '', // Zabezpečíme, že `note` nebude null ani undefined
+      };
+    }
+  } catch (e) {
+    // Spracovanie neočakávaných chýb
+    console.error('Unexpected error while loading order:', e);
+    handleError(e, t('order.toasts.loading_failed'));
   }
-  console.log('Loaded order:', data);
-  order.value = data;
 }
+
 // Funkcia na spracovanie požiadavky
 function handleRequest() {
   // Implementácia spracovania požiadavky

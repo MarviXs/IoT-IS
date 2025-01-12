@@ -1,5 +1,5 @@
 <template>
-  <q-dialog v-model="isOpen">
+  <q-dialog v-model="isOpen" @hide="closeDialog">
     <q-card>
       <q-card-section>
         <div class="text-h6">{{ t('order_item.add_item') }}</div>
@@ -7,7 +7,11 @@
 
       <q-card-section>
         <!-- Komponent OrderItemForm -->
-        <OrderItemForm v-model:orderItem="orderItem" :loading="addingItem" @on-submit="onSubmit" />
+        <OrderItemForm  
+        v-model:orderItem="orderItem" 
+        :loading="addingItem" 
+        @on-submit="onSubmit" 
+        @cancel="closeDialog" />
       </q-card-section>
     </q-card>
   </q-dialog>
@@ -56,9 +60,14 @@ watch(
   { immediate: true }
 );
 
+watch(isOpen, (val) => {
+  emit('update:modelValue', val);
+});
+
 // Funkcia na zatvorenie dialógu
 function closeDialog() {
-  emit('update:modelValue', false);
+  isOpen.value = false; // Zavrie dialóg
+  emit('update:modelValue', false); // Synchronizácia s rodičovským modelom
 }
 
 // Aktualizácia objednávkového objektu

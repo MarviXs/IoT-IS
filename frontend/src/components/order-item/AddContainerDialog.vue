@@ -7,43 +7,50 @@
         :loading="addingContainer"
         @update:containerData="(val: AddOrderContainerRequest) => containerData = val"
         @on-submit="addContainerToOrder"
+        @cancel="closeDialog" 
       />
     </template>
   </dialog-common>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted  } from 'vue';
 import { handleError } from '@/utils/error-handler';
 import { toast } from 'vue3-toastify';
 import { useI18n } from 'vue-i18n';
 import DialogCommon from '@/components/core/DialogCommon.vue';
 import ContainerForm from './ContainerForm.vue';
 import OrderItemsService from '@/api/services/OrderItemsService';
+import { useRoute } from 'vue-router'; // Import the route object to get orderId from the URL
 
 interface AddOrderContainerRequest {
-  orderId: number;
+  orderId: string;
   name: string;
   quantity: number;
   pricePerContainer: number;
 }
 
 const props = defineProps<{ 
-  orderId: number, 
+  orderId: string, 
   modelValue: boolean 
 }>();
 
 const emit = defineEmits(['update:modelValue', 'onCreate']);
-
+const route = useRoute();
 const { t } = useI18n();
 
 const isDialogOpen = ref(props.modelValue);
 watch(() => props.modelValue, (val) => { isDialogOpen.value = val; });
 watch(isDialogOpen, (val) => emit('update:modelValue', val));
 
+// Extract orderId from the URL
+var orderId = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id;
+onMounted(() => {
+  orderId = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id || '';
+});
 // Inicializujeme údaje pre kontajner
 const containerData = ref<AddOrderContainerRequest>({
-  orderId: props.orderId,
+  orderId: orderId,
   name: '',
   quantity: 1,
   pricePerContainer: 0
@@ -53,9 +60,9 @@ const addingContainer = ref(false);
 
 async function addContainerToOrder() {
   addingContainer.value = true;
-
+  
   try {
-    const { data, error } = await OrderItemsService.addOrderContainer(props.orderId, containerData.value);
+    const { data, error } = await OrderItemsService.addOrderContainer(orderId, containerData.value);
     if (error) {
       handleError(error, t('order_item.toasts.add_failed'));
       return;
@@ -78,4 +85,9 @@ async function addContainerToOrder() {
     addingContainer.value = false;
   }
 }
+
+function closeDialog() {
+  isDialogOpen.value = false;
+}
+
 </script>

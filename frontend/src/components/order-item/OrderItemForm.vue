@@ -121,7 +121,7 @@ function onSubmit() {
 
 // 🔴 **6. Zrušenie formulára**
 function cancel() {
-    emit('update:orderItem', null);
+  emit('cancel'); 
 }
 </script>
 
