@@ -61,6 +61,7 @@ public class AppDbContext
         modelBuilder.ApplyConfiguration(new WorkDayDetailConfiguration());
         modelBuilder.ApplyConfiguration(new WorkReportConfiguration());
         modelBuilder.ApplyConfiguration(new VATCategoryConfiguration());
+        modelBuilder.ApplyConfiguration(new SystemSettingConfiguration());
 
         modelBuilder.ApplyDataSeeds();
     }
@@ -94,6 +95,7 @@ public class AppDbContext
     public DbSet<ProductionPlan> ProductionPlans { get; set; }
     public DbSet<Summary> Summaries { get; set; }
     public DbSet<Supplier> Suppliers { get; set; }
+    public DbSet<SystemSetting> SystemSettings { get; set; }
     public DbSet<WorkDayDetail> WorkDayDetails { get; set; }
     public DbSet<WorkReport> WorkReports { get; set; }
 
