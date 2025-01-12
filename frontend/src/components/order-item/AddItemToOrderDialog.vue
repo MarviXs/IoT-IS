@@ -42,7 +42,6 @@ const addingItem = ref(false);
 var orderId = route.params.id;
 onMounted(() => {
   orderId = route.params.id || '';
-  console.log('Extracted orderId from URL:', orderId.value);
 });
 
 // Objednávkový objekt pre formulár

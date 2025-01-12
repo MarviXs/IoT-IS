@@ -105,7 +105,6 @@ export default {
       if (container && container.quantity > 0) container.quantity -= 1;
     },
     openAddItemDialog(containerId) {
-      console.log('Opening AddItem dialog for container:', containerId);
       this.selectedContainerId = containerId;
       this.isAddItemDialogOpen = true;
     },

@@ -14,13 +14,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch,onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import DialogCommon from '@/components/core/DialogCommon.vue';
 import UpdateOrderForm from './UpdateOrderForm.vue'; // Nový formulár pre update
 import OrdersService from '@/api/services/OrdersService'; // predpokladaná service
 import { toast } from 'vue3-toastify';
 import { handleError } from '@/utils/error-handler';
+import { useRoute } from 'vue-router'; // Import the route object to get orderId from the URL
+
 
 const props = defineProps<{ orderId: number; modelValue: boolean }>();
 const emit = defineEmits(['update:modelValue', 'onUpdate']);
@@ -32,7 +34,7 @@ watch(isDialogOpen, (val) => emit('update:modelValue', val));
 
 const orderData = ref<any>(null);
 const updatingOrder = ref(false);
-
+const route = useRoute();
 // Načítanie objednávky pri otvorení dialógu
 watch(isDialogOpen, async (val) => {
   if (val) {
@@ -40,9 +42,13 @@ watch(isDialogOpen, async (val) => {
   }
 });
 
+var orderId = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id;
+onMounted(() => {
+  orderId = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id || '';
+});
 async function loadOrder() {
   orderData.value = null;
-  const { data, error } = await OrdersService.getOrder(props.orderId.toString());
+  const { data, error } = await OrdersService.getOrder(orderId);
   if (error) {
     handleError(error, t('order.toasts.load_failed'));
     isDialogOpen.value = false;
@@ -53,7 +59,7 @@ async function loadOrder() {
 
 async function updateOrder(updatedData: any) {
   updatingOrder.value = true;
-  const { data, error } = await OrdersService.updateOrder(props.orderId, updatedData);
+  const { data, error } = await OrdersService.updateOrder(orderId, updatedData);
   updatingOrder.value = false;
 
   if (error) {

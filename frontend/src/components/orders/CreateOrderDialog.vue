@@ -38,7 +38,7 @@ const creatingOrder = ref(false);
 
 // Initialize the order form data with default values
 const order = ref<OrderFormData>({
-    customerId: 0, // Changed to customerId to match backend requirements
+    customerId: '', // Changed to customerId to match backend requirements
     contactPhone: '',
     paymentMethod: '',
     note: '', 

@@ -7,22 +7,20 @@
 
 <script setup lang="ts">
 import { handleError } from '@/utils/error-handler';
-import { ref } from 'vue';
+import { ref ,onMounted} from 'vue';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue3-toastify';
+import { useRoute } from 'vue-router'; // Import the route object to get orderId from the URL
 import DeleteConfirmationDialog from '../core/DeleteConfirmationDialog.vue';
 import OrderService from '@/api/services/OrdersService';
-
+const route = useRoute();
 const isDialogOpen = ref<boolean>(false);
 
-
-const props = defineProps({
-    orderId: {
-        type: String,
-        default: '',
-        required: true,
-    },
+var orderId = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id;
+onMounted(() => {
+  orderId = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id || '';
 });
+
 
 const emit = defineEmits(['onDeleted']);
 
@@ -31,16 +29,18 @@ const isDeleteInProgress = ref(false);
 
 async function handleDelete() {
     isDeleteInProgress.value = true;
-    try {
-        await OrderService.deleteOrder(props.orderId);
-        toast.success(t('order.toasts.delete_success'));
-        emit('onDeleted');
-        isDialogOpen.value = false;
-    } catch (error) {
-        handleError(error, t('order.toasts.delete_error'));
-    } finally {
-        isDeleteInProgress.value = false;
-    }
+    
+    const { error } = await OrderService.deleteOrder(orderId);
+    toast.success(t('order.toasts.delete_success'));
+    emit('onDeleted');
+    isDeleteInProgress.value = false;
+
+    isDialogOpen.value = false;
+    if (error) {
+    handleError(error, 'Error deleting item');
+    return;
+  }
+    
 }
 </script>
 
