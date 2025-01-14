@@ -59,7 +59,7 @@ public class AppDbContext
         modelBuilder.ApplyConfiguration(new SummaryConfiguration());
         modelBuilder.ApplyConfiguration(new SupplierConfiguration());
         modelBuilder.ApplyConfiguration(new WorkDayDetailConfiguration());
-        modelBuilder.ApplyConfiguration(new WorkReportConfiguration());
+        modelBuilder.ApplyConfiguration(new OrderItemContainerConfiguration());
         modelBuilder.ApplyConfiguration(new VATCategoryConfiguration());
 
         modelBuilder.ApplyDataSeeds();
@@ -96,6 +96,7 @@ public class AppDbContext
     public DbSet<Supplier> Suppliers { get; set; }
     public DbSet<WorkDayDetail> WorkDayDetails { get; set; }
     public DbSet<WorkReport> WorkReports { get; set; }
+    public DbSet<OrderItemContainer> OrderItemContainers { get; set; }
 
     public override int SaveChanges()
     {

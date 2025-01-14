@@ -29,6 +29,7 @@
     "permissions": "Permissions",
     "n_of_m": "{0} of {1}",
     "refresh": "Refresh",
+    "actions": "Actions",
     "automatic_refresh_interval": "Automatic refresh interval",
     "enter_refresh_interval_s": "Enter refresh interval in seconds (0 to disable)",
     "rules": {
@@ -329,6 +330,7 @@
     "czech_name": "Czech Name",
     "latin_name": "Latin Name",
     "code": "Code",
+    "variety": "Variety",
     "flower_leaf_description": "Flower Leaf Description",
     "pot_diameter_pack": "Pot Diameter Pack",
     "price_per_piece_pack": "Price Per Piece Pack",
@@ -439,6 +441,24 @@
       "cash": "Cash",
       "card": "Card",
       "transfer": "Transfer"
+    },
+    "details": "Order details"
+  },
+  "order_item": {
+    "id": "ID",
+    "product_number": "Product Number",
+    "variety_name": "Variety Name",
+    "oneContainer": "Price for one container",
+    "total": "Total price",
+    "quantity": "Quantity",
+    "add_item": "Add item",
+    "delete_item": "Delete item",
+    "delete_item_desc": "Are you sure you want to delete this item?",
+    "toasts": {
+      "delete_success": "Item deleted successfully",
+      "add_success": "Item added successfully",
+      "add_failed": "Failed to add item",
+      "delete_failed": "Failed to delete item"
     }
   },
   "company": {

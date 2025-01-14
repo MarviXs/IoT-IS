@@ -2,7 +2,7 @@ namespace Fei.Is.Api.Data.Models.InformationSystem;
 
 public class OrderItem : BaseModel
 {
-    public string VarietyName { get; set; }
-    public int Quantity { get; set; }
-    public Product Product { get; set; }
+    public required Product Product { get; set; } // Objekt Product uložený priamo v OrderItem
+
+    public required int Quantity { get; set; } // Počet kusov daného produktu
 }

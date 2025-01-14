@@ -4,4591 +4,5142 @@
  */
 
 export interface paths {
-    "/admin/users/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get user by ID */
-        get: operations["GetUserById"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+  '/admin/users/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/admin/users": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get all registered users */
-        get: operations["GetUsers"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Get user by ID */
+    get: operations['GetUserById'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/users': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/admin/users/{id}/email": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Update user email */
-        put: operations["UpdateUserEmail"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Get all registered users */
+    get: operations['GetUsers'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/users/{id}/email': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/admin/users/{id}/password": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Update user password */
-        put: operations["UpdateUserPassword"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    /** Update user email */
+    put: operations['UpdateUserEmail'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/users/{id}/password': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/admin/users/{id}/role": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Update user role */
-        put: operations["UpdateUserRole"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    /** Update user password */
+    put: operations['UpdateUserPassword'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/users/{id}/role': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/auth/device": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** This endpoint endpoint is called by EMQX to authenticate a device */
-        post: operations["AuthDevice"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    /** Update user role */
+    put: operations['UpdateUserRole'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/auth/device': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/auth/login": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Login
-         * @description Login with an email and password
-         */
-        post: operations["Login"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** This endpoint endpoint is called by EMQX to authenticate a device */
+    post: operations['AuthDevice'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/auth/login': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/auth/google": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Login
-         * @description Login with Google
-         */
-        post: operations["LoginByGoogle"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /**
+     * Login
+     * @description Login with an email and password
+     */
+    post: operations['Login'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/auth/google': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/auth/refresh": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Refresh a token
-         * @description Refresh an access token using a refresh token
-         */
-        post: operations["RefreshToken"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /**
+     * Login
+     * @description Login with Google
+     */
+    post: operations['LoginByGoogle'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/auth/refresh': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/auth/register": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Register a new user
-         * @description Register a new user with an email and password
-         */
-        post: operations["Register"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /**
+     * Refresh a token
+     * @description Refresh an access token using a refresh token
+     */
+    post: operations['RefreshToken'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/auth/register': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/auth/email": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Update user e-mail */
-        put: operations["UpdateEmail"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /**
+     * Register a new user
+     * @description Register a new user with an email and password
+     */
+    post: operations['Register'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/auth/email': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/auth/password": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Update user password */
-        put: operations["UpdatePassword"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    /** Update user e-mail */
+    put: operations['UpdateEmail'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/auth/password': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/product-categories": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get product categories */
-        get: operations["GetProductCategories"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    /** Update user password */
+    put: operations['UpdatePassword'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/product-categories': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/product-categories/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get a category by Id */
-        get: operations["GetCategoryById"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Get product categories */
+    get: operations['GetProductCategories'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/product-categories/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/commands/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get a command by id */
-        get: operations["GetCommandById"];
-        /** Update a command */
-        put: operations["UpdateCommand"];
-        post?: never;
-        /** Delete a command */
-        delete: operations["DeleteCommand"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Get a category by Id */
+    get: operations['GetCategoryById'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/commands/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/commands": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get all commands */
-        get: operations["GetCommands"];
-        put?: never;
-        /** Create a command */
-        post: operations["CreateCommand"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Get a command by id */
+    get: operations['GetCommandById'];
+    /** Update a command */
+    put: operations['UpdateCommand'];
+    post?: never;
+    /** Delete a command */
+    delete: operations['DeleteCommand'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/commands': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/companies": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get paginated companies */
-        get: operations["GetCompanies"];
-        put?: never;
-        /** Create a company */
-        post: operations["CreateCompany"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Get all commands */
+    get: operations['GetCommands'];
+    put?: never;
+    /** Create a command */
+    post: operations['CreateCommand'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/companies': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/companies/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get a company by Id */
-        get: operations["GetCompanyById"];
-        /** Update a company */
-        put: operations["UpdateCompany"];
-        post?: never;
-        /** Delete a company */
-        delete: operations["DeleteCompany"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Get paginated companies */
+    get: operations['GetCompanies'];
+    put?: never;
+    /** Create a company */
+    post: operations['CreateCompany'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/companies/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/devices/{deviceId}/sensors/{sensorTag}/data/latest": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Retrieve the most recent data points for a sensor
-         * @description Fetch the latest data points for a sensor
-         */
-        get: operations["GetLatestDataPoints"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Get a company by Id */
+    get: operations['GetCompanyById'];
+    /** Update a company */
+    put: operations['UpdateCompany'];
+    post?: never;
+    /** Delete a company */
+    delete: operations['DeleteCompany'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/devices/{deviceId}/sensors/{sensorTag}/data/latest': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/devices/{deviceId}/sensors/{sensorTag}/data": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get stored data points for a sensor
-         * @description Get stored data points for a sensor within a specified time range. Optionally downsample the data or group it into time buckets.
-         */
-        get: operations["GetSensorDataPoints"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /**
+     * Retrieve the most recent data points for a sensor
+     * @description Fetch the latest data points for a sensor
+     */
+    get: operations['GetLatestDataPoints'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/devices/{deviceId}/sensors/{sensorTag}/data': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/devices/{deviceAccessToken}/data": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Create data points
-         * @description This endpoint is called by the device to create data points.
-         */
-        post: operations["CreateDataPoints"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /**
+     * Get stored data points for a sensor
+     * @description Get stored data points for a sensor within a specified time range. Optionally downsample the data or group it into time buckets.
+     */
+    get: operations['GetSensorDataPoints'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/devices/{deviceAccessToken}/data': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/products/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get a product by PLUCode */
-        get: operations["GetProductById"];
-        /** Update a product */
-        put: operations["UpdateProduct"];
-        post?: never;
-        /** Delete a product */
-        delete: operations["DeleteProduct"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /**
+     * Create data points
+     * @description This endpoint is called by the device to create data points.
+     */
+    post: operations['CreateDataPoints'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/products/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/device-templates/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get a device template by id */
-        get: operations["GetDeviceTemplateById"];
-        /** Update a device */
-        put: operations["UpdateDeviceTemplate"];
-        post?: never;
-        /** Delete a device template */
-        delete: operations["DeleteDeviceTemplate"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Get a product by PLUCode */
+    get: operations['GetProductById'];
+    /** Update a product */
+    put: operations['UpdateProduct'];
+    post?: never;
+    /** Delete a product */
+    delete: operations['DeleteProduct'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/device-templates/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/devices/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get a device by id */
-        get: operations["GetDeviceById"];
-        /** Update a device */
-        put: operations["UpdateDevice"];
-        post?: never;
-        /** Delete a device */
-        delete: operations["DeleteDevice"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Get a device template by id */
+    get: operations['GetDeviceTemplateById'];
+    /** Update a device */
+    put: operations['UpdateDeviceTemplate'];
+    post?: never;
+    /** Delete a device template */
+    delete: operations['DeleteDeviceTemplate'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/devices/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/devices": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get paginated devices */
-        get: operations["GetDevices"];
-        put?: never;
-        /** Create a device */
-        post: operations["CreateDevice"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Get a device by id */
+    get: operations['GetDeviceById'];
+    /** Update a device */
+    put: operations['UpdateDevice'];
+    post?: never;
+    /** Delete a device */
+    delete: operations['DeleteDevice'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/devices': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/devices/with-sensors": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get devices with sensors */
-        get: operations["GetDevicesWithSensors"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Get paginated devices */
+    get: operations['GetDevices'];
+    put?: never;
+    /** Create a device */
+    post: operations['CreateDevice'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/devices/with-sensors': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/device-collections/{collectionId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get a device collection */
-        get: operations["GetDeviceCollectionById"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Get devices with sensors */
+    get: operations['GetDevicesWithSensors'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/device-collections/{collectionId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/device-collections": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get paginated device collections */
-        get: operations["GetDeviceCollections"];
-        put?: never;
-        /** Create a device collection */
-        post: operations["CreateDeviceCollection"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Get a device collection */
+    get: operations['GetDeviceCollectionById'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/device-collections': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/device-collections/{collectionId}/sensors": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get a device collection with sensors */
-        get: operations["GetDeviceCollectionWithSensors"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Get paginated device collections */
+    get: operations['GetDeviceCollections'];
+    put?: never;
+    /** Create a device collection */
+    post: operations['CreateDeviceCollection'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/device-collections/{collectionId}/sensors': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/device-collections/{collectionId}/devices/{deviceId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Add a device to a device collection */
-        post: operations["AddDeviceToDeviceCollection"];
-        /** Remove device from device collection */
-        delete: operations["RemoveDeviceFromDeviceCollection"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Get a device collection with sensors */
+    get: operations['GetDeviceCollectionWithSensors'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/device-collections/{collectionId}/devices/{deviceId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/device-collections/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Update a device collection */
-        put: operations["UpdateDeviceCollection"];
-        post?: never;
-        /** Delete a device collection */
-        delete: operations["DeleteDeviceCollection"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Add a device to a device collection */
+    post: operations['AddDeviceToDeviceCollection'];
+    /** Remove device from device collection */
+    delete: operations['RemoveDeviceFromDeviceCollection'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/device-collections/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/devices/{id}/shared-users": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get a list of users with whom the device is shared */
-        get: operations["GetDeviceSharedUsers"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    /** Update a device collection */
+    put: operations['UpdateDeviceCollection'];
+    post?: never;
+    /** Delete a device collection */
+    delete: operations['DeleteDeviceCollection'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/devices/{id}/shared-users': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/devices/{deviceId}/share": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Share a device with a user by email */
-        post: operations["ShareDeviceToUser"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Get a list of users with whom the device is shared */
+    get: operations['GetDeviceSharedUsers'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/devices/{deviceId}/share': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/devices/{deviceId}/unshare": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Unshare a device with a user by email */
-        post: operations["UnshareDeviceToUser"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Share a device with a user by email */
+    post: operations['ShareDeviceToUser'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/devices/{deviceId}/unshare': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/device-templates": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get all device templates */
-        get: operations["GetDeviceTemplates"];
-        put?: never;
-        /** Create a device template */
-        post: operations["CreateDeviceTemplate"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Unshare a device with a user by email */
+    post: operations['UnshareDeviceToUser'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/device-templates': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/devices/{deviceId}/jobs/active": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get all active jobs on a device */
-        get: operations["GetActiveJobs"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Get all device templates */
+    get: operations['GetDeviceTemplates'];
+    put?: never;
+    /** Create a device template */
+    post: operations['CreateDeviceTemplate'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/devices/{deviceId}/jobs/active': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/jobs/{jobId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get job */
-        get: operations["GetJobById"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Get all active jobs on a device */
+    get: operations['GetActiveJobs'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/jobs/{jobId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/jobs": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get all jobs on a device */
-        get: operations["GetJobsOnDevice"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Get job */
+    get: operations['GetJobById'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/jobs': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/jobs/{jobId}/cancel": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * Cancel a job
-         * @description Cancel a running or paused job.
-         */
-        put: operations["CancelJob"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Get all jobs on a device */
+    get: operations['GetJobsOnDevice'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/jobs/{jobId}/cancel': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/devices/{deviceId}/jobs": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Create a job
-         * @description Create a job for a device from a recipe.
-         */
-        post: operations["CreateJob"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    /**
+     * Cancel a job
+     * @description Cancel a running or paused job.
+     */
+    put: operations['CancelJob'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/devices/{deviceId}/jobs': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/jobs/{jobId}/pause": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * Pause a job
-         * @description Pause a job.
-         */
-        put: operations["PauseJob"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /**
+     * Create a job
+     * @description Create a job for a device from a recipe.
+     */
+    post: operations['CreateJob'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/jobs/{jobId}/pause': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/jobs/{jobId}/resume": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * Resume a job
-         * @description Resume a paused job.
-         */
-        put: operations["ResumeJob"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    /**
+     * Pause a job
+     * @description Pause a job.
+     */
+    put: operations['PauseJob'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/jobs/{jobId}/resume': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/jobs/{jobId}/skip-cycle": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * Skip a cycle in a job
-         * @description Skip the current cycle in a job and move to the next cycle.
-         */
-        put: operations["SkipCycle"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    /**
+     * Resume a job
+     * @description Resume a paused job.
+     */
+    put: operations['ResumeJob'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/jobs/{jobId}/skip-cycle': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/jobs/{jobId}/skip-step": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * Skip a step in a job
-         * @description Skip the current step in a job and move to the next step.
-         */
-        put: operations["SkipStep"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    /**
+     * Skip a cycle in a job
+     * @description Skip the current cycle in a job and move to the next cycle.
+     */
+    put: operations['SkipCycle'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/jobs/{jobId}/skip-step': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/orders": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get paginated orders */
-        get: operations["GetOrders"];
-        put?: never;
-        /** Create an order */
-        post: operations["CreateOrder"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    /**
+     * Skip a step in a job
+     * @description Skip the current step in a job and move to the next step.
+     */
+    put: operations['SkipStep'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/orders/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/products": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get paginated products */
-        get: operations["GetProducts"];
-        put?: never;
-        /** Create a product */
-        post: operations["CreateProduct"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Get order by ID */
+    get: operations['GetOrderById'];
+    /** Update an order */
+    put: operations['UpdateOrder'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/orders': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/products-by-list": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Create products from list */
-        post: operations["CreateProductsFromList"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Get paginated orders */
+    get: operations['GetOrders'];
+    put?: never;
+    /** Create an order */
+    post: operations['CreateOrder'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/orders/{orderId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/recipes/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get a recipe */
-        get: operations["GetRecipeById"];
-        /** Update recipe */
-        put: operations["UpdateRecipe"];
-        post?: never;
-        /** Delete a recipe */
-        delete: operations["DeleteRecipe"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Delete an order
+     * @description Deletes an order by its unique identifier.
+     */
+    delete: operations['DeleteOrder'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/orders/{orderId}/items/{itemId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/recipes": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get all recipes */
-        get: operations["GetRecipes"];
-        put?: never;
-        /** Create a recipe */
-        post: operations["CreateRecipe"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Delete an item from an order */
+    delete: operations['DeleteItemFromOrder'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/orders/{orderId}/container/{containerId}/decrease': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/recipes/{recipeId}/steps": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * Update recipe with recipe steps
-         * @description Set the steps of a recipe, replacing the existing steps. If StepId is null, the step will be created.
-         */
-        put: operations["UpdateRecipeSteps"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Decrease the quantity of a container by 1 */
+    post: operations['DecreaseQuantityContainer'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/orders/{orderId}/container/{containerId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/device-templates/{templateId}/sensors": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get all sensors on a device template */
-        get: operations["GetDeviceTemplateSensors"];
-        /**
-         * Update sensors of a device template
-         * @description Set the sensors of a device template, replacing the existing sensors. If Id is null, the sensor will be created.
-         */
-        put: operations["UpdateDeviceTemplateSensors"];
-        /** Create a sensor */
-        post: operations["CreateSensor"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Delete a container and its items from an order */
+    delete: operations['DeleteContainer'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/orders/{orderId}/container/{containerId}/increase': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/sensors/{sensorId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get a sensor by ID */
-        get: operations["GetSensorById"];
-        /** Update a sensor */
-        put: operations["UpdateSensor"];
-        post?: never;
-        /** Delete a sensor */
-        delete: operations["DeleteSensor"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Increase the quantity of a container by 1 */
+    post: operations['IncreaseQuantityContainer'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/orders/{orderId}/container': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/suppliers": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get paginated suppliers */
-        get: operations["GetSuppliers"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Get paginated order item containers by order ID */
+    get: operations['GetOrderItemContainer'];
+    put?: never;
+    /** Add a container to an order */
+    post: operations['AddOrderContainer'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/orders/{orderId}/container/{containerId}/item': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/suppliers/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get a supplier by Id */
-        get: operations["GetSupplierById"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /**
+     * Add an item to an order container
+     * @description Adds an order item to a specified order container by container ID.
+     */
+    post: operations['AddItemToContainer'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/products': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/vat-category": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get VAT categories */
-        get: operations["GetVATCategories"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Get paginated products */
+    get: operations['GetProducts'];
+    put?: never;
+    /** Create a product */
+    post: operations['CreateProduct'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/products-by-list': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/vat": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get VAT categories */
-        get: operations["GetVatList"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Create products from list */
+    post: operations['CreateProductsFromList'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/recipes/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
+    /** Get a recipe */
+    get: operations['GetRecipeById'];
+    /** Update recipe */
+    put: operations['UpdateRecipe'];
+    post?: never;
+    /** Delete a recipe */
+    delete: operations['DeleteRecipe'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/recipes': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get all recipes */
+    get: operations['GetRecipes'];
+    put?: never;
+    /** Create a recipe */
+    post: operations['CreateRecipe'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/recipes/{recipeId}/steps': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /**
+     * Update recipe with recipe steps
+     * @description Set the steps of a recipe, replacing the existing steps. If StepId is null, the step will be created.
+     */
+    put: operations['UpdateRecipeSteps'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/device-templates/{templateId}/sensors': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get all sensors on a device template */
+    get: operations['GetDeviceTemplateSensors'];
+    /**
+     * Update sensors of a device template
+     * @description Set the sensors of a device template, replacing the existing sensors. If Id is null, the sensor will be created.
+     */
+    put: operations['UpdateDeviceTemplateSensors'];
+    /** Create a sensor */
+    post: operations['CreateSensor'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/sensors/{sensorId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get a sensor by ID */
+    get: operations['GetSensorById'];
+    /** Update a sensor */
+    put: operations['UpdateSensor'];
+    post?: never;
+    /** Delete a sensor */
+    delete: operations['DeleteSensor'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/suppliers': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get paginated suppliers */
+    get: operations['GetSuppliers'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/suppliers/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get a supplier by Id */
+    get: operations['GetSupplierById'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/vat-category': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get VAT categories */
+    get: operations['GetVATCategories'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/vat': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get VAT categories */
+    get: operations['GetVatList'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: {
-        "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Commands.Queries.GetCommands.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
-            /** Format: int32 */
-            currentPage: number;
-            /** Format: int32 */
-            totalPages: number;
-            /** Format: int32 */
-            pageSize: number;
-            /** Format: int32 */
-            totalCount: number;
-            readonly hasPrevious: boolean;
-            readonly hasNext: boolean;
-            items: components["schemas"]["Fei.Is.Api.Features.Commands.Queries.GetCommands.Response"][];
-        };
-        "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Companies.Queries.GetCompanies.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
-            /** Format: int32 */
-            currentPage: number;
-            /** Format: int32 */
-            totalPages: number;
-            /** Format: int32 */
-            pageSize: number;
-            /** Format: int32 */
-            totalCount: number;
-            readonly hasPrevious: boolean;
-            readonly hasNext: boolean;
-            items: components["schemas"]["Fei.Is.Api.Features.Companies.Queries.GetCompanies.Response"][];
-        };
-        "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollections.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
-            /** Format: int32 */
-            currentPage: number;
-            /** Format: int32 */
-            totalPages: number;
-            /** Format: int32 */
-            pageSize: number;
-            /** Format: int32 */
-            totalCount: number;
-            readonly hasPrevious: boolean;
-            readonly hasNext: boolean;
-            items: components["schemas"]["Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollections.Response"][];
-        };
-        "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.DeviceTemplates.Queries.GetDeviceTemplates.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
-            /** Format: int32 */
-            currentPage: number;
-            /** Format: int32 */
-            totalPages: number;
-            /** Format: int32 */
-            pageSize: number;
-            /** Format: int32 */
-            totalCount: number;
-            readonly hasPrevious: boolean;
-            readonly hasNext: boolean;
-            items: components["schemas"]["Fei.Is.Api.Features.DeviceTemplates.Queries.GetDeviceTemplates.Response"][];
-        };
-        "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Devices.Queries.GetDevices.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
-            /** Format: int32 */
-            currentPage: number;
-            /** Format: int32 */
-            totalPages: number;
-            /** Format: int32 */
-            pageSize: number;
-            /** Format: int32 */
-            totalCount: number;
-            readonly hasPrevious: boolean;
-            readonly hasNext: boolean;
-            items: components["schemas"]["Fei.Is.Api.Features.Devices.Queries.GetDevices.Response"][];
-        };
-        "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Jobs.Queries.GetJobsOnDevice.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
-            /** Format: int32 */
-            currentPage: number;
-            /** Format: int32 */
-            totalPages: number;
-            /** Format: int32 */
-            pageSize: number;
-            /** Format: int32 */
-            totalCount: number;
-            readonly hasPrevious: boolean;
-            readonly hasNext: boolean;
-            items: components["schemas"]["Fei.Is.Api.Features.Jobs.Queries.GetJobsOnDevice.Response"][];
-        };
-        "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Orders.Queries.GetOrders.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
-            /** Format: int32 */
-            currentPage: number;
-            /** Format: int32 */
-            totalPages: number;
-            /** Format: int32 */
-            pageSize: number;
-            /** Format: int32 */
-            totalCount: number;
-            readonly hasPrevious: boolean;
-            readonly hasNext: boolean;
-            items: components["schemas"]["Fei.Is.Api.Features.Orders.Queries.GetOrders.Response"][];
-        };
-        "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.ProductCategories.Queries.GetProductCategories.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
-            /** Format: int32 */
-            currentPage: number;
-            /** Format: int32 */
-            totalPages: number;
-            /** Format: int32 */
-            pageSize: number;
-            /** Format: int32 */
-            totalCount: number;
-            readonly hasPrevious: boolean;
-            readonly hasNext: boolean;
-            items: components["schemas"]["Fei.Is.Api.Features.ProductCategories.Queries.GetProductCategories.Response"][];
-        };
-        "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Products.Queries.GetProducts.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
-            /** Format: int32 */
-            currentPage: number;
-            /** Format: int32 */
-            totalPages: number;
-            /** Format: int32 */
-            pageSize: number;
-            /** Format: int32 */
-            totalCount: number;
-            readonly hasPrevious: boolean;
-            readonly hasNext: boolean;
-            items: components["schemas"]["Fei.Is.Api.Features.Products.Queries.GetProducts.Response"][];
-        };
-        "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Products.Queries.GetSuppliers.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
-            /** Format: int32 */
-            currentPage: number;
-            /** Format: int32 */
-            totalPages: number;
-            /** Format: int32 */
-            pageSize: number;
-            /** Format: int32 */
-            totalCount: number;
-            readonly hasPrevious: boolean;
-            readonly hasNext: boolean;
-            items: components["schemas"]["Fei.Is.Api.Features.Products.Queries.GetSuppliers.Response"][];
-        };
-        "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Recipes.Queries.GetRecipes.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
-            /** Format: int32 */
-            currentPage: number;
-            /** Format: int32 */
-            totalPages: number;
-            /** Format: int32 */
-            pageSize: number;
-            /** Format: int32 */
-            totalCount: number;
-            readonly hasPrevious: boolean;
-            readonly hasNext: boolean;
-            items: components["schemas"]["Fei.Is.Api.Features.Recipes.Queries.GetRecipes.Response"][];
-        };
-        "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.UserManagement.Queries.GetUsers.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
-            /** Format: int32 */
-            currentPage: number;
-            /** Format: int32 */
-            totalPages: number;
-            /** Format: int32 */
-            pageSize: number;
-            /** Format: int32 */
-            totalCount: number;
-            readonly hasPrevious: boolean;
-            readonly hasNext: boolean;
-            items: components["schemas"]["Fei.Is.Api.Features.UserManagement.Queries.GetUsers.Response"][];
-        };
-        /** @enum {string} */
-        "Fei.Is.Api.Data.Enums.DevicePermission": "Owner" | "Editor" | "Viewer";
-        /** @enum {string} */
-        "Fei.Is.Api.Data.Enums.DeviceSharePermission": "Editor" | "Viewer";
-        /** @enum {string} */
-        "Fei.Is.Api.Data.Enums.JobStatusEnum": "JOB_QUEUED" | "JOB_IN_PROGRESS" | "JOB_PAUSED" | "JOB_SUCCEEDED" | "JOB_REJECTED" | "JOB_FAILED" | "JOB_TIMED_OUT" | "JOB_CANCELED";
-        /** @enum {string} */
-        "Fei.Is.Api.Data.Enums.Role": "Admin" | "User";
-        "Fei.Is.Api.Features.AdminUserManagement.Commands.UpdateUserEmail.Request": {
-            email: string;
-        };
-        "Fei.Is.Api.Features.AdminUserManagement.Commands.UpdateUserPassword.Request": {
-            password: string;
-        };
-        "Fei.Is.Api.Features.AdminUserManagement.Commands.UpdateUserRole.Request": {
-            role: components["schemas"]["Fei.Is.Api.Data.Enums.Role"];
-        };
-        "Fei.Is.Api.Features.Auth.Commands.AuthDevice.Endpoint.Request": {
-            accessToken: string;
-        };
-        "Fei.Is.Api.Features.Auth.Commands.AuthDevice.Response": {
-            result: string;
-            is_superuser: boolean;
-            client_attrs?: {
-                [key: string]: string;
-            } | null;
-        };
-        "Fei.Is.Api.Features.Auth.Commands.Login.Request": {
-            email: string;
-            password: string;
-        };
-        "Fei.Is.Api.Features.Auth.Commands.Login.Response": {
-            accessToken: string;
-            refreshToken: string;
-        };
-        "Fei.Is.Api.Features.Auth.Commands.LoginByGoogle.Request": {
-            googleToken: string;
-        };
-        "Fei.Is.Api.Features.Auth.Commands.LoginByGoogle.Response": {
-            accessToken: string;
-            refreshToken: string;
-        };
-        "Fei.Is.Api.Features.Auth.Commands.RefreshToken.Request": {
-            refreshToken: string;
-        };
-        "Fei.Is.Api.Features.Auth.Commands.RefreshToken.Response": {
-            accessToken: string;
-        };
-        "Fei.Is.Api.Features.Auth.Commands.Register.Endpoint.Request": {
-            email: string;
-            password: string;
-        };
-        "Fei.Is.Api.Features.Auth.Commands.UpdateEmail.Request": {
-            newEmail: string;
-        };
-        "Fei.Is.Api.Features.Auth.Commands.UpdatePassword.Request": {
-            oldPassword: string;
-            newPassword: string;
-        };
-        "Fei.Is.Api.Features.Commands.Commands.CreateCommand.Request": {
-            displayName: string;
-            name: string;
-            /** Format: uuid */
-            deviceTemplateId: string;
-            params: number[];
-        };
-        "Fei.Is.Api.Features.Commands.Commands.UpdateCommand.Request": {
-            displayName: string;
-            name: string;
-            params: number[];
-        };
-        "Fei.Is.Api.Features.Commands.Queries.GetCommandById.Response": {
-            /** Format: uuid */
-            id: string;
-            displayName: string;
-            name: string;
-            params: number[];
-        };
-        "Fei.Is.Api.Features.Commands.Queries.GetCommands.Response": {
-            /** Format: uuid */
-            id: string;
-            displayName: string;
-            name: string;
-            params: number[];
-        };
-        "Fei.Is.Api.Features.Companies.Commands.CreateCompany.Request": {
-            title: string;
-            ic: string;
-            dic?: string | null;
-            street?: string | null;
-            psc?: string | null;
-            city?: string | null;
-        };
-        "Fei.Is.Api.Features.Companies.Commands.UpdateCompany.Request": {
-            title: string;
-            ic: string;
-            dic?: string | null;
-            street?: string | null;
-            psc?: string | null;
-            city?: string | null;
-        };
-        "Fei.Is.Api.Features.Companies.Queries.GetCompanies.Response": {
-            /** Format: uuid */
-            id: string;
-            title: string;
-            ic: string;
-        };
-        "Fei.Is.Api.Features.Companies.Queries.GetCompanyById.Response": {
-            title: string;
-            ic: string;
-            dic?: string | null;
-            street?: string | null;
-            psc?: string | null;
-            city?: string | null;
-        };
-        "Fei.Is.Api.Features.DataPoints.Commands.CreateDataPoints.Request": {
-            tag: string;
-            /** Format: double */
-            value: number;
-            /** Format: int64 */
-            timeStamp?: number | null;
-        };
-        "Fei.Is.Api.Features.DataPoints.Queries.GetLatestDataPoints.Response": {
-            /** Format: double */
-            value: number | null;
-        };
-        /** @enum {string} */
-        "Fei.Is.Api.Features.DataPoints.Queries.GetSensorDataPoints.DownsampleMethod": "Asap" | "Lttb";
-        "Fei.Is.Api.Features.DataPoints.Queries.GetSensorDataPoints.Response": {
-            /** Format: date-time */
-            ts: string;
-            /** Format: double */
-            value?: number | null;
-        };
-        /** @enum {string} */
-        "Fei.Is.Api.Features.DataPoints.Queries.GetSensorDataPoints.TimeBucketMethod": "Average" | "Max" | "Min" | "StdDev" | "Sum";
-        "Fei.Is.Api.Features.DeviceCollections.Commands.CreateDeviceCollection.Request": {
-            name: string;
-            /** Format: uuid */
-            collectionParentId?: string | null;
-        };
-        "Fei.Is.Api.Features.DeviceCollections.Commands.CreateDeviceCollection.Response": {
-            /** Format: uuid */
-            id: string;
-            name: string;
-        };
-        "Fei.Is.Api.Features.DeviceCollections.Commands.UpdateDeviceCollection.Request": {
-            name: string;
-        };
-        "Fei.Is.Api.Features.DeviceCollections.Commands.UpdateDeviceCollection.Response": {
-            /** Format: uuid */
-            id: string;
-            name: string;
-        };
-        "Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionById.Response": {
-            /** Format: uuid */
-            id: string;
-            name: string;
-            items: components["schemas"]["Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionById.SubItemResponse"][];
-        };
-        "Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionById.SubItemResponse": {
-            /** Format: uuid */
-            id: string;
-            name: string;
-            items: components["schemas"]["Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionById.SubItemResponse"][];
-            type: components["schemas"]["Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionById.SubItemTypes"];
-        };
-        /** @enum {string} */
-        "Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionById.SubItemTypes": "Device" | "SubCollection";
-        "Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionWithSensors.Response": {
-            /** Format: uuid */
-            id: string;
-            name: string;
-            items: components["schemas"]["Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionWithSensors.Response"][];
-            type: components["schemas"]["Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionWithSensors.SubItemTypes"];
-            sensor: components["schemas"]["Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionWithSensors.SensorResponse"];
-        };
-        "Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionWithSensors.SensorResponse": {
-            /** Format: uuid */
-            id: string;
-            name: string;
-            unit: string;
-            tag: string;
-            /** Format: int32 */
-            accuracyDecimals?: number | null;
-        };
-        /** @enum {string} */
-        "Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionWithSensors.SubItemTypes": "Device" | "SubCollection" | "Sensor";
-        "Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollections.Response": {
-            /** Format: uuid */
-            id: string;
-            name: string;
-        };
-        "Fei.Is.Api.Features.DeviceSharing.Commands.ShareDeviceToUser.Request": {
-            email: string;
-            permission: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceSharePermission"];
-        };
-        "Fei.Is.Api.Features.DeviceSharing.Commands.UnshareDeviceToUser.Request": {
-            email: string;
-        };
-        "Fei.Is.Api.Features.DeviceSharing.Queries.GetDeviceSharedUsers.Response": {
-            email: string;
-            permission: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceSharePermission"];
-        };
-        "Fei.Is.Api.Features.DeviceTemplates.Commands.CreateDeviceTemplate.Request": {
-            name: string;
-        };
-        "Fei.Is.Api.Features.DeviceTemplates.Commands.UpdateDeviceTemplate.Request": {
-            name: string;
-        };
-        "Fei.Is.Api.Features.DeviceTemplates.Queries.GetDeviceTemplateById.Response": {
-            /** Format: uuid */
-            id: string;
-            name: string;
-        };
-        "Fei.Is.Api.Features.DeviceTemplates.Queries.GetDeviceTemplates.Response": {
-            /** Format: uuid */
-            id: string;
-            name: string;
-            /** Format: date-time */
-            updatedAt: string;
-        };
-        "Fei.Is.Api.Features.Devices.Commands.CreateDevice.Request": {
-            name: string;
-            accessToken: string;
-            /** Format: uuid */
-            templateId?: string | null;
-        };
-        "Fei.Is.Api.Features.Devices.Commands.UpdateDevice.Request": {
-            name: string;
-            accessToken: string;
-            /** Format: uuid */
-            templateId?: string | null;
-        };
-        "Fei.Is.Api.Features.Devices.Queries.GetDeviceById.Response": {
-            /** Format: uuid */
-            id: string;
-            name: string;
-            mac?: string | null;
-            accessToken?: string | null;
-            deviceTemplate: components["schemas"]["Fei.Is.Api.Features.Devices.Queries.GetDeviceById.TemplateResponse"];
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-            connected: boolean;
-            /** Format: date-time */
-            lastSeen?: string | null;
-        };
-        "Fei.Is.Api.Features.Devices.Queries.GetDeviceById.SensorResponse": {
-            /** Format: uuid */
-            id: string;
-            tag: string;
-            name: string;
-            unit?: string | null;
-            /** Format: int32 */
-            accuracyDecimals?: number | null;
-        };
-        "Fei.Is.Api.Features.Devices.Queries.GetDeviceById.TemplateResponse": {
-            /** Format: uuid */
-            id: string;
-            name: string;
-            sensors: components["schemas"]["Fei.Is.Api.Features.Devices.Queries.GetDeviceById.SensorResponse"][];
-        };
-        "Fei.Is.Api.Features.Devices.Queries.GetDevices.Response": {
-            /** Format: uuid */
-            id: string;
-            name: string;
-            connected: boolean;
-            permission: components["schemas"]["Fei.Is.Api.Data.Enums.DevicePermission"];
-            /** Format: date-time */
-            lastSeen?: string | null;
-        };
-        "Fei.Is.Api.Features.Devices.Queries.GetDevicesWithSensors.Response": {
-            /** Format: uuid */
-            id: string;
-            name: string;
-            sensors: components["schemas"]["Fei.Is.Api.Features.Devices.Queries.GetDevicesWithSensors.Sensor"][];
-        };
-        "Fei.Is.Api.Features.Devices.Queries.GetDevicesWithSensors.Sensor": {
-            name: string;
-            tag: string;
-            unit: string;
-        };
-        "Fei.Is.Api.Features.Jobs.Commands.CreateJob.Request": {
-            /** Format: uuid */
-            recipeId: string;
-            /** Format: int32 */
-            cycles: number;
-        };
-        "Fei.Is.Api.Features.Jobs.Queries.GetActiveJobs.Response": {
-            /** Format: uuid */
-            id: string;
-            /** Format: uuid */
-            deviceId: string;
-            name: string;
-            /** Format: int32 */
-            totalSteps: number;
-            /** Format: int32 */
-            totalCycles: number;
-            /** Format: int32 */
-            currentStep: number;
-            /** Format: int32 */
-            currentCycle: number;
-            currentCommand: string;
-            paused: boolean;
-            /** Format: double */
-            progress: number;
-            status: components["schemas"]["Fei.Is.Api.Data.Enums.JobStatusEnum"];
-        };
-        /** @enum {string} */
-        "Fei.Is.Api.Features.Jobs.Queries.GetJobById.CommandProgress": "CommandPending" | "CommandProcessing" | "CommandDone";
-        "Fei.Is.Api.Features.Jobs.Queries.GetJobById.CommandResponse": {
-            /** Format: int32 */
-            order: number;
-            name: string;
-            progress: components["schemas"]["Fei.Is.Api.Features.Jobs.Queries.GetJobById.CommandProgress"];
-        };
-        "Fei.Is.Api.Features.Jobs.Queries.GetJobById.Response": {
-            /** Format: uuid */
-            id: string;
-            /** Format: uuid */
-            deviceId: string;
-            name: string;
-            /** Format: int32 */
-            currentStep: number;
-            /** Format: int32 */
-            totalSteps: number;
-            /** Format: int32 */
-            currentCycle: number;
-            /** Format: int32 */
-            totalCycles: number;
-            paused: boolean;
-            /** Format: double */
-            progress: number;
-            status: components["schemas"]["Fei.Is.Api.Data.Enums.JobStatusEnum"];
-            commands: components["schemas"]["Fei.Is.Api.Features.Jobs.Queries.GetJobById.CommandResponse"][];
-        };
-        "Fei.Is.Api.Features.Jobs.Queries.GetJobsOnDevice.DeviceResponse": {
-            /** Format: uuid */
-            id: string;
-            name: string;
-        };
-        "Fei.Is.Api.Features.Jobs.Queries.GetJobsOnDevice.Response": {
-            device: components["schemas"]["Fei.Is.Api.Features.Jobs.Queries.GetJobsOnDevice.DeviceResponse"];
-            /** Format: uuid */
-            id: string;
-            name: string;
-            status: components["schemas"]["Fei.Is.Api.Data.Enums.JobStatusEnum"];
-            /** Format: int32 */
-            currentStep: number;
-            /** Format: int32 */
-            totalSteps: number;
-            /** Format: int32 */
-            currentCycle: number;
-            /** Format: int32 */
-            totalCycles: number;
-            paused: boolean;
-            /** Format: date-time */
-            startedAt?: string | null;
-            /** Format: date-time */
-            finishedAt?: string | null;
-            /** Format: date-time */
-            createdAt?: string | null;
-            /** Format: date-time */
-            updatedAt?: string | null;
-        };
-        "Fei.Is.Api.Features.Orders.Commands.CreateOrder.Request": {
-            /** Format: int32 */
-            customerId: number;
-            /** Format: date-time */
-            orderDate: string;
-            /** Format: int32 */
-            deliveryWeek: number;
-            paymentMethod: string;
-            contactPhone: string;
-            note?: string | null;
-        };
-        "Fei.Is.Api.Features.Orders.Queries.GetOrders.Response": {
-            /** Format: uuid */
-            id: string;
-            customerName: string;
-            /** Format: date-time */
-            orderDate: string;
-            /** Format: int32 */
-            deliveryWeek: number;
-            paymentMethod: string;
-            contactPhone: string;
-            note: string;
-        };
-        "Fei.Is.Api.Features.ProductCategories.Queries.GetCategoryById.Response": {
-            /** Format: uuid */
-            id: string;
-            name: string;
-        };
-        "Fei.Is.Api.Features.ProductCategories.Queries.GetProductCategories.Response": {
-            /** Format: uuid */
-            id: string;
-            name: string;
-        };
-        "Fei.Is.Api.Features.ProductCategories.Queries.GetSupplierById.Response": {
-            /** Format: uuid */
-            id: string;
-            name: string;
-        };
-        "Fei.Is.Api.Features.Products.Commands.CreateProduct.Request": {
-            code?: string | null;
-            pluCode?: string | null;
-            latinName: string;
-            czechName?: string | null;
-            flowerLeafDescription?: string | null;
-            potDiameterPack?: string | null;
-            /** Format: double */
-            pricePerPiecePack?: number | null;
-            /** Format: double */
-            pricePerPiecePackVAT?: number | null;
-            /** Format: double */
-            discountedPriceWithoutVAT?: number | null;
-            /** Format: double */
-            retailPrice?: number | null;
-            /** Format: uuid */
-            categoryId: string;
-            /** Format: uuid */
-            supplierId: string;
-            variety: string;
-            /** Format: uuid */
-            vatCategoryId: string;
-        };
-        "Fei.Is.Api.Features.Products.Commands.CreateProductsFromList.ProductRequest": {
-            code?: string | null;
-            latinName: string;
-            czechName?: string | null;
-            flowerLeafDescription?: string | null;
-            potDiameterPack?: string | null;
-            /** Format: double */
-            pricePerPiecePack?: number | null;
-            /** Format: double */
-            pricePerPiecePackVAT?: number | null;
-            /** Format: double */
-            discountedPriceWithoutVAT?: number | null;
-            /** Format: double */
-            retailPrice?: number | null;
-            categoryName: string;
-            /** Format: uuid */
-            supplierId: string;
-            variety: string;
-            /** Format: uuid */
-            vatCategoryId: string;
-        };
-        "Fei.Is.Api.Features.Products.Commands.CreateProductsFromList.Request": {
-            products: components["schemas"]["Fei.Is.Api.Features.Products.Commands.CreateProductsFromList.ProductRequest"][];
-        };
-        "Fei.Is.Api.Features.Products.Commands.UpdateProduct.Request": {
-            pluCode: string;
-            code?: string | null;
-            latinName: string;
-            czechName?: string | null;
-            flowerLeafDescription?: string | null;
-            variety: string;
-            potDiameterPack?: string | null;
-            /** Format: double */
-            pricePerPiecePack?: number | null;
-            /** Format: double */
-            pricePerPiecePackVAT?: number | null;
-            /** Format: double */
-            discountedPriceWithoutVAT?: number | null;
-            /** Format: double */
-            retailPrice?: number | null;
-            /** Format: uuid */
-            categoryId: string;
-            /** Format: uuid */
-            supplierId?: string | null;
-            /** Format: uuid */
-            vatCategoryId?: string | null;
-        };
-        "Fei.Is.Api.Features.Products.Queries.GetProductById.CategoryModel": {
-            /** Format: uuid */
-            id: string;
-            name: string;
-        };
-        "Fei.Is.Api.Features.Products.Queries.GetProductById.Response": {
-            pluCode: string;
-            code?: string | null;
-            latinName: string;
-            czechName?: string | null;
-            flowerLeafDescription?: string | null;
-            potDiameterPack?: string | null;
-            /** Format: double */
-            pricePerPiecePack?: number | null;
-            /** Format: double */
-            discountedPriceWithoutVAT?: number | null;
-            /** Format: double */
-            retailPrice?: number | null;
-            category: components["schemas"]["Fei.Is.Api.Features.Products.Queries.GetProductById.CategoryModel"];
-            supplier: components["schemas"]["Fei.Is.Api.Features.Products.Queries.GetProductById.SupplierModel"];
-            variety: string;
-            vatCategory: components["schemas"]["Fei.Is.Api.Features.Products.Queries.GetProductById.VatCategoryModel"];
-        };
-        "Fei.Is.Api.Features.Products.Queries.GetProductById.SupplierModel": {
-            /** Format: uuid */
-            id: string;
-            name: string;
-        };
-        "Fei.Is.Api.Features.Products.Queries.GetProductById.VatCategoryModel": {
-            /** Format: uuid */
-            id: string;
-            name: string;
-            /** Format: double */
-            rate: number;
-        };
-        "Fei.Is.Api.Features.Products.Queries.GetProducts.Response": {
-            /** Format: uuid */
-            id: string;
-            code?: string | null;
-            pluCode: string;
-            /** Format: uuid */
-            categoryId: string;
-            /** Format: uuid */
-            supplierId: string;
-        };
-        "Fei.Is.Api.Features.Products.Queries.GetSuppliers.Response": {
-            /** Format: uuid */
-            id: string;
-            name: string;
-        };
-        "Fei.Is.Api.Features.Products.Queries.GetVatList.Response": {
-            /** Format: uuid */
-            guid: string;
-            name: string;
-            /** Format: double */
-            rate: number;
-        };
-        "Fei.Is.Api.Features.RecipeSteps.Commands.UpdateRecipeSteps.Request": {
-            /** Format: uuid */
-            stepId?: string | null;
-            /** Format: uuid */
-            commandId?: string | null;
-            /** Format: uuid */
-            subrecipeId?: string | null;
-            /** Format: int32 */
-            cycles: number;
-            /** Format: int32 */
-            order: number;
-        };
-        "Fei.Is.Api.Features.Recipes.Commands.CreateRecipe.Request": {
-            name: string;
-            /** Format: uuid */
-            deviceTemplateId: string;
-        };
-        "Fei.Is.Api.Features.Recipes.Commands.UpdateRecipe.Request": {
-            name: string;
-        };
-        "Fei.Is.Api.Features.Recipes.Queries.GetRecipeById.CommandResponse": {
-            /** Format: uuid */
-            id: string;
-            displayName: string;
-            name: string;
-            params: number[];
-        };
-        "Fei.Is.Api.Features.Recipes.Queries.GetRecipeById.RecipeStepResponse": {
-            /** Format: uuid */
-            id: string;
-            command: components["schemas"]["Fei.Is.Api.Features.Recipes.Queries.GetRecipeById.CommandResponse"];
-            subrecipe: components["schemas"]["Fei.Is.Api.Features.Recipes.Queries.GetRecipeById.SubrecipeResponse"];
-            /** Format: int32 */
-            cycles: number;
-            /** Format: int32 */
-            order: number;
-        };
-        "Fei.Is.Api.Features.Recipes.Queries.GetRecipeById.Response": {
-            /** Format: uuid */
-            id: string;
-            name: string;
-            steps: components["schemas"]["Fei.Is.Api.Features.Recipes.Queries.GetRecipeById.RecipeStepResponse"][];
-        };
-        "Fei.Is.Api.Features.Recipes.Queries.GetRecipeById.SubrecipeResponse": {
-            /** Format: uuid */
-            id: string;
-            name: string;
-            steps: components["schemas"]["Fei.Is.Api.Features.Recipes.Queries.GetRecipeById.RecipeStepResponse"][];
-        };
-        "Fei.Is.Api.Features.Recipes.Queries.GetRecipes.Response": {
-            /** Format: uuid */
-            id: string;
-            name: string;
-            /** Format: date-time */
-            updatedAt: string;
-        };
-        "Fei.Is.Api.Features.Sensors.Commands.CreateSensor.Request": {
-            tag: string;
-            name: string;
-            unit?: string | null;
-            /** Format: int32 */
-            accuracyDecimals?: number | null;
-        };
-        "Fei.Is.Api.Features.Sensors.Commands.UpdateDeviceTemplateSensors.Request": {
-            /** Format: uuid */
-            id?: string | null;
-            tag: string;
-            name: string;
-            unit?: string | null;
-            /** Format: int32 */
-            accuracyDecimals?: number | null;
-        };
-        "Fei.Is.Api.Features.Sensors.Commands.UpdateSensor.Request": {
-            tag: string;
-            name: string;
-            unit?: string | null;
-            /** Format: int32 */
-            accuracyDecimals?: number | null;
-        };
-        "Fei.Is.Api.Features.Sensors.Queries.GetDeviceTemplateSensors.Response": {
-            /** Format: uuid */
-            id: string;
-            tag: string;
-            name: string;
-            unit?: string | null;
-            /** Format: int32 */
-            accuracyDecimals?: number | null;
-        };
-        "Fei.Is.Api.Features.Sensors.Queries.GetSensorById.Response": {
-            /** Format: uuid */
-            id: string;
-            tag: string;
-            name: string;
-            unit?: string | null;
-            /** Format: int32 */
-            accuracyDecimals?: number | null;
-        };
-        "Fei.Is.Api.Features.UserManagement.Queries.GetUserById.Response": {
-            /** Format: uuid */
-            id: string;
-            email: string;
-            /** Format: date-time */
-            registrationDate: string;
-            roles: string[];
-        };
-        "Fei.Is.Api.Features.UserManagement.Queries.GetUsers.Response": {
-            /** Format: uuid */
-            id: string;
-            email: string;
-            /** Format: date-time */
-            registrationDate: string;
-            roles: string[];
-        };
-        "Fei.Is.Api.Features.VATCategory.Queries.GetVATCategories.Response": {
-            /** Format: uuid */
-            id: string;
-            name: string;
-            /** Format: double */
-            rate: number;
-        };
-        "Microsoft.AspNetCore.Http.HttpValidationProblemDetails": {
-            type?: string | null;
-            title?: string | null;
-            /** Format: int32 */
-            status?: number | null;
-            detail?: string | null;
-            instance?: string | null;
-            errors: {
-                [key: string]: string[];
-            };
-        } & {
-            [key: string]: unknown;
-        };
-        "Microsoft.AspNetCore.Mvc.ProblemDetails": {
-            type: string | null;
-            title: string | null;
-            /** Format: int32 */
-            status: number | null;
-            detail: string | null;
-            instance: string | null;
-        } & {
-            [key: string]: unknown;
-        };
+  schemas: {
+    'Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Commands.Queries.GetCommands.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]': {
+      /** Format: int32 */
+      currentPage: number;
+      /** Format: int32 */
+      totalPages: number;
+      /** Format: int32 */
+      pageSize: number;
+      /** Format: int32 */
+      totalCount: number;
+      readonly hasPrevious: boolean;
+      readonly hasNext: boolean;
+      items: components['schemas']['Fei.Is.Api.Features.Commands.Queries.GetCommands.Response'][];
     };
-    responses: never;
-    parameters: never;
-    requestBodies: never;
-    headers: never;
-    pathItems: never;
+    'Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Companies.Queries.GetCompanies.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]': {
+      /** Format: int32 */
+      currentPage: number;
+      /** Format: int32 */
+      totalPages: number;
+      /** Format: int32 */
+      pageSize: number;
+      /** Format: int32 */
+      totalCount: number;
+      readonly hasPrevious: boolean;
+      readonly hasNext: boolean;
+      items: components['schemas']['Fei.Is.Api.Features.Companies.Queries.GetCompanies.Response'][];
+    };
+    'Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollections.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]': {
+      /** Format: int32 */
+      currentPage: number;
+      /** Format: int32 */
+      totalPages: number;
+      /** Format: int32 */
+      pageSize: number;
+      /** Format: int32 */
+      totalCount: number;
+      readonly hasPrevious: boolean;
+      readonly hasNext: boolean;
+      items: components['schemas']['Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollections.Response'][];
+    };
+    'Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.DeviceTemplates.Queries.GetDeviceTemplates.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]': {
+      /** Format: int32 */
+      currentPage: number;
+      /** Format: int32 */
+      totalPages: number;
+      /** Format: int32 */
+      pageSize: number;
+      /** Format: int32 */
+      totalCount: number;
+      readonly hasPrevious: boolean;
+      readonly hasNext: boolean;
+      items: components['schemas']['Fei.Is.Api.Features.DeviceTemplates.Queries.GetDeviceTemplates.Response'][];
+    };
+    'Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Devices.Queries.GetDevices.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]': {
+      /** Format: int32 */
+      currentPage: number;
+      /** Format: int32 */
+      totalPages: number;
+      /** Format: int32 */
+      pageSize: number;
+      /** Format: int32 */
+      totalCount: number;
+      readonly hasPrevious: boolean;
+      readonly hasNext: boolean;
+      items: components['schemas']['Fei.Is.Api.Features.Devices.Queries.GetDevices.Response'][];
+    };
+    'Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Jobs.Queries.GetJobsOnDevice.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]': {
+      /** Format: int32 */
+      currentPage: number;
+      /** Format: int32 */
+      totalPages: number;
+      /** Format: int32 */
+      pageSize: number;
+      /** Format: int32 */
+      totalCount: number;
+      readonly hasPrevious: boolean;
+      readonly hasNext: boolean;
+      items: components['schemas']['Fei.Is.Api.Features.Jobs.Queries.GetJobsOnDevice.Response'][];
+    };
+    'Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.OrderItemContainers.Queries.GetOrderItemContainer.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]': {
+      /** Format: int32 */
+      currentPage: number;
+      /** Format: int32 */
+      totalPages: number;
+      /** Format: int32 */
+      pageSize: number;
+      /** Format: int32 */
+      totalCount: number;
+      readonly hasPrevious: boolean;
+      readonly hasNext: boolean;
+      items: components['schemas']['Fei.Is.Api.Features.OrderItemContainers.Queries.GetOrderItemContainer.Response'][];
+    };
+    'Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Orders.Queries.GetOrders.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]': {
+      /** Format: int32 */
+      currentPage: number;
+      /** Format: int32 */
+      totalPages: number;
+      /** Format: int32 */
+      pageSize: number;
+      /** Format: int32 */
+      totalCount: number;
+      readonly hasPrevious: boolean;
+      readonly hasNext: boolean;
+      items: components['schemas']['Fei.Is.Api.Features.Orders.Queries.GetOrders.Response'][];
+    };
+    'Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.ProductCategories.Queries.GetProductCategories.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]': {
+      /** Format: int32 */
+      currentPage: number;
+      /** Format: int32 */
+      totalPages: number;
+      /** Format: int32 */
+      pageSize: number;
+      /** Format: int32 */
+      totalCount: number;
+      readonly hasPrevious: boolean;
+      readonly hasNext: boolean;
+      items: components['schemas']['Fei.Is.Api.Features.ProductCategories.Queries.GetProductCategories.Response'][];
+    };
+    'Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Products.Queries.GetProducts.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]': {
+      /** Format: int32 */
+      currentPage: number;
+      /** Format: int32 */
+      totalPages: number;
+      /** Format: int32 */
+      pageSize: number;
+      /** Format: int32 */
+      totalCount: number;
+      readonly hasPrevious: boolean;
+      readonly hasNext: boolean;
+      items: components['schemas']['Fei.Is.Api.Features.Products.Queries.GetProducts.Response'][];
+    };
+    'Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Products.Queries.GetSuppliers.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]': {
+      /** Format: int32 */
+      currentPage: number;
+      /** Format: int32 */
+      totalPages: number;
+      /** Format: int32 */
+      pageSize: number;
+      /** Format: int32 */
+      totalCount: number;
+      readonly hasPrevious: boolean;
+      readonly hasNext: boolean;
+      items: components['schemas']['Fei.Is.Api.Features.Products.Queries.GetSuppliers.Response'][];
+    };
+    'Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Recipes.Queries.GetRecipes.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]': {
+      /** Format: int32 */
+      currentPage: number;
+      /** Format: int32 */
+      totalPages: number;
+      /** Format: int32 */
+      pageSize: number;
+      /** Format: int32 */
+      totalCount: number;
+      readonly hasPrevious: boolean;
+      readonly hasNext: boolean;
+      items: components['schemas']['Fei.Is.Api.Features.Recipes.Queries.GetRecipes.Response'][];
+    };
+    'Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.UserManagement.Queries.GetUsers.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]': {
+      /** Format: int32 */
+      currentPage: number;
+      /** Format: int32 */
+      totalPages: number;
+      /** Format: int32 */
+      pageSize: number;
+      /** Format: int32 */
+      totalCount: number;
+      readonly hasPrevious: boolean;
+      readonly hasNext: boolean;
+      items: components['schemas']['Fei.Is.Api.Features.UserManagement.Queries.GetUsers.Response'][];
+    };
+    /** @enum {string} */
+    'Fei.Is.Api.Data.Enums.DevicePermission': 'Owner' | 'Editor' | 'Viewer';
+    /** @enum {string} */
+    'Fei.Is.Api.Data.Enums.DeviceSharePermission': 'Editor' | 'Viewer';
+    /** @enum {string} */
+    'Fei.Is.Api.Data.Enums.JobStatusEnum':
+      | 'JOB_QUEUED'
+      | 'JOB_IN_PROGRESS'
+      | 'JOB_PAUSED'
+      | 'JOB_SUCCEEDED'
+      | 'JOB_REJECTED'
+      | 'JOB_FAILED'
+      | 'JOB_TIMED_OUT'
+      | 'JOB_CANCELED';
+    /** @enum {string} */
+    'Fei.Is.Api.Data.Enums.Role': 'Admin' | 'User';
+    'Fei.Is.Api.Features.AdminUserManagement.Commands.UpdateUserEmail.Request': {
+      email: string;
+    };
+    'Fei.Is.Api.Features.AdminUserManagement.Commands.UpdateUserPassword.Request': {
+      password: string;
+    };
+    'Fei.Is.Api.Features.AdminUserManagement.Commands.UpdateUserRole.Request': {
+      role: components['schemas']['Fei.Is.Api.Data.Enums.Role'];
+    };
+    'Fei.Is.Api.Features.Auth.Commands.AuthDevice.Endpoint.Request': {
+      accessToken: string;
+    };
+    'Fei.Is.Api.Features.Auth.Commands.AuthDevice.Response': {
+      result: string;
+      is_superuser: boolean;
+      client_attrs?: {
+        [key: string]: string;
+      } | null;
+    };
+    'Fei.Is.Api.Features.Auth.Commands.Login.Request': {
+      email: string;
+      password: string;
+    };
+    'Fei.Is.Api.Features.Auth.Commands.Login.Response': {
+      accessToken: string;
+      refreshToken: string;
+    };
+    'Fei.Is.Api.Features.Auth.Commands.LoginByGoogle.Request': {
+      googleToken: string;
+    };
+    'Fei.Is.Api.Features.Auth.Commands.LoginByGoogle.Response': {
+      accessToken: string;
+      refreshToken: string;
+    };
+    'Fei.Is.Api.Features.Auth.Commands.RefreshToken.Request': {
+      refreshToken: string;
+    };
+    'Fei.Is.Api.Features.Auth.Commands.RefreshToken.Response': {
+      accessToken: string;
+    };
+    'Fei.Is.Api.Features.Auth.Commands.Register.Endpoint.Request': {
+      email: string;
+      password: string;
+    };
+    'Fei.Is.Api.Features.Auth.Commands.UpdateEmail.Request': {
+      newEmail: string;
+    };
+    'Fei.Is.Api.Features.Auth.Commands.UpdatePassword.Request': {
+      oldPassword: string;
+      newPassword: string;
+    };
+    'Fei.Is.Api.Features.Commands.Commands.CreateCommand.Request': {
+      displayName: string;
+      name: string;
+      /** Format: uuid */
+      deviceTemplateId: string;
+      params: number[];
+    };
+    'Fei.Is.Api.Features.Commands.Commands.UpdateCommand.Request': {
+      displayName: string;
+      name: string;
+      params: number[];
+    };
+    'Fei.Is.Api.Features.Commands.Queries.GetCommandById.Response': {
+      /** Format: uuid */
+      id: string;
+      displayName: string;
+      name: string;
+      params: number[];
+    };
+    'Fei.Is.Api.Features.Commands.Queries.GetCommands.Response': {
+      /** Format: uuid */
+      id: string;
+      displayName: string;
+      name: string;
+      params: number[];
+    };
+    'Fei.Is.Api.Features.Companies.Commands.CreateCompany.Request': {
+      title: string;
+      ic: string;
+      dic?: string | null;
+      street?: string | null;
+      psc?: string | null;
+      city?: string | null;
+    };
+    'Fei.Is.Api.Features.Companies.Commands.UpdateCompany.Request': {
+      title: string;
+      ic: string;
+      dic?: string | null;
+      street?: string | null;
+      psc?: string | null;
+      city?: string | null;
+    };
+    'Fei.Is.Api.Features.Companies.Queries.GetCompanies.Response': {
+      /** Format: uuid */
+      id: string;
+      title: string;
+      ic: string;
+    };
+    'Fei.Is.Api.Features.Companies.Queries.GetCompanyById.Response': {
+      title: string;
+      ic: string;
+      dic?: string | null;
+      street?: string | null;
+      psc?: string | null;
+      city?: string | null;
+    };
+    'Fei.Is.Api.Features.DataPoints.Commands.CreateDataPoints.Request': {
+      tag: string;
+      /** Format: double */
+      value: number;
+      /** Format: int64 */
+      timeStamp?: number | null;
+    };
+    'Fei.Is.Api.Features.DataPoints.Queries.GetLatestDataPoints.Response': {
+      /** Format: double */
+      value: number | null;
+    };
+    /** @enum {string} */
+    'Fei.Is.Api.Features.DataPoints.Queries.GetSensorDataPoints.DownsampleMethod': 'Asap' | 'Lttb';
+    'Fei.Is.Api.Features.DataPoints.Queries.GetSensorDataPoints.Response': {
+      /** Format: date-time */
+      ts: string;
+      /** Format: double */
+      value?: number | null;
+    };
+    /** @enum {string} */
+    'Fei.Is.Api.Features.DataPoints.Queries.GetSensorDataPoints.TimeBucketMethod':
+      | 'Average'
+      | 'Max'
+      | 'Min'
+      | 'StdDev'
+      | 'Sum';
+    'Fei.Is.Api.Features.DeviceCollections.Commands.CreateDeviceCollection.Request': {
+      name: string;
+      /** Format: uuid */
+      collectionParentId?: string | null;
+    };
+    'Fei.Is.Api.Features.DeviceCollections.Commands.CreateDeviceCollection.Response': {
+      /** Format: uuid */
+      id: string;
+      name: string;
+    };
+    'Fei.Is.Api.Features.DeviceCollections.Commands.UpdateDeviceCollection.Request': {
+      name: string;
+    };
+    'Fei.Is.Api.Features.DeviceCollections.Commands.UpdateDeviceCollection.Response': {
+      /** Format: uuid */
+      id: string;
+      name: string;
+    };
+    'Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionById.Response': {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      items: components['schemas']['Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionById.SubItemResponse'][];
+    };
+    'Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionById.SubItemResponse': {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      items: components['schemas']['Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionById.SubItemResponse'][];
+      type: components['schemas']['Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionById.SubItemTypes'];
+    };
+    /** @enum {string} */
+    'Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionById.SubItemTypes': 'Device' | 'SubCollection';
+    'Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionWithSensors.Response': {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      items: components['schemas']['Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionWithSensors.Response'][];
+      type: components['schemas']['Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionWithSensors.SubItemTypes'];
+      sensor: components['schemas']['Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionWithSensors.SensorResponse'];
+    };
+    'Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionWithSensors.SensorResponse': {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      unit: string;
+      tag: string;
+      /** Format: int32 */
+      accuracyDecimals?: number | null;
+    };
+    /** @enum {string} */
+    'Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionWithSensors.SubItemTypes':
+      | 'Device'
+      | 'SubCollection'
+      | 'Sensor';
+    'Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollections.Response': {
+      /** Format: uuid */
+      id: string;
+      name: string;
+    };
+    'Fei.Is.Api.Features.DeviceSharing.Commands.ShareDeviceToUser.Request': {
+      email: string;
+      permission: components['schemas']['Fei.Is.Api.Data.Enums.DeviceSharePermission'];
+    };
+    'Fei.Is.Api.Features.DeviceSharing.Commands.UnshareDeviceToUser.Request': {
+      email: string;
+    };
+    'Fei.Is.Api.Features.DeviceSharing.Queries.GetDeviceSharedUsers.Response': {
+      email: string;
+      permission: components['schemas']['Fei.Is.Api.Data.Enums.DeviceSharePermission'];
+    };
+    'Fei.Is.Api.Features.DeviceTemplates.Commands.CreateDeviceTemplate.Request': {
+      name: string;
+    };
+    'Fei.Is.Api.Features.DeviceTemplates.Commands.UpdateDeviceTemplate.Request': {
+      name: string;
+    };
+    'Fei.Is.Api.Features.DeviceTemplates.Queries.GetDeviceTemplateById.Response': {
+      /** Format: uuid */
+      id: string;
+      name: string;
+    };
+    'Fei.Is.Api.Features.DeviceTemplates.Queries.GetDeviceTemplates.Response': {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      /** Format: date-time */
+      updatedAt: string;
+    };
+    'Fei.Is.Api.Features.Devices.Commands.CreateDevice.Request': {
+      name: string;
+      accessToken: string;
+      /** Format: uuid */
+      templateId?: string | null;
+    };
+    'Fei.Is.Api.Features.Devices.Commands.UpdateDevice.Request': {
+      name: string;
+      accessToken: string;
+      /** Format: uuid */
+      templateId?: string | null;
+    };
+    'Fei.Is.Api.Features.Devices.Queries.GetDeviceById.Response': {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      mac?: string | null;
+      accessToken?: string | null;
+      deviceTemplate: components['schemas']['Fei.Is.Api.Features.Devices.Queries.GetDeviceById.TemplateResponse'];
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      updatedAt: string;
+      connected: boolean;
+      /** Format: date-time */
+      lastSeen?: string | null;
+    };
+    'Fei.Is.Api.Features.Devices.Queries.GetDeviceById.SensorResponse': {
+      /** Format: uuid */
+      id: string;
+      tag: string;
+      name: string;
+      unit?: string | null;
+      /** Format: int32 */
+      accuracyDecimals?: number | null;
+    };
+    'Fei.Is.Api.Features.Devices.Queries.GetDeviceById.TemplateResponse': {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      sensors: components['schemas']['Fei.Is.Api.Features.Devices.Queries.GetDeviceById.SensorResponse'][];
+    };
+    'Fei.Is.Api.Features.Devices.Queries.GetDevices.Response': {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      connected: boolean;
+      permission: components['schemas']['Fei.Is.Api.Data.Enums.DevicePermission'];
+      /** Format: date-time */
+      lastSeen?: string | null;
+    };
+    'Fei.Is.Api.Features.Devices.Queries.GetDevicesWithSensors.Response': {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      sensors: components['schemas']['Fei.Is.Api.Features.Devices.Queries.GetDevicesWithSensors.Sensor'][];
+    };
+    'Fei.Is.Api.Features.Devices.Queries.GetDevicesWithSensors.Sensor': {
+      name: string;
+      tag: string;
+      unit: string;
+    };
+    'Fei.Is.Api.Features.Jobs.Commands.CreateJob.Request': {
+      /** Format: uuid */
+      recipeId: string;
+      /** Format: int32 */
+      cycles: number;
+    };
+    'Fei.Is.Api.Features.Jobs.Queries.GetActiveJobs.Response': {
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      deviceId: string;
+      name: string;
+      /** Format: int32 */
+      totalSteps: number;
+      /** Format: int32 */
+      totalCycles: number;
+      /** Format: int32 */
+      currentStep: number;
+      /** Format: int32 */
+      currentCycle: number;
+      currentCommand: string;
+      paused: boolean;
+      /** Format: double */
+      progress: number;
+      status: components['schemas']['Fei.Is.Api.Data.Enums.JobStatusEnum'];
+    };
+    /** @enum {string} */
+    'Fei.Is.Api.Features.Jobs.Queries.GetJobById.CommandProgress':
+      | 'CommandPending'
+      | 'CommandProcessing'
+      | 'CommandDone';
+    'Fei.Is.Api.Features.Jobs.Queries.GetJobById.CommandResponse': {
+      /** Format: int32 */
+      order: number;
+      name: string;
+      progress: components['schemas']['Fei.Is.Api.Features.Jobs.Queries.GetJobById.CommandProgress'];
+    };
+    'Fei.Is.Api.Features.Jobs.Queries.GetJobById.Response': {
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      deviceId: string;
+      name: string;
+      /** Format: int32 */
+      currentStep: number;
+      /** Format: int32 */
+      totalSteps: number;
+      /** Format: int32 */
+      currentCycle: number;
+      /** Format: int32 */
+      totalCycles: number;
+      paused: boolean;
+      /** Format: double */
+      progress: number;
+      status: components['schemas']['Fei.Is.Api.Data.Enums.JobStatusEnum'];
+      commands: components['schemas']['Fei.Is.Api.Features.Jobs.Queries.GetJobById.CommandResponse'][];
+    };
+    'Fei.Is.Api.Features.Jobs.Queries.GetJobsOnDevice.DeviceResponse': {
+      /** Format: uuid */
+      id: string;
+      name: string;
+    };
+    'Fei.Is.Api.Features.Jobs.Queries.GetJobsOnDevice.Response': {
+      device: components['schemas']['Fei.Is.Api.Features.Jobs.Queries.GetJobsOnDevice.DeviceResponse'];
+      /** Format: uuid */
+      id: string;
+      name: string;
+      status: components['schemas']['Fei.Is.Api.Data.Enums.JobStatusEnum'];
+      /** Format: int32 */
+      currentStep: number;
+      /** Format: int32 */
+      totalSteps: number;
+      /** Format: int32 */
+      currentCycle: number;
+      /** Format: int32 */
+      totalCycles: number;
+      paused: boolean;
+      /** Format: date-time */
+      startedAt?: string | null;
+      /** Format: date-time */
+      finishedAt?: string | null;
+      /** Format: date-time */
+      createdAt?: string | null;
+      /** Format: date-time */
+      updatedAt?: string | null;
+    };
+    'Fei.Is.Api.Features.OrderItemContainers.Commands.AddOrderContainer.Request': {
+      /** Format: uuid */
+      orderId: string;
+      name: string;
+      /** Format: int32 */
+      quantity: number;
+      /** Format: double */
+      pricePerContainer: number;
+    };
+    'Fei.Is.Api.Features.OrderItemContainers.Queries.GetOrderItemContainer.ProductResponse': {
+      pluCode: string;
+      latinName: string;
+      czechName?: string | null;
+      variety: string;
+      potDiameterPack?: string | null;
+      /** Format: double */
+      pricePerPiecePack?: number | null;
+      /** Format: double */
+      pricePerPiecePackVAT?: number | null;
+      /** Format: int32 */
+      quantity: number;
+    };
+    'Fei.Is.Api.Features.OrderItemContainers.Queries.GetOrderItemContainer.Response': {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      /** Format: int32 */
+      quantity: number;
+      /** Format: double */
+      pricePerContainer?: number | null;
+      /** Format: double */
+      totalPrice?: number | null;
+      products: components['schemas']['Fei.Is.Api.Features.OrderItemContainers.Queries.GetOrderItemContainer.ProductResponse'][];
+    };
+    'Fei.Is.Api.Features.Orders.Commands.CreateOrder.Request': {
+      /** Format: uuid */
+      customerId: string;
+      /** Format: date-time */
+      orderDate: string;
+      /** Format: int32 */
+      deliveryWeek: number;
+      paymentMethod: string;
+      contactPhone: string;
+      note?: string | null;
+    };
+    'Fei.Is.Api.Features.Orders.Commands.UpdateOrder.Request': {
+      /** Format: uuid */
+      customerId: string;
+      /** Format: date-time */
+      orderDate: string;
+      /** Format: int32 */
+      deliveryWeek: number;
+      paymentMethod: string;
+      contactPhone: string;
+      note?: string | null;
+    };
+    'Fei.Is.Api.Features.Orders.Queries.GetOrderById.Response': {
+      /** Format: uuid */
+      id: string;
+      customerName: string;
+      /** Format: uuid */
+      customerId: string;
+      /** Format: date-time */
+      orderDate: string;
+      /** Format: int32 */
+      deliveryWeek: number;
+      paymentMethod: string;
+      contactPhone: string;
+      note?: string | null;
+    };
+    'Fei.Is.Api.Features.Orders.Queries.GetOrders.Response': {
+      /** Format: uuid */
+      id: string;
+      customerName: string;
+      /** Format: date-time */
+      orderDate: string;
+      /** Format: int32 */
+      deliveryWeek: number;
+      paymentMethod: string;
+      contactPhone: string;
+      note?: string | null;
+    };
+    'Fei.Is.Api.Features.ProductCategories.Queries.GetCategoryById.Response': {
+      /** Format: uuid */
+      id: string;
+      name: string;
+    };
+    'Fei.Is.Api.Features.ProductCategories.Queries.GetProductCategories.Response': {
+      /** Format: uuid */
+      id: string;
+      name: string;
+    };
+    'Fei.Is.Api.Features.ProductCategories.Queries.GetSupplierById.Response': {
+      /** Format: uuid */
+      id: string;
+      name: string;
+    };
+    'Fei.Is.Api.Features.Products.Commands.CreateProduct.Request': {
+      code?: string | null;
+      pluCode?: string | null;
+      latinName: string;
+      czechName?: string | null;
+      flowerLeafDescription?: string | null;
+      potDiameterPack?: string | null;
+      /** Format: double */
+      pricePerPiecePack?: number | null;
+      /** Format: double */
+      pricePerPiecePackVAT?: number | null;
+      /** Format: double */
+      discountedPriceWithoutVAT?: number | null;
+      /** Format: double */
+      retailPrice?: number | null;
+      /** Format: uuid */
+      categoryId: string;
+      /** Format: uuid */
+      supplierId: string;
+      variety: string;
+      /** Format: uuid */
+      vatCategoryId: string;
+    };
+    'Fei.Is.Api.Features.Products.Commands.CreateProductsFromList.ProductRequest': {
+      code?: string | null;
+      latinName: string;
+      czechName?: string | null;
+      flowerLeafDescription?: string | null;
+      potDiameterPack?: string | null;
+      /** Format: double */
+      pricePerPiecePack?: number | null;
+      /** Format: double */
+      pricePerPiecePackVAT?: number | null;
+      /** Format: double */
+      discountedPriceWithoutVAT?: number | null;
+      /** Format: double */
+      retailPrice?: number | null;
+      categoryName: string;
+      /** Format: uuid */
+      supplierId: string;
+      variety: string;
+      /** Format: uuid */
+      vatCategoryId: string;
+    };
+    'Fei.Is.Api.Features.Products.Commands.CreateProductsFromList.Request': {
+      products: components['schemas']['Fei.Is.Api.Features.Products.Commands.CreateProductsFromList.ProductRequest'][];
+    };
+    'Fei.Is.Api.Features.Products.Commands.UpdateProduct.Request': {
+      pluCode: string;
+      code?: string | null;
+      latinName: string;
+      czechName?: string | null;
+      flowerLeafDescription?: string | null;
+      variety: string;
+      potDiameterPack?: string | null;
+      /** Format: double */
+      pricePerPiecePack?: number | null;
+      /** Format: double */
+      pricePerPiecePackVAT?: number | null;
+      /** Format: double */
+      discountedPriceWithoutVAT?: number | null;
+      /** Format: double */
+      retailPrice?: number | null;
+      /** Format: uuid */
+      categoryId: string;
+      /** Format: uuid */
+      supplierId?: string | null;
+      /** Format: uuid */
+      vatCategoryId?: string | null;
+    };
+    'Fei.Is.Api.Features.Products.Queries.GetProductById.CategoryModel': {
+      /** Format: uuid */
+      id: string;
+      name: string;
+    };
+    'Fei.Is.Api.Features.Products.Queries.GetProductById.Response': {
+      pluCode: string;
+      code?: string | null;
+      latinName: string;
+      czechName?: string | null;
+      flowerLeafDescription?: string | null;
+      potDiameterPack?: string | null;
+      /** Format: double */
+      pricePerPiecePack?: number | null;
+      /** Format: double */
+      discountedPriceWithoutVAT?: number | null;
+      /** Format: double */
+      retailPrice?: number | null;
+      category: components['schemas']['Fei.Is.Api.Features.Products.Queries.GetProductById.CategoryModel'];
+      supplier: components['schemas']['Fei.Is.Api.Features.Products.Queries.GetProductById.SupplierModel'];
+      variety: string;
+      vatCategory: components['schemas']['Fei.Is.Api.Features.Products.Queries.GetProductById.VatCategoryModel'];
+    };
+    'Fei.Is.Api.Features.Products.Queries.GetProductById.SupplierModel': {
+      /** Format: uuid */
+      id: string;
+      name: string;
+    };
+    'Fei.Is.Api.Features.Products.Queries.GetProductById.VatCategoryModel': {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      /** Format: double */
+      rate: number;
+    };
+    'Fei.Is.Api.Features.Products.Queries.GetProducts.Response': {
+      /** Format: uuid */
+      id: string;
+      code?: string | null;
+      pluCode: string;
+      /** Format: uuid */
+      categoryId: string;
+      /** Format: uuid */
+      supplierId: string;
+    };
+    'Fei.Is.Api.Features.Products.Queries.GetSuppliers.Response': {
+      /** Format: uuid */
+      id: string;
+      name: string;
+    };
+    'Fei.Is.Api.Features.Products.Queries.GetVatList.Response': {
+      /** Format: uuid */
+      guid: string;
+      name: string;
+      /** Format: double */
+      rate: number;
+    };
+    'Fei.Is.Api.Features.RecipeSteps.Commands.UpdateRecipeSteps.Request': {
+      /** Format: uuid */
+      stepId?: string | null;
+      /** Format: uuid */
+      commandId?: string | null;
+      /** Format: uuid */
+      subrecipeId?: string | null;
+      /** Format: int32 */
+      cycles: number;
+      /** Format: int32 */
+      order: number;
+    };
+    'Fei.Is.Api.Features.Recipes.Commands.CreateRecipe.Request': {
+      name: string;
+      /** Format: uuid */
+      deviceTemplateId: string;
+    };
+    'Fei.Is.Api.Features.Recipes.Commands.UpdateRecipe.Request': {
+      name: string;
+    };
+    'Fei.Is.Api.Features.Recipes.Queries.GetRecipeById.CommandResponse': {
+      /** Format: uuid */
+      id: string;
+      displayName: string;
+      name: string;
+      params: number[];
+    };
+    'Fei.Is.Api.Features.Recipes.Queries.GetRecipeById.RecipeStepResponse': {
+      /** Format: uuid */
+      id: string;
+      command: components['schemas']['Fei.Is.Api.Features.Recipes.Queries.GetRecipeById.CommandResponse'];
+      subrecipe: components['schemas']['Fei.Is.Api.Features.Recipes.Queries.GetRecipeById.SubrecipeResponse'];
+      /** Format: int32 */
+      cycles: number;
+      /** Format: int32 */
+      order: number;
+    };
+    'Fei.Is.Api.Features.Recipes.Queries.GetRecipeById.Response': {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      steps: components['schemas']['Fei.Is.Api.Features.Recipes.Queries.GetRecipeById.RecipeStepResponse'][];
+    };
+    'Fei.Is.Api.Features.Recipes.Queries.GetRecipeById.SubrecipeResponse': {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      steps: components['schemas']['Fei.Is.Api.Features.Recipes.Queries.GetRecipeById.RecipeStepResponse'][];
+    };
+    'Fei.Is.Api.Features.Recipes.Queries.GetRecipes.Response': {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      /** Format: date-time */
+      updatedAt: string;
+    };
+    'Fei.Is.Api.Features.Sensors.Commands.CreateSensor.Request': {
+      tag: string;
+      name: string;
+      unit?: string | null;
+      /** Format: int32 */
+      accuracyDecimals?: number | null;
+    };
+    'Fei.Is.Api.Features.Sensors.Commands.UpdateDeviceTemplateSensors.Request': {
+      /** Format: uuid */
+      id?: string | null;
+      tag: string;
+      name: string;
+      unit?: string | null;
+      /** Format: int32 */
+      accuracyDecimals?: number | null;
+    };
+    'Fei.Is.Api.Features.Sensors.Commands.UpdateSensor.Request': {
+      tag: string;
+      name: string;
+      unit?: string | null;
+      /** Format: int32 */
+      accuracyDecimals?: number | null;
+    };
+    'Fei.Is.Api.Features.Sensors.Queries.GetDeviceTemplateSensors.Response': {
+      /** Format: uuid */
+      id: string;
+      tag: string;
+      name: string;
+      unit?: string | null;
+      /** Format: int32 */
+      accuracyDecimals?: number | null;
+    };
+    'Fei.Is.Api.Features.Sensors.Queries.GetSensorById.Response': {
+      /** Format: uuid */
+      id: string;
+      tag: string;
+      name: string;
+      unit?: string | null;
+      /** Format: int32 */
+      accuracyDecimals?: number | null;
+    };
+    'Fei.Is.Api.Features.UserManagement.Queries.GetUserById.Response': {
+      /** Format: uuid */
+      id: string;
+      email: string;
+      /** Format: date-time */
+      registrationDate: string;
+      roles: string[];
+    };
+    'Fei.Is.Api.Features.UserManagement.Queries.GetUsers.Response': {
+      /** Format: uuid */
+      id: string;
+      email: string;
+      /** Format: date-time */
+      registrationDate: string;
+      roles: string[];
+    };
+    'Fei.Is.Api.Features.VATCategory.Queries.GetVATCategories.Response': {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      /** Format: double */
+      rate: number;
+    };
+    'Microsoft.AspNetCore.Http.HttpValidationProblemDetails': {
+      type?: string | null;
+      title?: string | null;
+      /** Format: int32 */
+      status?: number | null;
+      detail?: string | null;
+      instance?: string | null;
+      errors: {
+        [key: string]: string[];
+      };
+    } & {
+      [key: string]: unknown;
+    };
+    'Microsoft.AspNetCore.Mvc.ProblemDetails': {
+      type: string | null;
+      title: string | null;
+      /** Format: int32 */
+      status: number | null;
+      detail: string | null;
+      instance: string | null;
+    } & {
+      [key: string]: unknown;
+    };
+  };
+  responses: never;
+  parameters: never;
+  requestBodies: never;
+  headers: never;
+  pathItems: never;
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    GetUserById: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Features.UserManagement.Queries.GetUserById.Response"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    GetUsers: {
-        parameters: {
-            query?: {
-                SortBy?: string;
-                Descending?: boolean;
-                SearchTerm?: string;
-                PageNumber?: number;
-                PageSize?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.UserManagement.Queries.GetUsers.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    UpdateUserEmail: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Fei.Is.Api.Features.AdminUserManagement.Commands.UpdateUserEmail.Request"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    UpdateUserPassword: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Fei.Is.Api.Features.AdminUserManagement.Commands.UpdateUserPassword.Request"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    UpdateUserRole: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Fei.Is.Api.Features.AdminUserManagement.Commands.UpdateUserRole.Request"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    AuthDevice: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Fei.Is.Api.Features.Auth.Commands.AuthDevice.Endpoint.Request"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Features.Auth.Commands.AuthDevice.Response"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    Login: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Fei.Is.Api.Features.Auth.Commands.Login.Request"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Features.Auth.Commands.Login.Response"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
-                };
-            };
-        };
-    };
-    LoginByGoogle: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Fei.Is.Api.Features.Auth.Commands.LoginByGoogle.Request"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Features.Auth.Commands.LoginByGoogle.Response"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
-                };
-            };
-        };
-    };
-    RefreshToken: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Fei.Is.Api.Features.Auth.Commands.RefreshToken.Request"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Features.Auth.Commands.RefreshToken.Response"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Mvc.ProblemDetails"];
-                };
-            };
-        };
-    };
-    Register: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Fei.Is.Api.Features.Auth.Commands.Register.Endpoint.Request"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
-                };
-            };
-            /** @description Conflict */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    UpdateEmail: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Fei.Is.Api.Features.Auth.Commands.UpdateEmail.Request"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    UpdatePassword: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Fei.Is.Api.Features.Auth.Commands.UpdatePassword.Request"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    GetProductCategories: {
-        parameters: {
-            query?: {
-                SortBy?: string;
-                Descending?: boolean;
-                SearchTerm?: string;
-                PageNumber?: number;
-                PageSize?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.ProductCategories.Queries.GetProductCategories.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"];
-                };
-            };
-        };
-    };
-    GetCategoryById: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Features.ProductCategories.Queries.GetCategoryById.Response"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    GetCommandById: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Features.Commands.Queries.GetCommandById.Response"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    UpdateCommand: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Fei.Is.Api.Features.Commands.Commands.UpdateCommand.Request"];
-            };
-        };
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
-                };
-            };
-        };
-    };
-    DeleteCommand: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    GetCommands: {
-        parameters: {
-            query?: {
-                DeviceTemplateId?: string;
-                SortBy?: string;
-                Descending?: boolean;
-                SearchTerm?: string;
-                PageNumber?: number;
-                PageSize?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Commands.Queries.GetCommands.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
-                };
-            };
-        };
-    };
-    CreateCommand: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Fei.Is.Api.Features.Commands.Commands.CreateCommand.Request"];
-            };
-        };
-        responses: {
-            /** @description Created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": string;
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
-                };
-            };
-        };
-    };
-    GetCompanies: {
-        parameters: {
-            query?: {
-                SortBy?: string;
-                Descending?: boolean;
-                SearchTerm?: string;
-                PageNumber?: number;
-                PageSize?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Companies.Queries.GetCompanies.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"];
-                };
-            };
-        };
-    };
-    CreateCompany: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Fei.Is.Api.Features.Companies.Commands.CreateCompany.Request"];
-            };
-        };
-        responses: {
-            /** @description Created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": string;
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
-                };
-            };
-        };
-    };
-    GetCompanyById: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Features.Companies.Queries.GetCompanyById.Response"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    UpdateCompany: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Fei.Is.Api.Features.Companies.Commands.UpdateCompany.Request"];
-            };
-        };
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    DeleteCompany: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    GetLatestDataPoints: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                deviceId: string;
-                sensorTag: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Features.DataPoints.Queries.GetLatestDataPoints.Response"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    GetSensorDataPoints: {
-        parameters: {
-            query?: {
-                From?: string;
-                To?: string;
-                Downsample?: number;
-                TimeBucket?: number;
-                DownsampleMethod?: components["schemas"]["Fei.Is.Api.Features.DataPoints.Queries.GetSensorDataPoints.DownsampleMethod"];
-                TimeBucketMethod?: components["schemas"]["Fei.Is.Api.Features.DataPoints.Queries.GetSensorDataPoints.TimeBucketMethod"];
-            };
-            header?: never;
-            path: {
-                sensorTag: string;
-                deviceId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Features.DataPoints.Queries.GetSensorDataPoints.Response"][];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    CreateDataPoints: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                deviceAccessToken: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Fei.Is.Api.Features.DataPoints.Commands.CreateDataPoints.Request"][];
-            };
-        };
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    GetProductById: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Features.Products.Queries.GetProductById.Response"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    UpdateProduct: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Fei.Is.Api.Features.Products.Commands.UpdateProduct.Request"];
-            };
-        };
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    DeleteProduct: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    GetDeviceTemplateById: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Features.DeviceTemplates.Queries.GetDeviceTemplateById.Response"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    UpdateDeviceTemplate: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Fei.Is.Api.Features.DeviceTemplates.Commands.UpdateDeviceTemplate.Request"];
-            };
-        };
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Conflict */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    DeleteDeviceTemplate: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    GetDeviceById: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Features.Devices.Queries.GetDeviceById.Response"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    UpdateDevice: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Fei.Is.Api.Features.Devices.Commands.UpdateDevice.Request"];
-            };
-        };
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Conflict */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    DeleteDevice: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    GetDevices: {
-        parameters: {
-            query?: {
-                SortBy?: string;
-                Descending?: boolean;
-                SearchTerm?: string;
-                PageNumber?: number;
-                PageSize?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Devices.Queries.GetDevices.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"];
-                };
-            };
-        };
-    };
-    CreateDevice: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Fei.Is.Api.Features.Devices.Commands.CreateDevice.Request"];
-            };
-        };
-        responses: {
-            /** @description Created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": string;
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
-                };
-            };
-        };
-    };
-    GetDevicesWithSensors: {
-        parameters: {
-            query?: {
-                SortBy?: string;
-                Descending?: boolean;
-                SearchTerm?: string;
-                PageNumber?: number;
-                PageSize?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Features.Devices.Queries.GetDevicesWithSensors.Response"][];
-                };
-            };
-        };
-    };
-    GetDeviceCollectionById: {
-        parameters: {
-            query?: {
-                MaxDepth?: number;
-            };
-            header?: never;
-            path: {
-                collectionId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionById.Response"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    GetDeviceCollections: {
-        parameters: {
-            query?: {
-                SortBy?: string;
-                Descending?: boolean;
-                SearchTerm?: string;
-                PageNumber?: number;
-                PageSize?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollections.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"];
-                };
-            };
-        };
-    };
-    CreateDeviceCollection: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Fei.Is.Api.Features.DeviceCollections.Commands.CreateDeviceCollection.Request"];
-            };
-        };
-        responses: {
-            /** @description Created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Features.DeviceCollections.Commands.CreateDeviceCollection.Response"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
-                };
-            };
-        };
-    };
-    GetDeviceCollectionWithSensors: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                collectionId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionWithSensors.Response"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    AddDeviceToDeviceCollection: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                collectionId: string;
-                deviceId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
-                };
-            };
-        };
-    };
-    RemoveDeviceFromDeviceCollection: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                collectionId: string;
-                deviceId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
-                };
-            };
-        };
-    };
-    UpdateDeviceCollection: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Fei.Is.Api.Features.DeviceCollections.Commands.UpdateDeviceCollection.Request"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Features.DeviceCollections.Commands.UpdateDeviceCollection.Response"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
-                };
-            };
-        };
-    };
-    DeleteDeviceCollection: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    GetDeviceSharedUsers: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Features.DeviceSharing.Queries.GetDeviceSharedUsers.Response"][];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    ShareDeviceToUser: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                deviceId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Fei.Is.Api.Features.DeviceSharing.Commands.ShareDeviceToUser.Request"];
-            };
-        };
-        responses: {
-            /** @description Created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": string;
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    UnshareDeviceToUser: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                deviceId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Fei.Is.Api.Features.DeviceSharing.Commands.UnshareDeviceToUser.Request"];
-            };
-        };
-        responses: {
-            /** @description Created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": string;
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    GetDeviceTemplates: {
-        parameters: {
-            query?: {
-                SortBy?: string;
-                Descending?: boolean;
-                SearchTerm?: string;
-                PageNumber?: number;
-                PageSize?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.DeviceTemplates.Queries.GetDeviceTemplates.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
-                };
-            };
-        };
-    };
-    CreateDeviceTemplate: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Fei.Is.Api.Features.DeviceTemplates.Commands.CreateDeviceTemplate.Request"];
-            };
-        };
-        responses: {
-            /** @description Created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": string;
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
-                };
-            };
-        };
-    };
-    GetActiveJobs: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                deviceId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Features.Jobs.Queries.GetActiveJobs.Response"][];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    GetJobById: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                jobId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Features.Jobs.Queries.GetJobById.Response"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    GetJobsOnDevice: {
-        parameters: {
-            query?: {
-                DeviceId?: string;
-                SortBy?: string;
-                Descending?: boolean;
-                SearchTerm?: string;
-                PageNumber?: number;
-                PageSize?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Jobs.Queries.GetJobsOnDevice.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    CancelJob: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                jobId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    CreateJob: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                deviceId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Fei.Is.Api.Features.Jobs.Commands.CreateJob.Request"];
-            };
-        };
-        responses: {
-            /** @description Created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": string;
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    PauseJob: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                jobId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    ResumeJob: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                jobId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    SkipCycle: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                jobId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    SkipStep: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                jobId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    GetOrders: {
-        parameters: {
-            query?: {
-                SortBy?: string;
-                Descending?: boolean;
-                SearchTerm?: string;
-                PageNumber?: number;
-                PageSize?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Orders.Queries.GetOrders.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"];
-                };
-            };
-        };
-    };
-    CreateOrder: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Fei.Is.Api.Features.Orders.Commands.CreateOrder.Request"];
-            };
-        };
-        responses: {
-            /** @description Created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": string;
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
-                };
-            };
-        };
-    };
-    GetProducts: {
-        parameters: {
-            query?: {
-                SortBy?: string;
-                Descending?: boolean;
-                SearchTerm?: string;
-                PageNumber?: number;
-                PageSize?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Products.Queries.GetProducts.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"];
-                };
-            };
-        };
-    };
-    CreateProduct: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Fei.Is.Api.Features.Products.Commands.CreateProduct.Request"];
-            };
-        };
-        responses: {
-            /** @description Created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": string;
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
-                };
-            };
-        };
-    };
-    CreateProductsFromList: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Fei.Is.Api.Features.Products.Commands.CreateProductsFromList.Request"];
-            };
-        };
-        responses: {
-            /** @description Created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": number;
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
-                };
-            };
-        };
-    };
-    GetRecipeById: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Features.Recipes.Queries.GetRecipeById.Response"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    UpdateRecipe: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Fei.Is.Api.Features.Recipes.Commands.UpdateRecipe.Request"];
-            };
-        };
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    DeleteRecipe: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    GetRecipes: {
-        parameters: {
-            query?: {
-                DeviceTemplateId?: string;
-                DeviceId?: string;
-                SortBy?: string;
-                Descending?: boolean;
-                SearchTerm?: string;
-                PageNumber?: number;
-                PageSize?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Recipes.Queries.GetRecipes.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    CreateRecipe: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Fei.Is.Api.Features.Recipes.Commands.CreateRecipe.Request"];
-            };
-        };
-        responses: {
-            /** @description Created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": string;
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    UpdateRecipeSteps: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                recipeId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Fei.Is.Api.Features.RecipeSteps.Commands.UpdateRecipeSteps.Request"][];
-            };
-        };
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    GetDeviceTemplateSensors: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                templateId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Features.Sensors.Queries.GetDeviceTemplateSensors.Response"][];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    UpdateDeviceTemplateSensors: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                templateId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Fei.Is.Api.Features.Sensors.Commands.UpdateDeviceTemplateSensors.Request"][];
-            };
-        };
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    CreateSensor: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                templateId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Fei.Is.Api.Features.Sensors.Commands.CreateSensor.Request"];
-            };
-        };
-        responses: {
-            /** @description Created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": string;
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    GetSensorById: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                sensorId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Features.Sensors.Queries.GetSensorById.Response"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    UpdateSensor: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                sensorId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Fei.Is.Api.Features.Sensors.Commands.UpdateSensor.Request"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    DeleteSensor: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                sensorId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    GetSuppliers: {
-        parameters: {
-            query?: {
-                SortBy?: string;
-                Descending?: boolean;
-                SearchTerm?: string;
-                PageNumber?: number;
-                PageSize?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Products.Queries.GetSuppliers.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"];
-                };
-            };
-        };
-    };
-    GetSupplierById: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Features.ProductCategories.Queries.GetSupplierById.Response"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    GetVATCategories: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Features.VATCategory.Queries.GetVATCategories.Response"][];
-                };
-            };
-        };
-    };
-    GetVatList: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Features.Products.Queries.GetVatList.Response"][];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
+  GetUserById: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Fei.Is.Api.Features.UserManagement.Queries.GetUserById.Response'];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  GetUsers: {
+    parameters: {
+      query?: {
+        SortBy?: string;
+        Descending?: boolean;
+        SearchTerm?: string;
+        PageNumber?: number;
+        PageSize?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.UserManagement.Queries.GetUsers.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  UpdateUserEmail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Fei.Is.Api.Features.AdminUserManagement.Commands.UpdateUserEmail.Request'];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Microsoft.AspNetCore.Http.HttpValidationProblemDetails'];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  UpdateUserPassword: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Fei.Is.Api.Features.AdminUserManagement.Commands.UpdateUserPassword.Request'];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Microsoft.AspNetCore.Http.HttpValidationProblemDetails'];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  UpdateUserRole: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Fei.Is.Api.Features.AdminUserManagement.Commands.UpdateUserRole.Request'];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Microsoft.AspNetCore.Http.HttpValidationProblemDetails'];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AuthDevice: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Fei.Is.Api.Features.Auth.Commands.AuthDevice.Endpoint.Request'];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Fei.Is.Api.Features.Auth.Commands.AuthDevice.Response'];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  Login: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Fei.Is.Api.Features.Auth.Commands.Login.Request'];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Fei.Is.Api.Features.Auth.Commands.Login.Response'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Microsoft.AspNetCore.Http.HttpValidationProblemDetails'];
+        };
+      };
+    };
+  };
+  LoginByGoogle: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Fei.Is.Api.Features.Auth.Commands.LoginByGoogle.Request'];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Fei.Is.Api.Features.Auth.Commands.LoginByGoogle.Response'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Microsoft.AspNetCore.Http.HttpValidationProblemDetails'];
+        };
+      };
+    };
+  };
+  RefreshToken: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Fei.Is.Api.Features.Auth.Commands.RefreshToken.Request'];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Fei.Is.Api.Features.Auth.Commands.RefreshToken.Response'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Microsoft.AspNetCore.Mvc.ProblemDetails'];
+        };
+      };
+    };
+  };
+  Register: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Fei.Is.Api.Features.Auth.Commands.Register.Endpoint.Request'];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Microsoft.AspNetCore.Http.HttpValidationProblemDetails'];
+        };
+      };
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  UpdateEmail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Fei.Is.Api.Features.Auth.Commands.UpdateEmail.Request'];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Microsoft.AspNetCore.Http.HttpValidationProblemDetails'];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  UpdatePassword: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Fei.Is.Api.Features.Auth.Commands.UpdatePassword.Request'];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Microsoft.AspNetCore.Http.HttpValidationProblemDetails'];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  GetProductCategories: {
+    parameters: {
+      query?: {
+        SortBy?: string;
+        Descending?: boolean;
+        SearchTerm?: string;
+        PageNumber?: number;
+        PageSize?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.ProductCategories.Queries.GetProductCategories.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'];
+        };
+      };
+    };
+  };
+  GetCategoryById: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Fei.Is.Api.Features.ProductCategories.Queries.GetCategoryById.Response'];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  GetCommandById: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Fei.Is.Api.Features.Commands.Queries.GetCommandById.Response'];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  UpdateCommand: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Fei.Is.Api.Features.Commands.Commands.UpdateCommand.Request'];
+      };
+    };
+    responses: {
+      /** @description No Content */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Microsoft.AspNetCore.Http.HttpValidationProblemDetails'];
+        };
+      };
+    };
+  };
+  DeleteCommand: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No Content */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  GetCommands: {
+    parameters: {
+      query?: {
+        DeviceTemplateId?: string;
+        SortBy?: string;
+        Descending?: boolean;
+        SearchTerm?: string;
+        PageNumber?: number;
+        PageSize?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Commands.Queries.GetCommands.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Microsoft.AspNetCore.Http.HttpValidationProblemDetails'];
+        };
+      };
+    };
+  };
+  CreateCommand: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Fei.Is.Api.Features.Commands.Commands.CreateCommand.Request'];
+      };
+    };
+    responses: {
+      /** @description Created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': string;
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Microsoft.AspNetCore.Http.HttpValidationProblemDetails'];
+        };
+      };
+    };
+  };
+  GetCompanies: {
+    parameters: {
+      query?: {
+        SortBy?: string;
+        Descending?: boolean;
+        SearchTerm?: string;
+        PageNumber?: number;
+        PageSize?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Companies.Queries.GetCompanies.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'];
+        };
+      };
+    };
+  };
+  CreateCompany: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Fei.Is.Api.Features.Companies.Commands.CreateCompany.Request'];
+      };
+    };
+    responses: {
+      /** @description Created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': string;
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Microsoft.AspNetCore.Http.HttpValidationProblemDetails'];
+        };
+      };
+    };
+  };
+  GetCompanyById: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Fei.Is.Api.Features.Companies.Queries.GetCompanyById.Response'];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  UpdateCompany: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Fei.Is.Api.Features.Companies.Commands.UpdateCompany.Request'];
+      };
+    };
+    responses: {
+      /** @description No Content */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Microsoft.AspNetCore.Http.HttpValidationProblemDetails'];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  DeleteCompany: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No Content */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  GetLatestDataPoints: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        deviceId: string;
+        sensorTag: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Fei.Is.Api.Features.DataPoints.Queries.GetLatestDataPoints.Response'];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  GetSensorDataPoints: {
+    parameters: {
+      query?: {
+        From?: string;
+        To?: string;
+        Downsample?: number;
+        TimeBucket?: number;
+        DownsampleMethod?: components['schemas']['Fei.Is.Api.Features.DataPoints.Queries.GetSensorDataPoints.DownsampleMethod'];
+        TimeBucketMethod?: components['schemas']['Fei.Is.Api.Features.DataPoints.Queries.GetSensorDataPoints.TimeBucketMethod'];
+      };
+      header?: never;
+      path: {
+        sensorTag: string;
+        deviceId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Fei.Is.Api.Features.DataPoints.Queries.GetSensorDataPoints.Response'][];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  CreateDataPoints: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        deviceAccessToken: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Fei.Is.Api.Features.DataPoints.Commands.CreateDataPoints.Request'][];
+      };
+    };
+    responses: {
+      /** @description No Content */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Microsoft.AspNetCore.Http.HttpValidationProblemDetails'];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  GetProductById: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Fei.Is.Api.Features.Products.Queries.GetProductById.Response'];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  UpdateProduct: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Fei.Is.Api.Features.Products.Commands.UpdateProduct.Request'];
+      };
+    };
+    responses: {
+      /** @description No Content */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Microsoft.AspNetCore.Http.HttpValidationProblemDetails'];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  DeleteProduct: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No Content */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  GetDeviceTemplateById: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Fei.Is.Api.Features.DeviceTemplates.Queries.GetDeviceTemplateById.Response'];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  UpdateDeviceTemplate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Fei.Is.Api.Features.DeviceTemplates.Commands.UpdateDeviceTemplate.Request'];
+      };
+    };
+    responses: {
+      /** @description No Content */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Microsoft.AspNetCore.Http.HttpValidationProblemDetails'];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  DeleteDeviceTemplate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No Content */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  GetDeviceById: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Fei.Is.Api.Features.Devices.Queries.GetDeviceById.Response'];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  UpdateDevice: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Fei.Is.Api.Features.Devices.Commands.UpdateDevice.Request'];
+      };
+    };
+    responses: {
+      /** @description No Content */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Microsoft.AspNetCore.Http.HttpValidationProblemDetails'];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  DeleteDevice: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No Content */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  GetDevices: {
+    parameters: {
+      query?: {
+        SortBy?: string;
+        Descending?: boolean;
+        SearchTerm?: string;
+        PageNumber?: number;
+        PageSize?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Devices.Queries.GetDevices.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'];
+        };
+      };
+    };
+  };
+  CreateDevice: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Fei.Is.Api.Features.Devices.Commands.CreateDevice.Request'];
+      };
+    };
+    responses: {
+      /** @description Created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': string;
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Microsoft.AspNetCore.Http.HttpValidationProblemDetails'];
+        };
+      };
+    };
+  };
+  GetDevicesWithSensors: {
+    parameters: {
+      query?: {
+        SortBy?: string;
+        Descending?: boolean;
+        SearchTerm?: string;
+        PageNumber?: number;
+        PageSize?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Fei.Is.Api.Features.Devices.Queries.GetDevicesWithSensors.Response'][];
+        };
+      };
+    };
+  };
+  GetDeviceCollectionById: {
+    parameters: {
+      query?: {
+        MaxDepth?: number;
+      };
+      header?: never;
+      path: {
+        collectionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionById.Response'];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  GetDeviceCollections: {
+    parameters: {
+      query?: {
+        SortBy?: string;
+        Descending?: boolean;
+        SearchTerm?: string;
+        PageNumber?: number;
+        PageSize?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollections.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'];
+        };
+      };
+    };
+  };
+  CreateDeviceCollection: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Fei.Is.Api.Features.DeviceCollections.Commands.CreateDeviceCollection.Request'];
+      };
+    };
+    responses: {
+      /** @description Created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Fei.Is.Api.Features.DeviceCollections.Commands.CreateDeviceCollection.Response'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Microsoft.AspNetCore.Http.HttpValidationProblemDetails'];
+        };
+      };
+    };
+  };
+  GetDeviceCollectionWithSensors: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        collectionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionWithSensors.Response'];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AddDeviceToDeviceCollection: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        collectionId: string;
+        deviceId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Microsoft.AspNetCore.Http.HttpValidationProblemDetails'];
+        };
+      };
+    };
+  };
+  RemoveDeviceFromDeviceCollection: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        collectionId: string;
+        deviceId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No Content */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Microsoft.AspNetCore.Http.HttpValidationProblemDetails'];
+        };
+      };
+    };
+  };
+  UpdateDeviceCollection: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Fei.Is.Api.Features.DeviceCollections.Commands.UpdateDeviceCollection.Request'];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Fei.Is.Api.Features.DeviceCollections.Commands.UpdateDeviceCollection.Response'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Microsoft.AspNetCore.Http.HttpValidationProblemDetails'];
+        };
+      };
+    };
+  };
+  DeleteDeviceCollection: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No Content */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  GetDeviceSharedUsers: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Fei.Is.Api.Features.DeviceSharing.Queries.GetDeviceSharedUsers.Response'][];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ShareDeviceToUser: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        deviceId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Fei.Is.Api.Features.DeviceSharing.Commands.ShareDeviceToUser.Request'];
+      };
+    };
+    responses: {
+      /** @description Created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': string;
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Microsoft.AspNetCore.Http.HttpValidationProblemDetails'];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  UnshareDeviceToUser: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        deviceId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Fei.Is.Api.Features.DeviceSharing.Commands.UnshareDeviceToUser.Request'];
+      };
+    };
+    responses: {
+      /** @description Created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': string;
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Microsoft.AspNetCore.Http.HttpValidationProblemDetails'];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  GetDeviceTemplates: {
+    parameters: {
+      query?: {
+        SortBy?: string;
+        Descending?: boolean;
+        SearchTerm?: string;
+        PageNumber?: number;
+        PageSize?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.DeviceTemplates.Queries.GetDeviceTemplates.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Microsoft.AspNetCore.Http.HttpValidationProblemDetails'];
+        };
+      };
+    };
+  };
+  CreateDeviceTemplate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Fei.Is.Api.Features.DeviceTemplates.Commands.CreateDeviceTemplate.Request'];
+      };
+    };
+    responses: {
+      /** @description Created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': string;
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Microsoft.AspNetCore.Http.HttpValidationProblemDetails'];
+        };
+      };
+    };
+  };
+  GetActiveJobs: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        deviceId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Fei.Is.Api.Features.Jobs.Queries.GetActiveJobs.Response'][];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  GetJobById: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        jobId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Fei.Is.Api.Features.Jobs.Queries.GetJobById.Response'];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  GetJobsOnDevice: {
+    parameters: {
+      query?: {
+        DeviceId?: string;
+        SortBy?: string;
+        Descending?: boolean;
+        SearchTerm?: string;
+        PageNumber?: number;
+        PageSize?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Jobs.Queries.GetJobsOnDevice.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  CancelJob: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        jobId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  CreateJob: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        deviceId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Fei.Is.Api.Features.Jobs.Commands.CreateJob.Request'];
+      };
+    };
+    responses: {
+      /** @description Created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': string;
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Microsoft.AspNetCore.Http.HttpValidationProblemDetails'];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  PauseJob: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        jobId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ResumeJob: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        jobId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  SkipCycle: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        jobId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  SkipStep: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        jobId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  GetOrderById: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Fei.Is.Api.Features.Orders.Queries.GetOrderById.Response'];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  UpdateOrder: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Fei.Is.Api.Features.Orders.Commands.UpdateOrder.Request'];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Microsoft.AspNetCore.Http.HttpValidationProblemDetails'];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  GetOrders: {
+    parameters: {
+      query?: {
+        SortBy?: string;
+        Descending?: boolean;
+        SearchTerm?: string;
+        PageNumber?: number;
+        PageSize?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Orders.Queries.GetOrders.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'];
+        };
+      };
+    };
+  };
+  CreateOrder: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Fei.Is.Api.Features.Orders.Commands.CreateOrder.Request'];
+      };
+    };
+    responses: {
+      /** @description Created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': string;
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Microsoft.AspNetCore.Http.HttpValidationProblemDetails'];
+        };
+      };
+    };
+  };
+  DeleteOrder: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        orderId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No Content */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  DeleteItemFromOrder: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        orderId: number;
+        itemId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No Content */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  DecreaseQuantityContainer: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        orderId: string;
+        containerId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No Content */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  DeleteContainer: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        orderId: string;
+        containerId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No Content */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  IncreaseQuantityContainer: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        orderId: string;
+        containerId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No Content */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  GetOrderItemContainer: {
+    parameters: {
+      query?: {
+        SortBy?: string;
+        Descending?: boolean;
+        SearchTerm?: string;
+        PageNumber?: number;
+        PageSize?: number;
+      };
+      header?: never;
+      path: {
+        orderId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.OrderItemContainers.Queries.GetOrderItemContainer.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AddOrderContainer: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        orderId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Fei.Is.Api.Features.OrderItemContainers.Commands.AddOrderContainer.Request'];
+      };
+    };
+    responses: {
+      /** @description Created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': string;
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Microsoft.AspNetCore.Http.HttpValidationProblemDetails'];
+        };
+      };
+    };
+  };
+  AddItemToContainer: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        containerId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Fei.Is.Api.Features.Containers.Commands.AddItemToContainer.AddItemRequest'];
+      };
+    };
+    responses: {
+      /** @description Created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  GetProducts: {
+    parameters: {
+      query?: {
+        SortBy?: string;
+        Descending?: boolean;
+        SearchTerm?: string;
+        PageNumber?: number;
+        PageSize?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Products.Queries.GetProducts.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'];
+        };
+      };
+    };
+  };
+  CreateProduct: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Fei.Is.Api.Features.Products.Commands.CreateProduct.Request'];
+      };
+    };
+    responses: {
+      /** @description Created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': string;
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Microsoft.AspNetCore.Http.HttpValidationProblemDetails'];
+        };
+      };
+    };
+  };
+  CreateProductsFromList: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Fei.Is.Api.Features.Products.Commands.CreateProductsFromList.Request'];
+      };
+    };
+    responses: {
+      /** @description Created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': number;
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Microsoft.AspNetCore.Http.HttpValidationProblemDetails'];
+        };
+      };
+    };
+  };
+  GetRecipeById: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Fei.Is.Api.Features.Recipes.Queries.GetRecipeById.Response'];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  UpdateRecipe: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Fei.Is.Api.Features.Recipes.Commands.UpdateRecipe.Request'];
+      };
+    };
+    responses: {
+      /** @description No Content */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Microsoft.AspNetCore.Http.HttpValidationProblemDetails'];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  DeleteRecipe: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No Content */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  GetRecipes: {
+    parameters: {
+      query?: {
+        DeviceTemplateId?: string;
+        DeviceId?: string;
+        SortBy?: string;
+        Descending?: boolean;
+        SearchTerm?: string;
+        PageNumber?: number;
+        PageSize?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Recipes.Queries.GetRecipes.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  CreateRecipe: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Fei.Is.Api.Features.Recipes.Commands.CreateRecipe.Request'];
+      };
+    };
+    responses: {
+      /** @description Created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': string;
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Microsoft.AspNetCore.Http.HttpValidationProblemDetails'];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  UpdateRecipeSteps: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        recipeId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Fei.Is.Api.Features.RecipeSteps.Commands.UpdateRecipeSteps.Request'][];
+      };
+    };
+    responses: {
+      /** @description No Content */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Microsoft.AspNetCore.Http.HttpValidationProblemDetails'];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  GetDeviceTemplateSensors: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        templateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Fei.Is.Api.Features.Sensors.Queries.GetDeviceTemplateSensors.Response'][];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  UpdateDeviceTemplateSensors: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        templateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Fei.Is.Api.Features.Sensors.Commands.UpdateDeviceTemplateSensors.Request'][];
+      };
+    };
+    responses: {
+      /** @description No Content */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Microsoft.AspNetCore.Http.HttpValidationProblemDetails'];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  CreateSensor: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        templateId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Fei.Is.Api.Features.Sensors.Commands.CreateSensor.Request'];
+      };
+    };
+    responses: {
+      /** @description Created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': string;
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Microsoft.AspNetCore.Http.HttpValidationProblemDetails'];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  GetSensorById: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sensorId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Fei.Is.Api.Features.Sensors.Queries.GetSensorById.Response'];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  UpdateSensor: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sensorId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Fei.Is.Api.Features.Sensors.Commands.UpdateSensor.Request'];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Microsoft.AspNetCore.Http.HttpValidationProblemDetails'];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  DeleteSensor: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sensorId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No Content */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  GetSuppliers: {
+    parameters: {
+      query?: {
+        SortBy?: string;
+        Descending?: boolean;
+        SearchTerm?: string;
+        PageNumber?: number;
+        PageSize?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Products.Queries.GetSuppliers.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'];
+        };
+      };
+    };
+  };
+  GetSupplierById: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Fei.Is.Api.Features.ProductCategories.Queries.GetSupplierById.Response'];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  GetVATCategories: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Fei.Is.Api.Features.VATCategory.Queries.GetVATCategories.Response'][];
+        };
+      };
+    };
+  };
+  GetVatList: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Fei.Is.Api.Features.Products.Queries.GetVatList.Response'][];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
 }

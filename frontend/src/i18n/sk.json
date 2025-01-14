@@ -19,6 +19,7 @@
     "clean": "Vyčistiť",
     "search": "Hľadať",
     "account": "Účet",
+    "actions": "Akcie",
     "user_management": "Správa používateľov",
     "home": "Domov",
     "created_on": "Vytvorené",
@@ -295,6 +296,37 @@
       "delete_failed": "Vymazanie receptu zlyhalo!"
     }
   },
+  "product": {
+    "label": "Produkt | Produkty",
+    "plu_code": "PLU Kód",
+    "czech_name": "Český názov",
+    "latin_name": "Latinský názov",
+    "code": "Kód",
+    "variety": "Odroda",
+    "flower_leaf_description": "Popis kvetu alebo listu",
+    "pot_diameter_pack": "Priemer kvetináča (balenie)",
+    "price_per_piece_pack": "Cena za kus (balenie)",
+    "price_per_piece_pack_vat": "Cena za kus s DPH (balenie)",
+    "discounted_price_without_vat": "Zľavnená cena bez DPH",
+    "retail_price": "Maloobchodná cena",
+    "add_product": "Pridať produkt",
+    "edit_product": "Upraviť produkt",
+    "import_products": "Importovať produkty",
+    "delete_product": "Odstrániť produkt",
+    "delete_product_desc": "Ste si istý, že chcete odstrániť tento produkt?",
+    "toasts": {
+      "load_failed": "Načítanie produktov zlyhalo!",
+      "create_success": "Produkt bol vytvorený!",
+      "create_failed": "Vytvorenie produktu zlyhalo!",
+      "update_success": "Produkt bol aktualizovaný!",
+      "update_failed": "Aktualizácia produktu zlyhala!",
+      "delete_success": "Produkt bol odstránený!",
+      "delete_failed": "Odstránenie produktu zlyhalo!"
+    }
+  },
+  "product_category": {
+    "label": "Kategória"
+  },
   "command": {
     "label": "Príkaz | Príkazy",
     "create_command": "Vytvoriť príkaz",
@@ -435,7 +467,7 @@
     "id": "ID",
     "customer": "Zákazník",
     "delivery_week": "Týždeň doručenia",
-    "contact_phone": "Telefónne číslo",
+    "contact_phone": "Kontaktný telefón",
     "note": "Poznámka",
     "add_order": "Pridať objednávku",
     "order_date": "Dátum objednávky",
@@ -445,7 +477,24 @@
       "cash": "Hotovosť",
       "card": "Karta",
       "transfer": "Prevod"
+    },
+    "details": "Detaily objednávky"
+  },
+  "order_item": {
+    "id": "ID",
+    "product_number": "Číslo produktu",
+    "variety_name": "Názov odrody",
+    "oneContainer": "Cena za jeden kontajner",
+    "total": "Celková cena",
+    "quantity": "Množstvo",
+    "add_item": "Pridať položku",
+    "delete_item": "Odstrániť položku",
+    "delete_item_desc": "Ste si istý, že chcete odstrániť túto položku?",
+    "toasts": {
+      "delete_success": "Položka bola úspešne odstránená",
+      "add_success": "Položka bola úspešne pridaná",
+      "add_failed": "Nepodarilo sa pridať položku",
+      "delete_failed": "Nepodarilo sa odstrániť položku"
     }
-}
-
+  }
 }
