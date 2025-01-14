@@ -1,70 +1,81 @@
 using System.Security.Claims;
 using Carter;
-using Fei.Is.Api.Common.Pagination;
+using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models.InformationSystem;
-using Fei.Is.Api.Extensions;
-using Fei.Is.Api.Redis;
+using FluentResults;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fei.Is.Api.Features.Orders.Queries;
 
-public static class GetOrders
+public static class GetOrderById
 {
-    public class QueryParameters : SearchParameters { }
-
     public sealed class Endpoint : ICarterModule
     {
         public void AddRoutes(IEndpointRouteBuilder app)
         {
             app.MapGet(
-                    "orders",
-                    async Task<Ok<PagedList<Response>>> (IMediator mediator, ClaimsPrincipal user, [AsParameters] QueryParameters parameters) =>
+                    "orders/{id}",
+                    async Task<Results<NotFound, Ok<Response>>> (IMediator mediator, ClaimsPrincipal user, Guid id) =>
                     {
-                        var query = new Query(user, parameters);
+                        var query = new Query(user, id);
                         var result = await mediator.Send(query);
-                        return TypedResults.Ok(result);
+
+                        if (result.HasError<NotFoundError>())
+                        {
+                            return TypedResults.NotFound();
+                        }
+
+                        return TypedResults.Ok(result.Value);
                     }
                 )
-                .WithName(nameof(GetOrders))
+                .WithName(nameof(GetOrderById))
                 .WithTags(nameof(Order))
                 .WithOpenApi(o =>
                 {
-                    o.Summary = "Get paginated orders";
+                    o.Summary = "Get order by ID";
                     return o;
                 });
         }
     }
 
-    public record Query(ClaimsPrincipal User, QueryParameters Parameters) : IRequest<PagedList<Response>>;
+    public record Query(ClaimsPrincipal User, Guid Id) : IRequest<Result<Response>>;
 
-    public sealed class Handler(AppDbContext context) : IRequestHandler<Query, PagedList<Response>>
+    public sealed class Handler(AppDbContext context) : IRequestHandler<Query, Result<Response>>
     {
-        public async Task<PagedList<Response>> Handle(Query message, CancellationToken cancellationToken)
+        public async Task<Result<Response>> Handle(Query message, CancellationToken cancellationToken)
         {
-            var query = context
+            var order = context
                 .Orders.AsNoTracking()
                 .Include(o => o.Customer) // Načítanie priradenej zákazníckej entity
+                .Where(o => o.Id == message.Id);
+
+            if (!await order.AnyAsync())
+            {
+                return Result.Fail(new NotFoundError());
+            }
+
+            return await order
                 .Select(order => new Response(
                     order.Id,
                     order.Customer.Title, // Prístup k názvu zákazníka cez navigačnú vlastnosť
+                    order.Customer.Id,
                     order.OrderDate,
                     order.DeliveryWeek,
                     order.PaymentMethod,
                     order.ContactPhone,
                     order.Note
                 ))
-                .Paginate(message.Parameters); // Použitie stránkovania
-
-            return query.ToPagedList(await query.CountAsync(cancellationToken), message.Parameters.PageNumber, message.Parameters.PageSize);
+                .FirstAsync(cancellationToken);
         }
     }
 
     public record Response(
         Guid Id,
         string CustomerName,
+        Guid CustomerId,
         DateTime OrderDate,
         int DeliveryWeek,
         string PaymentMethod,

@@ -2,7 +2,12 @@
   <dialog-common v-model="isDialogOpen">
     <template #title>{{ t('order.add_order') }}</template>
     <template #default>
-      <OrderForm ref="orderForm" v-model="order" @on-submit="createOrder" :loading="creatingOrder" />
+      <OrderForm 
+      ref="orderForm" 
+      v-model="order" 
+      @on-submit="createOrder" 
+      :loading="creatingOrder" 
+      />
     </template>
   </dialog-common>
 </template>
@@ -33,7 +38,7 @@ const creatingOrder = ref(false);
 
 // Initialize the order form data with default values
 const order = ref<OrderFormData>({
-    customerId: 0, // Changed to customerId to match backend requirements
+    customerId: '', // Changed to customerId to match backend requirements
     contactPhone: '',
     paymentMethod: '',
     note: '', 

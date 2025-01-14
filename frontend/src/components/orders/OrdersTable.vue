@@ -14,6 +14,14 @@
       binary-state-sort
       @request="emit('onRequest', $event)"
     >
+      <template #body-cell-customer="props">
+        <q-td :props="props">
+          <q-btn flat @click="goToCustomerPage(props.row.id)" color="primary" class="text-decoration-none">
+            {{ props.row.customerName }}
+          </q-btn>
+        </q-td>
+      </template>
+      
       <template #no-data="{ message }">
         <div class="full-width column flex-center q-pa-lg nothing-found-text">
           <q-icon :name="mdiFileSearchOutline" class="q-mb-md" size="50px"></q-icon>
@@ -31,6 +39,7 @@ import { useI18n } from 'vue-i18n';
 import { mdiFileSearchOutline } from '@quasar/extras/mdi-v7';
 import { PaginationClient } from '@/models/Pagination';
 import { OrdersResponse } from '@/api/services/OrdersService';
+import { useRouter } from 'vue-router';
 
 const props = defineProps({
   orders: {
@@ -51,6 +60,7 @@ const ordersFiltered = computed(() => props.orders?.items ?? []);
 const emit = defineEmits(['onChange', 'onRequest']);
 
 const { t } = useI18n();
+const router = useRouter();
 
 // Funkcia na formátovanie dátumu a času pomocou Quasar date utility
 function formatDateTime(dateString: string | Date): string {
@@ -60,8 +70,14 @@ function formatDateTime(dateString: string | Date): string {
   return date.formatDate(dateString, 'YYYY-MM-DD HH:mm:ss');
 }
 
+// Funkcia na navigáciu na stránku s podrobnosťami o zákazníkovi
+function goToCustomerPage(orderId: number) {
+  router.push({ name: 'OrderDetails', params: { id: orderId } });
+}
+
 
 const columns = computed<QTableProps['columns']>(() => [
+  /*
   {
     name: 'id',
     label: t('order.id'),
@@ -69,6 +85,7 @@ const columns = computed<QTableProps['columns']>(() => [
     align: 'left',
     sortable: true,
   },
+  */
   {
     name: 'customer',
     label: t('order.customer'),
