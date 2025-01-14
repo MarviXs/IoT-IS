@@ -7,19 +7,17 @@
   >
     <template #default>
       <OrderDetailsCard v-if="order" :order="order" @edit="isUpdateDialogOpen = true" />
-      <div>
-        <OrderItemTable
-          v-model:pagination="pagination"
-          :currentOrderId="orderId"
-          :orders="ordersPaginated || []"
-          :containers="ordersPaginated || []"
-          :loading="isLoadingContainers"
-          :refreshTable="refreshTable"
-          class="shadow"
-          @on-change="getOrderItemContainers(pagination)"
-          @open-delete-dialog="openDeleteContainerDialog"
-        />
-      </div>
+      <OrderItemTable
+        v-model:pagination="pagination"
+        :currentOrderId="orderId"
+        :orders="ordersPaginated || []"
+        :containers="ordersPaginated || []"
+        :loading="isLoadingContainers"
+        :refreshTable="refreshTable"
+        class="shadow"
+        @on-change="getOrderItemContainers(pagination)"
+        @open-delete-dialog="openDeleteContainerDialog"
+      />
     </template>
   </PageLayout>
   <!-- Delete Container Dialog -->
@@ -71,7 +69,7 @@ interface Order {
   deliveryWeek: number;
   paymentMethod: string;
   contactPhone: string;
-  note: string ;
+  note: string;
 }
 var orderId = String(Array.isArray(route.params.id) ? route.params.id[0] : route.params.id);
 
