@@ -6,26 +6,42 @@
           <q-td :props="props" key="id">{{ props.row.id }}</q-td>
           <q-td :props="props" key="name">{{ props.row.name }}</q-td>
           <q-td :props="props" key="quantity">{{ props.row.quantity }}</q-td>
-          <q-td :props="props" key="actions" class="action-column">
-            <div class="product-quantity-actions">
-              <q-btn flat dense round size="sm" :icon="minusIcon" @click="decreaseQuantity(props.row.id)" />
-              <q-btn flat dense round size="sm" :icon="plusIcon" @click="increaseQuantity(props.row.id)" />
-            </div>
+          <q-td :props="props" key="actions">
+            <q-btn flat dense round size="sm" :icon="minusIcon" @click="decreaseQuantity(props.row.id)" />
+            <q-btn flat dense round size="sm" :icon="plusIcon" @click="increaseQuantity(props.row.id)" />
           </q-td>
           <q-td :props="props" key="pricePerContainer">{{ props.row.pricePerContainer }}</q-td>
           <q-td :props="props" key="totalPrice">{{ props.row.totalPrice }}</q-td>
-          <q-td class="final-actions">
-            <div class="product-quantity-actions">
-              <q-btn flat round size="sm" :icon="mdiPlusBox" color="grey-color"
-                @click="openAddItemDialog(props.row.id)">
+          <q-td>
+            <div class="tw-flex tw-justify-center">
+              <q-btn
+                flat
+                round
+                size="sm"
+                :icon="mdiPlusBox"
+                color="grey-color"
+                @click="openAddItemDialog(props.row.id)"
+              >
                 <q-tooltip>{{ $t('order_item.add_item') }}</q-tooltip>
               </q-btn>
-              <q-btn flat round size="sm" :icon="mdiPencil" color="grey-color"
-                @click.stop="openUpdateDialog(props.row.id)">
+              <q-btn
+                flat
+                round
+                size="sm"
+                :icon="mdiPencil"
+                color="grey-color"
+                @click.stop="openUpdateDialog(props.row.id)"
+              >
                 <q-tooltip>{{ $t('global.edit') }}</q-tooltip>
               </q-btn>
-              <q-btn flat round size="sm" :icon="mdiTrashCan" color="grey-color"
-                @click.stop="openDeleteDialog(props.row.id)">
+              <q-btn
+                flat
+                round
+                size="sm"
+                :icon="mdiTrashCan"
+                color="grey-color"
+                @click.stop="openDeleteDialog(props.row.id)"
+              >
                 <q-tooltip>{{ $t('global.delete') }}</q-tooltip>
               </q-btn>
             </div>
@@ -33,8 +49,17 @@
         </q-tr>
         <q-tr class="nested-row">
           <q-td :colspan="parentColumns.length" class="nested-table-cell">
-            <q-table :rows="props.row.products" :columns="nestedColumns" flat dense separator="horizontal" row-key="PLU"
-              no-data-label="{{ $t('table.no_data_label') }}" hide-bottom class="nested-table" />
+            <q-table
+              :rows="props.row.products"
+              :columns="nestedColumns"
+              flat
+              dense
+              separator="horizontal"
+              row-key="PLU"
+              no-data-label="{{ $t('table.no_data_label') }}"
+              hide-bottom
+              class="nested-table"
+            />
           </q-td>
         </q-tr>
       </template>
@@ -42,8 +67,12 @@
 
     <!-- AddItem Dialog -->
 
-    <AddItemToOrderDialog v-model="isAddItemDialogOpen" :orderId="currentOrderId" :containerId="selectedContainerId"
-      @onCreate="handleItemCreated" />
+    <AddItemToOrderDialog
+      v-model="isAddItemDialogOpen"
+      :orderId="currentOrderId"
+      :containerId="selectedContainerId"
+      @onCreate="handleItemCreated"
+    />
 
     <!-- DeleteContainer Dialog -->
     <DeleteContainerDialog
@@ -52,9 +81,6 @@
       :containerId="selectedContainerId"
       @onDeleted="handleContainerDeleted"
     />
-    
-
-
   </div>
 </template>
 
@@ -66,9 +92,8 @@ import OrderItemsService from '@/api/services/OrderItemsService';
 import { useRoute } from 'vue-router';
 import { toast } from 'vue3-toastify';
 
-
 export default {
-  name: "OrderItemTable",
+  name: 'OrderItemTable',
   setup() {
     const route = useRoute();
     const currentOrderId = route.params.id; // Získanie orderId z URL
@@ -84,9 +109,9 @@ export default {
       required: true,
     },
     refreshTable: {
-    type: Function, // Externá funkcia na obnovu tabuľky
-    required: true,
-  },
+      type: Function, // Externá funkcia na obnovu tabuľky
+      required: true,
+    },
   },
   data() {
     return {
@@ -99,23 +124,37 @@ export default {
       selectedOrderId: null,
       parentColumns: [
         //{ name: "id", label: this.$t('order_item.id'), field: "id", align: "left" },
-        { name: "name", label: this.$t('global.name'), field: "name", align: "left" },
-        { name: "quantity", label: this.$t('order_item.quantity'), field: "quantity", align: "center" },
-        { name: "actions", label: "", align: "center" },
-        { name: "pricePerContainer", label: this.$t('order_item.oneContainer'), align: "right" },
-        { name: "totalPrice", label: this.$t('order_item.total'), align: "right" },
-        { name: "finalActions", label: this.$t('global.actions'), align: "center" },
+        { name: 'name', label: this.$t('global.name'), field: 'name', align: 'left' },
+        { name: 'quantity', label: this.$t('order_item.quantity'), field: 'quantity', align: 'center' },
+        { name: 'actions', label: '', align: 'center' },
+        { name: 'pricePerContainer', label: this.$t('order_item.oneContainer'), align: 'right' },
+        { name: 'totalPrice', label: this.$t('order_item.total'), align: 'right' },
+        { name: 'finalActions', label: this.$t('global.actions'), align: 'center' },
       ],
       nestedColumns: [
-        { name: "pluCode", label: this.$t('product.plu_code'), field: "pluCode", align: "left" },
-        { name: "latinName", label: this.$t('product.latin_name'), field: "latinName", align: "left" },
-        { name: "czechName", label: this.$t('product.czech_name'), field: "czechName", align: "left" },
-        { name: "variety", label: this.$t('product.variety'), field: "variety", align: "left" },
-        { name: "potDiameterPack", label: this.$t('product.pot_diameter_pack'), field: "potDiameterPack", align: "left" },
-        { name: "quantity", label: this.$t('order_item.quantity'), field: "quantity", align: "right" },
-        { name: "pricePerPiecePack", label: this.$t('product.price_per_piece_pack'), field: "pricePerPiecePack", align: "right" },
-        { name: "pricePerPiecePackVAT", label: this.$t('product.price_per_piece_pack_vat'), field: "pricePerPiecePackVAT", align: "right" },
-
+        { name: 'pluCode', label: this.$t('product.plu_code'), field: 'pluCode', align: 'left' },
+        { name: 'latinName', label: this.$t('product.latin_name'), field: 'latinName', align: 'left' },
+        { name: 'czechName', label: this.$t('product.czech_name'), field: 'czechName', align: 'left' },
+        { name: 'variety', label: this.$t('product.variety'), field: 'variety', align: 'left' },
+        {
+          name: 'potDiameterPack',
+          label: this.$t('product.pot_diameter_pack'),
+          field: 'potDiameterPack',
+          align: 'left',
+        },
+        { name: 'quantity', label: this.$t('order_item.quantity'), field: 'quantity', align: 'right' },
+        {
+          name: 'pricePerPiecePack',
+          label: this.$t('product.price_per_piece_pack'),
+          field: 'pricePerPiecePack',
+          align: 'right',
+        },
+        {
+          name: 'pricePerPiecePackVAT',
+          label: this.$t('product.price_per_piece_pack_vat'),
+          field: 'pricePerPiecePackVAT',
+          align: 'right',
+        },
       ],
     };
   },
@@ -165,7 +204,6 @@ export default {
       this.selectedContainerId = containerId;
       this.isDeleteDialogOpen = true;
       this.$emit('open-delete-dialog', containerId); // Emitovanie udalosti pre rodiča
-
     },
     handleContainerDeleted() {
       this.isDeleteDialogOpen = false;
@@ -187,7 +225,6 @@ export default {
 .product-quantity-actions {
   display: flex;
   align-items: center;
-  
 }
 
 .final-actions {
@@ -247,15 +284,9 @@ export default {
   border-bottom: 1px solid #ddd;
   padding: 10px;
 }
-.q-table--dense .q-table thead tr, .q-table--dense .q-table tbody tr, .q-table--dense .q-table tbody td {
-    height: 30px;
+.q-table--dense .q-table thead tr,
+.q-table--dense .q-table tbody tr,
+.q-table--dense .q-table tbody td {
+  height: 30px;
 }
-
-
-
-
-
-
-
-
 </style>
