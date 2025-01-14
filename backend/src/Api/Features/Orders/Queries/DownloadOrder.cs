@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using System.Net.Mime;
+using System.Security.Claims;
 using Carter;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models.InformationSystem;
@@ -19,7 +20,16 @@ public static class DownloadOrder
                         var query = new Query(user);
                         var result = await mediator.Send(query);
 
+                        ContentDisposition contentDisposition = new ContentDisposition
+                        {
+                            FileName = Path.GetFileName(result.Name),
+                            Inline = false
+                        };
+                        context.Response.Headers.ContentDisposition = contentDisposition.ToString();
+                        context.Response.Headers.AccessControlExposeHeaders = "Content-Disposition";
+
                         context.Response.ContentType = "application/octet-stream";
+
                         await result.CopyToAsync(context.Response.Body);
                         result.Close();
                     }
@@ -40,7 +50,7 @@ public static class DownloadOrder
     {
         public async Task<FileStream> Handle(Query message, CancellationToken cancellationToken)
         {
-            return new FileStream("C:\\Users\\Jakub\\Downloads\\aa.xls", FileMode.Open, FileAccess.Read);
+            return new FileStream("C:\\Users\\Admin\\Downloads\\a.pdf", FileMode.Open, FileAccess.Read);
         }
     }
 }

@@ -5,6 +5,18 @@
       { label: order?.customerName || 'Order Details', to: `/orders/${orderId}` },
     ]"
   >
+    <template #actions>
+      <q-btn
+        class="shadow col-grow col-lg-auto"
+        color="primary"
+        unelevated
+        no-caps
+        size="15px"
+        :label="t('order.download_template')"
+        :icon="mdiDownload"
+        @click="downloadOrderTemplate"
+      />
+    </template>
     <template #default>
       <OrderDetailsCard v-if="order" :order="order" @edit="isUpdateDialogOpen = true" />
       <div>
@@ -36,7 +48,7 @@ import OrderItemTable from '@/components/order-item/OrderItemTable.vue';
 import { useRoute } from 'vue-router';
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { mdiPlus } from '@quasar/extras/mdi-v7';
+import { mdiDownload } from '@quasar/extras/mdi-v7';
 import PageLayout from '@/layouts/PageLayout.vue';
 import OrderDetailsCard from '@/components/orders/OrderDetailsCard.vue';
 import { PaginationClient, PaginationTable } from '@/models/Pagination';
@@ -71,7 +83,7 @@ interface Order {
   deliveryWeek: number;
   paymentMethod: string;
   contactPhone: string;
-  note: string ;
+  note: string;
 }
 var orderId = String(Array.isArray(route.params.id) ? route.params.id[0] : route.params.id);
 
@@ -79,6 +91,24 @@ onMounted(() => {
   orderId = String(Array.isArray(route.params.id) ? route.params.id[0] : route.params.id);
   refreshTable(); // Po úvodnom mount načítaj dáta
 });
+
+function downloadOrderTemplate() {
+  OrderService.downloadOrderTemplate(orderId).then((response) => {
+    var contentDisposition = response.headers.get('Content-Disposition');
+    var parts = contentDisposition?.split('filename=');
+    var filename = parts?.length === 2 ? parts[1] : 'order_template.xlsx';
+
+    response.blob().then((blob) => {
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+  });
+}
 
 async function getOrderItemContainers(paginationTable: PaginationTable) {
   try {

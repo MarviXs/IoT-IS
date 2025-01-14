@@ -442,7 +442,8 @@
       "card": "Card",
       "transfer": "Transfer"
     },
-    "details": "Order details"
+    "details": "Order details",
+    "download_template": "Download template"
   },
   "order_item": {
     "id": "ID",

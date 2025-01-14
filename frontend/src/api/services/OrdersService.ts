@@ -43,6 +43,18 @@ class OrdersService {
       },
     });
   }
+
+  async downloadOrderTemplate(orderId: string) {
+    const baseUrl = process.env.VITE_API_URL || 'http://localhost:5097/';
+    var request = new Request(`${baseUrl}orders/${orderId}/download`);
+    const authStore = useAuthStore();
+
+    if (authStore.accessToken) {
+      request.headers.set('Authorization', `Bearer ${authStore.accessToken}`);
+    }
+
+    return await fetch(request.clone());
+  }
 }
 
 export default new OrdersService();
