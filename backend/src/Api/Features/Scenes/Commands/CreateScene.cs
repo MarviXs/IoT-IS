@@ -29,7 +29,7 @@ public static class CreateScene
         bool IsEnabled,
         string? Condition,
         List<SceneActionRequest> Actions,
-        long CooldownAfterTriggerTime
+        double CooldownAfterTriggerTime
     );
 
     public sealed class Endpoint : ICarterModule

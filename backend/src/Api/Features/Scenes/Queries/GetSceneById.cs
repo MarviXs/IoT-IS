@@ -80,7 +80,8 @@ public static class GetSceneById
                         action.NotificationMessage
                     ))
                     .ToList(),
-                scene.CooldownAfterTriggerTime
+                scene.CooldownAfterTriggerTime,
+                scene.LastTriggeredAt
             );
 
             return Result.Ok(response);
@@ -101,6 +102,7 @@ public static class GetSceneById
         bool IsEnabled,
         string? Condition,
         List<SceneActionResponse> Actions,
-        long CooldownAfterTriggerTime = 0
+        double CooldownAfterTriggerTime = 0,
+        DateTimeOffset? LastTriggeredAt = null
     );
 }

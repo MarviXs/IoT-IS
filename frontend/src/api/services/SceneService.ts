@@ -23,6 +23,10 @@ class SceneService {
     return await client.PUT('/scenes/{id}', { params: { path: { id: id } }, body: data });
   }
 
+  async enableScene(id: string, enable: boolean) {
+    return await client.PATCH('/scenes/{id}/enable', { params: { path: { id: id } }, body: { isEnabled: enable } });
+  }
+
   async deleteScene(id: string) {
     return await client.DELETE('/scenes/{id}', { params: { path: { id: id } } });
   }

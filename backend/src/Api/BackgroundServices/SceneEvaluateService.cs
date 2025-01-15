@@ -3,6 +3,7 @@ using EFCore.BulkExtensions;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
+using Fei.Is.Api.Features.Jobs.Services;
 using Fei.Is.Api.Redis;
 using Json.Logic;
 using Microsoft.EntityFrameworkCore;
@@ -73,7 +74,7 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
                             .Include(s => s.SensorTriggers)
                             .ToListAsync(cancellationToken);
 
-                        await EvaluateScenes(dataPoints, scenes, redis, timescale, dbContext);
+                        await EvaluateScenes(dataPoints, scenes, scope);
 
                         var messageIds = messages.Select(m => m.Id).ToArray();
                         await redis.Db.StreamAcknowledgeAsync(StreamName, GroupName, messageIds);
@@ -89,21 +90,35 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
         }
     }
 
-    private async Task EvaluateScenes(
-        List<DataPoint> dataPoints,
-        List<Scene> scenes,
-        RedisService redis,
-        TimeScaleDbContext timescale,
-        AppDbContext dbContext
-    )
+    private async Task EvaluateScenes(List<DataPoint> dataPoints, List<Scene> scenes, IServiceScope serviceScope)
     {
+        var dbContext = serviceScope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var redis = serviceScope.ServiceProvider.GetRequiredService<RedisService>();
+        var timescale = serviceScope.ServiceProvider.GetRequiredService<TimeScaleDbContext>();
+
         foreach (var scene in scenes)
         {
+            // Check if the scene is enabled
+            if (!scene.IsEnabled)
+            {
+                continue;
+            }
+
+            // Check if the scene has a cooldown period
+            if (scene.LastTriggeredAt.HasValue && scene.CooldownAfterTriggerTime > 0)
+            {
+                var cooldownEnd = scene.LastTriggeredAt.Value.AddSeconds(scene.CooldownAfterTriggerTime);
+                if (DateTimeOffset.UtcNow < cooldownEnd)
+                {
+                    continue;
+                }
+            }
+
             var data = new JsonObject();
             foreach (var trigger in scene.SensorTriggers)
             {
                 var dataPoint = dataPoints.FirstOrDefault(dp => dp.DeviceId == trigger.DeviceId && dp.SensorTag == trigger.SensorTag);
-                dataPoint ??= await GetDataPointFromRedis(trigger, redis);
+                dataPoint ??= await GetDataPointFromCache(trigger, redis);
                 dataPoint ??= await GetDataPointFromDb(trigger, timescale);
 
                 if (dataPoint != null)
@@ -122,7 +137,7 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
 
                     if (result is JsonValue booleanResult && booleanResult.TryGetValue<bool>(out var isTriggered) && isTriggered)
                     {
-                        await HandleTriggeredScene(scene, dbContext);
+                        await HandleTriggeredScene(scene, serviceScope);
                     }
                 }
             }
@@ -133,8 +148,13 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
         }
     }
 
-    private async Task HandleTriggeredScene(Scene scene, AppDbContext dbContext)
+    private async Task HandleTriggeredScene(Scene scene, IServiceScope serviceScope)
     {
+        var dbContext = serviceScope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var jobService = serviceScope.ServiceProvider.GetRequiredService<JobService>();
+
+        scene.LastTriggeredAt = DateTimeOffset.UtcNow;
+
         var actions = scene.Actions;
 
         foreach (var action in actions)
@@ -149,12 +169,16 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
                 };
                 dbContext.SceneNotifications.Add(notification);
             }
+            else if (action.Type == SceneActionType.JOB && action.RecipeId.HasValue && action.DeviceId.HasValue)
+            {
+                await jobService.CreateJobFromRecipe(action.DeviceId.Value, action.RecipeId.Value, 1, CancellationToken.None);
+            }
         }
 
         await dbContext.SaveChangesAsync();
     }
 
-    private static async Task<DataPoint?> GetDataPointFromRedis(SceneSensorTrigger trigger, RedisService redis)
+    private static async Task<DataPoint?> GetDataPointFromCache(SceneSensorTrigger trigger, RedisService redis)
     {
         var cacheResult = await redis.Db.StringGetAsync($"device:{trigger.DeviceId}:{trigger.SensorTag}:last");
         return cacheResult.HasValue

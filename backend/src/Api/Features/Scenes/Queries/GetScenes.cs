@@ -73,16 +73,16 @@ public static class GetScenes
 
             var totalCount = await query.CountAsync(cancellationToken);
 
-            var commands = await query
+            var scenes = await query
                 .Paginate(queryParameters)
-                .Select(command => new Response(command.Id, command.Name, command.IsEnabled, command.CreatedAt, command.UpdatedAt))
+                .Select(scene => new Response(scene.Id, scene.Name, scene.IsEnabled, scene.CreatedAt, scene.UpdatedAt, scene.LastTriggeredAt))
                 .ToListAsync(cancellationToken);
 
-            return Result.Ok(commands.ToPagedList(totalCount, queryParameters.PageNumber, queryParameters.PageSize));
+            return Result.Ok(scenes.ToPagedList(totalCount, queryParameters.PageNumber, queryParameters.PageSize));
         }
     }
 
-    public record Response(Guid Id, string Name, bool IsEnabled, DateTime CreatedAt, DateTime UpdatedAt);
+    public record Response(Guid Id, string Name, bool IsEnabled, DateTime CreatedAt, DateTime UpdatedAt, DateTimeOffset? LastTriggeredAt = null);
 
     public sealed class ParametersValidator : AbstractValidator<QueryParameters>
     {

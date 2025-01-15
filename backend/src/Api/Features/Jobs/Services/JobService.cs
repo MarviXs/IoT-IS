@@ -51,6 +51,9 @@ public class JobService(AppDbContext context)
         job.TotalSteps = commands.Count;
         job.AddDomainEvent(new JobCreatedEvent(job));
 
+        await context.JobCommands.AddRangeAsync(commands, cancellationToken);
+        await context.SaveChangesAsync(cancellationToken);
+
         return Result.Ok(job);
     }
 

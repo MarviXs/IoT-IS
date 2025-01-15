@@ -901,6 +901,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/scenes/{id}/enable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Enable or disable a scene */
+        patch: operations["EnableScene"];
+        trace?: never;
+    };
     "/scene-notifications": {
         parameters: {
             query?: never;
@@ -1634,7 +1651,7 @@ export interface components {
             isEnabled: boolean;
             condition?: string | null;
             actions: components["schemas"]["Fei.Is.Api.Features.Scenes.Commands.CreateScene.SceneActionRequest"][];
-            /** Format: int64 */
+            /** Format: double */
             cooldownAfterTriggerTime: number;
         };
         "Fei.Is.Api.Features.Scenes.Commands.CreateScene.SceneActionRequest": {
@@ -1646,13 +1663,16 @@ export interface components {
             notificationSeverity: components["schemas"]["Fei.Is.Api.Data.Enums.NotificationSeverity"];
             notificationMessage?: string | null;
         };
+        "Fei.Is.Api.Features.Scenes.Commands.EnableScene.Request": {
+            isEnabled: boolean;
+        };
         "Fei.Is.Api.Features.Scenes.Commands.UpdateScene.Request": {
             name: string;
             description?: string | null;
             isEnabled: boolean;
             condition?: string | null;
             actions: components["schemas"]["Fei.Is.Api.Features.Scenes.Commands.UpdateScene.SceneActionRequest"][];
-            /** Format: int64 */
+            /** Format: double */
             cooldownAfterTriggerTime: number;
         };
         "Fei.Is.Api.Features.Scenes.Commands.UpdateScene.SceneActionRequest": {
@@ -1670,8 +1690,10 @@ export interface components {
             isEnabled: boolean;
             condition?: string | null;
             actions: components["schemas"]["Fei.Is.Api.Features.Scenes.Queries.GetSceneById.SceneActionResponse"][];
-            /** Format: int64 */
+            /** Format: double */
             cooldownAfterTriggerTime: number;
+            /** Format: date-time */
+            lastTriggeredAt?: string | null;
         };
         "Fei.Is.Api.Features.Scenes.Queries.GetSceneById.SceneActionResponse": {
             type: components["schemas"]["Fei.Is.Api.Data.Enums.SceneActionType"];
@@ -1691,6 +1713,8 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
+            /** Format: date-time */
+            lastTriggeredAt?: string | null;
         };
         "Fei.Is.Api.Features.Sensors.Commands.CreateSensor.Request": {
             tag: string;
@@ -4140,6 +4164,41 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["Fei.Is.Api.Features.Scenes.Commands.CreateScene.Request"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+        };
+    };
+    EnableScene: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.Scenes.Commands.EnableScene.Request"];
             };
         };
         responses: {
