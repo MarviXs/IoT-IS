@@ -806,6 +806,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/lifecycles/plants": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create a plant */
+        post: operations["CreatePlant"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/lifecycles/plant/{id}": {
         parameters: {
             query?: never;
@@ -1538,6 +1555,13 @@ export interface components {
             /** Format: date-time */
             updatedAt?: string | null;
         };
+        "Fei.Is.Api.Features.LifeCycles.Commands.CreatePlant.Request": {
+            plantId: string;
+            name: string;
+            type: string;
+            /** Format: date-time */
+            datePlanted: string;
+        };
         "Fei.Is.Api.Features.LifeCycles.Queries.GetLifeCycleById.Response": {
             /** Format: uuid */
             plantId: string;
@@ -1557,6 +1581,7 @@ export interface components {
         "Fei.Is.Api.Features.LifeCycles.Queries.GetLifeCycles.Response": {
             /** Format: uuid */
             id: string;
+            plantId: string;
             name: string;
             type: string;
             /** Format: date-time */
@@ -3854,6 +3879,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.LifeCycles.Queries.GetLifeCycles.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"];
+                };
+            };
+        };
+    };
+    CreatePlant: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.LifeCycles.Commands.CreatePlant.Request"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
                 };
             };
         };

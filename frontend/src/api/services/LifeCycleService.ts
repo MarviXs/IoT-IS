@@ -5,6 +5,8 @@ export type LifeCyclesQueryParams = paths['/lifecycles']['get']['parameters']['q
 export type LifeCyclesResponse = paths['/lifecycles']['get']['responses']['200']['content']['application/json'];
 
 export type ProductResponse = paths['/lifecycles/plant/{plantId}']['get']['responses']['200']['content']['application/json'];
+export type CreatePlantRequest = paths['/lifecycles/plants']['post']['requestBody']['content']['application/json'];
+
 
 class LifeCycleService {
   // Načítanie životných cyklov s podporou stránkovania a filtrovania
@@ -18,6 +20,10 @@ class LifeCycleService {
 
   async deletePlant(id: string) {
     return await client.DELETE('/lifecycles/plant/{id}', { params: { path: { id } } });
+  }
+
+  async createPlant(request: CreatePlantRequest) {
+    return await client.POST('/lifecycles/plants', { body: request });
   }
 }
 

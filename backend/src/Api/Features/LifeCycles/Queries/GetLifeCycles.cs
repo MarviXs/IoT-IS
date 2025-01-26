@@ -63,6 +63,7 @@ public static class GetLifeCycles
                 //.Sort(message.Parameters.SortBy ?? nameof(Plant.Name), message.Parameters.Descending)
                 .Select(plant => new Response(
                     plant.Id,
+                    plant.PlantId,
                     plant.Name,
                     plant.Type,
                     plant.DatePlanted
@@ -73,5 +74,5 @@ public static class GetLifeCycles
         }
     }
 
-    public record Response(Guid Id, string Name, string Type, DateTime DatePlanted);
+    public record Response(Guid Id, string plantId, string Name, string Type, DateTime DatePlanted);
 }

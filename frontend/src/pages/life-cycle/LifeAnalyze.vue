@@ -103,7 +103,7 @@
 
       <q-separator />
       <q-card-section align="right">
-        <q-btn label="Save Plant" color="primary" :icon="mdiCheck" class="q-mr-sm" />
+        <q-btn label="Save Plant" color="primary" :icon="mdiCheck" class="q-mr-sm" @click="savePlant"/>
         <q-btn label="Cancel" color="secondary" flat />
       </q-card-section>
     </q-card>
@@ -113,6 +113,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { mdiCheck, mdiUpload } from '@quasar/extras/mdi-v7';
+import LifeCycleService from '@/api/services/LifeCycleService'; // Importujte svoj service
+
 
 const plantProperties = ref({
   id: '',
@@ -132,16 +134,68 @@ const triggerFileInput = () => {
   fileInput.value?.click();
 };
 
+// Function to upload the photo and get plant properties
+const uploadPhoto = async (file: File) => {
+  const formData = new FormData();
+  formData.append('photo', file);
+
+  try {
+    const response = await fetch('http://localhost:5000/upload', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      // Update the plant properties with the response data
+      plantProperties.value.height = data.height;
+      plantProperties.value.width = data.width;
+      plantProperties.value.area = data.area;
+      plantProperties.value.date = data.date;
+      plantProperties.value.leafCount = data.leafCount;
+      plantProperties.value.type = data.plant;
+      plantProperties.value.disease = data.disease;
+    } else {
+      console.error('Failed to upload photo');
+    }
+  } catch (error) {
+    console.error('Error uploading photo:', error);
+  }
+};
+
+// Handle file input change
 const handleFileUpload = (event: Event) => {
   const file = (event.target as HTMLInputElement).files?.[0];
   if (file) {
     const reader = new FileReader();
-    reader.onload = () => {
+    reader.onload = async () => {
       plantProperties.value.photo = reader.result as string;
+      // After uploading the photo, send it to the server and update properties
+      await uploadPhoto(file);
     };
     reader.readAsDataURL(file);
   }
 };
+
+// Metóda na uloženie rastliny
+const savePlant = async () => {
+  const request = {
+    //plantId: plantProperties.value.id,
+    plantId: plantProperties.value.id,
+    name: plantProperties.value.type,
+    type: "plant",
+    datePlanted: new Date(plantProperties.value.date).toISOString(),
+  };
+
+  try {
+    // Zavolajte metódu createPlant zo služby
+    await LifeCycleService.createPlant(request);
+    console.log('Plant saved successfully');
+  } catch (error) {
+    console.error('Failed to save plant:', error);
+  }
+};
+
 </script>
 
 <style scoped>

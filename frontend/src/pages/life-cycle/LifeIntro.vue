@@ -23,6 +23,7 @@
         :loading-label="t('table.loading_label')"
         :rows-per-page-label="t('table.rows_per_page_label')"
         row-key="id"
+        :columns="columns"
       >
         <template #no-data="{ message }">
           <div class="full-width column flex-center q-pa-lg nothing-found-text">
@@ -115,11 +116,31 @@ const isLoadingCollections = ref(false);
 const collections = ref<CollectionNode[]>([]);
 
 const columns = computed(() => [
-  {
+{
+    name: 'plantId',
+    label: t('Plant ID'),
+    field: 'plantId',
+    required: true,
+    style: 'text-align: left;',
+    headerStyle: 'text-align: center;'
+  },  
+{
     name: 'name',
-    label: t('table.column_name'),
-    align: 'left',
+    label: t('Plant Name'),
     field: 'name',
+    required: true,
+    headerStyle: 'text-align: center;'
+  },
+  {
+    name: 'type',
+    label: t('Plant Type'),
+    field: 'type',
+    required: true
+  },
+  {
+    name: 'days',
+    label: t('Days'),
+    field: 'days',
     required: true
   },
 ]);
@@ -132,6 +153,7 @@ async function loadCollections() {
 
     collections.value = response.data?.items.map(item => ({
       id: item.id,
+      plantId: item.plantId,
       name: item.name,
       type: item.type,
       days: calculateDays(item.datePlanted),
@@ -156,6 +178,7 @@ function navigateToLifecycle(id: string) {
 
 interface CollectionNode {
   id: string;
+  plantId: string;
   name: string;
   type: string;
   days: number;
