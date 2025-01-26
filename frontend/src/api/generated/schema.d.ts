@@ -799,7 +799,8 @@ export interface paths {
         /** Get paginated lifecycles */
         get: operations["GetLifeCycles"];
         put?: never;
-        post?: never;
+        /** Create a plant analysis record */
+        post: operations["CreateRecord"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1562,8 +1563,23 @@ export interface components {
             /** Format: date-time */
             datePlanted: string;
         };
-        "Fei.Is.Api.Features.LifeCycles.Queries.GetLifeCycleById.Response": {
+        "Fei.Is.Api.Features.LifeCycles.Commands.CreateRecord.Request": {
             /** Format: uuid */
+            plantId: string;
+            /** Format: date-time */
+            analysisDate: string;
+            /** Format: double */
+            height: number;
+            /** Format: double */
+            width: number;
+            /** Format: int32 */
+            leafCount: number;
+            /** Format: double */
+            area: number;
+            disease: string;
+            health: string;
+        };
+        "Fei.Is.Api.Features.LifeCycles.Queries.GetLifeCycleById.Response": {
             plantId: string;
             /** Format: double */
             leafCount?: number | null;
@@ -3879,6 +3895,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.LifeCycles.Queries.GetLifeCycles.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"];
+                };
+            };
+        };
+    };
+    CreateRecord: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.LifeCycles.Commands.CreateRecord.Request"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
                 };
             };
         };

@@ -104,7 +104,7 @@
       <q-separator />
       <q-card-section align="right">
         <q-btn label="Save Plant" color="primary" :icon="mdiCheck" class="q-mr-sm" @click="savePlant"/>
-        <q-btn label="Cancel" color="secondary" flat />
+        <q-btn label="Cancel" color="secondary" flat @click="goBack"/>
       </q-card-section>
     </q-card>
   </q-page>
@@ -112,6 +112,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { mdiCheck, mdiUpload } from '@quasar/extras/mdi-v7';
 import LifeCycleService from '@/api/services/LifeCycleService'; // Importujte svoj service
 
@@ -129,6 +130,7 @@ const plantProperties = ref({
 });
 
 const fileInput = ref<HTMLInputElement | null>(null);
+const router = useRouter();
 
 const triggerFileInput = () => {
   fileInput.value?.click();
@@ -180,7 +182,6 @@ const handleFileUpload = (event: Event) => {
 // Metóda na uloženie rastliny
 const savePlant = async () => {
   const request = {
-    //plantId: plantProperties.value.id,
     plantId: plantProperties.value.id,
     name: plantProperties.value.type,
     type: "plant",
@@ -189,11 +190,33 @@ const savePlant = async () => {
 
   try {
     // Zavolajte metódu createPlant zo služby
-    await LifeCycleService.createPlant(request);
+    const responseID = await LifeCycleService.createPlant(request);
     console.log('Plant saved successfully');
+
+    if (responseID && responseID.data) {
+      const responsePlantID = responseID.data;
+
+      const requestAnalysis = {
+        height: parseFloat(plantProperties.value.height),
+        width: parseFloat(plantProperties.value.width),
+        leafCount: parseInt(plantProperties.value.leafCount),
+        area: parseInt(plantProperties.value.area),
+        disease: plantProperties.value.disease,
+        health: "healthy",
+        plantId: responsePlantID,
+        analysisDate: new Date(plantProperties.value.date).toISOString(),
+      };
+
+      await LifeCycleService.createAnalysis(requestAnalysis);
+      console.log('Plant analysis saved successfully');
+    }
   } catch (error) {
     console.error('Failed to save plant:', error);
   }
+};
+
+const goBack = () => {
+  router.back();
 };
 
 </script>

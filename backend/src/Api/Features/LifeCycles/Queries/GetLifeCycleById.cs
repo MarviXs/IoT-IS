@@ -25,8 +25,22 @@ public static class GetLifeCycleById
                     .Where(pa => pa.PlantId == plantId)
                     .ToListAsync();
 
+                    var plants = await context
+                    .Plants.AsNoTracking()
+                    .Where(p => p.Id == plantId)
+                    .ToListAsync();
+
+                var resolvedPlantId = "";
+
+                    if (!plants.Any())
+                    {
+                        resolvedPlantId = "PlantID not found";
+                    }else{
+                        resolvedPlantId = plants.First().PlantId;
+                    }
+
                 var responses = plantAnalyses.Select(pa => new Response(
-                    PlantId: pa.PlantId,
+                    PlantId: resolvedPlantId,
                     LeafCount: pa.LeafCount,
                     width: pa.Width,
                     height: pa.Height,
@@ -65,7 +79,7 @@ public static class GetLifeCycleById
             }
 
             var response = new Response(
-                PlantId: plantAnalysis.PlantId,
+                PlantId: plantAnalysis.PlantId.ToString(),
                 LeafCount: plantAnalysis.LeafCount,
                 width: plantAnalysis.Width,
                 height: plantAnalysis.Height,
@@ -80,7 +94,7 @@ public static class GetLifeCycleById
     }
 
     public record Response(
-        Guid PlantId,
+        string PlantId,
         double? LeafCount,
         double? width,
         double? height,

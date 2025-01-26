@@ -6,6 +6,7 @@ export type LifeCyclesResponse = paths['/lifecycles']['get']['responses']['200']
 
 export type ProductResponse = paths['/lifecycles/plant/{plantId}']['get']['responses']['200']['content']['application/json'];
 export type CreatePlantRequest = paths['/lifecycles/plants']['post']['requestBody']['content']['application/json'];
+export type CreateAnalysisRequest = paths['/lifecycles']['post']['requestBody']['content']['application/json'];
 
 
 class LifeCycleService {
@@ -24,6 +25,10 @@ class LifeCycleService {
 
   async createPlant(request: CreatePlantRequest) {
     return await client.POST('/lifecycles/plants', { body: request });
+  }
+
+  async createAnalysis(request: CreateAnalysisRequest) {
+    return await client.POST('/lifecycles', { body: request });
   }
 }
 
