@@ -59,7 +59,7 @@ async function getDevices() {
 getDevices();
 
 const nameRules = [(val: string) => (val && val.length > 0) || t('global.rules.required')];
-const triggerDeactivateRules = [(val: string) => (!isNaN(Number(val)) && Number(val) > 0) || t('global.rules.number')];
+const triggerDeactivateRules = [(val: string) => (!isNaN(Number(val)) && Number(val) >= 0) || t('global.rules.number')];
 
 const formRef = ref();
 async function validate() {
