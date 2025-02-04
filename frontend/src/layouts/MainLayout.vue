@@ -42,17 +42,17 @@
     </q-header>
 
     <q-drawer v-model="leftDrawerOpen" show-if-above class="shadow bg-white">
-      <div class="column q-px-lg">
+      <div class="column q-px-lg no-wrap">
         <router-link class="q-my-lg q-mx-auto full-width" to="/">
           <q-img src="../assets/logo.png" height="3.7rem" fit="contain" no-spinner no-transition />
         </router-link>
         <div class="links">
-          <!-- <side-menu-button
+          <side-menu-button
             to="/notifications"
             :exact="true"
             :label="t('notification.label', 2)"
             :icon="mdiBellRingOutline"
-          /> -->
+          />
           <side-menu-button to="/device-templates" :label="t('device_template.label', 2)" :icon="mdiContentCopy" />
           <side-menu-button to="/devices" :label="t('device.label', 2)" :icon="mdiMemory" />
           <side-menu-button to="/collections" :label="t('collection.label', 2)" :icon="mdiFileTreeOutline" />
@@ -93,6 +93,7 @@ import {
   mdiFileTreeOutline,
   mdiCubeOutline,
   mdiWrench,
+  mdiBellRingOutline,
   mdiDomain,
 } from '@quasar/extras/mdi-v7';
 import { toast } from 'vue3-toastify';

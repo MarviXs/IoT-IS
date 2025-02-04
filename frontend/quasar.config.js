@@ -108,7 +108,7 @@ export default configure((/* ctx */) => {
           bodyClasses: true,
         },
         brand: {
-          primary: '#657cfd',
+          primary: '#526cff',
           secondary: '#6d6d6d',
         },
       },
