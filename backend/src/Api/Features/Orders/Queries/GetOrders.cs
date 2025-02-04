@@ -7,6 +7,7 @@ using Fei.Is.Api.Extensions;
 using Fei.Is.Api.Redis;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
 
 namespace Fei.Is.Api.Features.Orders.Queries;
 
@@ -39,60 +40,35 @@ public static class GetOrders
 
     public record Query(ClaimsPrincipal User, QueryParameters Parameters) : IRequest<PagedList<Response>>;
 
-    public sealed class Handler(AppDbContext context, RedisService redis) : IRequestHandler<Query, PagedList<Response>>
+    public sealed class Handler(AppDbContext context) : IRequestHandler<Query, PagedList<Response>>
     {
         public async Task<PagedList<Response>> Handle(Query message, CancellationToken cancellationToken)
         {
-            List<Order> orders = new List<Order>()
-            {
-                new Order()
-                {
-                    Id = 1,
-                    Note = "First Order",
-                    CustomerId = 1,
-                    OrderDate = DateTime.UtcNow.AddDays(-10),
-                    DeliveryWeek = 45,
-                    PaymentMethod = "Credit Card",
-                    ContactPhone = "+123456789",
-                    Customer = new Company { Id = 1, Title = "Customer One" },
-                },
-                new Order()
-                {
-                    Id = 2,
-                    Note = "Second Order",
-                    CustomerId = 2,
-                    OrderDate = DateTime.UtcNow.AddDays(-7),
-                    DeliveryWeek = 46,
-                    PaymentMethod = "Bank Transfer",
-                    ContactPhone = "+987654321",
-                    Customer = new Company { Id = 2, Title = "Customer Two" },
-                },
-                new Order()
-                {
-                    Id = 3,
-                    Note = "Third Order",
-                    CustomerId = 3,
-                    OrderDate = DateTime.UtcNow.AddDays(-3),
-                    DeliveryWeek = 47,
-                    PaymentMethod = "Cash on Delivery",
-                    ContactPhone = "+192837465",
-                    Customer = new Company { Id = 3, Title = "Customer Three" },
-                }
-            };
-
-            return orders
+            var query = context
+                .Orders.AsNoTracking()
+                .Include(o => o.Customer) // Načítanie priradenej zákazníckej entity
                 .Select(order => new Response(
                     order.Id,
-                    order.Customer.Title,
+                    order.Customer.Title, // Prístup k názvu zákazníka cez navigačnú vlastnosť
                     order.OrderDate,
                     order.DeliveryWeek,
                     order.PaymentMethod,
                     order.ContactPhone,
                     order.Note
                 ))
-                .ToPagedList(orders.Count, 0, 10);
+                .Paginate(message.Parameters); // Použitie stránkovania
+
+            return query.ToPagedList(await query.CountAsync(cancellationToken), message.Parameters.PageNumber, message.Parameters.PageSize);
         }
     }
 
-    public record Response(int id, string customerName, DateTime orderDate, int deliveryWeek, string paymentMethod, string contactPhone, string note);
+    public record Response(
+        Guid Id,
+        string CustomerName,
+        DateTime OrderDate,
+        int DeliveryWeek,
+        string PaymentMethod,
+        string ContactPhone,
+        string? Note
+    );
 }

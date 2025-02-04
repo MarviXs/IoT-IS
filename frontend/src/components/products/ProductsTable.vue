@@ -1,7 +1,7 @@
 <template>
   <q-table
     v-model:pagination="pagination"
-    :rows="devicesFiltered"
+    :rows="products"
     :columns="columns"
     :loading="props.loading"
     flat
@@ -53,31 +53,35 @@ import { PropType, computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { mdiFileSearchOutline, mdiPencil, mdiTrashCan } from '@quasar/extras/mdi-v7';
 import { PaginationClient } from '@/models/Pagination';
-import { ProductsResponse } from '@/api/services/ProductService';
 import EditProductDialog from './EditProductDialog.vue';
 import DeleteProductDialog from './DeleteProductDialog.vue';
 
 const props = defineProps({
-  devices: {
-    type: Object as PropType<ProductsResponse>,
-    required: false,
-    default: null,
-  },
   loading: {
     type: Boolean,
     required: true,
   },
 });
 
-const pagination = defineModel<PaginationClient>('pagination');
+const products = defineModel<Array<any>>('products', {
+  type: Array as PropType<Array<any>>,
+  default: [],
+});
 
-const devicesFiltered = computed(() => props.devices?.items ?? []);
+const pagination = defineModel<PaginationClient>('pagination');
 
 const emit = defineEmits(['onChange', 'onRequest']);
 
 const { t } = useI18n();
 
 const columns = computed<QTableProps['columns']>(() => [
+  {
+    name: 'code',
+    label: t('product.code'),
+    field: 'code',
+    align: 'left',
+    sortable: true,
+  },
   {
     name: 'pluCode',
     label: t('product.plu_code'),

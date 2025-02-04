@@ -9,9 +9,5 @@ public class AdditionalOrderConfiguration : IEntityTypeConfiguration<AdditionalO
     public void Configure(EntityTypeBuilder<AdditionalOrder> builder)
     {
         builder.HasKey(ao => ao.Id);
-
-        builder.HasOne(ao => ao.Product)
-            .WithMany()
-            .HasForeignKey(ao => ao.ProductId);
     }
 }

@@ -10,14 +10,8 @@ public class ProductionPlanConfiguration : IEntityTypeConfiguration<ProductionPl
     {
         builder.HasKey(pp => pp.Id);
 
-        builder.Property(pp => pp.Year)
-            .IsRequired();
+        builder.Property(pp => pp.Year).IsRequired();
 
-        builder.Property(pp => pp.DeliveryWeek)
-            .IsRequired();
-
-        builder.HasOne(pp => pp.Product)
-            .WithMany()
-            .HasForeignKey(pp => pp.ProductNumber);
+        builder.Property(pp => pp.DeliveryWeek).IsRequired();
     }
 }

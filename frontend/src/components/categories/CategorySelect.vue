@@ -11,6 +11,7 @@
     @filter="filterFn"
     @virtual-scroll="onScroll"
     :rules="categoryRules"
+    new-value-mode="add-unique"
   />
 </template>
 
@@ -28,7 +29,7 @@ export interface CategorySelectData {
 
 const { t } = useI18n();
 
-const selected = defineModel<CategorySelectData>({ required: false });
+const selected = defineModel<CategorySelectData | null>({ required: false });
 
 const items = ref<CategoryResponse['items']>([]);
 const isLoading = ref(false);

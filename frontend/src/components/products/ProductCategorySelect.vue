@@ -1,7 +1,7 @@
 <template>
   <q-select
     v-model="selected"
-    :label="t('device.label')"
+    :label="t('product.label')"
     :options="options"
     :loading="isLoading"
     use-input
@@ -31,7 +31,7 @@ export interface ProductCategorySelectData {
 
 const { t } = useI18n();
 
-const selected = defineModel<ProductCategorySelectData>({ required: false });
+const selected = defineModel<ProductCategorySelectData | null>({ required: false });
 
 const items = ref<ProductCategoryResponse['items']>([]);
 const isLoading = ref(false);
@@ -41,7 +41,7 @@ const lastPage = ref(1);
 
 const options = computed(() => {
   return items.value?.map((i) => ({
-    name: i.categoryName,
+    name: i.name,
     id: i.id,
   }));
 });

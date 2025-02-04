@@ -10,11 +10,6 @@ public class DeliveryNoteConfiguration : IEntityTypeConfiguration<DeliveryNote>
     {
         builder.HasKey(dn => dn.Id);
 
-        builder.Property(dn => dn.DeliveryNumber)
-            .IsRequired();
-
-        builder.HasOne(dn => dn.Supplier)
-            .WithMany(c => c.DeliveryNotes)
-            .HasForeignKey(dn => dn.SupplierId);
+        builder.Property(dn => dn.DeliveryNumber).IsRequired();
     }
 }

@@ -8,13 +8,14 @@ using FluentResults;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
 
 namespace Fei.Is.Api.Features.Orders.Commands;
 
 public static class CreateOrder
 {
     // Record to represent the request for creating an order
-    public record Request(int CustomerId, DateTime OrderDate, int DeliveryWeek, string PaymentMethod, string ContactPhone, string? Note);
+    public record Request(Guid CustomerId, DateTime OrderDate, int DeliveryWeek, string PaymentMethod, string ContactPhone, string? Note);
 
     // Endpoint definition for handling the creation of orders
     public sealed class Endpoint : ICarterModule
@@ -23,7 +24,7 @@ public static class CreateOrder
         {
             app.MapPost(
                     "orders", // Define the route for creating an order
-                    async Task<Results<Created<int>, ValidationProblem>> (IMediator mediator, ClaimsPrincipal user, Request request) =>
+                    async Task<Results<Created<Guid>, ValidationProblem>> (IMediator mediator, ClaimsPrincipal user, Request request) =>
                     {
                         // Create a command with the incoming request and user information
                         var command = new Command(request, user);
@@ -52,12 +53,12 @@ public static class CreateOrder
     }
 
     // Command to encapsulate the request data and user for creating an order
-    public record Command(Request Request, ClaimsPrincipal User) : IRequest<Result<int>>;
+    public record Command(Request Request, ClaimsPrincipal User) : IRequest<Result<Guid>>;
 
     // Handler to process the command and create an order in the database
-    public sealed class Handler(AppDbContext context, IValidator<Command> validator) : IRequestHandler<Command, Result<int>>
+    public sealed class Handler(AppDbContext context, IValidator<Command> validator) : IRequestHandler<Command, Result<Guid>>
     {
-        public async Task<Result<int>> Handle(Command message, CancellationToken cancellationToken)
+        public async Task<Result<Guid>> Handle(Command message, CancellationToken cancellationToken)
         {
             // Validate the command using the provided validator
             var result = validator.Validate(message);
@@ -68,18 +69,19 @@ public static class CreateOrder
             }
 
             // Find the customer in the database by CustomerId
-            var customer = await context.Companies.FindAsync(new object[] { message.Request.CustomerId }, cancellationToken);
-            // if (customer == null)
-            // {
-            //     // If customer is not found, return a NotFoundError
-            //     return Result.Fail(new NotFoundError("Customer not found"));
-            // }
+            var customerQuery = context.Companies.Where(company => company.Id == message.Request.CustomerId);
+            if (!await customerQuery.AnyAsync(cancellationToken))
+            {
+                // If customer is not found, return a NotFoundError
+                return Result.Fail(new NotFoundError());
+            }
+
+            var customer = await customerQuery.FirstAsync(cancellationToken);
 
             // Create a new Order entity and populate it with data from the request
             var order = new Order
             {
-                CustomerId = message.Request.CustomerId,
-                OrderDate = DateTime.SpecifyKind(message.Request.OrderDate, DateTimeKind.Utc),
+                OrderDate = message.Request.OrderDate,
                 DeliveryWeek = message.Request.DeliveryWeek,
                 PaymentMethod = message.Request.PaymentMethod,
                 ContactPhone = message.Request.ContactPhone,
@@ -102,8 +104,8 @@ public static class CreateOrder
     {
         public Validator()
         {
-            // CustomerId must be greater than 0
-            RuleFor(r => r.Request.CustomerId).GreaterThan(0).WithMessage("Customer ID is required and must be greater than 0");
+            // CustomerId is required
+            RuleFor(r => r.Request.CustomerId).NotEmpty().WithMessage("Customer ID is required");
             // OrderDate is required
             RuleFor(r => r.Request.OrderDate).NotEmpty().WithMessage("Order date is required");
             // PaymentMethod is required

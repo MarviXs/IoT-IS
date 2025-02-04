@@ -9,9 +9,5 @@ public class InvoiceItemConfiguration : IEntityTypeConfiguration<InvoiceItem>
     public void Configure(EntityTypeBuilder<InvoiceItem> builder)
     {
         builder.HasKey(ii => ii.Id);
-
-        builder.HasOne(ii => ii.Invoice)
-            .WithMany(i => i.InvoiceItems)
-            .HasForeignKey(ii => ii.InvoiceId);
     }
 }

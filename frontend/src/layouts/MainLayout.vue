@@ -42,7 +42,7 @@
     </q-header>
 
     <q-drawer v-model="leftDrawerOpen" show-if-above class="shadow bg-white">
-      <div class="column q-px-lg full-height no-wrap">
+      <div class="column q-px-lg no-wrap">
         <router-link class="q-my-lg q-mx-auto full-width" to="/">
           <q-img src="../assets/logo.png" height="3.7rem" fit="contain" no-spinner no-transition />
         </router-link>
@@ -59,6 +59,7 @@
           <side-menu-button to="/jobs" :label="t('job.label', 2)" :icon="mdiListStatus" />
           <side-menu-button to="/scenes" :label="t('scene.label', 2)" :icon="mdiCubeOutline" />
           <side-menu-button to="/products" :label="t('product.label', 2)" :icon="mdiWrench" />
+          <side-menu-button to="/companies" :label="t('company.label', 2)" :icon="mdiDomain" />
           <side-menu-button
             v-if="authStore.isAdmin"
             to="/user-management"
@@ -85,7 +86,6 @@ import {
   mdiAccountCircle,
   mdiLogout,
   mdiAccountOutline,
-  mdiFolderOutline,
   mdiListStatus,
   mdiAccountGroup,
   mdiContentCopy,
@@ -94,6 +94,7 @@ import {
   mdiCubeOutline,
   mdiWrench,
   mdiBellRingOutline,
+  mdiDomain,
 } from '@quasar/extras/mdi-v7';
 import { toast } from 'vue3-toastify';
 

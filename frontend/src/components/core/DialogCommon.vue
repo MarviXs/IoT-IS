@@ -1,5 +1,5 @@
 <template>
-  <q-dialog v-model="isDialogOpen">
+  <q-dialog v-model="isDialogOpen" v-bind="attrs">
     <q-card class="q-pa-sm" :style="dialogStyle">
       <q-card-section>
         <div class="text-h6">
@@ -12,7 +12,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, useAttrs } from 'vue';
 import { useQuasar } from 'quasar';
 const props = defineProps({
   minWidth: {
@@ -21,6 +21,8 @@ const props = defineProps({
   },
 });
 const isDialogOpen = defineModel<boolean>({ default: false });
+
+const attrs = useAttrs();
 
 const quasar = useQuasar();
 

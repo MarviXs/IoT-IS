@@ -10,11 +10,6 @@ public class InvoiceConfiguration : IEntityTypeConfiguration<Invoice>
     {
         builder.HasKey(i => i.Id);
 
-        builder.Property(i => i.InvoiceNumber)
-            .IsRequired();
-
-        builder.HasOne(i => i.Supplier)
-            .WithMany(c => c.Invoices)
-            .HasForeignKey(i => i.SupplierId);
+        builder.Property(i => i.InvoiceNumber).IsRequired();
     }
 }

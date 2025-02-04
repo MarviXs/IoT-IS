@@ -29,6 +29,7 @@
     "permissions": "Permissions",
     "n_of_m": "{0} of {1}",
     "refresh": "Refresh",
+    "actions": "Actions",
     "automatic_refresh_interval": "Automatic refresh interval",
     "enter_refresh_interval_s": "Enter refresh interval in seconds (0 to disable)",
     "rules": {
@@ -325,15 +326,18 @@
   "product": {
     "label": "Product | Products",
     "plu_code": "PLU Code",
+    "plu_code_hint": "Leave blank to generate automatically",
     "czech_name": "Czech Name",
     "latin_name": "Latin Name",
     "code": "Code",
+    "variety": "Variety",
     "flower_leaf_description": "Flower Leaf Description",
     "pot_diameter_pack": "Pot Diameter Pack",
     "price_per_piece_pack": "Price Per Piece Pack",
     "price_per_piece_pack_vat": "Price Per Piece Pack VAT",
     "discounted_price_without_vat": "Discounted Price Without VAT",
     "retail_price": "Retail Price",
+    "variety": "Variety",
     "add_product": "Add Product",
     "edit_product": "Edit Product",
     "import_products": "Import Products",
@@ -351,6 +355,12 @@
   },
   "product_category": {
     "label": "Category"
+  },
+  "supplier": {
+    "label": "Supplier | Suppliers"
+  },
+  "vat_category": {
+    "label": "VAT Category | VAT Categories"
   },
   "command": {
     "label": "Command | Commands",
@@ -431,6 +441,38 @@
       "cash": "Cash",
       "card": "Card",
       "transfer": "Transfer"
+    },
+    "details": "Order details"
+  },
+  "order_item": {
+    "id": "ID",
+    "product_number": "Product Number",
+    "variety_name": "Variety Name",
+    "oneContainer": "Price for one container",
+    "total": "Total price",
+    "quantity": "Quantity",
+    "add_item": "Add item",
+    "delete_item": "Delete item",
+    "delete_item_desc": "Are you sure you want to delete this item?",
+    "toasts": {
+      "delete_success": "Item deleted successfully",
+      "add_success": "Item added successfully",
+      "add_failed": "Failed to add item",
+      "delete_failed": "Failed to delete item"
     }
+  },
+  "company": {
+    "label": "Company | Companies",
+    "name": "Name",
+    "name2": "Name 2",
+    "IC": "IC",
+    "DIC": "DIC",
+    "street": "Street",
+    "city": "City",
+    "psc": "Postal code",
+    "add_company": "Add Company",
+    "edit_company": "Edit Company",
+    "delete_company": "Delete Company",
+    "delete_company_desc": "Are you sure you want to delete this company?"
   }
 }

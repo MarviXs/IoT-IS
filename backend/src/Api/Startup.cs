@@ -4,6 +4,7 @@ using Fei.Is.Api.BackgroundServices;
 using Fei.Is.Api.Common.OpenAPI;
 using Fei.Is.Api.Extensions;
 using Fei.Is.Api.Features.Auth;
+using Fei.Is.Api.Features.Products;
 using Fei.Is.Api.Features.Jobs.Services;
 using Fei.Is.Api.MqttClient;
 using Fei.Is.Api.MqttClient.Publish;
@@ -64,6 +65,8 @@ public class Startup(IConfiguration configuration)
 
         services.AddHostedService<StoreDataPointsBatchService>();
         services.AddHostedService<JobTimeOutService>();
+
+        services.AddScoped<PLUCodeService>();
         services.AddHostedService<SceneEvaluateService>();
 
         //MQTT Services

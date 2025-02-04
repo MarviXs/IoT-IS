@@ -9,6 +9,14 @@ export type ProductResponse = paths['/products/{id}']['get']['responses']['200']
 export type CreateProductParams = paths['/products']['post']['requestBody']['content']['application/json'];
 export type CreateProductResponse = paths['/products']['post']['responses']['201']['content']['application/json'];
 
+export type CreateProductsFromListParams =
+  paths['/products-by-list']['post']['requestBody']['content']['application/json'];
+export type CreateProductsFromListResponse =
+  paths['/products-by-list']['post']['responses']['201']['content']['application/json'];
+
+export type ProductRequest =
+  paths['/products-by-list']['post']['requestBody']['content']['application/json']['products'][number];
+
 export type UpdateProductRequest = paths['/products/{id}']['put']['requestBody']['content']['application/json'];
 
 class ProductService {
@@ -22,6 +30,10 @@ class ProductService {
 
   async createProduct(body: CreateProductParams) {
     return await client.POST('/products', { body });
+  }
+
+  async createProductsFromList(body: CreateProductsFromListParams) {
+    return await client.POST('/products-by-list', { body });
   }
 
   async updateProduct(productId: string, body: UpdateProductRequest) {

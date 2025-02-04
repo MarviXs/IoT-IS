@@ -22,17 +22,19 @@ const emit = defineEmits(['onCreate']);
 const { t } = useI18n();
 
 const product = ref<ProductFormData>({
-  pluCode: '',
   code: '',
+  pluCode: undefined,
   latinName: '',
   czechName: undefined,
   flowerLeafDescription: undefined,
+  variety: '',
   potDiameterPack: undefined,
   pricePerPiecePack: undefined,
-  pricePerPiecePackVAT: undefined,
   discountedPriceWithoutVAT: undefined,
   retailPrice: undefined,
   category: undefined,
+  supplier: undefined,
+  vatCategory: undefined,
 });
 const productForm = ref();
 
@@ -40,17 +42,19 @@ const creatingProduct = ref(false);
 
 async function createProduct() {
   const createRequest: CreateProductParams = {
+    code: product.value.code!,
     pluCode: product.value.pluCode,
-    code: product.value.code,
     latinName: product.value.latinName,
     czechName: product.value.czechName,
     flowerLeafDescription: product.value.flowerLeafDescription,
     potDiameterPack: product.value.potDiameterPack,
     pricePerPiecePack: product.value.pricePerPiecePack,
-    pricePerPiecePackVAT: product.value.pricePerPiecePackVAT,
     discountedPriceWithoutVAT: product.value.discountedPriceWithoutVAT,
     retailPrice: product.value.retailPrice,
-    categoryId: product.value.category!.id,
+    variety: product.value.variety,
+    categoryId: product.value.category?.id!,
+    vatCategoryId: product.value.vatCategory?.id!,
+    supplierId: product.value.supplier?.id!,
   };
 
   creatingProduct.value = true;
@@ -68,5 +72,3 @@ async function createProduct() {
   toast.success(t('device.toasts.create_success'));
 }
 </script>
-
-<style lang="scss" scoped></style>

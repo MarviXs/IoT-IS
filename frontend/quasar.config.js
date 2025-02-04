@@ -32,7 +32,7 @@ export default configure((/* ctx */) => {
     boot: ['i18n', 'toastify', 'googlelogin'],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
-    css: ['app.scss', 'inter.css'],
+    css: ['app.scss', 'inter.css', 'tailwind.css'],
 
     // https://github.com/quasarframework/quasar/tree/dev/extras
     extras: [

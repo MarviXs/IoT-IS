@@ -1,3 +1,4 @@
+using System.Reflection.Emit;
 using Fei.Is.Api.Data.Models.InformationSystem;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -12,10 +13,10 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
 
         builder.Property(p => p.PLUCode).IsRequired();
 
+        builder.HasIndex(p => p.PLUCode).IsUnique();
+
         builder.Property(p => p.Code).IsRequired();
 
         builder.Property(p => p.LatinName).IsRequired();
-
-        builder.HasOne(p => p.Category).WithMany(c => c.Products).HasForeignKey(p => p.CategoryId);
     }
 }
