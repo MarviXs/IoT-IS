@@ -27,7 +27,7 @@ public static class CreatePlant
         {
             app.MapPost(
                     "lifecycles/plants",
-                    async Task<Results<Created<Guid>, ValidationProblem>> (IMediator mediator, ClaimsPrincipal user, Request request) =>
+                    async Task<Results<Created<Guid>, ValidationProblem, Conflict<string>>> (IMediator mediator, ClaimsPrincipal user, Request request) =>
                     {
                         var command = new Command(request, user);
 
@@ -36,6 +36,13 @@ public static class CreatePlant
                         if (result.HasError<ValidationError>())
                         {
                             return TypedResults.ValidationProblem(result.ToValidationErrors());
+                        }
+
+                        // Kontrola duplicity PlantId a vrátenie HTTP 409 Conflict
+                        if (result.HasError<BadRequestError>())
+                        {
+                            var errorMessage = result.Errors.FirstOrDefault()?.Message;
+                            return TypedResults.Conflict(errorMessage);
                         }
 
                         return TypedResults.Created(result.Value.ToString(), result.Value);
@@ -64,9 +71,19 @@ public static class CreatePlant
                 return Result.Fail(new ValidationError(result));
             }
 
-            if (context.Plants.Any(p => p.PlantId == message.Request.PlantId))
+            /*if (context.Plants.Any(p => p.PlantId == message.Request.PlantId))
             {
+                // Záznam už existuje s rovnakým PlantId, vrátime chybový stav 409
                 return Result.Fail(new BadRequestError("Product with this PlantId already exists"));
+            }*/
+
+            var existingPlant = await context.Plants
+                .FirstOrDefaultAsync(p => p.PlantId == message.Request.PlantId, cancellationToken);
+        
+            if (existingPlant != null)
+            {
+                //return Result.Fail(new BadRequestError(existingPlant.Id.ToString()));
+                return Result.Ok(existingPlant.Id);
             }
 
             var plant = new Plant

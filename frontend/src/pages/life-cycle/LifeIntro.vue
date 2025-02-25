@@ -60,7 +60,7 @@
                 <q-btn :icon="mdiDotsVertical" color="grey-color" flat round>
                   <q-menu anchor="bottom right" self="top right">
                     <q-list>
-                      <q-item v-close-popup clickable>
+                      <q-item v-close-popup clickable @click="addRecord(treeProp.node.plantId)">
                         <div class="row items-center q-gutter-sm">
                           <q-icon color="grey-9" size="24px" :name="mdiSeedPlusOutline" />
                           <div>Add record</div>
@@ -196,6 +196,10 @@ async function deleteLifecycle(id: string) {
   } catch (error) {
     console.error('Chyba pri odstraňovaní životného cyklu:', error);
   }
+}
+
+function addRecord(id: string) {
+  router.push(`lifecycle/analyze/${id}`);
 }
 </script>
 

@@ -10,7 +10,7 @@
         size="15px"
         :label="'Add Record'"
         :icon="mdiPlus"
-        @click="addRecord"
+        @click="addRecord()"
       />
     </template>
     <template #default>
@@ -47,7 +47,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import LifeCycleService from '@/api/services/LifeCycleService';
 import PageLayout from '@/layouts/PageLayout.vue';
 import { mdiPlus } from '@quasar/extras/mdi-v7';
@@ -92,6 +92,10 @@ function formatDate(date: string | null): string {
 const route = useRoute();
 const plantId = route.params.id;
 
+const router = useRouter();
+let routerPID: string | undefined;
+
+
 onMounted(async () => {
   try {
     const response = await LifeCycleService.getLifeCyclesByPlantId(plantId as string);
@@ -99,13 +103,14 @@ onMounted(async () => {
       ...item,
       analysisDate: item.analysisDate ? item.analysisDate : null,
     })) ?? [];
+    routerPID = plants.value[0].plantId;
   } catch (error) {
     console.error('Error fetching plants data:', error);
   }
 });
 
 function addRecord() {
-  alert('Add Record button clicked!');
+  router.push(`analyze/${routerPID}`);
 }
 </script>
 

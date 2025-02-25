@@ -16,6 +16,18 @@
               style="max-height: 300px; object-fit: contain;"
               no-spinner
             />
+            <q-img
+              :src="plantProperties.photoLeaves || '../../assets/logo.png'"
+              alt="Leaves Image"
+              style="max-height: 300px; object-fit: contain;"
+              no-spinner
+            />
+            <q-img
+              :src="plantProperties.photoSize || '../../assets/logo.png'"
+              alt="Leaves Image"
+              style="max-height: 300px; object-fit: contain;"
+              no-spinner
+            />
             <q-btn
               flat
               class="q-mt-md"
@@ -31,6 +43,7 @@
               class="hidden"
               @change="handleFileUpload"
             />
+            <q-slider v-model="threshold" label label-always :min="120" :max="140" :step="1" class="q-mt-md" />
           </div>
 
           <!-- Right section for plant properties -->
@@ -111,8 +124,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, watch } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import { mdiCheck, mdiUpload } from '@quasar/extras/mdi-v7';
 import LifeCycleService from '@/api/services/LifeCycleService'; // Importujte svoj service
 
@@ -127,10 +140,19 @@ const plantProperties = ref({
   disease: '',
   date: '',
   photo: '',
+  photoLeaves: '',
+  photoSize: '',
 });
 
+let threshold = ref(130);
 const fileInput = ref<HTMLInputElement | null>(null);
 const router = useRouter();
+
+const route = useRoute();
+const plantId = route.params.id;
+if(plantId !== undefined){
+  plantProperties.value.id = plantId.toString();
+}
 
 const triggerFileInput = () => {
   fileInput.value?.click();
@@ -140,6 +162,7 @@ const triggerFileInput = () => {
 const uploadPhoto = async (file: File) => {
   const formData = new FormData();
   formData.append('photo', file);
+  formData.append('threshold', threshold.value.toString());
 
   try {
     const response = await fetch('http://localhost:5000/upload', {
@@ -157,6 +180,8 @@ const uploadPhoto = async (file: File) => {
       plantProperties.value.leafCount = data.leafCount;
       plantProperties.value.type = data.plant;
       plantProperties.value.disease = data.disease;
+      plantProperties.value.photoLeaves = `data:image/png;base64,${data.render}`;
+      plantProperties.value.photoSize = `data:image/png;base64,${data.plantImage}`;
     } else {
       console.error('Failed to upload photo');
     }
@@ -191,7 +216,7 @@ const savePlant = async () => {
   try {
     // Zavolajte metódu createPlant zo služby
     const responseID = await LifeCycleService.createPlant(request);
-    console.log('Plant saved successfully');
+    //console.log('Plant saved successfully');
 
     if (responseID && responseID.data) {
       const responsePlantID = responseID.data;
@@ -203,7 +228,7 @@ const savePlant = async () => {
         area: parseInt(plantProperties.value.area),
         disease: plantProperties.value.disease,
         health: "healthy",
-        plantId: responsePlantID,
+        plantId: responseID.response.status === 409 ? responseID.response.statusText : responsePlantID,
         analysisDate: new Date(plantProperties.value.date).toISOString(),
       };
 
