@@ -23,6 +23,8 @@ public class Startup(IConfiguration configuration)
 
     public void ConfigureServices(IServiceCollection services)
     {
+        bool isMqttEnabled = Configuration.GetValue<bool>("MqttSettings:Enabled");
+
         // Add services to the container.
         services.ConfigurePostgresContext(Configuration);
         services.ConfigureTimescaleContext(Configuration);
@@ -60,8 +62,11 @@ public class Startup(IConfiguration configuration)
         services.AddScoped<TokenService>();
         services.AddSingleton<RedisService>();
 
-        services.AddSingleton<MqttClientService>();
-        services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<MqttClientService>());
+        if (isMqttEnabled)
+        {
+            services.AddSingleton<MqttClientService>();
+            services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<MqttClientService>());
+        }
 
         services.AddHostedService<StoreDataPointsBatchService>();
         services.AddHostedService<JobTimeOutService>();

@@ -58,8 +58,10 @@
           <side-menu-button to="/collections" :label="t('collection.label', 2)" :icon="mdiFileTreeOutline" />
           <side-menu-button to="/jobs" :label="t('job.label', 2)" :icon="mdiListStatus" />
           <side-menu-button to="/scenes" :label="t('scene.label', 2)" :icon="mdiCubeOutline" />
-          <side-menu-button to="/products" :label="t('product.label', 2)" :icon="mdiWrench" />
-          <side-menu-button to="/companies" :label="t('company.label', 2)" :icon="mdiDomain" />
+          <template v-if="isIotOnly() == false">
+            <side-menu-button to="/products" :label="t('product.label', 2)" :icon="mdiWrench" />
+            <side-menu-button to="/companies" :label="t('company.label', 2)" :icon="mdiDomain" />
+          </template>
           <side-menu-button
             v-if="authStore.isAdmin"
             to="/user-management"
@@ -110,5 +112,9 @@ function logout() {
 
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value;
+}
+
+function isIotOnly() {
+  return String(process.env.VITE_IOT_ONLY).toLowerCase() == 'true';
 }
 </script>
