@@ -93,12 +93,12 @@ onMounted(() => {
 });
 
 function downloadOrderTemplate() {
-  OrderService.downloadOrderTemplate(orderId).then((response) => {
-    var contentDisposition = response.headers.get('Content-Disposition');
+  OrderService.downloadOrderTemplate(orderId).then((retVal) => {
+    var contentDisposition = retVal.response.headers.get('Content-Disposition');
     var parts = contentDisposition?.split('filename=');
     var filename = parts?.length === 2 ? parts[1] : 'order_template.xlsx';
 
-    response.blob().then((blob) => {
+    retVal.response.blob().then((blob) => {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;

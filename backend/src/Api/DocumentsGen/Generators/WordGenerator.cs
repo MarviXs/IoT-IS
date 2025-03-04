@@ -1,11 +1,15 @@
-﻿using NPOI.OpenXml4Net.OPC;
+﻿using NPOI.HSSF.UserModel;
+using NPOI.OpenXml4Net.OPC;
+using NPOI.SS.UserModel;
+using NPOI.XSSF.UserModel;
 using NPOI.XWPF.UserModel;
+using System.Text.RegularExpressions;
 
-namespace Fei.Is.Api.DocumentsGen
+namespace Fei.Is.Api.DocumentsGen.Generators
 {
-    public class WordGenerator : IDocumentGen
+    public class WordGenerator : DocumentGen
     {
-        public string ApplyFields(string documentPath, Dictionary<string, string> values)
+        public override string ApplyFields(string documentPath, Dictionary<string, string> values)
         {
             XWPFDocument document = new XWPFDocument(OPCPackage.Open(documentPath));
 
@@ -22,6 +26,11 @@ namespace Fei.Is.Api.DocumentsGen
             }
 
             return newDocumentPath;
+        }
+
+        public override List<string> GetFields(string documentPath)
+        {
+            throw new NotImplementedException();
         }
     }
 }

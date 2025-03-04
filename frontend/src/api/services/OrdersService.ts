@@ -1,6 +1,7 @@
-import { client } from '@/api/client';
+import { client, streamClient } from '@/api/client';
 import type { paths } from '@/api/generated/schema.d.ts';
 import { useAuthStore } from '@/stores/auth-store.js';
+import { MediaType } from 'export-to-csv';
 
 // Definovanie typov pre Orders API
 export type OrdersQueryParams = paths['/orders']['get']['parameters']['query'];
@@ -45,15 +46,7 @@ class OrdersService {
   }
 
   async downloadOrderTemplate(orderId: string) {
-    const baseUrl = process.env.VITE_API_URL || 'http://localhost:5097/';
-    var request = new Request(`${baseUrl}orders/${orderId}/download`);
-    const authStore = useAuthStore();
-
-    if (authStore.accessToken) {
-      request.headers.set('Authorization', `Bearer ${authStore.accessToken}`);
-    }
-
-    return await fetch(request.clone());
+    return await client.GET('/orders/{id}/download', { params: { path: { id: orderId } }, parseAs: "stream" })
   }
 }
 
