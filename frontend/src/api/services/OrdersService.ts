@@ -1,7 +1,5 @@
-import { client, streamClient } from '@/api/client';
+import { client } from '@/api/client';
 import type { paths } from '@/api/generated/schema.d.ts';
-import { useAuthStore } from '@/stores/auth-store.js';
-import { MediaType } from 'export-to-csv';
 
 // Definovanie typov pre Orders API
 export type OrdersQueryParams = paths['/orders']['get']['parameters']['query'];
