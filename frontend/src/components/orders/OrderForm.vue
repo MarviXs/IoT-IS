@@ -1,9 +1,20 @@
 <template>
-  <q-form @submit="onSubmit" ref="orderForm">
+  <q-form @submit.prevent="onSubmit" ref="orderForm">
     <q-card-section class="q-pt-none column q-gutter-md">
       <!-- Changed customerName to customerId to match backend requirements -->
-      <q-input v-model="order.customerId" :rules="customerIdRules" autofocus :label="t('order.customer_id')" />
-
+      <!--  <q-input v-model="order.customerId" :rules="customerIdRules" autofocus :label="t('order.customer_id')" />-->
+      
+      <q-select
+  v-model="order.customerId"
+  :options="companies"
+  option-label="Title"
+  option-value="Id"
+  emit-value
+  map-options
+  :rules="customerIdRules"
+  autofocus
+  :label="t('order.customer_id')"
+/>
       <q-input v-model="order.contactPhone" :rules="phoneRules" :label="t('order.contact_phone')" />
 
       <q-input
@@ -48,9 +59,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { isFormValid } from '@/utils/form-validation';
+import CompanyService from '@/api/services/CompanyService';
 
 export interface OrderFormData {
   customerId: string; // Changed to customerId to match backend requirements
@@ -83,6 +95,28 @@ const paymentMethods = [
   { label: t('order.payment_method.transfer'), value: 'Transfer' },
 ];
 
+// Načítanie firiem pomocou GetCompanies – odosielame potrebné query parametre
+const companies = ref<{ Id: string; Title: string; Ic: string }[]>([]);
+onMounted(async () => {
+  try {
+    const queryParams = {
+      SearchTerm: '',
+      PageNumber: 1,
+      PageSize: 100,
+    };
+    const response = await CompanyService.getCompanies(queryParams);
+    // Ak je odpoveď paginovaná, načítame zoznam z kľúča "items"
+    const data = response.data;
+    const items = data ? (Array.isArray(data) ? data : data.items) : [];
+    companies.value = (items ?? []).map((company: any) => ({
+      Id: company.id,
+      Title: company.title,
+      Ic: company.ic,
+    }));
+  } catch (error) {
+    console.error("Error fetching companies", error);
+  }
+});
 // Reference to the form for validation purposes
 const orderForm = ref();
 
