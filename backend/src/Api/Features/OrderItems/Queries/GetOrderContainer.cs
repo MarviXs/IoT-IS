@@ -75,6 +75,7 @@ public static class GetOrderItemContainer
                 container.PricePerContainer,
                 container.TotalPrice,
                 container.Items.Select(oi => new ProductResponse(
+                    oi.Product.Id,
                     oi.Product.PLUCode,
                     oi.Product.LatinName,
                     oi.Product.CzechName,
@@ -94,6 +95,7 @@ public static class GetOrderItemContainer
     public record Response(Guid Id, string Name, int Quantity, decimal? PricePerContainer, decimal? TotalPrice, IQueryable<ProductResponse> Products);
 
     public record ProductResponse(
+        Guid id,
         string PLUCode,
         string LatinName,
         string? CzechName,
