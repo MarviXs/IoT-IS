@@ -43,7 +43,7 @@
       </div>
     </q-card-section>
 
-    <AddContainerDialog :orderId="order.id" v-model="isAddContainerDialogOpen" @onCreate="handleContainerCreated" />
+    <AddContainerDialog :orderId="order.id.toString()" v-model="isAddContainerDialogOpen" @onCreate="handleContainerCreated" />
 
     <!-- Update dialog -->
     <UpdateOrderDialog v-model="isUpdateDialogOpen" :orderId="order.id" @onUpdate="handleOrderUpdated" />
