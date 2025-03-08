@@ -459,7 +459,12 @@
       "add_success": "Item added successfully",
       "add_failed": "Failed to add item",
       "delete_failed": "Failed to delete item"
-    }
+    },
+    "work_order": "Work Order",
+    "note": "Note",
+    "hours": "Hours",
+    "price_per_hour": "Price per Hour",
+    "price_excl_vat": "Price Excl. VAT"
   },
   "company": {
     "label": "Company | Companies",
@@ -474,5 +479,17 @@
     "edit_company": "Edit Company",
     "delete_company": "Delete Company",
     "delete_company_desc": "Are you sure you want to delete this company?"
-  }
+  },
+  "order_summary": {
+    "summary_title": "Order Summary",
+    "vat_rate_12": "VAT rate 12%",
+    "vat_rate_21": "VAT rate 21%",
+    "total": "Total",
+    "price_excl_vat_label": "Price excl. VAT",
+    "vat_label": "VAT",
+    "price_incl_vat_label": "Price incl. VAT"
+}
+
+
+
 }
