@@ -495,6 +495,20 @@
       "add_success": "Položka bola úspešne pridaná",
       "add_failed": "Nepodarilo sa pridať položku",
       "delete_failed": "Nepodarilo sa odstrániť položku"
-    }
+    },
+    "work_order": "Pracovný úkon",
+    "note": "Poznámka",
+    "hours": "Počet hodín",
+    "price_per_hour": "Cena za hodinu",
+    "price_excl_vat": "Cena bez DPH"
+  },
+  "order_summary": {
+    "summary_title": "Sumár objednávky",
+    "vat_rate_12": "Sadzba DPH 12%",
+    "vat_rate_21": "Sadzba DPH 21%",
+    "total": "Celkom",
+    "price_excl_vat_label": "Cena bez DPH",
+    "vat_label": "DPH",
+    "price_incl_vat_label": "Cena s DPH"
   }
 }
