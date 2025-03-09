@@ -104,6 +104,8 @@
     "update_password_other_desc": "Update account's password.",
     "change_role": "Change role",
     "change_role_desc": "Change user's role.",
+    "document_links": "Document Links",
+    "document_link": "Document Link",
     "toasts": {
       "get_user_failed": "Loading user failed! | Loading users failed!",
       "email_update_success": "Email updated!",
@@ -115,7 +117,8 @@
     },
     "rules": {
       "password_current_wrong": "Current password is wrong!",
-      "email_invalid": "Please enter a valid email address"
+      "email_invalid": "Please enter a valid email address",
+      "link_invalid": "Please enter a valid link"
     }
   },
   "not_found": {
