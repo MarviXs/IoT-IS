@@ -497,7 +497,7 @@
       "delete_failed": "Nepodarilo sa odstrániť položku"
     },
     "work_order": "Pracovný úkon",
-    "note": "Poznámka",
+    "name": "Názov",
     "hours": "Počet hodín",
     "price_per_hour": "Cena za hodinu",
     "price_excl_vat": "Cena bez DPH"

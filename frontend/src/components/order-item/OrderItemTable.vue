@@ -1,7 +1,8 @@
 <template>
   <div class="order-item-table">
+    <!-- Hlavná tabuľka: zobrazujú sa iba kontajnery, ktoré nemajú názov "práca" -->
     <q-table
-      :rows="containers"
+      :rows="nonWorkContainers"
       :columns="parentColumns"
       row-key="id"
       flat
@@ -10,28 +11,14 @@
       row-hover
     >
       <template #body="props">
-        <!-- Riadok rodičovskej tabuľky -->
+        <!-- Riadok hlavnej tabuľky (parent row) -->
         <q-tr :props="props" class="parent-row">
           <q-td :props="props" key="id">{{ props.row.id }}</q-td>
           <q-td :props="props" key="name">{{ props.row.name }}</q-td>
           <q-td :props="props" key="quantity">{{ props.row.quantity }}</q-td>
           <q-td :props="props" key="actions">
-            <q-btn
-              flat
-              dense
-              round
-              size="sm"
-              :icon="minusIcon"
-              @click="decreaseQuantity(props.row.id)"
-            />
-            <q-btn
-              flat
-              dense
-              round
-              size="sm"
-              :icon="plusIcon"
-              @click="increaseQuantity(props.row.id)"
-            />
+            <q-btn flat dense round size="sm" :icon="minusIcon" @click="decreaseQuantity(props.row.id)" />
+            <q-btn flat dense round size="sm" :icon="plusIcon" @click="increaseQuantity(props.row.id)" />
           </q-td>
           <q-td :props="props" key="pricePerContainer">
             {{ props.row.pricePerContainer }}
@@ -40,44 +27,22 @@
             {{ props.row.totalPrice }}
           </q-td>
           <q-td>
-            <div class="tw-flex tw-justify-center">
-              <q-btn
-                flat
-                round
-                size="sm"
-                :icon="mdiPlusBox"
-                color="grey-color"
-                @click="openAddItemDialog(props.row.id)"
-              >
+            <div class="actions-container">
+              <q-btn flat round size="sm" :icon="mdiPlusBox" color="grey-color" @click="openAddItemDialog(props.row.id)">
                 <q-tooltip>{{ $t('order_item.add_item') }}</q-tooltip>
               </q-btn>
-              <q-btn
-                flat
-                round
-                size="sm"
-                :icon="mdiPencil"
-                color="grey-color"
-                @click.stop="openUpdateDialog(props.row.id)"
-              >
+              <q-btn flat round size="sm" :icon="mdiPencil" color="grey-color" @click.stop="openUpdateDialog(props.row.id)">
                 <q-tooltip>{{ $t('global.edit') }}</q-tooltip>
               </q-btn>
-              <q-btn
-                flat
-                round
-                size="sm"
-                :icon="mdiTrashCan"
-                color="grey-color"
-                @click.stop="openDeleteDialog(props.row.id)"
-              >
+              <q-btn flat round size="sm" :icon="mdiTrashCan" color="grey-color" @click.stop="openDeleteDialog(props.row.id)">
                 <q-tooltip>{{ $t('global.delete') }}</q-tooltip>
               </q-btn>
             </div>
           </q-td>
         </q-tr>
 
-        <!-- Vnorená tabuľka (nested row) -->
+        <!-- Vnorená tabuľka pre produkty v danom kontejnere (ak sú definované) -->
         <q-tr class="nested-row">
-          <!-- Rozšírime cez colspan tak, aby sa vnorená tabuľka zobrazila v celej šírke -->
           <q-td :colspan="parentColumns.length" class="nested-table-cell">
             <q-table
               row-hover
@@ -91,30 +56,34 @@
               hide-bottom
               class="nested-table"
             >
-              <!-- Scoped slot pre stĺpec 'actions' -->
               <template #body-cell-actions="scope">
-                <q-btn
-                  flat
-                  dense
-                  round
-                  size="sm"
-                  :icon="minusIcon"
-                  @click="decreaseProductQuantity(props.row.id,scope.row)"
-                />
-                <q-btn
-                  flat
-                  dense
-                  round
-                  size="sm"
-                  :icon="plusIcon"
-                  @click="increaseProductQuantity(props.row.id,scope.row)"
-                />
+                <q-btn flat dense round size="sm" :icon="minusIcon" @click="decreaseProductQuantity(props.row.id, scope.row)" />
+                <q-btn flat dense round size="sm" :icon="plusIcon" @click="increaseProductQuantity(props.row.id, scope.row)" />
               </template>
             </q-table>
           </q-td>
         </q-tr>
       </template>
     </q-table>
+
+    <!-- Samostatná tabuľka pre produkty kontajnera s názvom "práca" -->
+    <div v-if="workOrderContainer" class="work-order-section" style="margin-top: 20px;">
+      <!-- Tabuľka s mapovanými stĺpcami -->
+      <q-table
+        :rows="workOrderRows"
+        :columns="workOrderColumns"
+        row-key="pluCode"
+        flat
+        dense
+        separator="horizontal"
+        no-data-label="{{ $t('table.no_data_label') }}"
+      >
+        <template #body-cell-actions="scope">
+          <q-btn flat dense round size="sm" :icon="minusIcon" @click="decreaseProductQuantity(workOrderContainer.id, scope.row)" />
+          <q-btn flat dense round size="sm" :icon="plusIcon" @click="increaseProductQuantity(workOrderContainer.id, scope.row)" />
+        </template>
+      </q-table>
+    </div>
 
     <!-- AddItem Dialog -->
     <AddItemToOrderDialog
@@ -172,34 +141,53 @@ export default {
         { name: 'totalPrice', label: this.$t('order_item.total'), align: 'right' },
         { name: 'finalActions', label: this.$t('global.actions'), align: 'center' },
       ],
+      // Stĺpce pre vnorenú tabuľku (ak sú zobrazené v kontejnere, ktorý nie je "práca")
       nestedColumns: [
         { name: 'pluCode', label: this.$t('product.plu_code'), field: 'pluCode', align: 'left' },
         { name: 'latinName', label: this.$t('product.latin_name'), field: 'latinName', align: 'left' },
         { name: 'czechName', label: this.$t('product.czech_name'), field: 'czechName', align: 'left' },
         { name: 'variety', label: this.$t('product.variety'), field: 'variety', align: 'left' },
-        {
-          name: 'potDiameterPack',
-          label: this.$t('product.pot_diameter_pack'),
-          field: 'potDiameterPack',
-          align: 'left',
-        },
+        { name: 'potDiameterPack', label: this.$t('product.pot_diameter_pack'), field: 'potDiameterPack', align: 'left' },
         { name: 'quantity', label: this.$t('order_item.quantity'), field: 'quantity', align: 'right' },
-        {
-          name: 'pricePerPiecePack',
-          label: this.$t('product.price_per_piece_pack'),
-          field: 'pricePerPiecePack',
-          align: 'right',
-        },
-        {
-          name: 'pricePerPiecePackVAT',
-          label: this.$t('product.price_per_piece_pack_vat'),
-          field: 'pricePerPiecePackVAT',
-          align: 'right',
-        },
-        // Stĺpec pre akcie
+        { name: 'pricePerPiecePack', label: this.$t('product.price_per_piece_pack'), field: 'pricePerPiecePack', align: 'right' },
+        { name: 'pricePerPiecePackVAT', label: this.$t('product.price_per_piece_pack_vat'), field: 'pricePerPiecePackVAT', align: 'right' },
         { name: 'actions', label: '', align: 'center' },
       ],
+      // Stĺpce pre tabuľku produktov v kontejnere "práca"
+      workOrderColumns: [
+        { name: 'workOrder', label: this.$t('order_item.work_order'), align: 'left', field: row => row.pluCode, },
+        { name: 'name', label: this.$t('order_item.name'), align: 'left', field: row => row.name },
+        { name: 'hours', label: this.$t('order_item.hours'), field: 'quantity', align: 'right' },
+        { name: 'pricePerHour', label: this.$t('order_item.price_per_hour'), field: 'pricePerPiecePack', align: 'right' },
+        { name: 'priceExclVAT', label: this.$t('order_item.price_excl_vat'), field: 'pricePerPiecePackVAT', align: 'right' },
+        { name: 'actions', label: " ", align: 'right' },
+      ],
     };
+  },
+  computed: {
+    // Hlavná tabuľka zobrazuje iba kontajnery, ktoré nie sú "práca" (porovnanie bez ohľadu na veľkosť písmen)
+    nonWorkContainers() {
+      return this.containers.filter(c => c.name.toLowerCase() !== 'práca');
+    },
+    // Nájde kontajner s názvom "práca" (ak existuje)
+    workOrderContainer() {
+      return this.containers.find(c => c.name.toLowerCase() === 'práca') || null;
+    },
+    // Pre tabuľku pracovných objednávok mapujeme produkty z kontajnera "práca"
+    workOrderRows() {
+      if (!this.workOrderContainer || !this.workOrderContainer.products) {
+        return [];
+      }
+      // Pre každý produkt z kontejneru "práca" vytvoríme nový objekt s požadovanými polami
+      return this.workOrderContainer.products.map(product => ({
+        pluCode: product.pluCode,
+        // Ak existuje CzechName, použijeme ho, inak LatinName
+        name: product.czechName || product.latinName,
+        quantity: product.quantity, // hodnota orderItem.quantity
+        pricePerPiecePack: product.pricePerPiecePack, // Price Per Hour
+        pricePerPiecePackVAT: product.pricePerPiecePackVAT, // Price Excl. VAT
+      }));
+    },
   },
   methods: {
     async increaseQuantity(containerId) {
@@ -214,7 +202,7 @@ export default {
     },
     async decreaseQuantity(containerId) {
       try {
-        const container = this.containers.find((c) => c.id === containerId);
+        const container = this.containers.find(c => c.id === containerId);
         if (container && container.quantity > 0) {
           await OrderItemsService.decreaseContainerQuantity(this.currentOrderId, containerId);
           toast.success(this.$t('container.toasts.decrease_success'));
@@ -250,21 +238,17 @@ export default {
       this.$emit('onChange');
       this.refreshTable();
     },
-    // Zvýšenie množstva na úrovni produktu (vnorený riadok)
-    // Zvýšenie množstva produktu – pred volaním API vyhľadáme položku v kontajneri podľa containerId a product.plu
     async increaseProductQuantity(containerId, product) {
       try {
-        // Vyhľadáme kontajner podľa containerId
-        const container = this.containers.find((c) => c.id === containerId);
+        const container = this.containers.find(c => c.id === containerId);
         if (!container) {
           throw new Error('Container not found');
         }
-        // Vyhľadáme položku v kontajneri podľa product.pluCode
         const item = container.products.find(p => p.pluCode === product.pluCode);
         if (!item || !item.id) {
           throw new Error(`Order item not found for product with PLU: ${product.pluCode}`);
         }
-        await OrderItemsService.increaseProductQuantity(this.currentOrderId,container.id, item.id);
+        await OrderItemsService.increaseProductQuantity(this.currentOrderId, container.id, item.id);
         toast.success(this.$t('container.toasts.increase_success'));
         this.refreshTable();
       } catch (error) {
@@ -272,7 +256,6 @@ export default {
         toast.error(this.$t('container.toasts.increase_error'));
       }
     },
-    // Zníženie množstva produktu – rovnako vyhľadáme položku
     async decreaseProductQuantity(containerId, product) {
       try {
         const container = this.containers.find(c => c.id === containerId);
@@ -281,9 +264,9 @@ export default {
         }
         const item = container.products.find(p => p.pluCode === product.pluCode);
         if (!item || !item.id) {
-          throw new Error(`Order item not found for product with PLU: ${product.plu}`);
+          throw new Error(`Order item not found for product with PLU: ${product.pluCode}`);
         }
-        await OrderItemsService.decreaseProductQuantity(this.currentOrderId,container.id, item.id);
+        await OrderItemsService.decreaseProductQuantity(this.currentOrderId, container.id, item.id);
         toast.success(this.$t('container.toasts.decrease_success'));
         this.refreshTable();
       } catch (error) {
@@ -296,22 +279,29 @@ export default {
 </script>
 
 <style scoped>
-/* Štýly pre hover a pod. Môžete ich prispôsobiť podľa potreby. */
 .q-table thead {
   background-color: #f5f5f5;
   font-weight: bold;
 }
-
-/* Zvýraznenie riadku pri hoverovaní */
 .q-table[row-hover] tbody tr:hover {
   background-color: #e0f7fa;
   cursor: pointer;
 }
-
-/* Ohraničenie pre vnorené tabuľky */
 .nested-table {
   border: 1px solid #e0e0e0;
   margin-top: 5px;
   margin-bottom: 5px;
+}
+.work-order-section {
+  border-top: 1px solid #ccc;
+  padding-top: 10px;
+}
+.actions-container {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+}
+.work-order-info p {
+  margin: 0.2em 0;
 }
 </style>
