@@ -461,7 +461,7 @@
       "delete_failed": "Failed to delete item"
     },
     "work_order": "Work Order",
-    "note": "Note",
+    "name": "Name",
     "hours": "Hours",
     "price_per_hour": "Price per Hour",
     "price_excl_vat": "Price Excl. VAT"

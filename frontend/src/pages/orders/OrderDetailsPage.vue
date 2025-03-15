@@ -18,8 +18,6 @@
         @on-change="getOrderItemContainers(pagination)"
         @open-delete-dialog="openDeleteContainerDialog"
       />
-
-      <WorkOrderTable />
       <OrderSummaryCard :summary="orderSummary" />
     </template>
   </PageLayout>
@@ -38,7 +36,6 @@ import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import OrderDetailsCard from '@/components/orders/OrderDetailsCard.vue';
 import OrderItemTable from '@/components/order-item/OrderItemTable.vue';
-import WorkOrderTable from '@/components/order-item/WorkOrderTable.vue';
 import OrderSummaryCard from '@/components/orders/OrderSummaryCard.vue';
 import DeleteContainerDialog from '@/components/order-item/DeleteContainerDialog.vue';
 import PageLayout from '@/layouts/PageLayout.vue';
