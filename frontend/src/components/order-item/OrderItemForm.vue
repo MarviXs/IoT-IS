@@ -3,7 +3,7 @@
         <q-card-section class="q-pt-none column q-gutter-md">
             <!-- Select pre výber produktu -->
             <q-select v-model="orderItem.productId" :options="productOptions" :loading="loadingProducts"
-                label="Select Product" option-value="id" option-label="code" outlined dense use-input
+                label="Select Product" option-value="id" option-label="name" outlined dense use-input
                 input-debounce="300" emit-value map-options @popup-show="loadDefaultProducts" @filter="filterProducts"
                 @update:model-value="onProductSelected">
                 <template v-slot:no-option>
@@ -91,6 +91,7 @@ async function fetchProducts(searchTerm = '') {
         if (response?.data?.items) {
             productOptions.value = response.data.items.map((product) => ({
                 id: product.id,
+                name: product.czechName || product.latinName || 'Unnamed Product',
                 code: product.code || product.pluCode || 'Unnamed Product',
             }));
         } else {
