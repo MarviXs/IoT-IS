@@ -15,18 +15,18 @@
         <div class="summary-cell header-value">{{ t('order_summary.price_excl_vat_label') }}</div>
         <div class="summary-cell header-value">{{ t('order_summary.vat_label') }}</div>
         <div class="summary-cell header-value">{{ t('order_summary.price_incl_vat_label') }}</div>
-        
-        <!-- Druhý riadok pre sadzbu DPH 12% -->
-        <div class="summary-cell summary-label">{{ t('order_summary.vat_rate_12') }}</div>
-        <div class="summary-cell summary-value">{{ summary.vat12.priceExclVAT }}</div>
-        <div class="summary-cell summary-value">{{ summary.vat12.vat }}</div>
-        <div class="summary-cell summary-value">{{ summary.vat12.priceInclVAT }}</div>
 
-        <!-- Tretí riadok pre sadzbu DPH 21% -->
+        <!-- Druhý riadok pre DPH 12 % (vatReduced) -->
+        <div class="summary-cell summary-label">{{ t('order_summary.vat_rate_12') }}</div>
+        <div class="summary-cell summary-value">{{ summary.vatReduced.priceExcVat }}</div>
+        <div class="summary-cell summary-value">{{ summary.vatReduced.vat }}</div>
+        <div class="summary-cell summary-value">{{ summary.vatReduced.priceInclVat }}</div>
+
+        <!-- Tretí riadok pre DPH 21 % (vatNormal) -->
         <div class="summary-cell summary-label">{{ t('order_summary.vat_rate_21') }}</div>
-        <div class="summary-cell summary-value">{{ summary.vat21.priceExclVAT }}</div>
-        <div class="summary-cell summary-value">{{ summary.vat21.vat }}</div>
-        <div class="summary-cell summary-value">{{ summary.vat21.priceInclVAT }}</div>
+        <div class="summary-cell summary-value">{{ summary.vatNormal.priceExcVat }}</div>
+        <div class="summary-cell summary-value">{{ summary.vatNormal.vat }}</div>
+        <div class="summary-cell summary-value">{{ summary.vatNormal.priceInclVat }}</div>
 
         <!-- Štvrtý riadok pre celkovú sumu -->
         <div class="summary-cell summary-label total" style="grid-column: span 3">
@@ -41,30 +41,66 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps } from 'vue';
+import { ref, onMounted, watch, defineExpose } from 'vue';
 import { useI18n } from 'vue-i18n';
+import OrdersService from '@/api/services/OrdersService';
 
 const { t } = useI18n();
 
+// Definícia typu pre VAT sumár
+interface VatSummary {
+  priceExcVat: number;
+  vat: number;
+  priceInclVat: number;
+}
+
 // Definícia typu pre súhrn objednávky
 interface OrderSummary {
-  vat12: {
-    priceExclVAT: number;
-    vat: number;
-    priceInclVAT: number;
-  };
-  vat21: {
-    priceExclVAT: number;
-    vat: number;
-    priceInclVAT: number;
-  };
+  vatReduced: VatSummary;
+  vatNormal: VatSummary;
   total: number;
 }
 
-// Súhrnné údaje budú prichádzať cez prop
-const props = defineProps<{
-  summary: OrderSummary;
-}>();
+// Očakávame, že do komponentu bude poslané orderId
+interface Props {
+  orderId: string;
+}
+
+const props = defineProps<Props>();
+
+// Inicializácia summary s predvolenými hodnotami
+const summary = ref<OrderSummary>({
+  vatReduced: { priceExcVat: 0, vat: 0, priceInclVat: 0 },
+  vatNormal: { priceExcVat: 0, vat: 0, priceInclVat: 0 },
+  total: 0,
+});
+
+// Funkcia pre načítanie súhrnu objednávky z API
+async function loadSummary() {
+  try {
+    const response = await OrdersService.getSummary(props.orderId) as { data: OrderSummary };
+    if (response.data && typeof response.data === 'object') {
+      summary.value = response.data;
+    }
+  } catch (error) {
+    console.error('Chyba pri načítaní súhrnu objednávky:', error);
+  }
+}
+
+// Exponujeme metódu getSummary, aby ju bolo možné volať z rodičovského komponentu
+defineExpose({
+  getSummary: loadSummary,
+});
+
+// Pri prvom načítaní komponentu
+onMounted(() => {
+  loadSummary();
+});
+
+// Ak sa zmení orderId, znovu načítame súhrn
+watch(() => props.orderId, () => {
+  loadSummary();
+});
 </script>
 
 <style lang="scss" scoped>
@@ -87,7 +123,6 @@ const props = defineProps<{
   padding: 10px;
 }
 
-/* Použijeme CSS grid na zobrazenie údajov v niekoľkých riadkoch */
 .summary-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -101,9 +136,7 @@ const props = defineProps<{
   font-size: 0.9em;
 }
 
-/* Riadok s názvami stĺpcov */
-.header-label,
-.header-value {
+.header-label, .header-value {
   font-weight: bold;
   color: #333;
 }
@@ -114,7 +147,6 @@ const props = defineProps<{
   padding-bottom: 4px;
 }
 
-/* Štýly pre údaje */
 .summary-label {
   font-weight: 600;
   color: #444;

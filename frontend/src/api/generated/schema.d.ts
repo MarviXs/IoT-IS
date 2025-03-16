@@ -844,6 +844,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/orders/{orderId}/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get summary of an order by order ID */
+        get: operations["GetSummary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/orders/{orderId}": {
         parameters: {
             query?: never;
@@ -890,7 +907,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Decrease the quantity of a product in a container by 1 and remove it if quantity reaches 0 */
+        /** Decrease the quantity of a product in a container by 1, remove it if quantity reaches 0, and update container pricing */
         post: operations["DecreaseQuantityProduct"];
         delete?: never;
         options?: never;
@@ -907,7 +924,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Increase the quantity of a product in a container by 1 based on containerId and productId */
+        /** Increase the quantity of a product in a container by 1 and update container pricing */
         post: operations["IncreaseQuantityProduct"];
         delete?: never;
         options?: never;
@@ -995,7 +1012,7 @@ export interface paths {
         put?: never;
         /**
          * Add an item to an order container
-         * @description Adds an order item to a specified order container by container ID.
+         * @description Adds an order item to a specified order container by container ID. If the product's category is 'Práca', a container with name 'Práca' is used (or created) for the order.
          */
         post: operations["AddItemToContainer"];
         delete?: never;
@@ -1959,6 +1976,8 @@ export interface components {
             /** Format: uuid */
             id: string;
             code?: string | null;
+            latinName: string;
+            czechName?: string | null;
             pluCode: string;
             /** Format: uuid */
             categoryId: string;
@@ -4306,6 +4325,26 @@ export interface operations {
             };
         };
     };
+    GetSummary: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orderId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     DeleteOrder: {
         parameters: {
             query?: never;
@@ -4585,6 +4624,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
+                orderId: string;
                 containerId: string;
             };
             cookie?: never;
