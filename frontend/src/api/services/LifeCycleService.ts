@@ -8,6 +8,9 @@ export type ProductResponse = paths['/lifecycles/plant/{plantId}']['get']['respo
 export type CreatePlantRequest = paths['/lifecycles/plants']['post']['requestBody']['content']['application/json'];
 export type CreateAnalysisRequest = paths['/lifecycles']['post']['requestBody']['content']['application/json'];
 
+export type LifeBoardsQueryParams = paths['/lifeboards']['get']['parameters']['query'];
+export type LifeBoardsResponse = paths['/lifeboards']['get']['responses']['200']['content']['application/json'];
+
 
 class LifeCycleService {
   // Načítanie životných cyklov s podporou stránkovania a filtrovania
@@ -17,6 +20,10 @@ class LifeCycleService {
 
   async getLifeCyclesByPlantId(plantId: string) {
     return await client.GET('/lifecycles/plant/{plantId}', { params: { path: { plantId } } });
+  }
+
+  async getPlantBoards(queryParams: LifeBoardsQueryParams) {
+    return await client.GET('/lifeboards', { params: { query: queryParams } });
   }
 
   async deletePlant(id: string) {

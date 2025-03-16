@@ -163,6 +163,7 @@ const uploadPhoto = async (file: File) => {
   const formData = new FormData();
   formData.append('photo', file);
   formData.append('threshold', threshold.value.toString());
+  formData.append('mode', '0');
 
   try {
     const response = await fetch('http://localhost:5000/upload', {

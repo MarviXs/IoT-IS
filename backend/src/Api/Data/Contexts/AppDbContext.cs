@@ -67,6 +67,7 @@ public class AppDbContext
         //Life-cycle configurations
         modelBuilder.ApplyConfiguration(new PlantConfiguration());
         modelBuilder.ApplyConfiguration(new PlantAnalysisConfiguration());
+        modelBuilder.ApplyConfiguration(new PlantBoardConfiguration());
 
         modelBuilder.ApplyDataSeeds();
     }
@@ -106,6 +107,7 @@ public class AppDbContext
     //Life-cycle tables
     public DbSet<Plant> Plants { get; set; }
     public DbSet<PlantAnalysis> PlantAnalyses { get; set; }
+    public DbSet<PlantBoard> PlantBoards { get; set; }
 
     public override int SaveChanges()
     {

@@ -25,5 +25,10 @@ public class PlantConfiguration : IEntityTypeConfiguration<Plant>
             .WithOne(a => a.Plant)
             .HasForeignKey(a => a.PlantId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(p => p.PlantBoard)
+            .WithMany(pb => pb.Plants)
+            .HasForeignKey(p => p.PlantBoardId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }

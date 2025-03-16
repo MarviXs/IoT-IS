@@ -11,6 +11,16 @@
         :icon="mdiPlus"
         to="/lifecycle/analyze"
       />
+      <q-btn
+        class="shadow"
+        color="primary"
+        unelevated
+        no-caps
+        size="15px"
+        :label="t('lifecycle.add_plants')"
+        :icon="mdiPlus"
+        to="/lifecycle/analyze_more"
+      />
     </template>
     <template #default>
       <q-table
@@ -60,7 +70,7 @@
                 <q-btn :icon="mdiDotsVertical" color="grey-color" flat round>
                   <q-menu anchor="bottom right" self="top right">
                     <q-list>
-                      <q-item v-close-popup clickable @click="addRecord(treeProp.node.plantId)">
+                      <q-item v-close-popup clickable @click="addRecord(treeProp.node.plantBoardId)">
                         <div class="row items-center q-gutter-sm">
                           <q-icon color="grey-9" size="24px" :name="mdiSeedPlusOutline" />
                           <div>Add record</div>
@@ -87,6 +97,7 @@
         </template>
       </q-table>
     </template>
+
   </PageLayout>
 </template>
 
@@ -117,30 +128,30 @@ const collections = ref<CollectionNode[]>([]);
 
 const columns = computed(() => [
 {
-    name: 'plantId',
-    label: t('Plant ID'),
-    field: 'plantId',
+    name: 'plantBoardId',
+    label: t('Planting board ID'),
+    field: 'plantBoardId',
     required: true,
     style: 'text-align: left;',
     headerStyle: 'text-align: center;'
   },  
 {
-    name: 'name',
-    label: t('Plant Name'),
-    field: 'name',
+    name: 'rows',
+    label: t('Board Rows'),
+    field: 'rows',
     required: true,
     headerStyle: 'text-align: center;'
   },
   {
-    name: 'type',
-    label: t('Plant Type'),
-    field: 'type',
+    name: 'cols',
+    label: t('Board Columns'),
+    field: 'cols',
     required: true
   },
   {
-    name: 'days',
-    label: t('Days'),
-    field: 'days',
+    name: 'createdAt',
+    label: t('Created date'),
+    field: 'createdAt',
     required: true
   },
 ]);
@@ -149,14 +160,14 @@ async function loadCollections() {
   try {
     isLoadingCollections.value = true;
     const queryParams = {}; // Parametre
-    const response = await LifeCycleService.getLifeCycles(queryParams);
+    const response = await LifeCycleService.getPlantBoards(queryParams);
 
     collections.value = response.data?.items.map(item => ({
       id: item.id,
-      plantId: item.plantId,
-      name: item.name,
-      type: item.type,
-      days: calculateDays(item.datePlanted),
+      plantBoardId: item.plantBoardId,
+      rows: item.rows,
+      cols: item.cols,
+      createdAt: item.createdAt.substring(0, 10),
     })) || [];
   } catch (error) {
     console.error('Chyba pri načítavaní životných cyklov:', error);
@@ -178,10 +189,10 @@ function navigateToLifecycle(id: string) {
 
 interface CollectionNode {
   id: string;
-  plantId: string;
-  name: string;
-  type: string;
-  days: number;
+  plantBoardId: string;
+  rows: number;
+  cols: number;
+  createdAt: string;
 }
 
 // Načítanie dát pri mountovaní komponentu
