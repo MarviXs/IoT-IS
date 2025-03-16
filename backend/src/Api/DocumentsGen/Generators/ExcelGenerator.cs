@@ -31,7 +31,7 @@ namespace Fei.Is.Api.DocumentsGen.Generators
             return newDocumentPath;
         }
 
-        private void ProcessSheet(ISheet sheet, JObject data, int searchStartRowIndex, int searchEndRoxIndex, string currentPath)
+        private void ProcessSheet(ISheet sheet, Dictionary<string, object> values values, int searchStartRowIndex, int searchEndRoxIndex, string currentPath)
         {
             int startRow = -1;
             int endRow = -1;
@@ -88,7 +88,7 @@ namespace Fei.Is.Api.DocumentsGen.Generators
                         if (Regex.IsMatch(cellValue, REGEX_LIST_START_FORMAT))
                         {
                             string otherTag = Regex.Match(cellValue, REGEX_LIST_START_PATTERN).Groups[1].Value;
-                            ProcessSheet(sheet, data, nestedListStartIndex, endRow - 1, $"{currentPath}.{currentListTag}");
+                            ProcessSheet(sheet, values, nestedListStartIndex, endRow - 1, $"{currentPath}.{currentListTag}");
                         }
                     }
                 }
@@ -107,7 +107,6 @@ namespace Fei.Is.Api.DocumentsGen.Generators
                 sheet.RemoveRow(sheet.GetRow(i));
             }
 
-            var currentObject = data;
             int insertPos = startRow;
 
             foreach (var order in orders)
