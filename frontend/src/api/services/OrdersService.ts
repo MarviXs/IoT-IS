@@ -28,27 +28,18 @@ class OrdersService {
     return await client.PUT('/orders/{id}', { params: { path: { id: orderId } }, body });
   }
 
-  // Aktualizácia objednávky podľa ID
-  // async updateOrder(orderId: string, body: UpdateOrderRequest) {
-  //   return await client.PUT('/orders/{id}', { body, params: { path: { id: orderId } } });
-  // }
-
-  // Odstránenie objednávky podľa ID
-  
-  
-  
   async deleteOrder(orderId: string) {
-  return await client.DELETE('/orders/{orderId}', {
-    params: {
-      path: { orderId }
-    }
-  });
-}
+    return await client.DELETE('/orders/{orderId}', {
+      params: {
+        path: { orderId }
+      }
+    });
+  }
 
-  
-
-
-  
+  // Nová metóda pre získanie súhrnu objednávky
+  async getSummary(orderId: string) {
+    return await client.GET('/orders/{orderId}/summary', { params: { path: { orderId } } });
+  }
 }
 
 export default new OrdersService();

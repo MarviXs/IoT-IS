@@ -18,7 +18,7 @@
         @on-change="getOrderItemContainers(pagination)"
         @open-delete-dialog="openDeleteContainerDialog"
       />
-      <OrderSummaryCard :summary="orderSummary" />
+      <OrderSummaryCard :summary="orderSummary" :orderId="orderId" />
     </template>
   </PageLayout>
   <!-- Delete Container Dialog -->
