@@ -1,6 +1,9 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Runtime.InteropServices.JavaScript;
+using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
 using MathNet.Numerics.Distributions;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
@@ -10,7 +13,7 @@ namespace Fei.Is.Api.DocumentsGen.Generators
 {
     public class ExcelGenerator : DocumentGen
     {
-        public override string ApplyFields(string documentPath, Dictionary<string, object> values)
+        public override string ApplyFields(string documentPath, JToken values)
         {
             IWorkbook wb = new XSSFWorkbook(documentPath);
 
@@ -18,7 +21,7 @@ namespace Fei.Is.Api.DocumentsGen.Generators
             {
                 ISheet sheet = wb.GetSheetAt(i);
 
-                ProcessSheet(sheet, StubbleRenderer, values, "");
+                ProcessSheet(sheet, values);
             }
 
             string newDocumentPath = Path.Combine(Path.GetTempPath(), Path.GetFileName(documentPath));
@@ -31,142 +34,93 @@ namespace Fei.Is.Api.DocumentsGen.Generators
             return newDocumentPath;
         }
 
-        private void ProcessSheet(ISheet sheet, Dictionary<string, object> values values, int searchStartRowIndex, int searchEndRoxIndex, string currentPath)
+
+        private void ProcessSheet(ISheet sheet, JToken values)
         {
-            int startRow = -1;
-            int endRow = -1;
-            string currentListTag = string.Empty;
+            List<TemplateList> listTags = new List<TemplateList>();
 
-            // Find the main list block {{#Orders}} and {{/Orders}}
-            for (int row = searchStartRowIndex; row <= searchStartRowIndex; row++)
+            foreach (IRow row in sheet)
             {
-                IRow currentRow = sheet.GetRow(row);
+                foreach (ICell cell in row)
+                {
+                    if (cell.CellType != CellType.String)
+                        continue;
 
-                if (currentRow == null)
+                    if (Regex.IsMatch(cell.StringCellValue, REGEX_LIST_START_PATTERN))
+                    {
+                        TemplateList listTag = new TemplateList();
+                        listTag.startRowIndex = cell.RowIndex;
+                        listTag.tag = Regex.Match(cell.StringCellValue, REGEX_LIST_START_PATTERN).Groups[1].Value;
+                        listTags.Add(listTag);
+                    }
+
+                    if (Regex.IsMatch(cell.StringCellValue, REGEX_LIST_END_PATTERN))
+                    {
+                        TemplateList? listTag = listTags.Find(tag => tag.tag == Regex.Match(cell.StringCellValue, REGEX_LIST_END_PATTERN).Groups[1].Value);
+                        if (listTag is not null)
+                        {
+                            listTag.endRowIndex = cell.RowIndex;
+                        }
+                    }
+                } 
+            }
+
+            foreach (TemplateList listTag in listTags)
+            {
+                JToken? listValues = values.SelectToken(listTag.tag);
+
+                if (listValues is null)
                 {
                     continue;
                 }
 
-                currentRow.Cells.ForEach(cell =>
-                {
-                    if (cell != null && cell.CellType == CellType.String)
-                    {
-                        string cellValue = cell.StringCellValue;
-                        if (startRow == -1 && Regex.IsMatch(cellValue, REGEX_LIST_START_PATTERN))
-                        {
-                            currentListTag = Regex.Match(cellValue, REGEX_LIST_START_PATTERN).Groups[1].Value;
-                            startRow = row;
-                        }
-                        if (endRow == -1 && cellValue.Equals(String.Format(REGEX_LIST_END_FORMAT, currentListTag)))
-                        {
-                            endRow = row;
-                        }
-                    }
-                });
+                FillList(sheet, listValues, listTag.startRowIndex, listTag.endRowIndex);
             }
 
-            if (startRow == -1 || endRow == -1)
+            foreach (IRow row in sheet)
             {
-                Console.WriteLine("⚠️ Missing list placeholders in template.");
+                foreach (ICell cell in row)
+                {
+                    if (cell.CellType == CellType.String && Regex.IsMatch(cell.StringCellValue, REGEX_ITEM_PATTERN))
+                    {
+                        string renderedString = StubbleRenderer.Render(cell.StringCellValue, values);
+                        cell.SetCellValue(renderedString);
+                    }
+                }
+            }
+        }
+
+        private void FillList(ISheet sheet, JToken values, int searchStartRowIndex, int searchEndRoxIndex)
+        {
+            ICell? listStartTemplate = sheet.GetRow(searchStartRowIndex).Cells.Find(cell => Regex.IsMatch(cell.StringCellValue, REGEX_LIST_START_PATTERN));
+
+            if (listStartTemplate == null)
+            {
                 return;
             }
 
-            for (int nestedListStartIndex = startRow + 1; nestedListStartIndex < endRow; nestedListStartIndex++)
+            for (int i = 1; i <= values.Count(); i++)
             {
-                IRow row = sheet.GetRow(nestedListStartIndex);
-                if (row != null)
-                {
-                    for (int j = 0; j < row.LastCellNum; j++)
-                    {
-                        ICell cell = row.GetCell(j);
-                        if (cell == null || cell.CellType != CellType.String)
-                        {
-                            continue;
-                        }
+                IRow newRow = sheet.CopyRow(searchStartRowIndex + 1, searchStartRowIndex + 1 + i);
 
-                        string cellValue = cell.StringCellValue;
-                        if (Regex.IsMatch(cellValue, REGEX_LIST_START_FORMAT))
-                        {
-                            string otherTag = Regex.Match(cellValue, REGEX_LIST_START_PATTERN).Groups[1].Value;
-                            ProcessSheet(sheet, values, nestedListStartIndex, endRow - 1, $"{currentPath}.{currentListTag}");
-                        }
+                foreach(ICell cell in newRow)
+                {
+                    if (cell != null && cell.CellType == CellType.String && Regex.IsMatch(cell.StringCellValue, REGEX_ITEM_PATTERN))
+                    {
+                        string renderedString = StubbleRenderer.Render(cell.StringCellValue, values[i - 1]);
+                        cell.SetCellValue(renderedString);
                     }
                 }
             }
 
-            // Extract order template
-            List<IRow> orderTemplate = new List<IRow>();
-            for (int i = startRow + 1; i < endRow; i++)
-            {
-                orderTemplate.Add(sheet.GetRow(i));
-            }
+            sheet.RemoveRow(sheet.GetRow(searchStartRowIndex));
+            sheet.ShiftRows(searchStartRowIndex + 1, sheet.LastRowNum, -1);
 
-            // Remove template rows
-            for (int i = endRow; i >= startRow; i--)
-            {
-                sheet.RemoveRow(sheet.GetRow(i));
-            }
+            sheet.RemoveRow(sheet.GetRow(searchStartRowIndex));
+            sheet.ShiftRows(searchStartRowIndex + 1, sheet.LastRowNum, -1);
 
-            int insertPos = startRow;
-
-            foreach (var order in orders)
-            {
-                foreach (IRow templateRow in orderTemplate)
-                {
-                    IRow newRow = sheet.CreateRow(insertPos++);
-                    CopyRow(templateRow, newRow);
-
-                    // Render placeholders
-                    for (int col = 0; col < templateRow.LastCellNum; col++)
-                    {
-                        ICell cell = newRow.GetCell(col);
-                        if (cell != null && cell.CellType == CellType.String)
-                        {
-                            cell.SetCellValue(stubble.Render(cell.StringCellValue, order));
-                        }
-                    }
-
-                    // Check if this row contains nested `{{#Items}}`
-                    if (templateRow.GetCell(0) != null && templateRow.GetCell(0).StringCellValue.Contains("{{#Items}}"))
-                    {
-                        int itemsStartRow = insertPos - 1; // The row where items should start
-                        int itemsEndRow = FindEndIndex(orderTemplate, "{{/Items}}");
-
-                        if (itemsEndRow == -1)
-                            continue; // No nested list found
-
-                        // Extract items template rows
-                        List<IRow> itemsTemplate = new List<IRow>();
-                        for (int i = itemsStartRow + 1; i < itemsEndRow + startRow; i++)
-                        {
-                            itemsTemplate.Add(sheet.GetRow(i));
-                        }
-
-                        var items = (List<Dictionary<string, object>>)order["Items"];
-                        int itemInsertPos = insertPos;
-
-                        foreach (var item in items)
-                        {
-                            foreach (IRow itemTemplateRow in itemsTemplate)
-                            {
-                                IRow newItemRow = sheet.CreateRow(itemInsertPos++);
-                                CopyRow(itemTemplateRow, newItemRow);
-
-                                for (int col = 0; col < itemTemplateRow.LastCellNum; col++)
-                                {
-                                    ICell cell = newItemRow.GetCell(col);
-                                    if (cell != null && cell.CellType == CellType.String)
-                                    {
-                                        cell.SetCellValue(stubble.Render(cell.StringCellValue, item));
-                                    }
-                                }
-                            }
-                        }
-
-                        insertPos = itemInsertPos; // Update position after inserting items
-                    }
-                }
-            }
+            sheet.RemoveRow(sheet.GetRow(searchEndRoxIndex + values.Count() - 2));
+            sheet.ShiftRows(searchEndRoxIndex - 1 + values.Count(), sheet.LastRowNum, -1);
         }
     }
 }

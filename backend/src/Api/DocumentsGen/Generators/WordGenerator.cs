@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using Newtonsoft.Json.Linq;
 using NPOI.HSSF.UserModel;
 using NPOI.OpenXml4Net.OPC;
 using NPOI.SS.Formula;
@@ -11,7 +12,7 @@ namespace Fei.Is.Api.DocumentsGen.Generators
 {
     public class WordGenerator : DocumentGen
     {
-        public override string ApplyFields(string documentPath, Dictionary<string, string> values)
+        public override string ApplyFields(string documentPath, JToken values)
         {
             /*XWPFDocument document = new XWPFDocument(OPCPackage.Open(documentPath));
 
