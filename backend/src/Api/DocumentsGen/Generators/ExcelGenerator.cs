@@ -5,7 +5,9 @@ using MathNet.Numerics.Distributions;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using NPOI.HPSF;
 using NPOI.HSSF.UserModel;
+using NPOI.POIFS.NIO;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
 
@@ -15,7 +17,12 @@ namespace Fei.Is.Api.DocumentsGen.Generators
     {
         public override string ApplyFields(string documentPath, JToken values)
         {
-            XSSFWorkbook wb = new XSSFWorkbook(documentPath);
+            XSSFWorkbook wb;
+
+            using (FileStream fs = new FileStream(documentPath, FileMode.Open, FileAccess.Read))
+            {
+                wb = new XSSFWorkbook(fs);
+            }
 
             for (int i = 0; i < wb.NumberOfSheets; i++)
             {
@@ -25,7 +32,6 @@ namespace Fei.Is.Api.DocumentsGen.Generators
             }
 
             string newDocumentPath = Path.Combine(Path.GetTempPath(), Path.GetFileName(documentPath));
-
             using (var fs = new FileStream(newDocumentPath, FileMode.Create, FileAccess.Write))
             {
                 wb.Write(fs);
