@@ -102,7 +102,10 @@
     "change_role": "Zmeniť rolu",
     "change_role_desc": "Zmeniť rolu používateľa.",
     "document_links": "Linky na dokumenty",
-    "document_link": "Link k dokumentu",
+    "document_link": "Dokument",
+    "payroll": "Daňový doklad",
+    "price_list": "Cenník",
+    "offer_sheet": "List ponuky",
     "toasts": {
       "get_user_failed": "Načítanie používateľa zlyhalo! | Načítanie používateľov zlyhalo!",
       "email_update_success": "E-mail bol aktualizovaný!",

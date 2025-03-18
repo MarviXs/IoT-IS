@@ -21,7 +21,17 @@
         </q-tabs>
       </q-card>
       <document-link-card
-        document-type="Payroll"
+        :document-type="t('account.payroll')"
+        :loading="loading"
+        @onSubmit="handleDocumentLinkSubmit"
+      />
+      <document-link-card
+        :document-type="t('account.price_list')"
+        :loading="loading"
+        @onSubmit="handleDocumentLinkSubmit"
+      />
+      <document-link-card
+        :document-type="t('account.offer_sheet')"
         :loading="loading"
         @onSubmit="handleDocumentLinkSubmit"
       />

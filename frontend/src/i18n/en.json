@@ -105,7 +105,10 @@
     "change_role": "Change role",
     "change_role_desc": "Change user's role.",
     "document_links": "Document Links",
-    "document_link": "Document Link",
+    "document_link": "Document",
+    "payroll": "Payroll",
+    "price_list": "Price list",
+    "offer_sheet": "Offer sheet",
     "toasts": {
       "get_user_failed": "Loading user failed! | Loading users failed!",
       "email_update_success": "Email updated!",

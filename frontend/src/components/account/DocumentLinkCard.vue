@@ -1,6 +1,6 @@
 <template>
-    <q-card class="shadow q-pa-lg">
-      <div class="row items-center q-mb-md">
+  <q-card class="shadow q-pa-lg q-mb-md">
+    <div class="row items-center q-mb-md">
         <div class="col-4 text-h6">{{ documentType }}</div>
         <div class="col-8">
           <q-form ref="qform" autocomplete="off">
@@ -72,7 +72,7 @@
   const linkRules = [
     (val: string) => (val && val.length > 0) || t('global.rules.required'),
     (val: string) => {
-      const urlRegex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
+      const urlRegex = /^[\w,\s-]+\.[A-Za-z]{3,4}$/;
       return urlRegex.test(val) || t('account.rules.link_invalid');
     },
   ];
