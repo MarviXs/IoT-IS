@@ -83,7 +83,7 @@ namespace Fei.Is.Api.DocumentsGen.Generators
                 FillList(sheet, listValues, listTag.startRow, listTag.endRow);
             }
 
-            /*foreach (IRow row in sheet)
+            foreach (IRow row in sheet)
             {
                 foreach (ICell cell in row)
                 {
@@ -93,7 +93,7 @@ namespace Fei.Is.Api.DocumentsGen.Generators
                         cell.SetCellValue(renderedString);
                     }
                 }
-            }*/
+            }
         }
 
         private void FillList(ISheet sheet, JToken values, IRow listStartRow, IRow listEndRow)
