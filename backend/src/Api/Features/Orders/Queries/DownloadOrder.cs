@@ -64,28 +64,28 @@ public static class DownloadOrder
         {
             var order = context
                 .Orders.AsNoTracking()
-                .Include(o => o.Customer) // Načítanie priradenej zákazníckej entity
+                .Include(o => o.Customer)
+                .Include(o => o.ItemContainers)
+                .ThenInclude(ic => ic.Items)
+                .ThenInclude(i => i.Product)
                 .Where(o => o.Id == message.Id);
 
             if (!await order.AnyAsync())
             {
                 return Result.Fail(new NotFoundError());
             }
+
             string path = "C:\\Users\\Jakub\\Downloads\\ponuka.xlsx";
             ExcelGenerator excelGenerator = new();
-            List<string> fields = excelGenerator.GetFields(path);
 
-            JToken jsonObject = JToken.FromObject(order);
+            JToken? jsonObject = JToken.FromObject(order).SelectToken("[0]");
 
-            Dictionary<string, string> fieldsWithValues = new();
-
-            foreach (var field in fields) {
-                string parsedField = field.Substring(2, field.Length - 4);
-                fieldsWithValues[field] = jsonObject.SelectToken("[0]." + parsedField)?.ToString() ?? String.Empty;
+            if (jsonObject == null)
+            {
+                return Result.Fail(new NotFoundError());
             }
 
-            string retDocPath = excelGenerator.ApplyFields(path, fieldsWithValues);
-
+            string retDocPath = excelGenerator.ApplyFields(path, jsonObject);
 
             return new FileStream(retDocPath, FileMode.Open, FileAccess.Read);
         }
