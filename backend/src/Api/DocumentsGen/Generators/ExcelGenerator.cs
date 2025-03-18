@@ -15,7 +15,7 @@ namespace Fei.Is.Api.DocumentsGen.Generators
     {
         public override string ApplyFields(string documentPath, JToken values)
         {
-            IWorkbook wb = new XSSFWorkbook(documentPath);
+            XSSFWorkbook wb = new XSSFWorkbook(documentPath);
 
             for (int i = 0; i < wb.NumberOfSheets; i++)
             {
@@ -49,7 +49,7 @@ namespace Fei.Is.Api.DocumentsGen.Generators
                     if (Regex.IsMatch(cell.StringCellValue, REGEX_LIST_START_PATTERN))
                     {
                         TemplateList listTag = new TemplateList();
-                        listTag.startRowIndex = cell.RowIndex;
+                        listTag.startRow = row;
                         listTag.tag = Regex.Match(cell.StringCellValue, REGEX_LIST_START_PATTERN).Groups[1].Value;
                         listTags.Add(listTag);
                     }
@@ -59,10 +59,10 @@ namespace Fei.Is.Api.DocumentsGen.Generators
                         TemplateList? listTag = listTags.Find(tag => tag.tag == Regex.Match(cell.StringCellValue, REGEX_LIST_END_PATTERN).Groups[1].Value);
                         if (listTag is not null)
                         {
-                            listTag.endRowIndex = cell.RowIndex;
+                            listTag.endRow = row;
                         }
                     }
-                } 
+                }
             }
 
             foreach (TemplateList listTag in listTags)
@@ -74,10 +74,10 @@ namespace Fei.Is.Api.DocumentsGen.Generators
                     continue;
                 }
 
-                FillList(sheet, listValues, listTag.startRowIndex, listTag.endRowIndex);
+                FillList(sheet, listValues, listTag.startRow, listTag.endRow);
             }
 
-            foreach (IRow row in sheet)
+            /*foreach (IRow row in sheet)
             {
                 foreach (ICell cell in row)
                 {
@@ -87,40 +87,56 @@ namespace Fei.Is.Api.DocumentsGen.Generators
                         cell.SetCellValue(renderedString);
                     }
                 }
-            }
+            }*/
         }
 
-        private void FillList(ISheet sheet, JToken values, int searchStartRowIndex, int searchEndRoxIndex)
+        private void FillList(ISheet sheet, JToken values, IRow listStartRow, IRow listEndRow)
         {
-            ICell? listStartTemplate = sheet.GetRow(searchStartRowIndex).Cells.Find(cell => Regex.IsMatch(cell.StringCellValue, REGEX_LIST_START_PATTERN));
+            List<IRow> innerTemplateRows = new List<IRow>();
 
-            if (listStartTemplate == null)
+            for (int i = listStartRow.RowNum + 1; i < listEndRow.RowNum; i++)
             {
-                return;
+                innerTemplateRows.Add(sheet.GetRow(i));
             }
 
-            for (int i = 1; i <= values.Count(); i++)
+            for (int currentObjectIndex = 1; currentObjectIndex <= values.Count(); currentObjectIndex++)
             {
-                IRow newRow = sheet.CopyRow(searchStartRowIndex + 1, searchStartRowIndex + 1 + i);
+                int innerListStartIndex = listStartRow.RowNum + (currentObjectIndex) * innerTemplateRows.Count + 1;
 
-                foreach(ICell cell in newRow)
+                for (int currentInnerRowIndex = 0; currentInnerRowIndex < innerTemplateRows.Count; currentInnerRowIndex++)
                 {
-                    if (cell != null && cell.CellType == CellType.String && Regex.IsMatch(cell.StringCellValue, REGEX_ITEM_PATTERN))
+                    IRow newRow = sheet.CopyRow(innerTemplateRows[currentInnerRowIndex].RowNum, innerListStartIndex + currentInnerRowIndex);
+
+                    foreach (ICell cell in newRow)
                     {
-                        string renderedString = StubbleRenderer.Render(cell.StringCellValue, values[i - 1]);
-                        cell.SetCellValue(renderedString);
+                        FillCell(cell, values[currentObjectIndex - 1]);
                     }
                 }
             }
 
-            sheet.RemoveRow(sheet.GetRow(searchStartRowIndex));
-            sheet.ShiftRows(searchStartRowIndex + 1, sheet.LastRowNum, -1);
+            DeleteRow(sheet, listStartRow);
 
-            sheet.RemoveRow(sheet.GetRow(searchStartRowIndex));
-            sheet.ShiftRows(searchStartRowIndex + 1, sheet.LastRowNum, -1);
+            innerTemplateRows.ForEach(row => DeleteRow(sheet, row));
 
-            sheet.RemoveRow(sheet.GetRow(searchEndRoxIndex + values.Count() - 2));
-            sheet.ShiftRows(searchEndRoxIndex - 1 + values.Count(), sheet.LastRowNum, -1);
+            DeleteRow(sheet, listEndRow);
+        }
+
+        private void FillCell(ICell cell, JToken? values)
+        {
+            if (values is null)
+            {
+                return;
+            }
+            if (cell != null && cell.CellType == CellType.String && Regex.IsMatch(cell.StringCellValue, REGEX_ITEM_PATTERN))
+            {
+                string renderedString = StubbleRenderer.Render(cell.StringCellValue, values);
+                cell.SetCellValue(renderedString);
+            }
+        }
+
+        private void DeleteRow(ISheet sheet, IRow row)
+        {
+            sheet.ShiftRows(row.RowNum + 1, sheet.LastRowNum, -1);
         }
     }
 }
