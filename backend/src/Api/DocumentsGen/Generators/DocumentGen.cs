@@ -7,7 +7,8 @@ namespace Fei.Is.Api.DocumentsGen.Generators
 {
     public abstract class DocumentGen
     {
-        protected const string REGEX_ITEM_PATTERN = @"{{(.*?)}}";
+        protected const string REGEX_LIST_ITEM_PATTERN = "{{(.*?)}}";
+        protected const string REGEX_ITEM_PATTERN = "{{([^./#][^}]*)}}";
         protected const string REGEX_LIST_START_PATTERN = "{{#(.*?)}}";
         protected const string REGEX_LIST_START_FORMAT = "{{#%s}}";
         protected const string REGEX_LIST_END_PATTERN = "{{/(.*?)}}";

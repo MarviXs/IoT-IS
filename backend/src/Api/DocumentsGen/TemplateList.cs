@@ -4,8 +4,10 @@ namespace Fei.Is.Api.DocumentsGen
 {
     public class TemplateList
     {
-        public IRow startRow { get; set; }
-        public IRow endRow { get; set; }
+        public TemplateRow startRow { get; set; }
+        public TemplateRow endRow { get; set; }
         public string tag { get; set; }
+
+        public List<TemplateRow> insertedRows = new List<TemplateRow>();
     }
 }
