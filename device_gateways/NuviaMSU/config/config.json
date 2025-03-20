@@ -1,0 +1,10 @@
+{
+  "api_url": "http://localhost:5097",
+  "jobRefreshTime": 1000,
+  "devices": [
+    {
+      "accessToken": "XLbYLWnhsx8rnDifjfEFeOOo",
+      "address": "localhost:3001"
+    }
+  ]
+}

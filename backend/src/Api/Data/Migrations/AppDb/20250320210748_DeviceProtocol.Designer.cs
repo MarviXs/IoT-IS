@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Fei.Is.Api.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Fei.Is.Api.Data.Migrations.AppDb
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250320210748_DeviceProtocol")]
+    partial class DeviceProtocol
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -252,6 +255,9 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("Connection")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -267,9 +273,6 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.Property<Guid>("OwnerId")
                         .HasColumnType("uuid");
-
-                    b.Property<int>("Protocol")
-                        .HasColumnType("integer");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");

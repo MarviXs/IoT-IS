@@ -13,6 +13,15 @@
           </q-icon>
         </template>
       </q-input>
+      <q-select
+        v-model="device.protocol"
+        :options="protocolOptions"
+        label="Protocol"
+        class="q-mt-lg"
+        :rules="[(val) => !!val || t('global.rules.required')]"
+        emit-value
+        map-options
+      />
     </q-card-section>
     <q-card-actions align="right" class="text-primary">
       <q-btn v-close-popup flat :label="t('global.cancel')" no-caps />
@@ -42,6 +51,7 @@ export interface DeviceFormData {
   name: string;
   accessToken: string;
   deviceTemplate?: DeviceTemplateSelectData;
+  protocol: 'MQTT' | 'HTTP';
 }
 
 const props = defineProps<{
@@ -51,6 +61,11 @@ const props = defineProps<{
 const emit = defineEmits(['onSubmit']);
 
 const { t } = useI18n();
+
+const protocolOptions = [
+  { label: 'MQTT', value: 'MQTT' },
+  { label: 'HTTP', value: 'HTTP' },
+];
 
 async function generateAccessToken() {
   const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';

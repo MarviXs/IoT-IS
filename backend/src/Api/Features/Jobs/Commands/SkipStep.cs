@@ -56,12 +56,31 @@ public static class SkipStep
         public async Task<Result<Guid>> Handle(Command message, CancellationToken cancellationToken)
         {
             var job = await context.Jobs.Include(j => j.Device).FirstOrDefaultAsync(j => j.Id == message.JobId, cancellationToken);
-            if (job == null)
+            if (job == null || job.Device == null)
             {
                 return Result.Fail(new NotFoundError());
             }
 
-            return await publishJobControl.Execute(job.Device.AccessToken, message.JobId, JobControl.JOB_SKIP_STEP);
+            if (job.Device.Protocol == DeviceConnectionProtocol.MQTT)
+            {
+                return await publishJobControl.Execute(job.Device.AccessToken, message.JobId, JobControl.JOB_SKIP_STEP);
+            }
+            else
+            {
+                job.CurrentStep++;
+                if (job.CurrentStep > job.TotalSteps)
+                {
+                    job.CurrentStep = 1;
+                    job.CurrentCycle++;
+                }
+                if (job.CurrentCycle > job.TotalCycles)
+                {
+                    job.CurrentCycle = job.TotalCycles;
+                }
+
+                await context.SaveChangesAsync(cancellationToken);
+                return Result.Ok(job.Id);
+            }
         }
     }
 }

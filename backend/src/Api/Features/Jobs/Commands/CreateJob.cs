@@ -26,7 +26,7 @@ public static class CreateJob
         {
             app.MapPost(
                     "devices/{deviceId:guid}/jobs",
-                    async Task<Results<Created<Guid>, NotFound,ForbidHttpResult, ValidationProblem>> (
+                    async Task<Results<Created<Guid>, NotFound, ForbidHttpResult, ValidationProblem>> (
                         IMediator mediator,
                         ClaimsPrincipal user,
                         Request request,
@@ -75,7 +75,9 @@ public static class CreateJob
                 return Result.Fail(new ValidationError(result));
             }
 
-            var device = await context.Devices.Include(d => d.SharedWithUsers).FirstOrDefaultAsync(device => device.Id == message.DeviceId, cancellationToken);
+            var device = await context
+                .Devices.Include(d => d.SharedWithUsers)
+                .FirstOrDefaultAsync(device => device.Id == message.DeviceId, cancellationToken);
             if (device == null)
             {
                 return Result.Fail(new NotFoundError());

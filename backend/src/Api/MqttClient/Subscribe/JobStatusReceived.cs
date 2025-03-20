@@ -70,7 +70,6 @@ public class JobStatusReceived(AppDbContext appContext, RedisService redis, IHub
         job.FinishedAt = DateTimeOffset.FromUnixTimeMilliseconds(jobFbs.FinishedAt).UtcDateTime;
         await appContext.SaveChangesAsync(cancellationToken);
 
-        var currentCommand = job.Commands.ElementAtOrDefault(job.CurrentStep - 1)?.DisplayName ?? string.Empty;
         var jobUpdate = new JobUpdateDto(
             job.Id,
             job.DeviceId,
@@ -79,7 +78,7 @@ public class JobStatusReceived(AppDbContext appContext, RedisService redis, IHub
             job.TotalCycles,
             job.CurrentStep,
             job.CurrentCycle,
-            currentCommand,
+            job.GetCurrentCommand(),
             job.Paused,
             job.GetProgress(),
             job.Status
