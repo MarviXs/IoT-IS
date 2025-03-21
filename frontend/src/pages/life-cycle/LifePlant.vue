@@ -72,7 +72,8 @@ const plants = ref<{
 // Table columns
 const columns = ref([
   { name: 'id', required: true, label: 'Plant ID', align: 'left', field: 'plantId', sortable: true },
-  { name: 'health', required: true, label: 'Health', align: 'left', field: 'health', sortable: true },
+  { name: 'disease', required: true, label: 'Disease', align: 'left', field: 'disease', sortable: true },
+  { name: 'area', required: true, label: 'Size', align: 'right', field: 'area', sortable: true },
   { name: 'leafCount', required: true, label: 'Leaf Count', align: 'right', field: 'leafCount', sortable: true },
   { name: 'date', required: true, label: 'Date', align: 'left', field: 'analysisDate', sortable: true },
   { name: 'progress', required: true, label: 'Progress', align: 'left', field: 'progress', sortable: false },

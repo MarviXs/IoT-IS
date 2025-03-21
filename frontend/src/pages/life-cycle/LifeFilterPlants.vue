@@ -2,25 +2,15 @@
   <PageLayout :breadcrumbs="[{ label: t('lifecycle.label', 2) }]">
     <template #actions>
       <q-btn
-        class="shadow"
-        color="primary"
-        unelevated
-        no-caps
-        size="15px"
-        :label="t('lifecycle.add_plant')"
-        :icon="mdiPlus"
-        to="/lifecycle/analyze"
-      />
-      <q-btn
-        class="shadow"
-        color="primary"
-        unelevated
-        no-caps
-        size="15px"
-        :label="t('lifecycle.add_plants')"
-        :icon="mdiPlus"
-        to="/lifecycle/analyze_more"
-      />
+      class="shadow"
+      color="primary"
+      unelevated
+      no-caps
+      size="15px"
+      :label="t('lifecycle.add_plants')"
+      :icon="mdiPlus"
+      @click="navigateToAnalyzeMore"
+    />
     </template>
     <template #default>
       <q-table
@@ -33,7 +23,9 @@
         :loading-label="t('table.loading_label')"
         :rows-per-page-label="t('table.rows_per_page_label')"
         row-key="id"
+        v-model:pagination="pagination"
         :columns="columns"
+        @request="onRequest"
       >
         <template #no-data="{ message }">
           <div class="full-width column flex-center q-pa-lg nothing-found-text">
@@ -41,25 +33,15 @@
             {{ message }}
           </div>
         </template>
-        <template #body-cell-plantBoardId="props">
-          <q-td :props="props">
-            <span
-              @click="onPlantBoardClick(props.row)"
-              class="cursor-pointer text-blue"
-            >
-              {{ props.row.plantBoardId }}
-            </span>
-          </q-td>
-        </template>
         <template #body-cell-name="props">
-          <q-td :props="props" @click="onRowClick(props.row)">
+          <q-td :props="props">
             <q-tree
               v-model:selected="selected"
               v-model:expanded="expandedNodes"
               :nodes="[props.row]"
               selected-color="black"
               node-key="id"
-              label-key="plantBoardId"
+              label-key="name"
               children-key="items"
             >
               <template #default-header="treeProp">
@@ -80,7 +62,7 @@
                 <q-btn :icon="mdiDotsVertical" color="grey-color" flat round>
                   <q-menu anchor="bottom right" self="top right">
                     <q-list>
-                      <q-item v-close-popup clickable @click="addRecord(treeProp.node.plantBoardId)">
+                      <q-item v-close-popup clickable @click="addRecord(treeProp.node.plantId)">
                         <div class="row items-center q-gutter-sm">
                           <q-icon color="grey-9" size="24px" :name="mdiSeedPlusOutline" />
                           <div>Add record</div>
@@ -113,7 +95,7 @@
 <script setup lang="ts">
 import { QTableProps } from 'quasar';
 import { computed, ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import {
   mdiHubspot,
@@ -122,61 +104,95 @@ import {
   mdiPencil,
   mdiTrashCan,
   mdiDotsVertical,
-  mdiSeedPlusOutline
+  mdiSeedPlusOutline 
 } from '@quasar/extras/mdi-v7';
 import PageLayout from '@/layouts/PageLayout.vue';
-import LifeCycleService from '@/api/services/LifeCycleService';
+import LifeCycleService, { PlantsCollectionQueryParams } from '@/api/services/LifeCycleService';
+import { PaginationClient, PaginationTable } from '@/models/Pagination';
+import { watch } from 'vue';
 
 const { t } = useI18n();
+
+const pagination = ref<PaginationClient>({
+  sortBy: 'name',
+  descending: false,
+  page: 1,
+  rowsPerPage: 20,
+  rowsNumber: 0,
+});
+
+watch(pagination, (newPagination) => {
+  console.log('Paginácia sa zmenila:', newPagination);
+  loadCollections(newPagination);
+}, { immediate: true });
+
 const router = useRouter();
+const route = useRoute();
 
 const selected = ref('');
 const expandedNodes = ref<string[]>([]);
 const isLoadingCollections = ref(false);
 const collections = ref<CollectionNode[]>([]);
+const plantId = route.params.id;
 
 const columns = computed(() => [
-  {
-    name: 'plantBoardId',
-    label: t('Planting board ID'),
-    field: 'plantBoardId',
+{
+    name: 'plantId',
+    label: t('Plant ID'),
+    field: 'plantId',
     required: true,
     style: 'text-align: left;',
     headerStyle: 'text-align: center;'
   },  
-  {
-    name: 'rows',
-    label: t('Board Rows'),
-    field: 'rows',
+{
+    name: 'name',
+    label: t('Plant Name'),
+    field: 'name',
     required: true,
+    headerStyle: 'text-align: center;'
   },
   {
-    name: 'cols',
-    label: t('Board Columns'),
-    field: 'cols',
+    name: 'type',
+    label: t('Plant Type'),
+    field: 'type',
     required: true
   },
   {
-    name: 'createdAt',
-    label: t('Created date'),
-    field: 'createdAt',
+    name: 'days',
+    label: t('Days'),
+    field: 'days',
     required: true
   },
 ]);
 
-async function loadCollections() {
+async function loadCollections(paginationTable: PaginationTable) {
+  const paginationQuery: PlantsCollectionQueryParams = {
+    SortBy: paginationTable.sortBy,
+    Descending: paginationTable.descending,
+    PageNumber: paginationTable.page,
+    PageSize: paginationTable.rowsPerPage,
+  };
+  let tmpResponse;
+
   try {
     isLoadingCollections.value = true;
     const queryParams = {}; // Parametre
-    const response = await LifeCycleService.getPlantBoards(queryParams);
+    const response = await LifeCycleService.getPlantsByBoard(plantId.toString(), paginationQuery);
 
     collections.value = response.data?.items.map(item => ({
       id: item.id,
-      plantBoardId: item.plantBoardId,
-      rows: item.rows,
-      cols: item.cols,
-      createdAt: item.createdAt.substring(0, 10),
+      plantId: item.plantId,
+      name: item.name,
+      type: item.type,
+      days: calculateDays(item.datePlanted),
     })) || [];
+
+    
+    pagination.value.sortBy = paginationTable.sortBy;
+    pagination.value.descending = paginationTable.descending;
+    pagination.value.page = (response.data?.currentPage ?? 1);
+    pagination.value.rowsPerPage = response.data?.pageSize ?? 10;
+    pagination.value.rowsNumber = response.data?.totalCount ?? 0;
   } catch (error) {
     console.error('Chyba pri načítavaní životných cyklov:', error);
   } finally {
@@ -184,35 +200,34 @@ async function loadCollections() {
   }
 }
 
+function calculateDays(datePlanted: string): number {
+  const date = new Date(datePlanted);
+  const now = new Date();
+  const diffTime = Math.abs(now.getTime() - date.getTime());
+  return Math.ceil(diffTime / (1000 * 60 * 60 * 24)); // Konvertujte na dni
+}
+
 function navigateToLifecycle(id: string) {
-  router.push(`/lifeboard/${id}`);
-}
-
-function onRowClick(row: CollectionNode) {
-  router.push(`/lifeboard/${row.id}`);
-}
-
-function onPlantBoardClick(row: CollectionNode) {
-  router.push(`/lifeboard/${row.plantBoardId}`);
+  router.push(`/lifecycle/${id}`);
 }
 
 interface CollectionNode {
   id: string;
-  plantBoardId: string;
-  rows: number;
-  cols: number;
-  createdAt: string;
+  plantId: string;
+  name: string;
+  type: string;
+  days: number;
 }
 
 // Načítanie dát pri mountovaní komponentu
 onMounted(() => {
-  loadCollections();
+  loadCollections(pagination.value);
 });
 
 async function deleteLifecycle(id: string) {
   try {
     await LifeCycleService.deletePlant(id);
-    await loadCollections();
+    await loadCollections(pagination.value);
   } catch (error) {
     console.error('Chyba pri odstraňovaní životného cyklu:', error);
   }
@@ -220,6 +235,18 @@ async function deleteLifecycle(id: string) {
 
 function addRecord(id: string) {
   router.push(`lifecycle/analyze/${id}`);
+}
+
+function navigateToAnalyzeMore() {
+  if (plantId !== undefined) {
+    router.push(`/lifecycle/analyze_more/${plantId.toString()}`);
+  } else {
+    console.error('Plant ID not found');
+  }
+}
+
+async function onRequest(props: { pagination: PaginationTable }) {
+  await loadCollections(props.pagination);
 }
 </script>
 

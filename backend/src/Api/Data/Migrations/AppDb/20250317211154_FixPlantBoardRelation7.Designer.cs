@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Fei.Is.Api.Data.Migrations.AppDb
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250316173951_EditPlantBoardEntity")]
-    partial class EditPlantBoardEntity
+    [Migration("20250317211154_FixPlantBoardRelation7")]
+    partial class FixPlantBoardRelation7
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -503,73 +503,73 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                         {
                             Id = new Guid("479b6c63-f552-4a6e-b706-62ec96edb896"),
                             City = "Příbram",
-                            CreatedAt = new DateTime(2025, 3, 16, 17, 39, 51, 77, DateTimeKind.Utc).AddTicks(8783),
+                            CreatedAt = new DateTime(2025, 3, 17, 21, 11, 53, 831, DateTimeKind.Utc).AddTicks(6432),
                             Dic = "CZ25735641",
                             Ic = "25735641",
                             Psc = "26101",
                             Title = "Petunia s.r.o.",
                             Ulice = "Třemošenská 658",
-                            UpdatedAt = new DateTime(2025, 3, 16, 17, 39, 51, 77, DateTimeKind.Utc).AddTicks(8784)
+                            UpdatedAt = new DateTime(2025, 3, 17, 21, 11, 53, 831, DateTimeKind.Utc).AddTicks(6432)
                         },
                         new
                         {
                             Id = new Guid("7337c6db-43d7-4c10-aeb3-3ef2f853f7d3"),
                             City = "Stará Huť",
-                            CreatedAt = new DateTime(2025, 3, 16, 17, 39, 51, 77, DateTimeKind.Utc).AddTicks(8789),
+                            CreatedAt = new DateTime(2025, 3, 17, 21, 11, 53, 831, DateTimeKind.Utc).AddTicks(6437),
                             Dic = "CZ696123003",
                             Ic = "71070877",
                             Psc = "26202",
                             Title = "Štamberková Monika",
                             Ulice = "K Vršíčku 91",
-                            UpdatedAt = new DateTime(2025, 3, 16, 17, 39, 51, 77, DateTimeKind.Utc).AddTicks(8789)
+                            UpdatedAt = new DateTime(2025, 3, 17, 21, 11, 53, 831, DateTimeKind.Utc).AddTicks(6437)
                         },
                         new
                         {
                             Id = new Guid("f51a5725-b267-4c19-9cf0-444bb7c32b6e"),
                             City = "Dřísy",
-                            CreatedAt = new DateTime(2025, 3, 16, 17, 39, 51, 77, DateTimeKind.Utc).AddTicks(8791),
+                            CreatedAt = new DateTime(2025, 3, 17, 21, 11, 53, 831, DateTimeKind.Utc).AddTicks(6440),
                             Dic = "CZ27469613",
                             Ic = "27469613",
                             Psc = "27714",
                             Title = "Arboeko s.r.o.",
                             Ulice = "Lhota 244",
-                            UpdatedAt = new DateTime(2025, 3, 16, 17, 39, 51, 77, DateTimeKind.Utc).AddTicks(8792)
+                            UpdatedAt = new DateTime(2025, 3, 17, 21, 11, 53, 831, DateTimeKind.Utc).AddTicks(6440)
                         },
                         new
                         {
                             Id = new Guid("91827187-f264-44b2-b6e3-697a752aa968"),
                             City = "Olbramkostel",
-                            CreatedAt = new DateTime(2025, 3, 16, 17, 39, 51, 77, DateTimeKind.Utc).AddTicks(8794),
+                            CreatedAt = new DateTime(2025, 3, 17, 21, 11, 53, 831, DateTimeKind.Utc).AddTicks(6443),
                             Dic = "CZ28282711",
                             Ic = "28282711",
                             Psc = "67151",
                             Title = "Moravol s.r.o.",
                             Ulice = "Olbramkostel 41",
-                            UpdatedAt = new DateTime(2025, 3, 16, 17, 39, 51, 77, DateTimeKind.Utc).AddTicks(8794)
+                            UpdatedAt = new DateTime(2025, 3, 17, 21, 11, 53, 831, DateTimeKind.Utc).AddTicks(6443)
                         },
                         new
                         {
                             Id = new Guid("be97065a-c6e9-4b03-a173-c1c85f9b42db"),
                             City = "Horní Benešov",
-                            CreatedAt = new DateTime(2025, 3, 16, 17, 39, 51, 77, DateTimeKind.Utc).AddTicks(8796),
+                            CreatedAt = new DateTime(2025, 3, 17, 21, 11, 53, 831, DateTimeKind.Utc).AddTicks(6444),
                             Dic = "CZ29296721",
                             Ic = "29296721",
                             Psc = "79312",
                             Title = "LM Agroton s.r.o.",
                             Ulice = "Mírová 407",
-                            UpdatedAt = new DateTime(2025, 3, 16, 17, 39, 51, 77, DateTimeKind.Utc).AddTicks(8796)
+                            UpdatedAt = new DateTime(2025, 3, 17, 21, 11, 53, 831, DateTimeKind.Utc).AddTicks(6445)
                         },
                         new
                         {
                             Id = new Guid("3b29e227-bb97-441f-878e-d4b1111b3ebb"),
                             City = "Třebechovice pod Orebem",
-                            CreatedAt = new DateTime(2025, 3, 16, 17, 39, 51, 77, DateTimeKind.Utc).AddTicks(8798),
+                            CreatedAt = new DateTime(2025, 3, 17, 21, 11, 53, 831, DateTimeKind.Utc).AddTicks(6446),
                             Dic = "CZ6203071741",
                             Ic = "46212152",
                             Psc = "50346",
                             Title = "Jan Zatloukal - Zahradnictví Blešno",
                             Ulice = "Blešno 127",
-                            UpdatedAt = new DateTime(2025, 3, 16, 17, 39, 51, 77, DateTimeKind.Utc).AddTicks(8798)
+                            UpdatedAt = new DateTime(2025, 3, 17, 21, 11, 53, 831, DateTimeKind.Utc).AddTicks(6446)
                         });
                 });
 
@@ -1312,7 +1312,6 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
             modelBuilder.Entity("Fei.Is.Api.Data.Models.LifeCycleSystem.Plant", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
@@ -1330,10 +1329,6 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("PlantBoardId1")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<string>("PlantId")
                         .IsRequired()
                         .HasColumnType("text");
@@ -1347,10 +1342,6 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("PlantBoardId");
-
-                    b.HasIndex("PlantBoardId1");
 
                     b.ToTable("Plants");
                 });
@@ -1407,8 +1398,9 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.LifeCycleSystem.PlantBoard", b =>
                 {
-                    b.Property<string>("PlantBoardId")
-                        .HasColumnType("text");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
 
                     b.Property<int>("Cols")
                         .HasColumnType("integer");
@@ -1416,8 +1408,15 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("PlantBoardId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<int>("Rows")
                         .HasColumnType("integer");
@@ -1425,7 +1424,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.HasKey("PlantBoardId");
+                    b.HasKey("Id");
 
                     b.ToTable("PlantBoards");
                 });
@@ -1987,15 +1986,9 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.LifeCycleSystem.Plant", b =>
                 {
-                    b.HasOne("Fei.Is.Api.Data.Models.LifeCycleSystem.PlantBoard", null)
-                        .WithMany("Plants")
-                        .HasForeignKey("PlantBoardId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Fei.Is.Api.Data.Models.LifeCycleSystem.PlantBoard", "PlantBoard")
-                        .WithMany()
-                        .HasForeignKey("PlantBoardId1")
+                        .WithMany("Plants")
+                        .HasForeignKey("Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

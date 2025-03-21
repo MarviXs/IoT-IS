@@ -24,8 +24,19 @@
                 :src="plantProperties.photoLeaves || '../../assets/logo.png'"
                 alt="Leaves Image"
                 style="max-width: 300px; height: auto; object-fit: contain;"
-                no-spinner
+                @click="getClickPosition"
               />
+
+              <div
+                v-for="(index, idx) in positionDisX"
+                :key="idx"
+                class="marker"
+                :style="{ left: `${positionDisX[idx]}px`, top: `${positionDisY[idx]}px` }"
+                @click="removeDisease(idx)"
+              >
+                <span v-if="choroby[idx]" class="disease-label">{{ choroby[idx] }}</span>
+              </div>
+
               <q-btn
                 flat
                 class="q-mt-md"
@@ -42,7 +53,7 @@
                 @change="handleFileUpload"
               />
             </div>
-            <q-slider v-model="threshold" label label-always :min="120" :max="140" :step="1" class="q-mt-md" />
+            <q-slider v-model="threshold" label label-always :min="110" :max="130" :step="1" class="q-mt-md" />
           </div>
 
           <!-- Right section for plant properties -->
@@ -51,7 +62,7 @@
               <q-input
                 v-model="plantProperties.id"
                 outlined
-                label="Plant ID"
+                label="PlantBoard ID"
                 dense
                 class="q-mb-md"
               />
@@ -119,15 +130,32 @@
         <q-btn label="Cancel" color="secondary" flat @click="goBack"/>
       </q-card-section>
     </q-card>
+
+    <q-dialog v-model="dialogOpen">
+      <q-card>
+        <q-card-section>
+          <div class="text-h6">Enter Disease Name</div>
+          <q-input v-model="diseaseInput" label="Disease Name" dense autofocus />
+        </q-card-section>
+
+        <q-card-actions>
+          <q-btn label="Cancel" color="secondary" @click="dialogOpen = false" />
+          <q-btn label="Save" color="primary" @click="saveDisease" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
   </q-page>
 </template>
 
+
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { mdiCheck, mdiUpload } from '@quasar/extras/mdi-v7';
 import { Cropper as VueAdvancedCropper } from 'vue-advanced-cropper';
 import 'vue-advanced-cropper/dist/style.css';
+import LifeCycleService from '@/api/services/LifeCycleService';
 import { ro } from 'date-fns/locale';
 
 const plantProperties = ref({
@@ -149,10 +177,23 @@ let imageHeight = 0;
 let imageTop = 0;
 let imageLeft = 0;  
 let threshold = ref(130);
+let tmpResponse: { nums: Array<string> } | undefined;
+let choroby: string[] = [];
+let index = ref<number | null>(null);
+let positionDisX: number[] = [];
+let positionDisY: number[] = []; 
 const fileInput = ref<HTMLInputElement | null>(null);
 const router = useRouter();
+const route = useRoute();
 const showCropper = ref(false);
 const cropper = ref(null);
+const receivedPblId = route.params.id || '';
+const dialogOpen = ref(false);
+const diseaseInput = ref('');
+
+if(receivedPblId !== undefined){
+  plantProperties.value.id = receivedPblId.toString();
+}
 
 const cropData = ref({
   x: 0,        // Pozícia na osi X (ľavý okraj orezaného obrázka)
@@ -206,6 +247,14 @@ const applyCrop = () => {
   }
 };
 
+const calculateTotalLeaves = (nums: Record<string, { leaves: number; size: number }>) => {
+  return Object.values(nums).reduce((sum, entry) => sum + entry.leaves, 0).toString();
+};
+
+const calculateTotalArea = (nums: Record<string, { leaves: number; size: number }>) => {
+  return Object.values(nums).reduce((sum, entry) => sum + entry.size, 0).toString();
+};
+
 const uploadPhoto = async (file: File) => {
   const formData = new FormData();
   formData.append('photo', file);
@@ -226,9 +275,11 @@ const uploadPhoto = async (file: File) => {
 
     if (response.ok) {
       const data = await response.json();
-      plantProperties.value.area = data.area;
+      tmpResponse = data;
+
+      plantProperties.value.area = calculateTotalArea(data.nums);
       plantProperties.value.date = data.date;
-      plantProperties.value.leafCount = data.leafCount;
+      plantProperties.value.leafCount = calculateTotalLeaves(data.nums);;
       plantProperties.value.type = data.plant;
       plantProperties.value.disease = data.disease;
       plantProperties.value.photoLeaves = `data:image/png;base64,${data.plantImage}`;
@@ -240,10 +291,174 @@ const uploadPhoto = async (file: File) => {
   }
 };
 
+const savePlant = async () => {
+  const request = {
+    plantBoardId: plantProperties.value.id,
+    rows: Number(plantProperties.value.rows),
+    cols: Number(plantProperties.value.cols),
+  };
+
+  try {
+    // Zavolajte metódu createPlant zo služby
+    const responseID = await LifeCycleService.createPlantBoard(request);
+    //console.log('Plant saved successfully');
+
+    if (tmpResponse ==  undefined){
+      console.log(`Undefinedddd`);
+    }
+
+    if (responseID && responseID.data && tmpResponse !== undefined) {
+      const plantBoardId = responseID.data;
+
+      if (tmpResponse.nums && typeof tmpResponse.nums === 'object') {
+        // Preveď objekt na pole hodnôt
+        const numsArray = Object.values(tmpResponse.nums);
+
+        for (const num of numsArray.entries()) {
+          const re = num[1];  // Hodnota z numsArray
+          const reParsed = JSON.parse(JSON.stringify(re));  // Vyparsujeme JSON string späť na objekt
+
+          const leaves1 = reParsed.leaves;  // Získaš hodnotu "leaves"
+          const size1 = reParsed.size;
+          const disease1 = reParsed.disease;
+          console.log(`Leaves: ${leaves1} Size: ${size1}`);
+
+          const indexP = num[0];
+
+          // Nastavíme pevne hodnoty
+          const plant = {
+              leaves: leaves1,   // Pevne nastavené hodnoty
+              size: size1,   // Pevne nastavené hodnoty
+              disease: disease1,  // Pevne nastavené hodnoty
+          };
+
+          // Generujeme plantId
+          //const plantId = `${plantBoardId}${index}`;
+          const plantId = `${plantProperties.value.id}${indexP}`;
+          const requestAnalysis = {
+              leafCount: plant.leaves.toString(),  // Pevne nastavené na 10
+              area: plant.size,  // Pevne nastavené na 1500
+              plantBoardId: plantProperties.value.id,
+              plantId: plantId,
+              analysisDate: new Date(plantProperties.value.date).toISOString(),
+              name: `${plantProperties.value.id}${indexP}`,
+              type: plantProperties.value.type || 'Unknown',
+              datePlanted: new Date(plantProperties.value.date).toISOString(),
+          };
+
+          // Pošli požiadavku na uloženie rastliny
+          const res_id = await LifeCycleService.createPlant(requestAnalysis);
+
+          if (res_id && res_id.data) {
+            const responsePlantID = res_id.data;
+
+            const requestAnalysis = {
+              height: 0,
+              width: 0,
+              leafCount: plant.leaves,
+              area: plant.size,
+              disease: choroby[indexP] || 'Zdrava',
+              health: "healthy",
+              plantId: res_id.response.status === 409 ? res_id.response.statusText : responsePlantID,
+              analysisDate: new Date(plantProperties.value.date).toISOString(),
+            };
+
+            await LifeCycleService.createAnalysis(requestAnalysis);
+            console.log('Plant analysis saved successfully');
+          }
+
+          console.log(`Plant analysis saved successfully for plantId: ${plantId}`);
+      }
+
+  } else {
+    console.error('Error: tmpResponse.nums is not a valid object');
+    }
+    }
+  } catch (error) {
+    console.error('Failed to save plant:', error);
+  }
+};
 
 const goBack = () => {
   router.back();
 };
+
+/*const getClickPosition = (event: MouseEvent) => {
+  const imgElement = event.target as HTMLImageElement;
+  const rect = imgElement.getBoundingClientRect();
+  console.log(`X: ${event.clientX - rect.left}, Y: ${event.clientY - rect.top}`);
+
+  // Pridanie novej pozície do poľa
+  clickPositions.value.push({
+    x: event.clientX - rect.left,
+    y: event.clientY - rect.top
+  });
+};*/
+
+const getClickPosition = (event: MouseEvent) => {
+  if (!tmpResponse || !tmpResponse.nums) {
+    console.error("No plant data available!");
+    return;
+  }
+
+  const imgElement = event.target as HTMLImageElement;
+  const rect = imgElement.getBoundingClientRect();
+  const clickX = event.clientX - rect.left;
+  const clickY = event.clientY - rect.top;
+
+  // Skutočné rozmery obrázka
+  const realWidth = imgElement.naturalWidth;
+  const realHeight = imgElement.naturalHeight;
+
+  // Prepočítané súradnice v REÁLNYCH rozmeroch
+  const scaledX = (clickX / rect.width) * realWidth;
+  const scaledY = (clickY / rect.height) * realHeight;
+
+  console.log(`X: ${scaledX}, Y: ${scaledY}`);
+
+  // Parsovanie tmpResponse.nums
+  const numsArray = Object.values(tmpResponse.nums);
+  let closestPlantIndex: number | null = null;
+  let minDistance = Infinity;
+
+  numsArray.forEach((num, index) => {
+    const reParsed = JSON.parse(JSON.stringify(num)); // Konverzia na objekt
+
+    const plantX = reParsed.x;
+    const plantY = reParsed.y;
+
+    const distance = Math.sqrt((plantX - scaledX) ** 2 + (plantY - scaledY) ** 2);
+    if (distance < minDistance) {
+      minDistance = distance;
+      closestPlantIndex = index;
+    }
+  });
+
+  if (closestPlantIndex !== null) {
+    dialogOpen.value = true;
+    index = closestPlantIndex;
+    positionDisX[Number(index)] = clickX;
+    positionDisY[Number(index)] = clickY;
+  }
+};
+
+const saveDisease = () => {
+  console.log(`Disease for plant ${index}: ${diseaseInput.value}`);
+  if (Number(index) >= 0 && diseaseInput.value) {
+    choroby[Number(index)] = diseaseInput.value;
+    dialogOpen.value = false;
+  }
+};
+
+const removeDisease = (index: number) => {
+  // Zrušenie choroby pre danú pozíciu
+  positionDisX.splice(index, 1);
+  positionDisY.splice(index, 1);
+  choroby.splice(index, 1); // Vyprázdnenie choroby v poli chorôb
+  dialogOpen.value = true;
+  dialogOpen.value = false;
+};
+
 
 </script>
 
@@ -260,5 +475,24 @@ const goBack = () => {
 .cropper {
   width: 100%;
   height: 300px;
+}
+
+.disease-label {
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  font-size: 12px;
+  padding: 2px;
+  border-radius: 15px;
+  transform: translateX(-50%);
+}
+
+.marker {
+  position: absolute;
+  cursor: pointer;  /* Zmena kurzora na pointer, aby bolo zrejmé, že sa dá kliknúť */
+}
+
+.image-container {
+  position: relative;
 }
 </style>

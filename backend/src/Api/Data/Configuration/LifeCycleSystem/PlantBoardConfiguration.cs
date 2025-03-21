@@ -10,6 +10,9 @@ namespace Fei.Is.Api.Data.Configuration.LifeCycleSystem
         {
             builder.HasKey(p => p.PlantBoardId);
 
+            builder.Property(p => p.PlantBoardId)
+                .HasMaxLength(100);
+
             builder.Property(p => p.Rows)
                 .IsRequired();
 

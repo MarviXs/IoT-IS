@@ -807,6 +807,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/lifecycles/{plantBoardId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get paginated plants by PlantBoardId */
+        get: operations["GetPlantsByBoard"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/lifecycles/plants": {
         parameters: {
             query?: never;
@@ -850,7 +867,8 @@ export interface paths {
         };
         /** Get all lifecycles by PlantId */
         get: operations["GetLifeCyclesByPlantId"];
-        put?: never;
+        /** Update plant analysis by PlantId */
+        put: operations["UpdateLifeCycleByPlantId"];
         post?: never;
         delete?: never;
         options?: never;
@@ -870,6 +888,40 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lifecycles/plantboards": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create a plant board */
+        post: operations["CreatePlantBoard"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lifeboard/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete a plantboard */
+        delete: operations["DeletePlantBoard"];
         options?: never;
         head?: never;
         patch?: never;
@@ -1170,6 +1222,19 @@ export interface components {
             readonly hasPrevious: boolean;
             readonly hasNext: boolean;
             items: components["schemas"]["Fei.Is.Api.Features.LifeCycles.Queries.GetPlantBoards.Response"][];
+        };
+        "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.LifeCycles.Queries.GetPlantsByBoard.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+            /** Format: int32 */
+            currentPage: number;
+            /** Format: int32 */
+            totalPages: number;
+            /** Format: int32 */
+            pageSize: number;
+            /** Format: int32 */
+            totalCount: number;
+            readonly hasPrevious: boolean;
+            readonly hasNext: boolean;
+            items: components["schemas"]["Fei.Is.Api.Features.LifeCycles.Queries.GetPlantsByBoard.Response"][];
         };
         "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Orders.Queries.GetOrders.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
             /** Format: int32 */
@@ -1592,6 +1657,14 @@ export interface components {
             type: string;
             /** Format: date-time */
             datePlanted: string;
+            plantBoardId: string;
+        };
+        "Fei.Is.Api.Features.LifeCycles.Commands.CreatePlantBoard.Request": {
+            plantBoardId: string;
+            /** Format: int32 */
+            rows: number;
+            /** Format: int32 */
+            cols: number;
         };
         "Fei.Is.Api.Features.LifeCycles.Commands.CreateRecord.Request": {
             /** Format: uuid */
@@ -1608,6 +1681,20 @@ export interface components {
             area: number;
             disease: string;
             health: string;
+        };
+        "Fei.Is.Api.Features.LifeCycles.Commands.UpdateLifeCycleById.Request": {
+            /** Format: int32 */
+            leafCount?: number | null;
+            /** Format: double */
+            width?: number | null;
+            /** Format: double */
+            height?: number | null;
+            /** Format: double */
+            area?: number | null;
+            disease?: string | null;
+            health?: string | null;
+            /** Format: date-time */
+            analysisDate?: string | null;
         };
         "Fei.Is.Api.Features.LifeCycles.Queries.GetLifeCycleById.Response": {
             plantId: string;
@@ -1636,7 +1723,6 @@ export interface components {
         "Fei.Is.Api.Features.LifeCycles.Queries.GetPlantBoards.Response": {
             /** Format: uuid */
             id: string;
-            /** Format: uuid */
             plantBoardId: string;
             /** Format: int32 */
             rows: number;
@@ -1644,6 +1730,15 @@ export interface components {
             cols: number;
             /** Format: date-time */
             createdAt: string;
+        };
+        "Fei.Is.Api.Features.LifeCycles.Queries.GetPlantsByBoard.Response": {
+            /** Format: uuid */
+            id: string;
+            plantId: string;
+            name: string;
+            type: string;
+            /** Format: date-time */
+            datePlanted: string;
         };
         "Fei.Is.Api.Features.Orders.Commands.CreateOrder.Request": {
             /** Format: int32 */
@@ -3974,6 +4069,34 @@ export interface operations {
             };
         };
     };
+    GetPlantsByBoard: {
+        parameters: {
+            query?: {
+                SortBy?: string;
+                Descending?: boolean;
+                SearchTerm?: string;
+                PageNumber?: number;
+                PageSize?: number;
+            };
+            header?: never;
+            path: {
+                plantBoardId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.LifeCycles.Queries.GetPlantsByBoard.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"];
+                };
+            };
+        };
+    };
     CreatePlant: {
         parameters: {
             query?: never;
@@ -4065,6 +4188,37 @@ export interface operations {
             };
         };
     };
+    UpdateLifeCycleByPlantId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plantId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.LifeCycles.Commands.UpdateLifeCycleById.Request"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     GetPlantBoards: {
         parameters: {
             query?: {
@@ -4088,6 +4242,75 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.LifeCycles.Queries.GetPlantBoards.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"];
                 };
+            };
+        };
+    };
+    CreatePlantBoard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.LifeCycles.Commands.CreatePlantBoard.Request"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+        };
+    };
+    DeletePlantBoard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

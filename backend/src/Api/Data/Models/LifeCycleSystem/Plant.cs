@@ -7,6 +7,6 @@ public class Plant : BaseModel
         public string Type { get; set; } = string.Empty;
         public DateTime DatePlanted { get; set; }
         public ICollection<PlantAnalysis> Analyses { get; set; } = new List<PlantAnalysis>();
-        public String PlantBoardId { get; set; }
+        public string PlantBoardId { get; set; }
         public PlantBoard PlantBoard { get; set; }
     }

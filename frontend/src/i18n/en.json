@@ -454,6 +454,7 @@
   },
   "lifecycle":{
     "label": "Plant life cycle | Plant life cycles",
-    "add_plant": "Add plant"
+    "add_plant": "Add plant",
+    "add_plants": "Add more plants"
   }
 }

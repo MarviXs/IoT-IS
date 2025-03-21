@@ -123,6 +123,14 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/life-cycle/LifeIntro.vue'),
       },
       {
+        path: '/lifeboard/:id/',
+        component: () => import('pages/life-cycle/LifeFilterPlants.vue'),
+      },
+      {
+        path: '/lifecycle/analyze_more/:id',
+        component: () => import('pages/life-cycle/LifeMoreAnalyze.vue'),
+      },
+      {
         path: '/lifecycle/analyze',
         component: () => import('pages/life-cycle/LifeAnalyze.vue'),
       },

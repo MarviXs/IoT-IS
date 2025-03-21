@@ -12,14 +12,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fei.Is.Api.Features.LifeCycles.Commands;
 
-public static class CreatePlant
+public static class CreatePlantBoard
 {
     public record Request(
-        string PlantId,
-        string Name,
-        string Type,
-        DateTime DatePlanted,
-        string PlantBoardId
+        string PlantBoardId,
+        int Rows,
+        int Cols
     );
 
     public sealed class Endpoint : ICarterModule
@@ -27,10 +25,10 @@ public static class CreatePlant
         public void AddRoutes(IEndpointRouteBuilder app)
         {
             app.MapPost(
-                    "lifecycles/plants",
-                    async Task<Results<Created<Guid>, ValidationProblem, Conflict<string>>> (IMediator mediator, ClaimsPrincipal user, Request request) =>
+                    "lifecycles/plantboards",
+                    async Task<Results<Created<Guid>, ValidationProblem, Conflict<string>>> (IMediator mediator, Request request) =>
                     {
-                        var command = new Command(request, user);
+                        var command = new Command(request);
 
                         var result = await mediator.Send(command);
 
@@ -48,17 +46,17 @@ public static class CreatePlant
                         return TypedResults.Created(result.Value.ToString(), result.Value);
                     }
                 )
-                .WithName(nameof(CreatePlant))
-                .WithTags(nameof(Plant))
+                .WithName(nameof(CreatePlantBoard))
+                .WithTags(nameof(PlantBoard))
                 .WithOpenApi(o =>
                 {
-                    o.Summary = "Create a plant";
+                    o.Summary = "Create a plant board";
                     return o;
                 });
         }
     }
 
-    public record Command(Request Request, ClaimsPrincipal User) : IRequest<Result<Guid>>;
+    public record Command(Request Request) : IRequest<Result<Guid>>;
 
     public sealed class Handler(AppDbContext context, IValidator<Command> validator)
         : IRequestHandler<Command, Result<Guid>>
@@ -71,36 +69,25 @@ public static class CreatePlant
                 return Result.Fail(new ValidationError(result));
             }
 
-            var existingPlant = await context.Plants
-                .FirstOrDefaultAsync(p => p.PlantId == message.Request.PlantId, cancellationToken);
-        
-            if (existingPlant != null)
-            {
-                return Result.Ok(existingPlant.Id);
-            }
-
-            var plantBoard = await context.PlantBoards
+            var existingBoard = await context.PlantBoards
                 .FirstOrDefaultAsync(pb => pb.PlantBoardId == message.Request.PlantBoardId, cancellationToken);
 
-            if (plantBoard == null)
+            if (existingBoard != null)
             {
-                return Result.Fail(new BadRequestError("Invalid PlantBoardId"));
+                return Result.Ok(existingBoard.Id);
             }
 
-            var plant = new Plant
+            var plantBoard = new PlantBoard
             {
-                PlantId = message.Request.PlantId,
-                Name = message.Request.Name,
-                Type = message.Request.Type,
-                DatePlanted = message.Request.DatePlanted,
                 PlantBoardId = message.Request.PlantBoardId,
-                PlantBoard = plantBoard
+                Rows = message.Request.Rows,
+                Cols = message.Request.Cols
             };
 
-            await context.Plants.AddAsync(plant, cancellationToken);
+            await context.PlantBoards.AddAsync(plantBoard, cancellationToken);
             await context.SaveChangesAsync(cancellationToken);
 
-            return Result.Ok(plant.Id);
+            return Result.Ok(plantBoard.Id);
         }
     }
 
@@ -108,10 +95,9 @@ public static class CreatePlant
     {
         public Validator()
         {
-            RuleFor(r => r.Request.Name).NotEmpty().WithMessage("Name is required");
-            RuleFor(r => r.Request.Type).NotEmpty().WithMessage("Type is required");
-            RuleFor(r => r.Request.DatePlanted).NotEmpty().WithMessage("DatePlanted is required");
             RuleFor(r => r.Request.PlantBoardId).NotEmpty().WithMessage("PlantBoardId is required");
+            RuleFor(r => r.Request.Rows).GreaterThan(0).WithMessage("Rows must be greater than 0");
+            RuleFor(r => r.Request.Cols).GreaterThan(0).WithMessage("Cols must be greater than 0");
         }
     }
 }
