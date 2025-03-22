@@ -29,7 +29,7 @@ namespace Fei.Is.Api.DocumentsGen.Generators
             {
                 ISheet sheet = wb.GetSheetAt(i);
 
-                ProcessSheet(sheet, values, new TemplateRow(sheet.GetRow(sheet.FirstRowNum)), new TemplateRow(sheet.GetRow(sheet.LastRowNum)));
+                ProcessSheet(sheet, values, sheet.GetRow(sheet.FirstRowNum), sheet.GetRow(sheet.LastRowNum));
             }
 
             string newDocumentPath = Path.Combine(Path.GetTempPath(), Path.GetFileName(documentPath));
@@ -41,15 +41,14 @@ namespace Fei.Is.Api.DocumentsGen.Generators
             return newDocumentPath;
         }
 
-
-        private void ProcessSheet(ISheet sheet, JToken values, TemplateRow startRow, TemplateRow endRow)
+        private void ProcessSheet(ISheet sheet, JToken values, IRow startRow, IRow endRow)
         {
             List<TemplateList> listTags = new List<TemplateList>();
             TemplateList? currentList = null;
 
             foreach (IRow row in sheet)
             {
-                if (row.RowNum < startRow.Row.RowNum || row.RowNum > endRow.Row.RowNum)
+                if (row.RowNum < startRow.RowNum || row.RowNum > endRow.RowNum)
                 {
                     continue;
                 }
@@ -62,15 +61,17 @@ namespace Fei.Is.Api.DocumentsGen.Generators
                     if (Regex.IsMatch(cell.StringCellValue, REGEX_LIST_START_PATTERN) && currentList is null)
                     {
                         currentList = new TemplateList();
-                        currentList.startRow = new TemplateRow(row);
+                        currentList.startRow = row;
                         currentList.tag = Regex.Match(cell.StringCellValue, REGEX_LIST_START_PATTERN).Groups[1].Value;
                     }
 
-                    if (Regex.IsMatch(cell.StringCellValue, REGEX_LIST_END_PATTERN) &&
-                        currentList != null &&
-                        currentList.tag == cell.StringCellValue.Substring(3, cell.StringCellValue.Length - 5))
+                    if (
+                        Regex.IsMatch(cell.StringCellValue, REGEX_LIST_END_PATTERN)
+                        && currentList != null
+                        && currentList.tag == cell.StringCellValue.Substring(3, cell.StringCellValue.Length - 5)
+                    )
                     {
-                        currentList.endRow = new TemplateRow(row);
+                        currentList.endRow = row;
                         listTags.Add(currentList);
                         currentList = null;
                     }
@@ -91,7 +92,7 @@ namespace Fei.Is.Api.DocumentsGen.Generators
 
             foreach (IRow row in sheet)
             {
-                if (row.RowNum < startRow.Row.RowNum || row.RowNum > endRow.Row.RowNum)
+                if (row.RowNum < startRow.RowNum || row.RowNum > endRow.RowNum)
                 {
                     continue;
                 }
@@ -109,47 +110,55 @@ namespace Fei.Is.Api.DocumentsGen.Generators
 
         private void CopyList(ISheet sheet, JToken values, TemplateList list)
         {
-            List<TemplateRow> innerTemplateRows = new List<TemplateRow>();
+            List<IRow> templateRows = new List<IRow>();
 
-            for (int i = list.startRow.Row.RowNum + 1; i < list.endRow.Row.RowNum; i++)
+            for (int i = list.startRow.RowNum + 1; i < list.endRow.RowNum; i++)
             {
-                innerTemplateRows.Add(new TemplateRow(sheet.GetRow(i)));
+                templateRows.Add(sheet.GetRow(i));
             }
+
+            int innerListStartIndex = -1;
+
+            List<List<IRow>> innerLists = new List<List<IRow>>();
 
             for (int currentObjectIndex = 0; currentObjectIndex < values.Count(); currentObjectIndex++)
             {
-                int innerListStartIndex = list.endRow.Row.RowNum + 1 + currentObjectIndex * innerTemplateRows.Count;
-
-                for (int currentInnerRowIndex = 0; currentInnerRowIndex < innerTemplateRows.Count; currentInnerRowIndex++)
+                List<IRow> innerListRows = new List<IRow>();
+                if (innerListStartIndex == -1)
                 {
-                    IRow newRow = sheet.CopyRow(innerTemplateRows[currentInnerRowIndex].Row.RowNum, innerListStartIndex + currentInnerRowIndex);
-
-                    list.insertedRows.Add(new TemplateRow(newRow));
+                    innerListStartIndex = list.endRow.RowNum;
+                }
+                else
+                {
+                    innerListStartIndex = innerLists.Last().Last().RowNum + 1;
                 }
 
-                ProcessSheet(sheet, values[currentObjectIndex], list.insertedRows.First(), list.insertedRows.Last());
-
-                foreach (TemplateRow row in list.insertedRows)
+                for (int currentInnerRowIndex = 0; currentInnerRowIndex < templateRows.Count; currentInnerRowIndex++)
                 {
-                    if (row.deleted)
-                    {
-                        continue;
-                    }
+                    IRow newRow = sheet.CopyRow(templateRows[currentInnerRowIndex].RowNum, innerListStartIndex + currentInnerRowIndex);
+                    innerListRows.Add(newRow);
+                }
 
-                    foreach (ICell cell in row.Row)
+                innerLists.Add(innerListRows);
+            }
+
+            for (int i = 0; i < innerLists.Count; i++)
+            {
+                ProcessSheet(sheet, values[i], innerLists[i].First(), innerLists[i].Last());
+                foreach (IRow row in innerLists[i])
+                {
+                    foreach (ICell cell in row)
                     {
-                        FillListCell(cell, values[currentObjectIndex]);
+                        FillListCell(cell, values[i]);
                     }
                 }
             }
 
             DeleteRow(sheet, list.startRow);
-            list.startRow.deleted = true;
 
-            innerTemplateRows.ForEach(row => DeleteRow(sheet, row));
+            templateRows.ForEach(row => DeleteRow(sheet, row));
 
             DeleteRow(sheet, list.endRow);
-            list.startRow.deleted = true;
         }
 
         private void FillListCell(ICell cell, JToken? values)
@@ -160,15 +169,19 @@ namespace Fei.Is.Api.DocumentsGen.Generators
             }
             if (cell != null && cell.CellType == CellType.String && Regex.IsMatch(cell.StringCellValue, REGEX_LIST_ITEM_PATTERN))
             {
-                string renderedString = StubbleRenderer.Render(cell.StringCellValue.Remove(2, 1), values);
+                string cellValue = cell.StringCellValue;
+
+                int indexOfMustacheStart = cellValue.IndexOf("{{");
+                cellValue = cellValue.Remove(indexOfMustacheStart + 2, 1);
+
+                string renderedString = StubbleRenderer.Render(cellValue, values);
                 cell.SetCellValue(renderedString);
             }
         }
 
-        private void DeleteRow(ISheet sheet, TemplateRow row)
+        private void DeleteRow(ISheet sheet, IRow row)
         {
-            sheet.ShiftRows(row.Row.RowNum + 1, sheet.LastRowNum, -1);
-            row.deleted = true;
+            sheet.ShiftRows(row.RowNum + 1, sheet.LastRowNum, -1);
         }
     }
 }
