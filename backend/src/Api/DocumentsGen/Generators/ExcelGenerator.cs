@@ -171,8 +171,7 @@ namespace Fei.Is.Api.DocumentsGen.Generators
             {
                 string cellValue = cell.StringCellValue;
 
-                int indexOfMustacheStart = cellValue.IndexOf("{{");
-                cellValue = cellValue.Remove(indexOfMustacheStart + 2, 1);
+                cellValue = cellValue.Remove(cellValue.IndexOf("{{") + 2, 1);
 
                 string renderedString = StubbleRenderer.Render(cellValue, values);
                 cell.SetCellValue(renderedString);

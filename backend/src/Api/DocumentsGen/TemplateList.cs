@@ -7,7 +7,5 @@ namespace Fei.Is.Api.DocumentsGen
         public IRow? startRow { get; set; }
         public IRow? endRow { get; set; }
         public string tag { get; set; }
-
-        public List<IRow> rows = new List<IRow>();
     }
 }
