@@ -213,23 +213,9 @@ async function processJob(client, apiUrl, accessToken, job, processingJobs) {
     while (currentCycle <= totalCycles && !finished) {
       // Inner loop: steps
       while (currentStep <= totalSteps) {
-        // Check for cancellation or pause by refetching job state
         const latestJob = await getJobStatus(apiUrl, accessToken, jobId);
-        if (
-          !latestJob ||
-          latestJob.paused ||
-          latestJob.status !== "JOB_IN_PROGRESS"
-        ) {
-          console.log(
-            `Job ${jobId} has been paused or cancelled. Aborting processing.`
-          );
-          return;
-        }
-
-        // *** Ensure the connection is alive before running any command ***
         client = await ensureClientAlive(client);
 
-        // Execute command based on currentCommand
         if (latestJob.currentCommand === "cmGetDetector") {
           console.log(
             `Processing cmGetDetector for job ${jobId}, cycle ${currentCycle}, step ${currentStep}`
@@ -238,9 +224,8 @@ async function processJob(client, apiUrl, accessToken, job, processingJobs) {
           const measurements = extractMeasurements(detectorDataBuffer);
           await sendDataToApi(apiUrl, accessToken, measurements);
         } else if (latestJob.currentCommand === "sleep") {
-          // Determine sleep parameter from the commands array using currentStep-1
           const commandIndex = currentStep - 1;
-          let sleepSeconds = 1; // default to 1 second
+          let sleepSeconds = 1;
           if (
             latestJob.commands &&
             latestJob.commands.length > commandIndex &&
