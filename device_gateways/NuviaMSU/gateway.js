@@ -162,7 +162,9 @@ async function ensureClientAlive(client) {
       }. Reconnecting...`
     );
     if (!client || !client.deviceAddress) {
-      throw new Error("Cannot reconnect because device address is unavailable.");
+      throw new Error(
+        "Cannot reconnect because device address is unavailable."
+      );
     }
     const newClient = await createDeviceConnection(client.deviceAddress);
     newClient.deviceAddress = client.deviceAddress;
@@ -243,6 +245,8 @@ async function processJob(client, apiUrl, accessToken, job, processingJobs) {
     status: "JOB_IN_PROGRESS",
   });
 
+  // Flag to indicate whether the job was canceled
+  let jobCanceled = false;
   try {
     let finished = false;
     // Outer loop: cycles
@@ -295,6 +299,16 @@ async function processJob(client, apiUrl, accessToken, job, processingJobs) {
           currentStep++;
         }
 
+        const updatedJob = await getJobStatus(apiUrl, accessToken, jobId);
+        if (updatedJob && updatedJob.status === "JOB_CANCELED") {
+          console.log(
+            `Job ${jobId} has been canceled. Stopping further processing.`
+          );
+          jobCanceled = true;
+          finished = true;
+          break;
+        }
+
         // Update job progress after each step.
         await updateJobStatus(apiUrl, jobId, {
           name: job.name,
@@ -325,16 +339,29 @@ async function processJob(client, apiUrl, accessToken, job, processingJobs) {
       }
     }
 
-    // Mark the job as succeeded if finished.
-    await updateJobStatus(apiUrl, jobId, {
-      name: job.name,
-      currentStep: totalSteps,
-      totalSteps,
-      currentCycle: totalCycles,
-      totalCycles,
-      paused: false,
-      status: "JOB_SUCCEEDED",
-    });
+    // Only mark the job as succeeded if it wasn't canceled.
+    if (jobCanceled) {
+      console.log(`Job ${jobId} processing terminated due to cancellation.`);
+      await updateJobStatus(apiUrl, jobId, {
+        name: job.name,
+        currentStep,
+        totalSteps,
+        currentCycle,
+        totalCycles,
+        paused: false,
+        status: "JOB_CANCELED",
+      });
+    } else {
+      await updateJobStatus(apiUrl, jobId, {
+        name: job.name,
+        currentStep: totalSteps,
+        totalSteps,
+        currentCycle: totalCycles,
+        totalCycles,
+        paused: false,
+        status: "JOB_SUCCEEDED",
+      });
+    }
   } catch (error) {
     await updateJobStatus(apiUrl, jobId, { status: "JOB_FAILED" });
     console.error(`Error processing job ${jobId}:`, error);
@@ -358,7 +385,10 @@ async function pollJobs(client, apiUrl, accessToken, refreshTime, cancelToken) {
         }
       }
     } catch (error) {
-      console.error(`Error fetching jobs for device ${accessToken}:`, error.message);
+      console.error(
+        `Error fetching jobs for device ${accessToken}:`,
+        error.message
+      );
     }
     // Wait for the configured refresh interval before polling again.
     await new Promise((resolve) => setTimeout(resolve, refreshTime));
@@ -383,7 +413,6 @@ async function processDevice(device, apiUrl, refreshTime, cancelToken) {
     if (client) client.end();
   }
 }
-
 
 export async function startGateway() {
   const config = await loadConfig();
