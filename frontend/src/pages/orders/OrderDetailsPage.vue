@@ -2,7 +2,7 @@
   <PageLayout
     :breadcrumbs="[
       { label: t('order.label', 2), to: '/orders' },
-      { label: order?.customerName || 'Order Details', to: `/orders/${orderId}` },
+      { label: order?.customerName || 'Order Details', to: `/orders/${orderId}` }
     ]"
   >
     <template #actions>
@@ -19,19 +19,18 @@
     </template>
     <template #default>
       <OrderDetailsCard v-if="order" :order="order" @edit="isUpdateDialogOpen = true" />
-      <div>
-        <OrderItemTable
-          v-model:pagination="pagination"
-          :currentOrderId="orderId"
-          :orders="ordersPaginated || []"
-          :containers="ordersPaginated || []"
-          :loading="isLoadingContainers"
-          :refreshTable="refreshTable"
-          class="shadow"
-          @on-change="getOrderItemContainers(pagination)"
-          @open-delete-dialog="openDeleteContainerDialog"
-        />
-      </div>
+      <OrderItemTable
+        v-model:pagination="pagination"
+        :currentOrderId="orderId"
+        :orders="ordersPaginated || []"
+        :containers="ordersPaginated || []"
+        :loading="isLoadingContainers"
+        :refreshTable="refreshTable"
+        class="shadow"
+        @on-change="getOrderItemContainers(pagination)"
+        @open-delete-dialog="openDeleteContainerDialog"
+      />
+      <OrderSummaryCard :summary="orderSummary" :orderId="orderId" />
     </template>
   </PageLayout>
   <!-- Delete Container Dialog -->
@@ -44,29 +43,26 @@
 </template>
 
 <script setup lang="ts">
-import OrderItemTable from '@/components/order-item/OrderItemTable.vue';
-import { useRoute } from 'vue-router';
 import { ref, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { mdiDownload } from '@quasar/extras/mdi-v7';
-import PageLayout from '@/layouts/PageLayout.vue';
 import OrderDetailsCard from '@/components/orders/OrderDetailsCard.vue';
-import { PaginationClient, PaginationTable } from '@/models/Pagination';
-
-import OrderItemsService, { OrderItemContainersQueryParams } from '@/api/services/OrderItemsService.ts';
-import OrderService from '@/api/services/OrdersService';
-import AddItemToOrderDialog from '@/components/order-item/AddItemToOrderDialog.vue';
+import OrderItemTable from '@/components/order-item/OrderItemTable.vue';
+import OrderSummaryCard from '@/components/orders/OrderSummaryCard.vue';
 import DeleteContainerDialog from '@/components/order-item/DeleteContainerDialog.vue';
+import PageLayout from '@/layouts/PageLayout.vue';
+import OrderItemsService, { OrderItemContainersQueryParams } from '@/api/services/OrderItemsService';
+import OrderService from '@/api/services/OrdersService';
+import { PaginationClient, PaginationTable } from '@/models/Pagination';
 
 const { t } = useI18n();
 const route = useRoute();
-const isAddDialogOpen = ref(false);
 const order = ref<Order | null>(null);
 const isUpdateDialogOpen = ref(false);
 const isLoadingContainers = ref(false);
 const ordersPaginated = ref<any>([]);
-const isDeleteDialogOpen = ref(false); // Stav otvorenia dialógu
-const selectedContainerId = ref<string | null>(null); // Aktuálne vybraný kontajner
+const isDeleteDialogOpen = ref(false);
+const selectedContainerId = ref<string | null>(null);
 
 const pagination = ref<PaginationClient>({
   sortBy: 'name',
@@ -85,7 +81,29 @@ interface Order {
   contactPhone: string;
   note: string;
 }
+
+// Typ pre súhrn objednávky
+interface OrderSummary {
+  vat12: {
+    priceExclVAT: number;
+    vat: number;
+    priceInclVAT: number;
+  };
+  vat21: {
+    priceExclVAT: number;
+    vat: number;
+    priceInclVAT: number;
+  };
+  total: number;
+}
+
 var orderId = String(Array.isArray(route.params.id) ? route.params.id[0] : route.params.id);
+
+const orderSummary = ref<OrderSummary>({
+  vat12: { priceExclVAT: 100, vat: 12, priceInclVAT: 112 },
+  vat21: { priceExclVAT: 200, vat: 42, priceInclVAT: 242 },
+  total: 354,
+});
 
 onMounted(() => {
   orderId = String(Array.isArray(route.params.id) ? route.params.id[0] : route.params.id);
@@ -131,7 +149,7 @@ async function getOrderItemContainers(paginationTable: PaginationTable) {
 
     ordersPaginated.value = data.items.map((item) => ({
       ...item,
-      products: item.products || [], // Zabezpečíme, že `products` vždy existuje ako pole
+      products: item.products || [], // zabezpečí, že `products` je vždy pole
     }));
   } catch (e) {
     console.error('Unexpected error:', e);
@@ -164,10 +182,10 @@ async function getOrder() {
 }
 
 function refreshTable() {
-  getOrder(); // Znovu načíta detaily objednávky
-  getOrderItemContainers(pagination.value); // Znovu načíta kontajnery
+  getOrder(); // Načítaj detaily objednávky
+  getOrderItemContainers(pagination.value); // Načítaj kontajnery
 }
-
+  
 function openDeleteContainerDialog(containerId: string) {
   selectedContainerId.value = containerId;
   isDeleteDialogOpen.value = true;

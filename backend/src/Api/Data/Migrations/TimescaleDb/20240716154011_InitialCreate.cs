@@ -32,9 +32,6 @@ namespace Fei.Is.Api.Data.Migrations.TimescaleDb
             );
 
             migrationBuilder.Sql("SELECT create_hypertable('\"DataPoints\"', by_range('TimeStamp'))");
-            migrationBuilder.Sql(
-                "ALTER TABLE \"DataPoints\" SET (timescaledb.compress, timescaledb.compress_segmentby = '\"DeviceId\", \"SensorTag\"', timescaledb.compress_orderby = '\"TimeStamp\"')"
-            );
         }
 
         /// <inheritdoc />

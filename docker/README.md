@@ -1,5 +1,5 @@
-### Start the app in development mode
+### Start the app with mqtt
 
 ```bash
-docker compose -f compose.yaml up -d --build --watch
+docker compose -f compose.yaml -f compose.mqtt.yaml up -d --build
 ```
