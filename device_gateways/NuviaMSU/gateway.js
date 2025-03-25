@@ -2,6 +2,7 @@ import fs from "fs/promises";
 import net from "net";
 import axios from "axios";
 
+const activePollers = new Map();
 const CONFIG_PATH = "config/config.json";
 
 // Load configuration (API url, list of devices, and jobRefreshTime)
@@ -29,50 +30,90 @@ function calculateChecksum(buffer) {
   return (~sum + 1) & 0xff;
 }
 
+// Build packet using the specified format: NextB (3 bytes), DevAdr, Cmd, Data, Checksum
 function buildPacket(devAdr, cmd, payload) {
-  // Data part: DevAdr, Cmd, and the payload.
   const dataPart = Buffer.concat([Buffer.from([devAdr, cmd]), payload]);
-
-  // NextB: 3 bytes representing the total length of dataPart + 1 (for the checksum)
-  const length = dataPart.length + 1;
+  const length = dataPart.length + 1; // Data part length plus 1 byte for checksum
   const nextB = Buffer.alloc(3);
   nextB.writeUIntBE(length, 0, 3); // big-endian 3-byte length
-
-  // Concatenate NextB and dataPart (this is what will be summed for the checksum)
   const packetWithoutChecksum = Buffer.concat([nextB, dataPart]);
-
-  // Compute checksum over the entire packetWithoutChecksum.
   const checksum = calculateChecksum(packetWithoutChecksum);
-
-  // Final packet: everything plus the checksum at the end.
   return Buffer.concat([packetWithoutChecksum, Buffer.from([checksum])]);
 }
 
-// Send a packet over the socket and wait for response.
-// For simplicity we assume the device returns the full answer in one burst.
-function sendCommand(client, packet) {
+// Read the complete packet from the client using the NextB field
+function readPacket(client) {
   return new Promise((resolve, reject) => {
-    const chunks = [];
-    client.once("data", (data) => {
-      chunks.push(data);
-      // In a real implementation you would check the "NextB" field to know how many bytes to expect.
-      setTimeout(() => {
-        resolve(Buffer.concat(chunks));
-      }, 100);
-    });
-    client.write(packet, (err) => {
-      if (err) {
-        reject(err);
+    let buffer = Buffer.alloc(0);
+    function onData(chunk) {
+      buffer = Buffer.concat([buffer, chunk]);
+      // Ensure we have at least the 3 bytes for NextB
+      if (buffer.length >= 3) {
+        const expectedLength = 3 + buffer.readUIntBE(0, 3); // total packet length
+        if (buffer.length >= expectedLength) {
+          client.removeListener("data", onData);
+          const packet = buffer.slice(0, expectedLength);
+          resolve(packet);
+        }
       }
+    }
+    client.on("data", onData);
+    client.on("error", (err) => {
+      client.removeListener("data", onData);
+      reject(err);
     });
   });
 }
 
-function extractMeasurements(buffer) {
-  // Remove header (first 5 bytes: 3 bytes NextB, 1 byte devAdr, 1 byte cmd)
-  // and drop the last checksum byte.
+// Parse a received packet according to the defined format
+function parsePacket(buffer) {
+  if (buffer.length < 5) {
+    throw new Error("Packet too short.");
+  }
+  const nextB = buffer.readUIntBE(0, 3);
+  if (buffer.length !== 3 + nextB) {
+    throw new Error("Invalid packet length.");
+  }
+  const devAdr = buffer[3];
+  const cmd = buffer[4];
   const payload = buffer.slice(5, buffer.length - 1);
-  // Ensure we have at least the expected number of bytes (241 bytes)
+  const checksum = buffer[buffer.length - 1];
+  const calculated = calculateChecksum(buffer.slice(0, buffer.length - 1));
+  if (checksum !== calculated) {
+    throw new Error("Checksum mismatch.");
+  }
+  return { nextB, devAdr, cmd, payload, checksum };
+}
+
+// Send a packet over the socket and wait for the complete, parsed response packet.
+async function sendCommand(client, packet) {
+  return new Promise((resolve, reject) => {
+    client.write(packet, (err) => {
+      if (err) {
+        return reject(err);
+      }
+      readPacket(client)
+        .then((rawPacket) => {
+          try {
+            const parsed = parsePacket(rawPacket);
+            resolve(parsed);
+          } catch (error) {
+            reject(error);
+          }
+        })
+        .catch(reject);
+    });
+  });
+}
+
+// Extract measurements from the parsed packet's payload.
+// This function supports both a parsed packet (with a 'payload' field)
+// or a raw packet buffer.
+function extractMeasurements(packetOrPayload) {
+  const payload =
+    packetOrPayload.payload !== undefined
+      ? packetOrPayload.payload
+      : packetOrPayload.slice(5, packetOrPayload.length - 1);
   if (payload.length < 241) {
     throw new Error("Measurement payload is too short.");
   }
@@ -92,9 +133,8 @@ async function getDetectorData(client) {
   const cmd = 0xbe; // command code for cmGetDetector
   const payload = Buffer.from([0x00]); // reserved byte (set to zero)
   const packet = buildPacket(devAdr, cmd, payload);
-  const response = await sendCommand(client, packet);
-
-  return response;
+  const parsedResponse = await sendCommand(client, packet);
+  return parsedResponse;
 }
 
 async function linkDevice(client) {
@@ -102,8 +142,8 @@ async function linkDevice(client) {
   const cmd = 0x01; // cmLink command code
   const payload = Buffer.alloc(0); // No data bytes are sent
   const packet = buildPacket(devAdr, cmd, payload);
-  const response = await sendCommand(client, packet);
-  const firmwareBuffer = response.slice(5, response.length - 1);
+  const parsedResponse = await sendCommand(client, packet);
+  const firmwareBuffer = parsedResponse.payload;
   const firmware = firmwareBuffer.toString("utf8");
   console.log("Firmware:", firmware);
   return firmware;
@@ -115,7 +155,6 @@ async function linkDevice(client) {
  * and sends the cmLink command again.
  */
 async function ensureClientAlive(client) {
-  // Check if client exists and is still connected.
   if (!client || client.destroyed) {
     console.log(
       `Socket is not alive for device ${
@@ -123,12 +162,9 @@ async function ensureClientAlive(client) {
       }. Reconnecting...`
     );
     if (!client || !client.deviceAddress) {
-      throw new Error(
-        "Cannot reconnect because device address is unavailable."
-      );
+      throw new Error("Cannot reconnect because device address is unavailable.");
     }
     const newClient = await createDeviceConnection(client.deviceAddress);
-    // Reattach device info so future reconnection checks work.
     newClient.deviceAddress = client.deviceAddress;
     newClient.accessToken = client.accessToken;
     console.log(
@@ -220,8 +256,8 @@ async function processJob(client, apiUrl, accessToken, job, processingJobs) {
           console.log(
             `Processing cmGetDetector for job ${jobId}, cycle ${currentCycle}, step ${currentStep}`
           );
-          const detectorDataBuffer = await getDetectorData(client);
-          const measurements = extractMeasurements(detectorDataBuffer);
+          const detectorDataPacket = await getDetectorData(client);
+          const measurements = extractMeasurements(detectorDataPacket);
           await sendDataToApi(apiUrl, accessToken, measurements);
         } else if (latestJob.currentCommand === "sleep") {
           const commandIndex = currentStep - 1;
@@ -254,9 +290,8 @@ async function processJob(client, apiUrl, accessToken, job, processingJobs) {
         // Check if we are at the final step of the final cycle.
         if (currentStep === totalSteps && currentCycle === totalCycles) {
           finished = true;
-          break; // Exit the inner loop without incrementing
+          break;
         } else {
-          // Increment step if not at the final command.
           currentStep++;
         }
 
@@ -309,26 +344,21 @@ async function processJob(client, apiUrl, accessToken, job, processingJobs) {
 }
 
 // Poll for active jobs and process them concurrently.
-// The "processingJobs" Set keeps track of jobs already being handled.
-async function pollJobs(client, apiUrl, accessToken, refreshTime) {
-  const processingJobs = new Set();
-  while (true) {
+async function pollJobs(client, apiUrl, accessToken, refreshTime, cancelToken) {
+  while (cancelToken.active) {
     try {
       const endpoint = `${apiUrl}/devices/${accessToken}/jobs/active`;
       const response = await axios.get(endpoint);
       const jobs = response.data;
       for (const job of jobs) {
-        if (job.status === "JOB_QUEUED" && !processingJobs.has(job.id)) {
-          console.log(`Found queued job ${job.id} for device ${accessToken}`);
-          // Start processing the job concurrently (do not await so that multiple jobs can run)
-          processJob(client, apiUrl, accessToken, job, processingJobs);
+        // Process job if queued, etc.
+        // (Assume processJob and related functions are defined as before.)
+        if (job.status === "JOB_QUEUED") {
+          processJob(client, apiUrl, accessToken, job, new Set());
         }
       }
     } catch (error) {
-      console.error(
-        `Error fetching jobs for device ${accessToken}:`,
-        error.message
-      );
+      console.error(`Error fetching jobs for device ${accessToken}:`, error.message);
     }
     // Wait for the configured refresh interval before polling again.
     await new Promise((resolve) => setTimeout(resolve, refreshTime));
@@ -336,36 +366,45 @@ async function pollJobs(client, apiUrl, accessToken, refreshTime) {
 }
 
 // Process device: connect, link, and start polling for jobs
-async function processDevice(device, apiUrl, jobRefreshTime) {
+async function processDevice(device, apiUrl, refreshTime, cancelToken) {
   const { address, accessToken } = device;
   let client;
   try {
     client = await createDeviceConnection(address);
-    // Store device info on the socket for future reconnection checks.
     client.deviceAddress = address;
     client.accessToken = accessToken;
     console.log(`Connected to device at ${address}`);
     const firmware = await linkDevice(client);
     console.log(`Device ${accessToken} firmware: ${firmware}`);
-
-    // Start polling for jobs (this runs continuously)
-    pollJobs(client, apiUrl, accessToken, jobRefreshTime);
+    // Start polling with cancellation support.
+    pollJobs(client, apiUrl, accessToken, refreshTime, cancelToken);
   } catch (error) {
     console.error(`Error processing device ${accessToken}:`, error);
     if (client) client.end();
   }
 }
 
+
 export async function startGateway() {
-  try {
-    const config = await loadConfig();
-    const { api_url: apiUrl, devices, jobRefreshTime } = config;
-    // Default refresh time if not set (in milliseconds)
-    const refreshTime = jobRefreshTime || 5000;
-    await Promise.all(
-      devices.map((device) => processDevice(device, apiUrl, refreshTime))
-    );
-  } catch (error) {
-    console.error("Error in main:", error);
-  }
+  const config = await loadConfig();
+  const { api_url: apiUrl, devices, jobRefreshTime } = config;
+  devices.forEach((device) => {
+    if (!activePollers.has(device.accessToken)) {
+      // Each device gets a cancellation token object.
+      const cancelToken = { active: true };
+      processDevice(device, apiUrl, jobRefreshTime, cancelToken);
+      activePollers.set(device.accessToken, cancelToken);
+    }
+  });
+}
+
+export async function reloadGateway() {
+  console.log("Reloading gateway with new configuration...");
+  // Cancel all active polling tasks.
+  activePollers.forEach((cancelToken, accessToken) => {
+    cancelToken.active = false;
+    activePollers.delete(accessToken);
+  });
+  // Restart gateway with new configuration.
+  await startGateway();
 }
