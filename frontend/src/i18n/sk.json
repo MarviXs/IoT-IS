@@ -106,6 +106,7 @@
     "payroll": "Daňový doklad",
     "price_list": "Cenník",
     "offer_sheet": "List ponuky",
+    "add_document": "Pridaj dokument",
     "toasts": {
       "get_user_failed": "Načítanie používateľa zlyhalo! | Načítanie používateľov zlyhalo!",
       "email_update_success": "E-mail bol aktualizovaný!",

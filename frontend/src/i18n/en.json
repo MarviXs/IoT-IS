@@ -109,6 +109,7 @@
     "payroll": "Payroll",
     "price_list": "Price list",
     "offer_sheet": "Offer sheet",
+    "add_document": "Add document",
     "toasts": {
       "get_user_failed": "Loading user failed! | Loading users failed!",
       "email_update_success": "Email updated!",
