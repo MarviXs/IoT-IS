@@ -1,5 +1,5 @@
 <template>
-  <PageLayout :breadcrumbs="[{ label: 'Plants Overview' }]">
+  <PageLayout :breadcrumbs="[{ label: 'Plants lifecycles' }]">
     <template #actions>
       <q-btn
         class="shadow"
@@ -40,7 +40,35 @@
             </q-linear-progress>
           </q-td>
         </template>
+        <template v-slot:body="props">
+          <q-tr :props="props" @click="logImageName(props.row)">
+            <q-td v-for="col in columns" :key="col.name">
+              {{ props.row[col.field] }}
+            </q-td>
+          </q-tr>
+        </template>
       </q-table>
+
+      <q-dialog v-model="showImageDialog">
+      <q-card style="width: 100%; ">
+        <q-card-section>
+          <div class="text-h6">Plant Image</div>
+        </q-card-section>
+        <q-card-section>
+          <q-img v-if="plantImage" style="width: 100%; " :src="plantImage" fit="contain">
+            <div
+              v-if="showImageDialog"
+              class="square-overlay"
+              :style="{ top: `${squareTop}px`, left: `${squareLeft}px`, width: '50px', height: '50px' }"
+            ></div>
+          </q-img>
+          <div v-else class="text-red">Image not found</div>
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn flat label="Close" color="primary" @click="showImageDialog = false" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
     </template>
   </PageLayout>
 </template>
@@ -51,6 +79,10 @@ import { useRoute, useRouter } from 'vue-router';
 import LifeCycleService from '@/api/services/LifeCycleService';
 import PageLayout from '@/layouts/PageLayout.vue';
 import { mdiPlus } from '@quasar/extras/mdi-v7';
+import axios from 'axios';
+
+const showImageDialog = ref(false);
+const plantImage = ref<string | null>(null);
 
 // Breadcrumbs for navigation
 const breadcrumbs = ref([
@@ -67,14 +99,15 @@ const plants = ref<{
   disease?: string | null;
   health?: string | null;
   analysisDate?: string | null;
+  imageName?: string | null;
 }[]>([]);
 
 // Table columns
 const columns = ref([
   { name: 'id', required: true, label: 'Plant ID', align: 'left', field: 'plantId', sortable: true },
   { name: 'disease', required: true, label: 'Disease', align: 'left', field: 'disease', sortable: true },
-  { name: 'area', required: true, label: 'Size', align: 'right', field: 'area', sortable: true },
-  { name: 'leafCount', required: true, label: 'Leaf Count', align: 'right', field: 'leafCount', sortable: true },
+  { name: 'area', required: true, label: 'Size', align: 'left', field: 'area', sortable: true },
+  { name: 'leafCount', required: true, label: 'Leaf Count', align: 'left', field: 'leafCount', sortable: true },
   { name: 'date', required: true, label: 'Date', align: 'left', field: 'analysisDate', sortable: true },
   { name: 'progress', required: true, label: 'Progress', align: 'left', field: 'progress', sortable: false },
 ]);
@@ -86,8 +119,11 @@ function formatDate(date: string | null): string {
     return 'Invalid date';
   }
   
-  const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
-  return parsedDate.toLocaleDateString('en-US', options);
+  const year = parsedDate.getUTCFullYear();
+  const month = String(parsedDate.getUTCMonth() + 1).padStart(2, '0'); // Mesiace sú od 0 do 11
+  const day = String(parsedDate.getUTCDate()).padStart(2, '0');
+
+  return `${year}/${month}/${day}`;
 }
 
 const route = useRoute();
@@ -95,6 +131,8 @@ const plantId = route.params.id;
 
 const router = useRouter();
 let routerPID: string | undefined;
+let squareTop: number = 0;
+let squareLeft: number = 0;
 
 
 onMounted(async () => {
@@ -102,7 +140,7 @@ onMounted(async () => {
     const response = await LifeCycleService.getLifeCyclesByPlantId(plantId as string);
     plants.value = response.data?.map((item) => ({
       ...item,
-      analysisDate: item.analysisDate ? item.analysisDate : null,
+      analysisDate: item.analysisDate ? formatDate(item.analysisDate) : null,
     })) ?? [];
     routerPID = plants.value[0].plantId;
   } catch (error) {
@@ -113,11 +151,41 @@ onMounted(async () => {
 function addRecord() {
   router.push(`analyze/${routerPID}`);
 }
+
+async function logImageName(row: any) {
+  console.log('ImageName:', row.imageName);
+  squareTop = row.height * 0.6 - 50;
+  //squareTop = 100;
+  squareLeft = row.width * 0.58 - 50;
+  //squareLeft = 100;
+
+  console.log('Square Top:', squareTop);
+  console.log('Square Left:', squareLeft);
+
+  if (!row.imageName) {
+    console.warn('No image name available');
+    return;
+  }
+
+  try {
+    const response = await axios.get(`http://localhost:5000/image/${row.imageName}`);
+    plantImage.value = response.data.plantImage; // Base64 string
+    showImageDialog.value = true; // Open dialog
+  } catch (error) {
+    console.error('Error fetching image:', error);
+    plantImage.value = null;
+    showImageDialog.value = true;
+  }
+}
 </script>
 
 <style scoped>
 .q-btn.flat {
   margin: 0;
   padding: 0.5rem 1rem;
+}
+.square-overlay {
+  position: absolute;
+  border: 3px solid yellow;
 }
 </style>

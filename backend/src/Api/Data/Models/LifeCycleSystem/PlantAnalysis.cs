@@ -12,4 +12,5 @@ public class PlantAnalysis : BaseModel
         public double Area { get; set; }
         public string Disease { get; set; } = string.Empty;
         public string Health { get; set; } = string.Empty;
+        public string ImageName { get; set; }  = string.Empty;
     }

@@ -1681,6 +1681,7 @@ export interface components {
             area: number;
             disease: string;
             health: string;
+            imageName: string;
         };
         "Fei.Is.Api.Features.LifeCycles.Commands.UpdateLifeCycleById.Request": {
             /** Format: int32 */
@@ -1710,6 +1711,7 @@ export interface components {
             health?: string | null;
             /** Format: date-time */
             analysisDate?: string | null;
+            imageName?: string | null;
         };
         "Fei.Is.Api.Features.LifeCycles.Queries.GetLifeCycles.Response": {
             /** Format: uuid */

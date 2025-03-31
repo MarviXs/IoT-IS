@@ -1,5 +1,5 @@
 <template>
-  <PageLayout :breadcrumbs="[{ label: t('lifecycle.label', 2) }]">
+  <PageLayout :breadcrumbs="[{ label: t('lifecycle.label', 1) }]">
     <template #actions>
       <q-btn
       class="shadow"

@@ -21,18 +21,20 @@
             </div>
             <div v-else>
               <q-img
+                v-if="!isLoading"
                 :src="plantProperties.photoLeaves || '../../assets/logo.png'"
                 alt="Leaves Image"
                 style="max-width: 300px; height: auto; object-fit: contain;"
                 @click="getClickPosition"
               />
+              <q-spinner v-else color="primary" size="50px" />
 
               <div
                 v-for="(index, idx) in positionDisX"
                 :key="idx"
                 class="marker"
                 :style="{ left: `${positionDisX[idx]}px`, top: `${positionDisY[idx]}px` }"
-                @click="removeDisease(idx)"
+                @click="confirmRemove(idx)"
               >
                 <span v-if="choroby[idx]" class="disease-label">{{ choroby[idx] }}</span>
               </div>
@@ -93,8 +95,9 @@
               <q-input
                 v-model="plantProperties.area"
                 outlined
-                label="Area"
+                label="Area (cm2)"
                 dense
+                type="number"
                 class="q-mb-md"
               />
               <q-input
@@ -145,18 +148,32 @@
       </q-card>
     </q-dialog>
 
+
+    <q-dialog v-model="dialogOpen2">
+      <q-card>
+        <q-card-section>
+          <div class="text-h6">Naozaj chcete odstrániť chorobu "{{ selectedDisease }}"?</div>
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn flat label="Nie" color="grey" v-close-popup />
+          <q-btn flat label="Áno" color="red" @click="removeDisease" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+
   </q-page>
 </template>
 
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { h, ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { mdiCheck, mdiUpload } from '@quasar/extras/mdi-v7';
 import { Cropper as VueAdvancedCropper } from 'vue-advanced-cropper';
 import 'vue-advanced-cropper/dist/style.css';
 import LifeCycleService from '@/api/services/LifeCycleService';
-import { ro } from 'date-fns/locale';
+import { he, ro } from 'date-fns/locale';
 
 const plantProperties = ref({
   id: '',
@@ -169,6 +186,7 @@ const plantProperties = ref({
   date: '',
   photo: '',
   photoLeaves: '',
+  photoName: '',
 });
 
 let uploadedFile: File | null = null;
@@ -181,7 +199,8 @@ let tmpResponse: { nums: Array<string> } | undefined;
 let choroby: string[] = [];
 let index = ref<number | null>(null);
 let positionDisX: number[] = [];
-let positionDisY: number[] = []; 
+let positionDisY: number[] = [];
+let selectedIndex = ref<number | null>(null); 
 const fileInput = ref<HTMLInputElement | null>(null);
 const router = useRouter();
 const route = useRoute();
@@ -190,6 +209,9 @@ const cropper = ref(null);
 const receivedPblId = route.params.id || '';
 const dialogOpen = ref(false);
 const diseaseInput = ref('');
+const isLoading = ref(false);
+const dialogOpen2 = ref(false);
+const selectedDisease = ref("");
 
 if(receivedPblId !== undefined){
   plantProperties.value.id = receivedPblId.toString();
@@ -252,7 +274,7 @@ const calculateTotalLeaves = (nums: Record<string, { leaves: number; size: numbe
 };
 
 const calculateTotalArea = (nums: Record<string, { leaves: number; size: number }>) => {
-  return Object.values(nums).reduce((sum, entry) => sum + entry.size, 0).toString();
+  return Math.round(Object.values(nums).reduce((sum, entry) => sum + entry.size, 0)).toString();
 };
 
 const uploadPhoto = async (file: File) => {
@@ -266,7 +288,7 @@ const uploadPhoto = async (file: File) => {
   formData.append('left', imageLeft.toString());
   formData.append('rows', plantProperties.value.rows.toString());
   formData.append('cols', plantProperties.value.cols.toString());
-
+  isLoading.value = true;
   try {
     const response = await fetch('http://localhost:5000/upload', {
       method: 'POST',
@@ -283,15 +305,18 @@ const uploadPhoto = async (file: File) => {
       plantProperties.value.type = data.plant;
       plantProperties.value.disease = data.disease;
       plantProperties.value.photoLeaves = `data:image/png;base64,${data.plantImage}`;
+      plantProperties.value.photoName = data.plantImageName;
     } else {
       console.error('Failed to upload photo');
     }
   } catch (error) {
     console.error('Error uploading photo:', error);
   }
+  isLoading.value = false;
 };
 
 const savePlant = async () => {
+
   const request = {
     plantBoardId: plantProperties.value.id,
     rows: Number(plantProperties.value.rows),
@@ -321,6 +346,8 @@ const savePlant = async () => {
           const leaves1 = reParsed.leaves;  // Získaš hodnotu "leaves"
           const size1 = reParsed.size;
           const disease1 = reParsed.disease;
+          const width1 = reParsed.x;
+          const height1 = reParsed.y;
           console.log(`Leaves: ${leaves1} Size: ${size1}`);
 
           const indexP = num[0];
@@ -353,14 +380,15 @@ const savePlant = async () => {
             const responsePlantID = res_id.data;
 
             const requestAnalysis = {
-              height: 0,
-              width: 0,
+              height: height1,
+              width: width1,
               leafCount: plant.leaves,
               area: plant.size,
               disease: choroby[indexP] || 'Zdrava',
               health: "healthy",
               plantId: res_id.response.status === 409 ? res_id.response.statusText : responsePlantID,
               analysisDate: new Date(plantProperties.value.date).toISOString(),
+              imageName: plantProperties.value.photoName,
             };
 
             await LifeCycleService.createAnalysis(requestAnalysis);
@@ -447,18 +475,24 @@ const saveDisease = () => {
   if (Number(index) >= 0 && diseaseInput.value) {
     choroby[Number(index)] = diseaseInput.value;
     dialogOpen.value = false;
+    diseaseInput.value = '';
   }
 };
 
-const removeDisease = (index: number) => {
-  // Zrušenie choroby pre danú pozíciu
-  positionDisX.splice(index, 1);
-  positionDisY.splice(index, 1);
-  choroby.splice(index, 1); // Vyprázdnenie choroby v poli chorôb
-  dialogOpen.value = true;
-  dialogOpen.value = false;
+const confirmRemove = (index: number) => {
+  selectedIndex.value = index;
+  selectedDisease.value = choroby[index];
+  dialogOpen2.value = true;
 };
 
+const removeDisease = () => {
+  if (selectedIndex.value !== null) {
+    positionDisX.splice(selectedIndex.value, 1);
+    positionDisY.splice(selectedIndex.value, 1);
+    choroby.splice(selectedIndex.value, 1);
+  }
+  dialogOpen2.value = false;
+};
 
 </script>
 

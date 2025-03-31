@@ -47,7 +47,8 @@ public static class GetLifeCycleById
                     area: pa.Area,
                     Disease: pa.Disease,
                     Health: pa.Health,
-                    AnalysisDate: pa.AnalysisDate
+                    AnalysisDate: pa.AnalysisDate,
+                    ImageName: pa.ImageName
                 )).ToList();
 
                 return TypedResults.Ok(responses);
@@ -86,7 +87,8 @@ public static class GetLifeCycleById
                 area: plantAnalysis.Area,
                 Disease: plantAnalysis.Disease,
                 Health: plantAnalysis.Health,
-                AnalysisDate: plantAnalysis.AnalysisDate
+                AnalysisDate: plantAnalysis.AnalysisDate,
+                ImageName: plantAnalysis.ImageName
             );
 
             return Result.Ok(response);
@@ -101,6 +103,7 @@ public static class GetLifeCycleById
         double? area,
         string? Disease,
         string? Health,
-        DateTime? AnalysisDate
+        DateTime? AnalysisDate,
+        string? ImageName
     );
 }

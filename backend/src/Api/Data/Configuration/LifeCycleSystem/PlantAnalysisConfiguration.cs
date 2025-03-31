@@ -25,6 +25,9 @@ public class PlantAnalysisConfiguration : IEntityTypeConfiguration<PlantAnalysis
         builder.Property(a => a.Area)
             .IsRequired();
 
+        builder.Property(a => a.ImageName)
+            .IsRequired();
+
         builder.Property(a => a.Disease)
             .HasMaxLength(200);
 

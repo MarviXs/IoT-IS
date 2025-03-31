@@ -22,7 +22,8 @@ public static class CreateRecord
         int LeafCount,
         double Area,
         string Disease, 
-        string Health
+        string Health,
+        string ImageName
         );
 
     public sealed class Endpoint : ICarterModule
@@ -82,7 +83,8 @@ public static class CreateRecord
                 Area = message.Request.Area,
                 Disease = message.Request.Disease,
                 Health = message.Request.Health,
-                AnalysisDate = message.Request.AnalysisDate
+                AnalysisDate = message.Request.AnalysisDate,
+                ImageName = message.Request.ImageName,
             };
 
             await context.PlantAnalyses.AddAsync(plantAnalysis, cancellationToken);
