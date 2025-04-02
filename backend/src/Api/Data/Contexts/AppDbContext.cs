@@ -62,8 +62,6 @@ public class AppDbContext
         modelBuilder.ApplyConfiguration(new OrderItemContainerConfiguration());
         modelBuilder.ApplyConfiguration(new VATCategoryConfiguration());
         modelBuilder.ApplyConfiguration(new SystemSettingConfiguration());
-
-        modelBuilder.ApplyDataSeeds();
     }
 
     //IoT tables

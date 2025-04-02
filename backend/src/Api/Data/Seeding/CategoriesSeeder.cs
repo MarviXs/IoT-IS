@@ -1,30 +1,42 @@
-﻿using Fei.Is.Api.Data.Models.InformationSystem;
+﻿using Fei.Is.Api.Data.Contexts;
+using Fei.Is.Api.Data.Models;
+using Fei.Is.Api.Data.Models.InformationSystem;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualBasic;
 
 namespace Fei.Is.Api.Data.Seeding
 {
     public class CategoriesSeeder : ISeed
     {
-        public void Seed(ModelBuilder modelBuilder)
+        public List<Type> GetDependencies()
         {
-            modelBuilder
-                .Entity<Category>()
-                .HasData(
-                    new Category()
+            return new List<Type>();
+        }
+
+        public Type GetModel()
+        {
+            return typeof(Category);
+        }
+
+        public void Seed(AppDbContext appDbContext)
+        {
+            appDbContext.Categories.AddRange(
+            [
+                new Category()
                     {
-                        Id = new Guid("6bf2fd3c-1185-47c4-870f-32738d045f36"),
+                        Id = Guid.NewGuid(),
                         CategoryName = "Nejaka burina",
                         CreatedAt = DateTime.MinValue,
                         UpdatedAt = DateTime.MinValue,
                     },
                     new Category()
                     {
-                        Id = new Guid("7905728d-ce7d-486b-a981-2882232f1b6b"),
+                        Id = Guid.NewGuid(),
                         CategoryName = "Nejaky strom",
                         CreatedAt = DateTime.MinValue,
                         UpdatedAt = DateTime.MinValue,
                     }
-                );
+            ]);
         }
     }
 }
