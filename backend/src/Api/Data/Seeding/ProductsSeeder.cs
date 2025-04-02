@@ -1,4 +1,4 @@
-using Fei.Is.Api.Data.Models.InformationSystem;
+/*using Fei.Is.Api.Data.Models.InformationSystem;
 using Microsoft.EntityFrameworkCore;
 using System;
 
@@ -8,7 +8,7 @@ namespace Fei.Is.Api.Data.Seeding
     {
         public void Seed(ModelBuilder modelBuilder)
         {
-            /* modelBuilder.Entity<Product>().HasData(
+            modelBuilder.Entity<Product>().HasData(
                 new Product()
                 {
                     Id = new Guid("21a51405-3c66-4e25-89ec-24f18e6232b9"),
@@ -394,7 +394,8 @@ namespace Fei.Is.Api.Data.Seeding
                         Rate = 21.0m
                     }
                 }
-            ); */
+            ); 
         }
     }
 }
+*/
