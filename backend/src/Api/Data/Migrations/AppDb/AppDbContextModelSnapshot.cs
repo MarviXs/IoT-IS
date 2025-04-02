@@ -268,6 +268,9 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.Property<Guid>("OwnerId")
                         .HasColumnType("uuid");
 
+                    b.Property<int>("Protocol")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -434,22 +437,6 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.HasKey("Id");
 
                     b.ToTable("Categories");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("6bf2fd3c-1185-47c4-870f-32738d045f36"),
-                            CategoryName = "Nejaka burina",
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            Id = new Guid("7905728d-ce7d-486b-a981-2882232f1b6b"),
-                            CategoryName = "Nejaky strom",
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        });
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Company", b =>
@@ -487,80 +474,6 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.HasKey("Id");
 
                     b.ToTable("Companies");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("479b6c63-f552-4a6e-b706-62ec96edb896"),
-                            City = "Příbram",
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Dic = "CZ25735641",
-                            Ic = "25735641",
-                            Psc = "26101",
-                            Street = "Třemošenská 658",
-                            Title = "Petunia s.r.o.",
-                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            Id = new Guid("7337c6db-43d7-4c10-aeb3-3ef2f853f7d3"),
-                            City = "Stará Huť",
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Dic = "CZ696123003",
-                            Ic = "71070877",
-                            Psc = "26202",
-                            Street = "K Vršíčku 91",
-                            Title = "Štamberková Monika",
-                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            Id = new Guid("f51a5725-b267-4c19-9cf0-444bb7c32b6e"),
-                            City = "Dřísy",
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Dic = "CZ27469613",
-                            Ic = "27469613",
-                            Psc = "27714",
-                            Street = "Lhota 244",
-                            Title = "Arboeko s.r.o.",
-                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            Id = new Guid("91827187-f264-44b2-b6e3-697a752aa968"),
-                            City = "Olbramkostel",
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Dic = "CZ28282711",
-                            Ic = "28282711",
-                            Psc = "67151",
-                            Street = "Olbramkostel 41",
-                            Title = "Moravol s.r.o.",
-                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            Id = new Guid("be97065a-c6e9-4b03-a173-c1c85f9b42db"),
-                            City = "Horní Benešov",
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Dic = "CZ29296721",
-                            Ic = "29296721",
-                            Psc = "79312",
-                            Street = "Mírová 407",
-                            Title = "LM Agroton s.r.o.",
-                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            Id = new Guid("3b29e227-bb97-441f-878e-d4b1111b3ebb"),
-                            City = "Třebechovice pod Orebem",
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Dic = "CZ6203071741",
-                            Ic = "46212152",
-                            Psc = "50346",
-                            Street = "Blešno 127",
-                            Title = "Jan Zatloukal - Zahradnictví Blešno",
-                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        });
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.DeliveryItem", b =>
@@ -1065,43 +978,20 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.HasKey("Id");
 
                     b.ToTable("Suppliers");
+                });
 
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("e8391bf0-9dc4-4d2e-a3f0-d028833ce902"),
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Volmary",
-                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            Id = new Guid("4fd1cbf4-bef4-4fee-b72f-fac1b15c8357"),
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Bennials",
-                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            Id = new Guid("94052ccf-6797-4351-ad43-5130cb6c4fbe"),
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Schneider",
-                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            Id = new Guid("7df5fe3b-1bbf-4dc8-a108-5c6f931e0db4"),
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Syngenta",
-                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            Id = new Guid("412ceb2b-ca6a-43c9-80e1-6eb1cb16164a"),
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Internal",
-                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        });
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.SystemSetting", b =>
+                {
+                    b.Property<string>("Key")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Key");
+
+                    b.ToTable("SystemSettings");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.VATCategory", b =>
@@ -1126,24 +1016,6 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.HasKey("Id");
 
                     b.ToTable("VATCategories");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("5bfc3ed5-8874-4452-9043-22065fc00e29"),
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Normal",
-                            Rate = 21m,
-                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            Id = new Guid("37b1c257-1401-4d79-9c4f-a206b0937fd2"),
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Reduced",
-                            Rate = 19m,
-                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        });
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.WorkDayDetail", b =>

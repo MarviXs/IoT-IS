@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Carter;
 using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
+using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
 using Fei.Is.Api.Features.Devices.Extensions;
@@ -86,21 +87,22 @@ public static class GetDeviceById
                     ? new TemplateResponse(
                         device.DeviceTemplate.Id,
                         device.DeviceTemplate.Name,
-                        device
-                            .DeviceTemplate.Sensors.Select(sensor => new SensorResponse(
+                        [
+                            .. device.DeviceTemplate.Sensors.Select(sensor => new SensorResponse(
                                 sensor.Id,
                                 sensor.Tag,
                                 sensor.Name,
                                 sensor.Unit,
                                 sensor.AccuracyDecimals
                             ))
-                            .ToArray()
+                        ]
                     )
                     : null,
                 device.CreatedAt,
                 device.UpdatedAt,
                 isOnline.HasValue && isOnline == "1",
-                lastSeen.HasValue && long.TryParse(lastSeen, out var timestamp) ? DateTimeOffset.FromUnixTimeSeconds(timestamp) : null
+                lastSeen.HasValue && long.TryParse(lastSeen, out var timestamp) ? DateTimeOffset.FromUnixTimeSeconds(timestamp) : null,
+                device.Protocol
             );
 
             return Result.Ok(response);
@@ -120,6 +122,7 @@ public static class GetDeviceById
         DateTime CreatedAt,
         DateTime UpdatedAt,
         bool Connected,
-        DateTimeOffset? LastSeen
+        DateTimeOffset? LastSeen,
+        DeviceConnectionProtocol Protocol
     );
 }

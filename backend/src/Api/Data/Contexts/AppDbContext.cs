@@ -63,8 +63,7 @@ public class AppDbContext
         modelBuilder.ApplyConfiguration(new WorkDayDetailConfiguration());
         modelBuilder.ApplyConfiguration(new OrderItemContainerConfiguration());
         modelBuilder.ApplyConfiguration(new VATCategoryConfiguration());
-
-        modelBuilder.ApplyDataSeeds();
+        modelBuilder.ApplyConfiguration(new SystemSettingConfiguration());
     }
 
     //IoT tables
@@ -99,6 +98,7 @@ public class AppDbContext
     public DbSet<ProductionPlan> ProductionPlans { get; set; }
     public DbSet<Summary> Summaries { get; set; }
     public DbSet<Supplier> Suppliers { get; set; }
+    public DbSet<SystemSetting> SystemSettings { get; set; }
     public DbSet<WorkDayDetail> WorkDayDetails { get; set; }
     public DbSet<WorkReport> WorkReports { get; set; }
     public DbSet<OrderItemContainer> OrderItemContainers { get; set; }

@@ -56,12 +56,26 @@ public static class SkipCycle
         public async Task<Result<Guid>> Handle(Command message, CancellationToken cancellationToken)
         {
             var job = await context.Jobs.Include(j => j.Device).FirstOrDefaultAsync(j => j.Id == message.JobId, cancellationToken);
-            if (job == null)
+            if (job == null || job.Device == null)
             {
                 return Result.Fail(new NotFoundError());
             }
 
-            return await publishJobControl.Execute(job.Device.AccessToken, message.JobId, JobControl.JOB_SKIP_CYCLE);
+            if (job.Device.Protocol == DeviceConnectionProtocol.MQTT)
+            {
+                return await publishJobControl.Execute(job.Device.AccessToken, message.JobId, JobControl.JOB_RESUME);
+            }
+            else
+            {
+                job.CurrentCycle++;
+                if (job.CurrentCycle > job.TotalCycles)
+                {
+                    job.CurrentCycle = job.TotalCycles;
+                }
+
+                await context.SaveChangesAsync(cancellationToken);
+                return Result.Ok(job.Id);
+            }
         }
     }
 }

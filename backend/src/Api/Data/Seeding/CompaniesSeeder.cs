@@ -1,3 +1,4 @@
+using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models.InformationSystem;
 using Microsoft.EntityFrameworkCore;
 
@@ -5,14 +6,22 @@ namespace Fei.Is.Api.Data.Seeding
 {
     public class CompaniesSeeder : ISeed
     {
-        public void Seed(ModelBuilder modelBuilder)
+        public List<Type> GetDependencies()
         {
-            modelBuilder
-                .Entity<Company>()
-                .HasData(
-                    new Company
+            return new List<Type>();
+        }
+
+        public Type GetModel()
+        {
+            return typeof(Company);
+        }
+
+        public void Seed(AppDbContext appDbContext)
+        {
+            appDbContext.Companies.AddRange([
+                new Company
                     {
-                        Id = Guid.Parse("479b6c63-f552-4a6e-b706-62ec96edb896"),
+                        Id = Guid.NewGuid(),
                         Title = "Petunia s.r.o.",
                         Ic = "25735641",
                         Dic = "CZ25735641",
@@ -24,7 +33,7 @@ namespace Fei.Is.Api.Data.Seeding
                     },
                     new Company
                     {
-                        Id = Guid.Parse("7337c6db-43d7-4c10-aeb3-3ef2f853f7d3"),
+                        Id = Guid.NewGuid(),
                         Title = "Štamberková Monika",
                         Ic = "71070877",
                         Dic = "CZ696123003",
@@ -36,7 +45,7 @@ namespace Fei.Is.Api.Data.Seeding
                     },
                     new Company
                     {
-                        Id = Guid.Parse("f51a5725-b267-4c19-9cf0-444bb7c32b6e"),
+                        Id = Guid.NewGuid(),
                         Title = "Arboeko s.r.o.",
                         Ic = "27469613",
                         Dic = "CZ27469613",
@@ -48,7 +57,7 @@ namespace Fei.Is.Api.Data.Seeding
                     },
                     new Company
                     {
-                        Id = Guid.Parse("91827187-f264-44b2-b6e3-697a752aa968"),
+                        Id = Guid.NewGuid(),
                         Title = "Moravol s.r.o.",
                         Ic = "28282711",
                         Dic = "CZ28282711",
@@ -60,7 +69,7 @@ namespace Fei.Is.Api.Data.Seeding
                     },
                     new Company
                     {
-                        Id = Guid.Parse("be97065a-c6e9-4b03-a173-c1c85f9b42db"),
+                        Id = Guid.NewGuid(),
                         Title = "LM Agroton s.r.o.",
                         Ic = "29296721",
                         Dic = "CZ29296721",
@@ -72,7 +81,7 @@ namespace Fei.Is.Api.Data.Seeding
                     },
                     new Company
                     {
-                        Id = Guid.Parse("3b29e227-bb97-441f-878e-d4b1111b3ebb"),
+                        Id = Guid.NewGuid(),
                         Title = "Jan Zatloukal - Zahradnictví Blešno",
                         Ic = "46212152",
                         Dic = "CZ6203071741",
@@ -82,7 +91,7 @@ namespace Fei.Is.Api.Data.Seeding
                         CreatedAt = DateTime.MinValue,
                         UpdatedAt = DateTime.MinValue
                     }
-                );
+                ]);
         }
     }
 }

@@ -10,6 +10,14 @@
           :label="t('account.label')"
           no-caps
         />
+        <q-route-tab
+          :to="{ path: '/account/document-links' }"
+          style="min-width: 130px"
+          name="document-links"
+          :icon="mdiFileDocument"
+          :label="t('account.document_links')"
+          no-caps
+        />
       </q-tabs>
     </q-card>
     <router-view />
@@ -18,9 +26,10 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import { mdiAccount } from '@quasar/extras/mdi-v7';
+import { mdiAccount, mdiFileDocument } from '@quasar/extras/mdi-v7';
 import PageLayout from '@/layouts/PageLayout.vue';
 
 const { t } = useI18n();
 </script>
+
 <style lang="scss" scoped></style>

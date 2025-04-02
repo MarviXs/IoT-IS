@@ -74,7 +74,7 @@ public static class GetActiveJobsFromDevice
             var responses = activeJobs
                 .Select(activeJob =>
                 {
-                    var currentCommand = activeJob.Commands.ElementAtOrDefault(activeJob.CurrentStep - 1)?.DisplayName ?? string.Empty;
+                    var currentCommand = activeJob.Commands.ElementAtOrDefault(activeJob.CurrentStep - 1)?.Name ?? string.Empty;
                     return new Response(
                         activeJob.Id,
                         activeJob.DeviceId,
@@ -86,7 +86,8 @@ public static class GetActiveJobsFromDevice
                         currentCommand,
                         activeJob.Paused,
                         activeJob.GetProgress(),
-                        activeJob.Status
+                        activeJob.Status,
+                        [.. activeJob.Commands.Select(c => new CommandResponse(c.Name, c.Params))]
                     );
                 })
                 .ToList();
@@ -94,6 +95,8 @@ public static class GetActiveJobsFromDevice
             return Result.Ok(responses);
         }
     }
+
+    public record CommandResponse(string Name, List<double> Params);
 
     public record Response(
         Guid Id,
@@ -106,6 +109,7 @@ public static class GetActiveJobsFromDevice
         string CurrentCommand,
         bool Paused,
         double Progress,
-        JobStatusEnum Status
+        JobStatusEnum Status,
+        List<CommandResponse> Commands
     );
 }

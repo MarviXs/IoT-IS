@@ -44,6 +44,7 @@ async function getDevice() {
       name: data.deviceTemplate?.name,
     },
     accessToken: data.accessToken ?? '',
+    protocol: data.protocol,
   };
 
   if (!data.deviceTemplate?.id) {

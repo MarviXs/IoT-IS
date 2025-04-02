@@ -6,10 +6,15 @@ using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
 using Fei.Is.Api.Features.Devices.Extensions;
+using Fei.Is.Api.Features.Jobs.Extensions;
+using Fei.Is.Api.SignalR.Dtos;
+using Fei.Is.Api.SignalR.Hubs;
+using Fei.Is.Api.SignalR.Interfaces;
 using FluentResults;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fei.Is.Api.Features.Jobs.Commands;
@@ -59,7 +64,8 @@ public static class UpdateJob
 
     public record Command(Request Request, Guid JobId) : IRequest<Result>;
 
-    public sealed class Handler(AppDbContext context, IValidator<Command> validator) : IRequestHandler<Command, Result>
+    public sealed class Handler(AppDbContext context, IValidator<Command> validator, IHubContext<IsHub, INotificationsClient> hubContext)
+        : IRequestHandler<Command, Result>
     {
         public async Task<Result> Handle(Command message, CancellationToken cancellationToken)
         {
@@ -83,8 +89,22 @@ public static class UpdateJob
             job.TotalCycles = message.Request.TotalCycles;
             job.Paused = message.Request.Paused;
             job.Status = message.Request.Status;
-
             await context.SaveChangesAsync(cancellationToken);
+
+            var jobUpdateDto = new JobUpdateDto(
+                job.Id,
+                job.DeviceId,
+                job.Name,
+                job.TotalSteps,
+                job.TotalCycles,
+                job.CurrentStep,
+                job.CurrentCycle,
+                job.GetCurrentCommand(),
+                job.Paused,
+                job.GetProgress(),
+                job.Status
+            );
+            await hubContext.Clients.Group(job.DeviceId.ToString()).ReceiveJobUpdate(jobUpdateDto);
 
             return Result.Ok();
         }

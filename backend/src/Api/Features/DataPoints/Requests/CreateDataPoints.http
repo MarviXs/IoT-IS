@@ -1,0 +1,11 @@
+### Create Data Points
+POST http://localhost:5097/devices/XLbYLWnhsx8rnDifjfEFeOOo/data
+Content-Type: application/json
+
+[
+  {
+    "Tag": "temp",
+    "Value": 22.5,
+    "TimeStamp": 1711132800000
+  }
+]

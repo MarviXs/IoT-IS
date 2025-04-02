@@ -1,4 +1,6 @@
-﻿namespace Fei.Is.Api.Data.Models;
+﻿using Fei.Is.Api.Data.Enums;
+
+namespace Fei.Is.Api.Data.Models;
 
 public class Device : BaseModel
 {
@@ -11,6 +13,7 @@ public class Device : BaseModel
     public required string Name { get; set; }
     public string? Mac { get; set; }
     public required string AccessToken { get; set; }
+    public DeviceConnectionProtocol Protocol { get; set; } = DeviceConnectionProtocol.HTTP;
 
     public ICollection<Job> Jobs { get; set; } = [];
     public ICollection<CollectionItem> CollectionItems { get; set; } = [];
