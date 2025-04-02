@@ -1,22 +1,37 @@
 <template>
   <div>
     <div v-if="isGroup(rule)">
-      <SceneRuleGroup v-model="rule" :is-root="false" :depth="depth" :devices="devices" @remove="emit('remove')" />
+      <SceneRuleGroup
+        class="q-mb-md"
+        v-model="rule"
+        :is-root="false"
+        :depth="depth"
+        :devices="devices"
+        @remove="emit('remove')"
+      />
     </div>
-    <div class="row items-center gap-md" v-else>
-      <q-btn :icon="mdiCloseCircleOutline" color="red" round dense flat class="q-ma-xs" @click="emit('remove')" />
+    <div class="row items-center" v-else>
+      <q-btn
+        :icon="mdiCloseCircleOutline"
+        color="red"
+        round
+        dense
+        flat
+        class="q-mb-lg q-mr-sm"
+        @click="emit('remove')"
+      />
       <SceneDeviceOperand v-model="leftCompare" :devices="devices" />
       <q-select
         v-model="comparisonOperator"
         :options="compareOptions"
-        label="Operand"
+        label="Operator"
         outlined
         :rules="operatorRules"
-        class="q-ma-xs"
+        class="q-mr-sm"
         emit-value
         map-options
       />
-      <SceneConstantOperand v-model="rightCompare" />
+      <SceneConstantOperand v-model="rightCompare" :unit="getUnit(leftCompare)" />
     </div>
   </div>
 </template>
@@ -25,7 +40,7 @@
 import { RulesLogic } from 'json-logic-js';
 import SceneRuleGroup from './SceneRuleGroup.vue';
 import { mdiCloseCircleOutline } from '@quasar/extras/mdi-v7';
-import { DevicesWithSensorsResponse } from '@/api/services/DeviceService';
+import { SceneDevice } from '@/api/services/DeviceService';
 import { computed, PropType } from 'vue';
 import SceneDeviceOperand from './SceneDeviceOperand.vue';
 import SceneConstantOperand from './SceneConstantOperand.vue';
@@ -35,7 +50,7 @@ const { t } = useI18n();
 
 const props = defineProps({
   depth: { type: Number, required: true },
-  devices: { type: Array as PropType<DevicesWithSensorsResponse>, required: true },
+  devices: { type: Array as PropType<SceneDevice>, required: true },
 });
 const emit = defineEmits(['remove']);
 const rule = defineModel<RulesLogic>({ required: true });
@@ -50,6 +65,17 @@ const compareOptions = computed(() => {
     { label: 'is not equal to', value: '!=' },
   ];
 });
+
+function getUnit(compare: any) {
+  if (!compare || !compare.var) {
+    return '';
+  }
+  const deviceId = compare.var.split('.')[1];
+  const tag = compare.var.split('.')[2];
+  const device = props.devices.find((device) => device.id === deviceId);
+  const tagInfo = device?.sensors.find((tagInfo) => tagInfo.tag === tag);
+  return tagInfo?.unit;
+}
 
 const leftCompare = computed({
   get: () => {

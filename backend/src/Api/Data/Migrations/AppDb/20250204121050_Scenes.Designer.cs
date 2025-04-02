@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Fei.Is.Api.Data.Migrations.AppDb
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241212190821_IS_ProductImport")]
-    partial class IS_ProductImport
+    [Migration("20250204121050_Scenes")]
+    partial class Scenes
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -385,18 +385,18 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.AdditionalOrder", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<int>("Amount")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Company")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("Company")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("ProductId")
                         .HasColumnType("uuid");
@@ -404,6 +404,9 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("Year")
                         .HasColumnType("timestamp with time zone");
@@ -440,32 +443,31 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                         {
                             Id = new Guid("6bf2fd3c-1185-47c4-870f-32738d045f36"),
                             CategoryName = "Nejaka burina",
-                            CreatedAt = new DateTime(2024, 12, 12, 19, 8, 20, 658, DateTimeKind.Utc).AddTicks(2263),
-                            UpdatedAt = new DateTime(2024, 12, 12, 19, 8, 20, 658, DateTimeKind.Utc).AddTicks(2265)
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = new Guid("7905728d-ce7d-486b-a981-2882232f1b6b"),
                             CategoryName = "Nejaky strom",
-                            CreatedAt = new DateTime(2024, 12, 12, 19, 8, 20, 658, DateTimeKind.Utc).AddTicks(2274),
-                            UpdatedAt = new DateTime(2024, 12, 12, 19, 8, 20, 658, DateTimeKind.Utc).AddTicks(2274)
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         });
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Company", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<string>("City")
-                        .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Dic")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Ic")
@@ -473,36 +475,108 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                         .HasColumnType("text");
 
                     b.Property<string>("Psc")
-                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Street")
                         .HasColumnType("text");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Title2")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Ulice")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
                     b.ToTable("Companies");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("479b6c63-f552-4a6e-b706-62ec96edb896"),
+                            City = "Příbram",
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Dic = "CZ25735641",
+                            Ic = "25735641",
+                            Psc = "26101",
+                            Street = "Třemošenská 658",
+                            Title = "Petunia s.r.o.",
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            Id = new Guid("7337c6db-43d7-4c10-aeb3-3ef2f853f7d3"),
+                            City = "Stará Huť",
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Dic = "CZ696123003",
+                            Ic = "71070877",
+                            Psc = "26202",
+                            Street = "K Vršíčku 91",
+                            Title = "Štamberková Monika",
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            Id = new Guid("f51a5725-b267-4c19-9cf0-444bb7c32b6e"),
+                            City = "Dřísy",
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Dic = "CZ27469613",
+                            Ic = "27469613",
+                            Psc = "27714",
+                            Street = "Lhota 244",
+                            Title = "Arboeko s.r.o.",
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            Id = new Guid("91827187-f264-44b2-b6e3-697a752aa968"),
+                            City = "Olbramkostel",
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Dic = "CZ28282711",
+                            Ic = "28282711",
+                            Psc = "67151",
+                            Street = "Olbramkostel 41",
+                            Title = "Moravol s.r.o.",
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            Id = new Guid("be97065a-c6e9-4b03-a173-c1c85f9b42db"),
+                            City = "Horní Benešov",
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Dic = "CZ29296721",
+                            Ic = "29296721",
+                            Psc = "79312",
+                            Street = "Mírová 407",
+                            Title = "LM Agroton s.r.o.",
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            Id = new Guid("3b29e227-bb97-441f-878e-d4b1111b3ebb"),
+                            City = "Třebechovice pod Orebem",
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Dic = "CZ6203071741",
+                            Ic = "46212152",
+                            Psc = "50346",
+                            Street = "Blešno 127",
+                            Title = "Jan Zatloukal - Zahradnictví Blešno",
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        });
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.DeliveryItem", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("uuid");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("DeliveryNoteId")
-                        .HasColumnType("integer");
+                    b.Property<Guid?>("DeliveryNoteId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("PackSize")
                         .IsRequired()
@@ -529,6 +603,9 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.Property<decimal>("UnitPriceWithoutVat")
                         .HasColumnType("numeric");
 
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<decimal>("VatRate")
                         .HasColumnType("numeric");
 
@@ -541,14 +618,15 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.DeliveryNote", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("uuid");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("CustomerId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("CustomerId")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("DeliveryDate")
                         .HasColumnType("timestamp with time zone");
@@ -569,8 +647,8 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("SupplierId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("SupplierId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Took")
                         .IsRequired()
@@ -578,6 +656,9 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.Property<decimal>("TotalAmountWithVat")
                         .HasColumnType("numeric");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<decimal>("VatGroup15")
                         .HasColumnType("numeric");
@@ -599,14 +680,15 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Invoice", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("uuid");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("CustomerId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("CustomerId")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("DueDate")
                         .HasColumnType("timestamp with time zone");
@@ -618,11 +700,14 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.Property<DateTime>("IssueDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("SupplierId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("SupplierId")
+                        .HasColumnType("uuid");
 
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("numeric");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -635,14 +720,15 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.InvoiceItem", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("uuid");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("InvoiceId")
-                        .HasColumnType("integer");
+                    b.Property<Guid?>("InvoiceId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("ItemDescription")
                         .IsRequired()
@@ -661,6 +747,9 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.Property<decimal>("UnitPrice")
                         .HasColumnType("numeric");
 
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.HasKey("Id");
 
                     b.HasIndex("InvoiceId");
@@ -670,24 +759,24 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Order", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<string>("ContactPhone")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("CustomerId")
-                        .HasColumnType("integer");
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CustomerId")
+                        .HasColumnType("uuid");
 
                     b.Property<int>("DeliveryWeek")
                         .HasColumnType("integer");
 
                     b.Property<string>("Note")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime>("OrderDate")
@@ -696,6 +785,9 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.Property<string>("PaymentMethod")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -706,32 +798,69 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.OrderItem", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("uuid");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("OrderId")
-                        .HasColumnType("integer");
+                    b.Property<Guid?>("OrderItemContainerId")
+                        .HasColumnType("uuid");
 
-                    b.Property<Guid>("ProductNumber")
+                    b.Property<Guid>("ProductId")
                         .HasColumnType("uuid");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("integer");
 
-                    b.Property<string>("VarietyName")
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderItemContainerId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("OrderItems");
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.OrderItemContainer", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<Guid?>("OrderId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal?>("PricePerContainer")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal?>("TotalPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
                     b.HasIndex("OrderId");
 
-                    b.HasIndex("ProductNumber");
-
-                    b.ToTable("OrderItems");
+                    b.ToTable("OrderItemContainers");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Product", b =>
@@ -805,17 +934,18 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.ProductionPlan", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<int>("ActualQuantity")
                         .HasColumnType("integer");
 
                     b.Property<int>("CbQuantity")
                         .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("DeliveryWeek")
                         .HasColumnType("integer");
@@ -853,7 +983,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.Property<int>("Pot9")
                         .HasColumnType("integer");
 
-                    b.Property<Guid>("ProductNumber")
+                    b.Property<Guid>("ProductId")
                         .HasColumnType("uuid");
 
                     b.Property<int>("S84")
@@ -871,6 +1001,9 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.Property<int>("TotalQuantity")
                         .HasColumnType("integer");
 
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<int>("VolyneQuantity")
                         .HasColumnType("integer");
 
@@ -882,32 +1015,36 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProductNumber");
+                    b.HasIndex("ProductId");
 
                     b.ToTable("ProductionPlans");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Summary", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<int>("Amount")
                         .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Place")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid>("ProductNumber")
+                    b.Property<Guid>("ProductId")
                         .HasColumnType("uuid");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProductNumber");
+                    b.HasIndex("ProductId");
 
                     b.ToTable("Summaries");
                 });
@@ -936,37 +1073,37 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                         new
                         {
                             Id = new Guid("e8391bf0-9dc4-4d2e-a3f0-d028833ce902"),
-                            CreatedAt = new DateTime(2024, 12, 12, 19, 8, 20, 658, DateTimeKind.Utc).AddTicks(2347),
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Volmary",
-                            UpdatedAt = new DateTime(2024, 12, 12, 19, 8, 20, 658, DateTimeKind.Utc).AddTicks(2347)
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = new Guid("4fd1cbf4-bef4-4fee-b72f-fac1b15c8357"),
-                            CreatedAt = new DateTime(2024, 12, 12, 19, 8, 20, 658, DateTimeKind.Utc).AddTicks(2349),
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Bennials",
-                            UpdatedAt = new DateTime(2024, 12, 12, 19, 8, 20, 658, DateTimeKind.Utc).AddTicks(2350)
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = new Guid("94052ccf-6797-4351-ad43-5130cb6c4fbe"),
-                            CreatedAt = new DateTime(2024, 12, 12, 19, 8, 20, 658, DateTimeKind.Utc).AddTicks(2350),
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Schneider",
-                            UpdatedAt = new DateTime(2024, 12, 12, 19, 8, 20, 658, DateTimeKind.Utc).AddTicks(2351)
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = new Guid("7df5fe3b-1bbf-4dc8-a108-5c6f931e0db4"),
-                            CreatedAt = new DateTime(2024, 12, 12, 19, 8, 20, 658, DateTimeKind.Utc).AddTicks(2352),
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Syngenta",
-                            UpdatedAt = new DateTime(2024, 12, 12, 19, 8, 20, 658, DateTimeKind.Utc).AddTicks(2352)
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = new Guid("412ceb2b-ca6a-43c9-80e1-6eb1cb16164a"),
-                            CreatedAt = new DateTime(2024, 12, 12, 19, 8, 20, 658, DateTimeKind.Utc).AddTicks(2353),
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Internal",
-                            UpdatedAt = new DateTime(2024, 12, 12, 19, 8, 20, 658, DateTimeKind.Utc).AddTicks(2353)
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         });
                 });
 
@@ -997,25 +1134,29 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                         new
                         {
                             Id = new Guid("5bfc3ed5-8874-4452-9043-22065fc00e29"),
-                            CreatedAt = new DateTime(2024, 12, 12, 19, 8, 20, 658, DateTimeKind.Utc).AddTicks(2415),
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Normal",
                             Rate = 21m,
-                            UpdatedAt = new DateTime(2024, 12, 12, 19, 8, 20, 658, DateTimeKind.Utc).AddTicks(2415)
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = new Guid("37b1c257-1401-4d79-9c4f-a206b0937fd2"),
-                            CreatedAt = new DateTime(2024, 12, 12, 19, 8, 20, 658, DateTimeKind.Utc).AddTicks(2418),
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Reduced",
                             Rate = 19m,
-                            UpdatedAt = new DateTime(2024, 12, 12, 19, 8, 20, 658, DateTimeKind.Utc).AddTicks(2419)
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         });
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.WorkDayDetail", b =>
                 {
-                    b.Property<int>("Id")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Equipment")
                         .IsRequired()
@@ -1026,9 +1167,6 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.Property<decimal>("RateB")
                         .HasColumnType("numeric");
-
-                    b.Property<int>("ReportId")
-                        .HasColumnType("integer");
 
                     b.Property<int>("TaskNumber")
                         .HasColumnType("integer");
@@ -1042,6 +1180,9 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.Property<decimal>("TotalEquipment")
                         .HasColumnType("numeric");
 
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateTime>("WorkDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -1052,6 +1193,9 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<Guid?>("WorkReportId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("WorkType")
                         .IsRequired()
                         .HasColumnType("text");
@@ -1061,19 +1205,22 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasKey("Id");
 
+                    b.HasIndex("WorkReportId");
+
                     b.ToTable("WorkDayDetails");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.WorkReport", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("uuid");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("CustomerId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("CustomerId")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("ReportDate")
                         .HasColumnType("timestamp with time zone");
@@ -1082,8 +1229,11 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("SupplierId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("SupplierId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -1274,6 +1424,108 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.HasIndex("UserId");
 
                     b.ToTable("RefreshTokens");
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.Scene", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Condition")
+                        .HasColumnType("text");
+
+                    b.Property<double>("CooldownAfterTriggerTime")
+                        .HasColumnType("double precision");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset?>("LastTriggeredAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerId");
+
+                    b.ToTable("Scenes");
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.SceneNotification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("SceneId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Severity")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SceneId");
+
+                    b.ToTable("SceneNotifications");
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.SceneSensorTrigger", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("DeviceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("SceneId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("SensorTag")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DeviceId");
+
+                    b.HasIndex("SceneId", "DeviceId", "SensorTag")
+                        .IsUnique();
+
+                    b.ToTable("SceneSensorTriggers");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.Sensor", b =>
@@ -1566,13 +1818,9 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.DeliveryItem", b =>
                 {
-                    b.HasOne("Fei.Is.Api.Data.Models.InformationSystem.DeliveryNote", "DeliveryNote")
+                    b.HasOne("Fei.Is.Api.Data.Models.InformationSystem.DeliveryNote", null)
                         .WithMany("DeliveryItems")
-                        .HasForeignKey("DeliveryNoteId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("DeliveryNote");
+                        .HasForeignKey("DeliveryNoteId");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.DeliveryNote", b =>
@@ -1584,7 +1832,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                         .IsRequired();
 
                     b.HasOne("Fei.Is.Api.Data.Models.InformationSystem.Company", "Supplier")
-                        .WithMany("DeliveryNotes")
+                        .WithMany()
                         .HasForeignKey("SupplierId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1603,7 +1851,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                         .IsRequired();
 
                     b.HasOne("Fei.Is.Api.Data.Models.InformationSystem.Company", "Supplier")
-                        .WithMany("Invoices")
+                        .WithMany()
                         .HasForeignKey("SupplierId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1615,13 +1863,9 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.InvoiceItem", b =>
                 {
-                    b.HasOne("Fei.Is.Api.Data.Models.InformationSystem.Invoice", "Invoice")
+                    b.HasOne("Fei.Is.Api.Data.Models.InformationSystem.Invoice", null)
                         .WithMany("InvoiceItems")
-                        .HasForeignKey("InvoiceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Invoice");
+                        .HasForeignKey("InvoiceId");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Order", b =>
@@ -1637,21 +1881,24 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.OrderItem", b =>
                 {
-                    b.HasOne("Fei.Is.Api.Data.Models.InformationSystem.Order", "Order")
-                        .WithMany("OrderItems")
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("Fei.Is.Api.Data.Models.InformationSystem.OrderItemContainer", null)
+                        .WithMany("Items")
+                        .HasForeignKey("OrderItemContainerId");
 
                     b.HasOne("Fei.Is.Api.Data.Models.InformationSystem.Product", "Product")
                         .WithMany()
-                        .HasForeignKey("ProductNumber")
+                        .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Order");
-
                     b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.OrderItemContainer", b =>
+                {
+                    b.HasOne("Fei.Is.Api.Data.Models.InformationSystem.Order", null)
+                        .WithMany("ItemContainers")
+                        .HasForeignKey("OrderId");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Product", b =>
@@ -1685,7 +1932,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                 {
                     b.HasOne("Fei.Is.Api.Data.Models.InformationSystem.Product", "Product")
                         .WithMany()
-                        .HasForeignKey("ProductNumber")
+                        .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1696,7 +1943,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                 {
                     b.HasOne("Fei.Is.Api.Data.Models.InformationSystem.Product", "Product")
                         .WithMany()
-                        .HasForeignKey("ProductNumber")
+                        .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1705,13 +1952,9 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.WorkDayDetail", b =>
                 {
-                    b.HasOne("Fei.Is.Api.Data.Models.InformationSystem.WorkReport", "WorkReport")
+                    b.HasOne("Fei.Is.Api.Data.Models.InformationSystem.WorkReport", null)
                         .WithMany("WorkDayDetails")
-                        .HasForeignKey("Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("WorkReport");
+                        .HasForeignKey("WorkReportId");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.WorkReport", b =>
@@ -1800,6 +2043,83 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.Scene", b =>
+                {
+                    b.HasOne("Fei.Is.Api.Data.Models.ApplicationUser", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.OwnsMany("Fei.Is.Api.Data.Models.SceneAction", "Actions", b1 =>
+                        {
+                            b1.Property<Guid>("SceneId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("integer");
+
+                            b1.Property<Guid?>("DeviceId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<string>("NotificationMessage")
+                                .HasColumnType("text");
+
+                            b1.Property<int>("NotificationSeverity")
+                                .HasColumnType("integer");
+
+                            b1.Property<Guid?>("RecipeId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<int>("Type")
+                                .HasColumnType("integer");
+
+                            b1.HasKey("SceneId", "Id");
+
+                            b1.ToTable("Scenes");
+
+                            b1.ToJson("Actions");
+
+                            b1.WithOwner()
+                                .HasForeignKey("SceneId");
+                        });
+
+                    b.Navigation("Actions");
+
+                    b.Navigation("Owner");
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.SceneNotification", b =>
+                {
+                    b.HasOne("Fei.Is.Api.Data.Models.Scene", "Scene")
+                        .WithMany()
+                        .HasForeignKey("SceneId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Scene");
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.SceneSensorTrigger", b =>
+                {
+                    b.HasOne("Fei.Is.Api.Data.Models.Device", "Device")
+                        .WithMany()
+                        .HasForeignKey("DeviceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Fei.Is.Api.Data.Models.Scene", "Scene")
+                        .WithMany("SensorTriggers")
+                        .HasForeignKey("SceneId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Device");
+
+                    b.Navigation("Scene");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.Sensor", b =>
@@ -1905,13 +2225,6 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.Navigation("Sensors");
                 });
 
-            modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Company", b =>
-                {
-                    b.Navigation("DeliveryNotes");
-
-                    b.Navigation("Invoices");
-                });
-
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.DeliveryNote", b =>
                 {
                     b.Navigation("DeliveryItems");
@@ -1924,7 +2237,12 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Order", b =>
                 {
-                    b.Navigation("OrderItems");
+                    b.Navigation("ItemContainers");
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.OrderItemContainer", b =>
+                {
+                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.VATCategory", b =>
@@ -1947,6 +2265,11 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.Navigation("ParentSteps");
 
                     b.Navigation("Steps");
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.Scene", b =>
+                {
+                    b.Navigation("SensorTriggers");
                 });
 #pragma warning restore 612, 618
         }

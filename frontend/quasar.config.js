@@ -65,6 +65,7 @@ export default configure((/* ctx */) => {
       // analyze: true,
       env: {
         VITE_API_URL: process.env.VITE_API_URL,
+        VITE_IOT_ONLY: process.env.VITE_IOT_ONLY,
       },
       // rawDefine: {}
       // ignorePublicFolder: true,
@@ -108,7 +109,7 @@ export default configure((/* ctx */) => {
           bodyClasses: true,
         },
         brand: {
-          primary: '#657cfd',
+          primary: '#526cff',
           secondary: '#6d6d6d',
         },
       },

@@ -175,7 +175,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("SubCollectionId");
 
-                    b.ToTable("CollectionItems", (string)null);
+                    b.ToTable("CollectionItems");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.CollectionShare", b =>
@@ -205,7 +205,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("CollectionShare", (string)null);
+                    b.ToTable("CollectionShare");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.Command", b =>
@@ -239,7 +239,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("DeviceTemplateId");
 
-                    b.ToTable("Commands", (string)null);
+                    b.ToTable("Commands");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.Device", b =>
@@ -280,7 +280,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("OwnerId");
 
-                    b.ToTable("Devices", (string)null);
+                    b.ToTable("Devices");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.DeviceCollection", b =>
@@ -314,7 +314,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("RootCollectionId");
 
-                    b.ToTable("DeviceCollections", (string)null);
+                    b.ToTable("DeviceCollections");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.DeviceShare", b =>
@@ -349,7 +349,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("SharingUserId");
 
-                    b.ToTable("DeviceShares", (string)null);
+                    b.ToTable("DeviceShares");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.DeviceTemplate", b =>
@@ -377,7 +377,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("OwnerId");
 
-                    b.ToTable("DeviceTemplates", (string)null);
+                    b.ToTable("DeviceTemplates");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.AdditionalOrder", b =>
@@ -412,7 +412,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("AdditionalOrders", (string)null);
+                    b.ToTable("AdditionalOrders");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Category", b =>
@@ -433,7 +433,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories", (string)null);
+                    b.ToTable("Categories");
 
                     b.HasData(
                         new
@@ -459,14 +459,12 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                         .HasColumnType("uuid");
 
                     b.Property<string>("City")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Dic")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Ic")
@@ -474,17 +472,12 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                         .HasColumnType("text");
 
                     b.Property<string>("Psc")
-                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Street")
                         .HasColumnType("text");
 
                     b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Title2")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Ulice")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -493,80 +486,80 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasKey("Id");
 
-                    b.ToTable("Companies", (string)null);
+                    b.ToTable("Companies");
 
                     b.HasData(
                         new
                         {
                             Id = new Guid("479b6c63-f552-4a6e-b706-62ec96edb896"),
                             City = "Příbram",
-                            CreatedAt = new DateTime(2024, 12, 29, 20, 5, 33, 669, DateTimeKind.Utc).AddTicks(8727),
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Dic = "CZ25735641",
                             Ic = "25735641",
                             Psc = "26101",
+                            Street = "Třemošenská 658",
                             Title = "Petunia s.r.o.",
-                            Ulice = "Třemošenská 658",
-                            UpdatedAt = new DateTime(2024, 12, 29, 20, 5, 33, 669, DateTimeKind.Utc).AddTicks(8727)
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = new Guid("7337c6db-43d7-4c10-aeb3-3ef2f853f7d3"),
                             City = "Stará Huť",
-                            CreatedAt = new DateTime(2024, 12, 29, 20, 5, 33, 669, DateTimeKind.Utc).AddTicks(8733),
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Dic = "CZ696123003",
                             Ic = "71070877",
                             Psc = "26202",
+                            Street = "K Vršíčku 91",
                             Title = "Štamberková Monika",
-                            Ulice = "K Vršíčku 91",
-                            UpdatedAt = new DateTime(2024, 12, 29, 20, 5, 33, 669, DateTimeKind.Utc).AddTicks(8733)
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = new Guid("f51a5725-b267-4c19-9cf0-444bb7c32b6e"),
                             City = "Dřísy",
-                            CreatedAt = new DateTime(2024, 12, 29, 20, 5, 33, 669, DateTimeKind.Utc).AddTicks(8736),
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Dic = "CZ27469613",
                             Ic = "27469613",
                             Psc = "27714",
+                            Street = "Lhota 244",
                             Title = "Arboeko s.r.o.",
-                            Ulice = "Lhota 244",
-                            UpdatedAt = new DateTime(2024, 12, 29, 20, 5, 33, 669, DateTimeKind.Utc).AddTicks(8736)
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = new Guid("91827187-f264-44b2-b6e3-697a752aa968"),
                             City = "Olbramkostel",
-                            CreatedAt = new DateTime(2024, 12, 29, 20, 5, 33, 669, DateTimeKind.Utc).AddTicks(8737),
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Dic = "CZ28282711",
                             Ic = "28282711",
                             Psc = "67151",
+                            Street = "Olbramkostel 41",
                             Title = "Moravol s.r.o.",
-                            Ulice = "Olbramkostel 41",
-                            UpdatedAt = new DateTime(2024, 12, 29, 20, 5, 33, 669, DateTimeKind.Utc).AddTicks(8738)
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = new Guid("be97065a-c6e9-4b03-a173-c1c85f9b42db"),
                             City = "Horní Benešov",
-                            CreatedAt = new DateTime(2024, 12, 29, 20, 5, 33, 669, DateTimeKind.Utc).AddTicks(8739),
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Dic = "CZ29296721",
                             Ic = "29296721",
                             Psc = "79312",
+                            Street = "Mírová 407",
                             Title = "LM Agroton s.r.o.",
-                            Ulice = "Mírová 407",
-                            UpdatedAt = new DateTime(2024, 12, 29, 20, 5, 33, 669, DateTimeKind.Utc).AddTicks(8739)
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = new Guid("3b29e227-bb97-441f-878e-d4b1111b3ebb"),
                             City = "Třebechovice pod Orebem",
-                            CreatedAt = new DateTime(2024, 12, 29, 20, 5, 33, 669, DateTimeKind.Utc).AddTicks(8742),
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Dic = "CZ6203071741",
                             Ic = "46212152",
                             Psc = "50346",
+                            Street = "Blešno 127",
                             Title = "Jan Zatloukal - Zahradnictví Blešno",
-                            Ulice = "Blešno 127",
-                            UpdatedAt = new DateTime(2024, 12, 29, 20, 5, 33, 669, DateTimeKind.Utc).AddTicks(8742)
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         });
                 });
 
@@ -617,7 +610,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("DeliveryNoteId");
 
-                    b.ToTable("DeliveryItems", (string)null);
+                    b.ToTable("DeliveryItems");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.DeliveryNote", b =>
@@ -679,7 +672,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("SupplierId");
 
-                    b.ToTable("DeliveryNotes", (string)null);
+                    b.ToTable("DeliveryNotes");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Invoice", b =>
@@ -719,7 +712,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("SupplierId");
 
-                    b.ToTable("Invoices", (string)null);
+                    b.ToTable("Invoices");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.InvoiceItem", b =>
@@ -758,7 +751,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("InvoiceId");
 
-                    b.ToTable("InvoiceItems", (string)null);
+                    b.ToTable("InvoiceItems");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Order", b =>
@@ -797,7 +790,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("CustomerId");
 
-                    b.ToTable("Orders", (string)null);
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.OrderItem", b =>
@@ -827,7 +820,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("OrderItems", (string)null);
+                    b.ToTable("OrderItems");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.OrderItemContainer", b =>
@@ -864,7 +857,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("OrderId");
 
-                    b.ToTable("OrderItemContainers", (string)null);
+                    b.ToTable("OrderItemContainers");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Product", b =>
@@ -933,7 +926,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("VATCategoryId");
 
-                    b.ToTable("Products", (string)null);
+                    b.ToTable("Products");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.ProductionPlan", b =>
@@ -1021,7 +1014,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductionPlans", (string)null);
+                    b.ToTable("ProductionPlans");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Summary", b =>
@@ -1050,7 +1043,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("Summaries", (string)null);
+                    b.ToTable("Summaries");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Supplier", b =>
@@ -1071,7 +1064,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasKey("Id");
 
-                    b.ToTable("Suppliers", (string)null);
+                    b.ToTable("Suppliers");
 
                     b.HasData(
                         new
@@ -1132,7 +1125,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasKey("Id");
 
-                    b.ToTable("VATCategories", (string)null);
+                    b.ToTable("VATCategories");
 
                     b.HasData(
                         new
@@ -1211,7 +1204,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("WorkReportId");
 
-                    b.ToTable("WorkDayDetails", (string)null);
+                    b.ToTable("WorkDayDetails");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.WorkReport", b =>
@@ -1245,7 +1238,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("SupplierId");
 
-                    b.ToTable("WorkReports", (string)null);
+                    b.ToTable("WorkReports");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.Job", b =>
@@ -1295,7 +1288,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("DeviceId");
 
-                    b.ToTable("Jobs", (string)null);
+                    b.ToTable("Jobs");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.JobCommand", b =>
@@ -1335,7 +1328,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("JobId");
 
-                    b.ToTable("JobCommands", (string)null);
+                    b.ToTable("JobCommands");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.Recipe", b =>
@@ -1361,7 +1354,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("DeviceTemplateId");
 
-                    b.ToTable("Recipes", (string)null);
+                    b.ToTable("Recipes");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.RecipeStep", b =>
@@ -1399,7 +1392,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("SubrecipeId");
 
-                    b.ToTable("RecipeSteps", (string)null);
+                    b.ToTable("RecipeSteps");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.RefreshToken", b =>
@@ -1427,7 +1420,109 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("RefreshTokens", (string)null);
+                    b.ToTable("RefreshTokens");
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.Scene", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Condition")
+                        .HasColumnType("text");
+
+                    b.Property<double>("CooldownAfterTriggerTime")
+                        .HasColumnType("double precision");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset?>("LastTriggeredAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerId");
+
+                    b.ToTable("Scenes");
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.SceneNotification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("SceneId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Severity")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SceneId");
+
+                    b.ToTable("SceneNotifications");
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.SceneSensorTrigger", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("DeviceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("SceneId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("SensorTag")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DeviceId");
+
+                    b.HasIndex("SceneId", "DeviceId", "SensorTag")
+                        .IsUnique();
+
+                    b.ToTable("SceneSensorTriggers");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.Sensor", b =>
@@ -1463,7 +1558,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("DeviceTemplateId");
 
-                    b.ToTable("Sensors", (string)null);
+                    b.ToTable("Sensors");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -1947,6 +2042,83 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.Scene", b =>
+                {
+                    b.HasOne("Fei.Is.Api.Data.Models.ApplicationUser", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.OwnsMany("Fei.Is.Api.Data.Models.SceneAction", "Actions", b1 =>
+                        {
+                            b1.Property<Guid>("SceneId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("integer");
+
+                            b1.Property<Guid?>("DeviceId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<string>("NotificationMessage")
+                                .HasColumnType("text");
+
+                            b1.Property<int>("NotificationSeverity")
+                                .HasColumnType("integer");
+
+                            b1.Property<Guid?>("RecipeId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<int>("Type")
+                                .HasColumnType("integer");
+
+                            b1.HasKey("SceneId", "Id");
+
+                            b1.ToTable("Scenes");
+
+                            b1.ToJson("Actions");
+
+                            b1.WithOwner()
+                                .HasForeignKey("SceneId");
+                        });
+
+                    b.Navigation("Actions");
+
+                    b.Navigation("Owner");
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.SceneNotification", b =>
+                {
+                    b.HasOne("Fei.Is.Api.Data.Models.Scene", "Scene")
+                        .WithMany()
+                        .HasForeignKey("SceneId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Scene");
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.SceneSensorTrigger", b =>
+                {
+                    b.HasOne("Fei.Is.Api.Data.Models.Device", "Device")
+                        .WithMany()
+                        .HasForeignKey("DeviceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Fei.Is.Api.Data.Models.Scene", "Scene")
+                        .WithMany("SensorTriggers")
+                        .HasForeignKey("SceneId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Device");
+
+                    b.Navigation("Scene");
+                });
+
             modelBuilder.Entity("Fei.Is.Api.Data.Models.Sensor", b =>
                 {
                     b.HasOne("Fei.Is.Api.Data.Models.DeviceTemplate", "DeviceTemplate")
@@ -2090,6 +2262,11 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.Navigation("ParentSteps");
 
                     b.Navigation("Steps");
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.Scene", b =>
+                {
+                    b.Navigation("SensorTriggers");
                 });
 #pragma warning restore 612, 618
         }

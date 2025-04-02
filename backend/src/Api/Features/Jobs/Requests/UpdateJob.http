@@ -1,0 +1,13 @@
+### Update Job Endpoint Test Request
+PUT http://localhost:5097/jobs/d98bdaf6-d9b3-4190-addd-0be3e58aac46
+Content-Type: application/json
+
+{
+  "Name": "Updated Job Name",
+  "CurrentStep": 2,
+  "TotalSteps": 10,
+  "CurrentCycle": 1,
+  "TotalCycles": 3,
+  "Paused": false,
+  "Status": "JOB_IN_PROGRESS"
+}
