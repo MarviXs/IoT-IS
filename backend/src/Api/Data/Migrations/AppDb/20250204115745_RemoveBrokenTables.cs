@@ -4,10 +4,12 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace Fei.Is.Api.Data.Migrations.AppDb
 {
     /// <inheritdoc />
-    public partial class Cleaning : Migration
+    public partial class RemoveBrokenTables : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -43,7 +45,13 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                 name: "Orders");
 
             migrationBuilder.DropTable(
+                name: "Products");
+
+            migrationBuilder.DropTable(
                 name: "WorkReports");
+
+            migrationBuilder.DropTable(
+                name: "Categories");
 
             migrationBuilder.DropTable(
                 name: "Companies");
@@ -53,26 +61,17 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "AdditionalOrders",
+                name: "Categories",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    ProductId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Amount = table.Column<int>(type: "integer", nullable: false),
-                    Company = table.Column<string>(type: "text", nullable: false),
-                    Type = table.Column<string>(type: "text", nullable: false),
-                    Year = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    CategoryName = table.Column<string>(type: "text", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AdditionalOrders", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_AdditionalOrders_Products_ProductId",
-                        column: x => x.ProductId,
-                        principalTable: "Products",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                    table.PrimaryKey("PK_Categories", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -95,63 +94,31 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                 });
 
             migrationBuilder.CreateTable(
-                name: "ProductionPlans",
+                name: "Products",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    ProductNumber = table.Column<Guid>(type: "uuid", nullable: false),
-                    ActualQuantity = table.Column<int>(type: "integer", nullable: false),
-                    CbQuantity = table.Column<int>(type: "integer", nullable: false),
-                    DeliveryWeek = table.Column<int>(type: "integer", nullable: false),
-                    M10 = table.Column<int>(type: "integer", nullable: false),
-                    M6 = table.Column<int>(type: "integer", nullable: false),
-                    OrderedQuantity = table.Column<int>(type: "integer", nullable: false),
-                    Pack10 = table.Column<int>(type: "integer", nullable: false),
-                    Pack6 = table.Column<int>(type: "integer", nullable: false),
-                    Pot10 = table.Column<int>(type: "integer", nullable: false),
-                    Pot12 = table.Column<int>(type: "integer", nullable: false),
-                    Pot14 = table.Column<int>(type: "integer", nullable: false),
-                    Pot17 = table.Column<int>(type: "integer", nullable: false),
-                    Pot21 = table.Column<int>(type: "integer", nullable: false),
-                    Pot9 = table.Column<int>(type: "integer", nullable: false),
-                    S84 = table.Column<int>(type: "integer", nullable: false),
-                    StoreQuantity = table.Column<int>(type: "integer", nullable: false),
-                    StrQuantity = table.Column<int>(type: "integer", nullable: false),
-                    TabQuantity = table.Column<int>(type: "integer", nullable: false),
-                    TotalQuantity = table.Column<int>(type: "integer", nullable: false),
-                    VolyneQuantity = table.Column<int>(type: "integer", nullable: false),
-                    Year = table.Column<int>(type: "integer", nullable: false),
-                    Z = table.Column<int>(type: "integer", nullable: false)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    CategoryId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Code = table.Column<string>(type: "text", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CzechName = table.Column<string>(type: "text", nullable: true),
+                    DiscountedPriceWithoutVAT = table.Column<decimal>(type: "numeric", nullable: true),
+                    FlowerLeafDescription = table.Column<string>(type: "text", nullable: true),
+                    LatinName = table.Column<string>(type: "text", nullable: false),
+                    PLUCode = table.Column<string>(type: "text", nullable: false),
+                    PotDiameterPack = table.Column<string>(type: "text", nullable: true),
+                    PricePerPiecePack = table.Column<decimal>(type: "numeric", nullable: true),
+                    PricePerPiecePackVAT = table.Column<decimal>(type: "numeric", nullable: true),
+                    RetailPrice = table.Column<decimal>(type: "numeric", nullable: true),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ProductionPlans", x => x.Id);
+                    table.PrimaryKey("PK_Products", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ProductionPlans_Products_ProductNumber",
-                        column: x => x.ProductNumber,
-                        principalTable: "Products",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Summaries",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    ProductNumber = table.Column<Guid>(type: "uuid", nullable: false),
-                    Amount = table.Column<int>(type: "integer", nullable: false),
-                    Place = table.Column<string>(type: "text", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Summaries", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Summaries_Products_ProductNumber",
-                        column: x => x.ProductNumber,
-                        principalTable: "Products",
+                        name: "FK_Products_Categories_CategoryId",
+                        column: x => x.CategoryId,
+                        principalTable: "Categories",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -275,6 +242,91 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                 });
 
             migrationBuilder.CreateTable(
+                name: "AdditionalOrders",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    ProductId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Amount = table.Column<int>(type: "integer", nullable: false),
+                    Company = table.Column<string>(type: "text", nullable: false),
+                    Type = table.Column<string>(type: "text", nullable: false),
+                    Year = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AdditionalOrders", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AdditionalOrders_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ProductionPlans",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    ProductNumber = table.Column<Guid>(type: "uuid", nullable: false),
+                    ActualQuantity = table.Column<int>(type: "integer", nullable: false),
+                    CbQuantity = table.Column<int>(type: "integer", nullable: false),
+                    DeliveryWeek = table.Column<int>(type: "integer", nullable: false),
+                    M10 = table.Column<int>(type: "integer", nullable: false),
+                    M6 = table.Column<int>(type: "integer", nullable: false),
+                    OrderedQuantity = table.Column<int>(type: "integer", nullable: false),
+                    Pack10 = table.Column<int>(type: "integer", nullable: false),
+                    Pack6 = table.Column<int>(type: "integer", nullable: false),
+                    Pot10 = table.Column<int>(type: "integer", nullable: false),
+                    Pot12 = table.Column<int>(type: "integer", nullable: false),
+                    Pot14 = table.Column<int>(type: "integer", nullable: false),
+                    Pot17 = table.Column<int>(type: "integer", nullable: false),
+                    Pot21 = table.Column<int>(type: "integer", nullable: false),
+                    Pot9 = table.Column<int>(type: "integer", nullable: false),
+                    S84 = table.Column<int>(type: "integer", nullable: false),
+                    StoreQuantity = table.Column<int>(type: "integer", nullable: false),
+                    StrQuantity = table.Column<int>(type: "integer", nullable: false),
+                    TabQuantity = table.Column<int>(type: "integer", nullable: false),
+                    TotalQuantity = table.Column<int>(type: "integer", nullable: false),
+                    VolyneQuantity = table.Column<int>(type: "integer", nullable: false),
+                    Year = table.Column<int>(type: "integer", nullable: false),
+                    Z = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProductionPlans", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProductionPlans_Products_ProductNumber",
+                        column: x => x.ProductNumber,
+                        principalTable: "Products",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Summaries",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    ProductNumber = table.Column<Guid>(type: "uuid", nullable: false),
+                    Amount = table.Column<int>(type: "integer", nullable: false),
+                    Place = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Summaries", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Summaries_Products_ProductNumber",
+                        column: x => x.ProductNumber,
+                        principalTable: "Products",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "DeliveryItems",
                 columns: table => new
                 {
@@ -383,6 +435,32 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.InsertData(
+                table: "Categories",
+                columns: new[] { "Id", "CategoryName", "CreatedAt", "UpdatedAt" },
+                values: new object[,]
+                {
+                    { new Guid("0c1d6c90-4937-4b87-b8c8-7f6658eb0080"), "LISTOVÁ ZELENINA", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { new Guid("11a4b47e-65c6-42eb-a1a0-b8e11a1f6c6e"), "Nástroje a nářadí", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { new Guid("1a36d5a7-85f5-43ff-a8a6-ea1b5d0b54dc"), "Substráty, hnojiva a ostatní materiály", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { new Guid("2f681d09-3b67-4a6d-bde2-f3f5afef3c5a"), "BYLINKY", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { new Guid("4a0ef2f4-ec8f-48cb-8b88-f68c5e497227"), "DENIVKY A IRISY", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { new Guid("58665a65-b5bc-4748-89b5-79e79cafe9bc"), "Vazba a aranžmá", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { new Guid("5a6ed8b2-4b2c-4d1e-bf9c-ef58c5c72a44"), "CHRYZANTÉMY", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { new Guid("6b399ace-1882-4140-b42d-67f205d700d2"), "Cibuloviny", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { new Guid("88d5353b-c64d-46d5-9e66-d68dc4f170c7"), "POKOJOVÉ A PŘENOSNÉ ROSTLINY", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { new Guid("8d0c7b8b-63ab-46f0-bc52-6f2950277e47"), "Papriky", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { new Guid("ae3f5e2a-cb26-463c-bcb0-c1f4e094a013"), "Osiva", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { new Guid("b62aa26f-b37b-42d5-8bcd-82d9159ac4b0"), "Vřes", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { new Guid("b6fbb1f0-c86c-4c09-8c47-8973a536e818"), "Keře a stromy (Ovocné)", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { new Guid("bc2e2baf-f5f3-43e4-bb3d-bd2c56374d93"), "TYKVE - CUKETY", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { new Guid("c88a047b-16b0-4425-8f7d-0f14c55f7b88"), "RAJČATA, LILEK", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { new Guid("d6f2d00e-e4e3-4a5c-8e3a-9c20a02f65c8"), "BALKÓNOVÉ ROSTLINY, LETNIČKY, DVOULETKY, TRVALKY A TRÁVY", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { new Guid("e5c3fda8-9d48-4a39-83c5-47f4d4eb13b1"), "OKURKY ROUBOVANÉ, Pravokořenné", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { new Guid("ebc45d37-d80c-44e8-8e45-e86575f7c6ae"), "Keře a stromy (Okrasné)", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { new Guid("ee1b4b55-2a41-4e63-9754-3e1c9d676728"), "Podzimní košík s květinami", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) }
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AdditionalOrders_ProductId",
                 table: "AdditionalOrders",
@@ -437,6 +515,11 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                 name: "IX_ProductionPlans_ProductNumber",
                 table: "ProductionPlans",
                 column: "ProductNumber");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Products_CategoryId",
+                table: "Products",
+                column: "CategoryId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Summaries_ProductNumber",
