@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Fei.Is.Api.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Fei.Is.Api.Data.Migrations.AppDb
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250112145652_SystemSettings")]
+    partial class SystemSettings
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -267,9 +270,6 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.Property<Guid>("OwnerId")
                         .HasColumnType("uuid");
-
-                    b.Property<int>("Protocol")
-                        .HasColumnType("integer");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -777,6 +777,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                         .HasColumnType("integer");
 
                     b.Property<string>("Note")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime>("OrderDate")
@@ -805,7 +806,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid?>("OrderItemContainerId")
+                    b.Property<Guid?>("OrderId")
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("ProductId")
@@ -817,50 +818,17 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrderItemContainerId");
-
-                    b.HasIndex("ProductId");
-
-                    b.ToTable("OrderItems");
-                });
-
-            modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.OrderItemContainer", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Name")
+                    b.Property<string>("VarietyName")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<Guid?>("OrderId")
-                        .HasColumnType("uuid");
-
-                    b.Property<decimal?>("PricePerContainer")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("integer");
-
-                    b.Property<decimal?>("TotalPrice")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
                     b.HasIndex("OrderId");
 
-                    b.ToTable("OrderItemContainers");
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("OrderItems");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Product", b =>
@@ -1447,108 +1415,6 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.ToTable("RefreshTokens");
                 });
 
-            modelBuilder.Entity("Fei.Is.Api.Data.Models.Scene", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Condition")
-                        .HasColumnType("text");
-
-                    b.Property<double>("CooldownAfterTriggerTime")
-                        .HasColumnType("double precision");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("text");
-
-                    b.Property<bool>("IsEnabled")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTimeOffset?>("LastTriggeredAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<Guid>("OwnerId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OwnerId");
-
-                    b.ToTable("Scenes");
-                });
-
-            modelBuilder.Entity("Fei.Is.Api.Data.Models.SceneNotification", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<Guid>("SceneId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("Severity")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SceneId");
-
-                    b.ToTable("SceneNotifications");
-                });
-
-            modelBuilder.Entity("Fei.Is.Api.Data.Models.SceneSensorTrigger", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("DeviceId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("SceneId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("SensorTag")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DeviceId");
-
-                    b.HasIndex("SceneId", "DeviceId", "SensorTag")
-                        .IsUnique();
-
-                    b.ToTable("SceneSensorTriggers");
-                });
-
             modelBuilder.Entity("Fei.Is.Api.Data.Models.Sensor", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1902,9 +1768,9 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.OrderItem", b =>
                 {
-                    b.HasOne("Fei.Is.Api.Data.Models.InformationSystem.OrderItemContainer", null)
-                        .WithMany("Items")
-                        .HasForeignKey("OrderItemContainerId");
+                    b.HasOne("Fei.Is.Api.Data.Models.InformationSystem.Order", null)
+                        .WithMany("OrderItems")
+                        .HasForeignKey("OrderId");
 
                     b.HasOne("Fei.Is.Api.Data.Models.InformationSystem.Product", "Product")
                         .WithMany()
@@ -1913,13 +1779,6 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                         .IsRequired();
 
                     b.Navigation("Product");
-                });
-
-            modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.OrderItemContainer", b =>
-                {
-                    b.HasOne("Fei.Is.Api.Data.Models.InformationSystem.Order", null)
-                        .WithMany("ItemContainers")
-                        .HasForeignKey("OrderId");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Product", b =>
@@ -2066,83 +1925,6 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Fei.Is.Api.Data.Models.Scene", b =>
-                {
-                    b.HasOne("Fei.Is.Api.Data.Models.ApplicationUser", "Owner")
-                        .WithMany()
-                        .HasForeignKey("OwnerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.OwnsMany("Fei.Is.Api.Data.Models.SceneAction", "Actions", b1 =>
-                        {
-                            b1.Property<Guid>("SceneId")
-                                .HasColumnType("uuid");
-
-                            b1.Property<int>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("integer");
-
-                            b1.Property<Guid?>("DeviceId")
-                                .HasColumnType("uuid");
-
-                            b1.Property<string>("NotificationMessage")
-                                .HasColumnType("text");
-
-                            b1.Property<int>("NotificationSeverity")
-                                .HasColumnType("integer");
-
-                            b1.Property<Guid?>("RecipeId")
-                                .HasColumnType("uuid");
-
-                            b1.Property<int>("Type")
-                                .HasColumnType("integer");
-
-                            b1.HasKey("SceneId", "Id");
-
-                            b1.ToTable("Scenes");
-
-                            b1.ToJson("Actions");
-
-                            b1.WithOwner()
-                                .HasForeignKey("SceneId");
-                        });
-
-                    b.Navigation("Actions");
-
-                    b.Navigation("Owner");
-                });
-
-            modelBuilder.Entity("Fei.Is.Api.Data.Models.SceneNotification", b =>
-                {
-                    b.HasOne("Fei.Is.Api.Data.Models.Scene", "Scene")
-                        .WithMany()
-                        .HasForeignKey("SceneId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Scene");
-                });
-
-            modelBuilder.Entity("Fei.Is.Api.Data.Models.SceneSensorTrigger", b =>
-                {
-                    b.HasOne("Fei.Is.Api.Data.Models.Device", "Device")
-                        .WithMany()
-                        .HasForeignKey("DeviceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Fei.Is.Api.Data.Models.Scene", "Scene")
-                        .WithMany("SensorTriggers")
-                        .HasForeignKey("SceneId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Device");
-
-                    b.Navigation("Scene");
-                });
-
             modelBuilder.Entity("Fei.Is.Api.Data.Models.Sensor", b =>
                 {
                     b.HasOne("Fei.Is.Api.Data.Models.DeviceTemplate", "DeviceTemplate")
@@ -2258,12 +2040,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Order", b =>
                 {
-                    b.Navigation("ItemContainers");
-                });
-
-            modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.OrderItemContainer", b =>
-                {
-                    b.Navigation("Items");
+                    b.Navigation("OrderItems");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.VATCategory", b =>
@@ -2286,11 +2063,6 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.Navigation("ParentSteps");
 
                     b.Navigation("Steps");
-                });
-
-            modelBuilder.Entity("Fei.Is.Api.Data.Models.Scene", b =>
-                {
-                    b.Navigation("SensorTriggers");
                 });
 #pragma warning restore 612, 618
         }

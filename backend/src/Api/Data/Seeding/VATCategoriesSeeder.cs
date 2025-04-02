@@ -1,18 +1,27 @@
-﻿using Fei.Is.Api.Data.Models.InformationSystem;
+﻿using Fei.Is.Api.Data.Contexts;
+using Fei.Is.Api.Data.Models.InformationSystem;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fei.Is.Api.Data.Seeding
 {
     public class VATCategoriesSeeder : ISeed
     {
-        public void Seed(ModelBuilder modelBuilder)
+        public List<Type> GetDependencies()
         {
-            modelBuilder
-                .Entity<VATCategory>()
-                .HasData(
-                    new VATCategory()
+            return new List<Type>();
+        }
+
+        public Type GetModel()
+        {
+            return typeof(VATCategory);
+        }
+
+        public void Seed(AppDbContext appDbContext)
+        {
+            appDbContext.AddRange([
+                new VATCategory()
                     {
-                        Id = new Guid("5bfc3ed5-8874-4452-9043-22065fc00e29"),
+                        Id = Guid.NewGuid(),
                         Name = "Normal",
                         Rate = 21,
                         CreatedAt = DateTime.MinValue,
@@ -20,13 +29,13 @@ namespace Fei.Is.Api.Data.Seeding
                     },
                     new VATCategory()
                     {
-                        Id = new Guid("37b1c257-1401-4d79-9c4f-a206b0937fd2"),
+                        Id = Guid.NewGuid(),
                         Name = "Reduced",
                         Rate = 19,
                         CreatedAt = DateTime.MinValue,
                         UpdatedAt = DateTime.MinValue,
                     }
-                );
+                ]);
         }
     }
 }

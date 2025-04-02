@@ -33,9 +33,11 @@ const customFetch = async (input: RequestInfo | URL, init?: RequestInit): Promis
 
     if (!response.headers.get('content-type')?.includes('text/event-stream')) {
       try {
-        const data = await response.clone().json();
-        if (data.status === 403 && data.detail === 'Invalid refresh token') {
-          authStore.logout();
+        if (response.status === 403 && response.headers.get('content-type')?.includes('application/json')) {
+          const data = await response.clone().json();
+          if (data.detail === 'Invalid refresh token') {
+            authStore.logout();
+          }
         }
       } catch (error) {
         console.error('Error parsing response:', error);
@@ -55,7 +57,7 @@ const customFetch = async (input: RequestInfo | URL, init?: RequestInit): Promis
 
 const client = createClient<paths>({
   baseUrl: baseUrl,
-  fetch: customFetch,
+  fetch: customFetch
 });
 
 export { baseUrl, client, customFetch };
