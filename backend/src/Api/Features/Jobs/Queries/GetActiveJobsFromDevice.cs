@@ -85,6 +85,7 @@ public static class GetActiveJobsFromDevice
                         activeJob.CurrentCycle,
                         currentCommand,
                         activeJob.Paused,
+                        activeJob.IsInfinite,
                         activeJob.GetProgress(),
                         activeJob.Status,
                         [.. activeJob.Commands.Select(c => new CommandResponse(c.Name, c.Params))]
@@ -108,6 +109,7 @@ public static class GetActiveJobsFromDevice
         int CurrentCycle,
         string CurrentCommand,
         bool Paused,
+        bool IsInfinite,
         double Progress,
         JobStatusEnum Status,
         List<CommandResponse> Commands

@@ -107,6 +107,7 @@ public static class GetJobById
                 job.TotalCycles,
                 job.GetCurrentCommand(),
                 job.Paused,
+                job.IsInfinite,
                 job.GetProgress(),
                 job.Status,
                 commands
@@ -136,6 +137,7 @@ public static class GetJobById
         int TotalCycles,
         string CurrentCommand,
         bool Paused,
+        bool IsInfinite,
         double Progress,
         JobStatusEnum Status,
         List<CommandResponse> Commands

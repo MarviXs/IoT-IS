@@ -14,6 +14,7 @@ public class Job : BaseModel
     public int CurrentCycle { get; set; } = 1;
     public int TotalCycles { get; set; } = 1;
     public bool Paused { get; set; } = false;
+    public bool IsInfinite { get; set; } = false;
     public DateTime? StartedAt { get; set; }
     public DateTime? FinishedAt { get; set; }
 }

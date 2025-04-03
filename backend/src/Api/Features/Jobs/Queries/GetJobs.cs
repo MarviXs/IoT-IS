@@ -72,10 +72,13 @@ public static class GetJobsOnDevice
                 return Result.Fail(new ValidationError(result));
             }
 
-            var query = context.Jobs.AsNoTracking()
-            .Include(j => j.Device)
-            .ThenInclude(d => d!.SharedWithUsers)
-            .Where(j => j.Device!.OwnerId == message.User.GetUserId() || j.Device!.SharedWithUsers.Any(u => u.SharedToUserId == message.User.GetUserId()));
+            var query = context
+                .Jobs.AsNoTracking()
+                .Include(j => j.Device)
+                .ThenInclude(d => d!.SharedWithUsers)
+                .Where(j =>
+                    j.Device!.OwnerId == message.User.GetUserId() || j.Device!.SharedWithUsers.Any(u => u.SharedToUserId == message.User.GetUserId())
+                );
 
             if (message.queryParameters.SortBy == "DeviceName")
             {
@@ -100,6 +103,7 @@ public static class GetJobsOnDevice
                     job.CurrentCycle,
                     job.TotalCycles,
                     job.Paused,
+                    job.IsInfinite,
                     job.StartedAt,
                     job.FinishedAt,
                     job.CreatedAt,
@@ -125,6 +129,7 @@ public static class GetJobsOnDevice
         int CurrentCycle = 1,
         int TotalCycles = 1,
         bool Paused = false,
+        bool IsInfinite = false,
         DateTime? StartedAt = null,
         DateTime? FinishedAt = null,
         DateTime? CreatedAt = null,

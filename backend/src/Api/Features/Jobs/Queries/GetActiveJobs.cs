@@ -56,7 +56,11 @@ public static class GetActiveJobs
     {
         public async Task<Result<List<Response>>> Handle(Query request, CancellationToken cancellationToken)
         {
-            var device = await context.Devices.AsNoTracking().Where(d => d.Id == request.DeviceId).Include(d => d.SharedWithUsers).SingleOrDefaultAsync(cancellationToken);
+            var device = await context
+                .Devices.AsNoTracking()
+                .Where(d => d.Id == request.DeviceId)
+                .Include(d => d.SharedWithUsers)
+                .SingleOrDefaultAsync(cancellationToken);
 
             if (device == null)
             {
@@ -73,23 +77,26 @@ public static class GetActiveJobs
                 .Include(j => j.Commands.OrderBy(c => c.Order))
                 .ToListAsync(cancellationToken);
 
-            var responses = activeJobs.Select(activeJob =>
-            {
-                var currentCommand = activeJob.Commands.ElementAtOrDefault(activeJob.CurrentStep - 1)?.DisplayName ?? string.Empty;
-                return new Response(
-                    activeJob.Id,
-                    activeJob.DeviceId,
-                    activeJob.Name,
-                    activeJob.TotalSteps,
-                    activeJob.TotalCycles,
-                    activeJob.CurrentStep,
-                    activeJob.CurrentCycle,
-                    currentCommand,
-                    activeJob.Paused,
-                    activeJob.GetProgress(),
-                    activeJob.Status
-                );
-            }).ToList();
+            var responses = activeJobs
+                .Select(activeJob =>
+                {
+                    var currentCommand = activeJob.Commands.ElementAtOrDefault(activeJob.CurrentStep - 1)?.DisplayName ?? string.Empty;
+                    return new Response(
+                        activeJob.Id,
+                        activeJob.DeviceId,
+                        activeJob.Name,
+                        activeJob.TotalSteps,
+                        activeJob.TotalCycles,
+                        activeJob.CurrentStep,
+                        activeJob.CurrentCycle,
+                        currentCommand,
+                        activeJob.Paused,
+                        activeJob.IsInfinite,
+                        activeJob.GetProgress(),
+                        activeJob.Status
+                    );
+                })
+                .ToList();
 
             return Result.Ok(responses);
         }
@@ -105,6 +112,7 @@ public static class GetActiveJobs
         int CurrentCycle,
         string CurrentCommand,
         bool Paused,
+        bool IsInfinite,
         double Progress,
         JobStatusEnum Status
     );

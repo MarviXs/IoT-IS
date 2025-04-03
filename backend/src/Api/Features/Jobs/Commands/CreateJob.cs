@@ -18,7 +18,7 @@ namespace Fei.Is.Api.Features.Jobs.Commands;
 
 public static class CreateJob
 {
-    public record Request(Guid RecipeId, int Cycles);
+    public record Request(Guid RecipeId, int Cycles, bool IsInfinite = false);
 
     public sealed class Endpoint : ICarterModule
     {
@@ -87,7 +87,13 @@ public static class CreateJob
                 return Result.Fail(new ForbiddenError());
             }
 
-            var job = await jobService.CreateJobFromRecipe(message.DeviceId, message.Request.RecipeId, message.Request.Cycles, cancellationToken);
+            var job = await jobService.CreateJobFromRecipe(
+                message.DeviceId,
+                message.Request.RecipeId,
+                message.Request.Cycles,
+                message.Request.IsInfinite,
+                cancellationToken
+            );
             if (job.IsFailed)
             {
                 return Result.Fail(job.Errors);
