@@ -118,11 +118,28 @@ function extractMeasurements(packetOrPayload) {
     throw new Error("Measurement payload is too short.");
   }
 
-  const currentDP4 = payload.readFloatLE(68) * 1000;
-  const cps4 = payload.readFloatLE(64) * 1000;
-  const dp4 = payload.readFloatLE(80) * 1000;
+  const currentDP1 = payload.readFloatLE(68);
+  const cps1 = payload.readFloatLE(76);
+  const dp1 = payload.readFloatLE(80);
 
-  return { currentDP: currentDP4, cps: cps4, dp: dp4 };
+  const currentDP2 = payload.readFloatLE(115);
+  const cps2 = payload.readFloatLE(123);
+  const dp2 = payload.readFloatLE(127);
+
+  const currentDP3 = payload.readFloatLE(162);
+  const cps3 = payload.readFloatLE(170);
+  const dp3 = payload.readFloatLE(174);
+
+  const currentDP4 = payload.readFloatLE(209);
+  const cps4 = payload.readFloatLE(217);
+  const dp4 = payload.readFloatLE(221);
+
+  return [
+    { currentDP: currentDP1, cps: cps1, dp: dp1 },
+    { currentDP: currentDP2, cps: cps2, dp: dp2 },
+    { currentDP: currentDP3, cps: cps3, dp: dp3 },
+    { currentDP: currentDP4, cps: cps4, dp: dp4 },
+  ];
 }
 
 async function getDetectorData(client) {
@@ -166,9 +183,7 @@ async function ensureClientAlive(client) {
     const newClient = await createDeviceConnection(client.deviceAddress);
     newClient.deviceAddress = client.deviceAddress;
     newClient.accessToken = client.accessToken;
-    console.log(
-      `Reconnected to device ${newClient.accessToken}.`
-    );
+    console.log(`Reconnected to device ${newClient.accessToken}.`);
     // await linkDevice(newClient);
     return newClient;
   }
@@ -178,11 +193,35 @@ async function ensureClientAlive(client) {
 async function sendDataToApi(apiUrl, accessToken, measurements) {
   const endpoint = `${apiUrl}/devices/${accessToken}/data`;
   const timeStamp = Math.floor(Date.now() / 1000);
-  const payload = [
-    { tag: "CurrentDP4", value: measurements.currentDP, timeStamp },
-    { tag: "CPS4", value: measurements.cps, timeStamp },
-    { tag: "DP4", value: measurements.dp, timeStamp },
-  ];
+
+  const payload = [];
+
+  // Loop through each measurement and check conditions
+  measurements.forEach((measurement, index) => {
+    // Exclude measurement if currentDP is -1, cps is 0, or dp is -1
+    if (
+      measurement.currentDP !== -1 &&
+      measurement.cps !== 0 &&
+      measurement.dp !== -1
+    ) {
+      // Multiply each measurement value by 1000 before sending
+      payload.push({
+        tag: `currentDP${index + 1}`,
+        value: measurement.currentDP * 1000,
+        timeStamp,
+      });
+      payload.push({
+        tag: `cps${index + 1}`,
+        value: measurement.cps * 1000,
+        timeStamp,
+      });
+      payload.push({
+        tag: `dp${index + 1}`,
+        value: measurement.dp * 1000,
+        timeStamp,
+      });
+    }
+  });
 
   try {
     await axios.post(endpoint, payload);
