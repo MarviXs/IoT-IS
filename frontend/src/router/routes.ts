@@ -22,6 +22,11 @@ const routes: RouteRecordRaw[] = [
       },
 
       {
+        path: '/account/document-links',
+        component: () => import('pages/account/AccountDocumentLinksPage.vue'),
+      },
+
+      {
         path: 'user-management',
         component: () => import('pages/account/UserManagementPage.vue'),
         meta: { requiresAdmin: true },

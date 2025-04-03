@@ -1,4 +1,5 @@
-﻿using Fei.Is.Api.Data.Models.InformationSystem;
+﻿using Fei.Is.Api.Data.Contexts;
+using Fei.Is.Api.Data.Models.InformationSystem;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,47 +7,55 @@ namespace Fei.Is.Api.Data.Seeding
 {
     public class SuppliersSeeder : ISeed
     {
-        public void Seed(ModelBuilder modelBuilder)
+        public List<Type> GetDependencies()
         {
-            modelBuilder
-                .Entity<Supplier>()
-                .HasData(
-                    new Supplier()
+            return new List<Type>();
+        }
+
+        public Type GetModel()
+        {
+            return typeof(Supplier);
+        }
+
+        public void Seed(AppDbContext appDbContext)
+        {
+            appDbContext.Suppliers.AddRange([
+                new Supplier()
                     {
-                        Id = new Guid("e8391bf0-9dc4-4d2e-a3f0-d028833ce902"),
+                        Id = Guid.NewGuid(),
                         Name = "Volmary",
                         CreatedAt = DateTime.MinValue,
                         UpdatedAt = DateTime.MinValue,
                     },
                     new Supplier()
                     {
-                        Id = new Guid("4fd1cbf4-bef4-4fee-b72f-fac1b15c8357"),
+                        Id = Guid.NewGuid(),
                         Name = "Bennials",
                         CreatedAt = DateTime.MinValue,
                         UpdatedAt = DateTime.MinValue,
                     },
                     new Supplier()
                     {
-                        Id = new Guid("94052ccf-6797-4351-ad43-5130cb6c4fbe"),
+                        Id = Guid.NewGuid(),
                         Name = "Schneider",
                         CreatedAt = DateTime.MinValue,
                         UpdatedAt = DateTime.MinValue,
                     },
                     new Supplier()
                     {
-                        Id = new Guid("7df5fe3b-1bbf-4dc8-a108-5c6f931e0db4"),
+                        Id = Guid.NewGuid(),
                         Name = "Syngenta",
                         CreatedAt = DateTime.MinValue,
                         UpdatedAt = DateTime.MinValue,
                     },
                     new Supplier()
                     {
-                        Id = new Guid("412ceb2b-ca6a-43c9-80e1-6eb1cb16164a"),
+                        Id = Guid.NewGuid(),
                         Name = "Internal",
                         CreatedAt = DateTime.MinValue,
                         UpdatedAt = DateTime.MinValue,
                     }
-                );
+                ]);
         }
     }
 }

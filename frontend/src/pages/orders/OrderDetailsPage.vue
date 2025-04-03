@@ -5,6 +5,18 @@
       { label: order?.customerName || 'Order Details', to: `/orders/${orderId}` }
     ]"
   >
+    <template #actions>
+      <q-btn
+        class="shadow col-grow col-lg-auto"
+        color="primary"
+        unelevated
+        no-caps
+        size="15px"
+        :label="t('order.download_template')"
+        :icon="mdiDownload"
+        @click="downloadOrderTemplate"
+      />
+    </template>
     <template #default>
       <OrderDetailsCard v-if="order" :order="order" @edit="isUpdateDialogOpen = true" />
       <OrderItemTable
@@ -95,8 +107,26 @@ const orderSummary = ref<OrderSummary>({
 
 onMounted(() => {
   orderId = String(Array.isArray(route.params.id) ? route.params.id[0] : route.params.id);
-  refreshTable(); // Na úvod načítaj dáta
+  refreshTable(); // Po úvodnom mount načítaj dáta
 });
+
+function downloadOrderTemplate() {
+  OrderService.downloadOrderTemplate(orderId).then((retVal) => {
+    var contentDisposition = retVal.response.headers.get('Content-Disposition');
+    var parts = contentDisposition?.split('filename=');
+    var filename = parts?.length === 2 ? parts[1] : 'order_template.xlsx';
+
+    retVal.response.blob().then((blob) => {
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+  });
+}
 
 async function getOrderItemContainers(paginationTable: PaginationTable) {
   try {
