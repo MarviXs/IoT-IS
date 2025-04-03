@@ -263,6 +263,7 @@ async function processJob(client, apiUrl, accessToken, jobId, processingJobs) {
     console.error(`Job ${jobId} not found.`);
     return;
   }
+
   processingJobs.add(jobId);
 
   let currentStep =
@@ -272,6 +273,7 @@ async function processJob(client, apiUrl, accessToken, jobId, processingJobs) {
   const totalSteps = job.totalSteps && job.totalSteps > 0 ? job.totalSteps : 1;
   const totalCycles =
     job.totalCycles && job.totalCycles > 0 ? job.totalCycles : 1;
+  const isInfinite = job.isInfinite === true;
 
   // Initial update
   await updateJobStatus(apiUrl, jobId, {
@@ -284,13 +286,13 @@ async function processJob(client, apiUrl, accessToken, jobId, processingJobs) {
     status: "JOB_IN_PROGRESS",
   });
 
-  // Flag to indicate whether the job was canceled
   let jobCanceled = false;
+
   try {
     let finished = false;
-    // Outer loop: cycles
-    while (currentCycle <= totalCycles && !finished) {
-      // Inner loop: steps
+
+    while (!finished) {
+      // Loop over steps
       while (currentStep <= totalSteps) {
         const latestJob = await getJobStatus(apiUrl, jobId);
         client = await ensureClientAlive(client);
@@ -331,14 +333,6 @@ async function processJob(client, apiUrl, accessToken, jobId, processingJobs) {
           );
         }
 
-        // Check if we are at the final step of the final cycle.
-        if (currentStep === totalSteps && currentCycle === totalCycles) {
-          finished = true;
-          break;
-        } else {
-          currentStep++;
-        }
-
         const updatedJob = await getJobStatus(apiUrl, jobId);
         if (updatedJob && updatedJob.status === "JOB_CANCELED") {
           console.log(
@@ -349,7 +343,9 @@ async function processJob(client, apiUrl, accessToken, jobId, processingJobs) {
           break;
         }
 
-        // Update job progress after each step.
+        currentStep++;
+
+        // Update job progress
         await updateJobStatus(apiUrl, jobId, {
           name: job.name,
           currentStep,
@@ -359,10 +355,28 @@ async function processJob(client, apiUrl, accessToken, jobId, processingJobs) {
           paused: false,
           status: "JOB_IN_PROGRESS",
         });
+
+        if (currentStep > totalSteps) {
+          break;
+        }
       }
 
-      // If not finished and there are more cycles, reset step counter and increment cycle.
-      if (!finished && currentCycle < totalCycles) {
+      if (jobCanceled) break;
+
+      if (isInfinite) {
+        // Reset step counter and increment cycle for infinite jobs
+        currentStep = 1;
+        await updateJobStatus(apiUrl, jobId, {
+          name: job.name,
+          currentStep,
+          totalSteps,
+          currentCycle: 1,
+          totalCycles: 1,
+          paused: false,
+          status: "JOB_IN_PROGRESS",
+        });
+      } else if (currentCycle < totalCycles) {
+        // For normal jobs, proceed to next cycle if any
         currentCycle++;
         currentStep = 1;
         await updateJobStatus(apiUrl, jobId, {
@@ -375,11 +389,10 @@ async function processJob(client, apiUrl, accessToken, jobId, processingJobs) {
           status: "JOB_IN_PROGRESS",
         });
       } else {
-        break;
+        finished = true;
       }
     }
 
-    // Only mark the job as succeeded if it wasn't canceled.
     if (jobCanceled) {
       await updateJobStatus(apiUrl, jobId, {
         name: job.name,
@@ -395,7 +408,7 @@ async function processJob(client, apiUrl, accessToken, jobId, processingJobs) {
         name: job.name,
         currentStep: totalSteps,
         totalSteps,
-        currentCycle: totalCycles,
+        currentCycle,
         totalCycles,
         paused: false,
         status: "JOB_SUCCEEDED",
@@ -411,16 +424,20 @@ async function processJob(client, apiUrl, accessToken, jobId, processingJobs) {
 
 // Poll for active jobs and process them concurrently.
 async function pollJobs(client, apiUrl, accessToken, refreshTime, cancelToken) {
+  const processingJobs = new Set(); // Shared tracking set per device
+
   while (cancelToken.active) {
     try {
       const endpoint = `${apiUrl}/devices/${accessToken}/jobs/active`;
       const response = await axios.get(endpoint);
       const jobs = response.data;
+
       for (const job of jobs) {
-        // Process job if queued, etc.
-        // (Assume processJob and related functions are defined as before.)
-        if (job.status === "JOB_QUEUED") {
-          processJob(client, apiUrl, accessToken, job.id, new Set());
+        if (
+          (job.status === "JOB_QUEUED" || job.status === "JOB_IN_PROGRESS") &&
+          !processingJobs.has(job.id)
+        ) {
+          processJob(client, apiUrl, accessToken, job.id, processingJobs);
         }
       }
     } catch (error) {
@@ -429,7 +446,6 @@ async function pollJobs(client, apiUrl, accessToken, refreshTime, cancelToken) {
         error.message
       );
     }
-    // Wait for the configured refresh interval before polling again.
     await new Promise((resolve) => setTimeout(resolve, refreshTime));
   }
 }

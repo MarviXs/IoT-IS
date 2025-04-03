@@ -281,6 +281,8 @@
     "finished_at": "Finished at",
     "status": "Status",
     "progress": "Progress",
+    "infinite": "Infinite",
+    "infinite_job": "Infinite job",
     "controls": {
       "pause": "Pause",
       "resume": "Resume",
@@ -496,8 +498,5 @@
     "price_excl_vat_label": "Price excl. VAT",
     "vat_label": "VAT",
     "price_incl_vat_label": "Price incl. VAT"
-}
-
-
-
+  }
 }
