@@ -4,8 +4,8 @@ using Fei.Is.Api.BackgroundServices;
 using Fei.Is.Api.Common.OpenAPI;
 using Fei.Is.Api.Extensions;
 using Fei.Is.Api.Features.Auth;
-using Fei.Is.Api.Features.Products;
 using Fei.Is.Api.Features.Jobs.Services;
+using Fei.Is.Api.Features.Products;
 using Fei.Is.Api.MqttClient;
 using Fei.Is.Api.MqttClient.Publish;
 using Fei.Is.Api.MqttClient.Subscribe;
@@ -62,11 +62,8 @@ public class Startup(IConfiguration configuration)
         services.AddScoped<TokenService>();
         services.AddSingleton<RedisService>();
 
-        if (isMqttEnabled)
-        {
-            services.AddSingleton<MqttClientService>();
-            services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<MqttClientService>());
-        }
+        services.AddSingleton<MqttClientService>();
+        services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<MqttClientService>());
 
         services.AddHostedService<StoreDataPointsBatchService>();
         services.AddHostedService<JobTimeOutService>();
