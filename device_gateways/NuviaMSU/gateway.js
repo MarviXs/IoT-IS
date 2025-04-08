@@ -117,15 +117,33 @@ function extractMeasurements(packetOrPayload) {
   if (payload.length < 241) {
     throw new Error("Measurement payload is too short.");
   }
-  // Offsets for detector 4 (0-indexed within payload):
-  // - CurrentDP4: bytes 210-213 => offset 209
-  // - CPS4: bytes 218-221 => offset 217
-  // - DP4: bytes 222-225 => offset 221
+
+  const currentCPS1 = payload.readFloatLE(64);
+  const currentDP1 = payload.readFloatLE(68);
+  const cps1 = payload.readFloatLE(76);
+  const dp1 = payload.readFloatLE(80);
+
+  const currentCPS2 = payload.readFloatLE(111);
+  const currentDP2 = payload.readFloatLE(115);
+  const cps2 = payload.readFloatLE(123);
+  const dp2 = payload.readFloatLE(127);
+
+  const currentCPS3 = payload.readFloatLE(158);
+  const currentDP3 = payload.readFloatLE(162);
+  const cps3 = payload.readFloatLE(170);
+  const dp3 = payload.readFloatLE(174);
+
+  const currentCPS4 = payload.readFloatLE(205);
   const currentDP4 = payload.readFloatLE(209);
   const cps4 = payload.readFloatLE(217);
   const dp4 = payload.readFloatLE(221);
 
-  return { currentDP: currentDP4, cps: cps4, dp: dp4 };
+  return [
+    { currentCPS: currentCPS1, currentDP: currentDP1, cps: cps1, dp: dp1 },
+    { currentCPS: currentCPS2, currentDP: currentDP2, cps: cps2, dp: dp2 },
+    { currentCPS: currentCPS3, currentDP: currentDP3, cps: cps3, dp: dp3 },
+    { currentCPS: currentCPS4, currentDP: currentDP4, cps: cps4, dp: dp4 },
+  ];
 }
 
 async function getDetectorData(client) {
@@ -169,10 +187,8 @@ async function ensureClientAlive(client) {
     const newClient = await createDeviceConnection(client.deviceAddress);
     newClient.deviceAddress = client.deviceAddress;
     newClient.accessToken = client.accessToken;
-    console.log(
-      `Reconnected to device ${newClient.accessToken}. Sending cmLink...`
-    );
-    await linkDevice(newClient);
+    console.log(`Reconnected to device ${newClient.accessToken}.`);
+    // await linkDevice(newClient);
     return newClient;
   }
   return client;
@@ -181,11 +197,43 @@ async function ensureClientAlive(client) {
 async function sendDataToApi(apiUrl, accessToken, measurements) {
   const endpoint = `${apiUrl}/devices/${accessToken}/data`;
   const timeStamp = Math.floor(Date.now() / 1000);
-  const payload = [
-    { tag: "CurrentDP4", value: measurements.currentDP, timeStamp },
-    { tag: "CPS4", value: measurements.cps, timeStamp },
-    { tag: "DP4", value: measurements.dp, timeStamp },
-  ];
+
+  const payload = [];
+
+  // Loop through each measurement and check conditions
+  measurements.forEach((measurement, index) => {
+    if (measurement.currentCPS !== 0) {
+      payload.push({
+        tag: `currentCPS${index + 1}`,
+        value: measurement.currentCPS * 1000,
+        timeStamp,
+      });
+    }
+
+    if (measurement.currentDP !== -1) {
+      payload.push({
+        tag: `currentDP${index + 1}`,
+        value: measurement.currentDP * 1000,
+        timeStamp,
+      });
+    }
+
+    if (measurement.cps !== 0) {
+      payload.push({
+        tag: `cps${index + 1}`,
+        value: measurement.cps * 1000,
+        timeStamp,
+      });
+    }
+
+    if (measurement.dp !== -1) {
+      payload.push({
+        tag: `dp${index + 1}`,
+        value: measurement.dp * 1000,
+        timeStamp,
+      });
+    }
+  });
 
   try {
     await axios.post(endpoint, payload);
@@ -208,12 +256,11 @@ async function updateJobStatus(apiUrl, jobId, payload) {
 }
 
 // Helper to fetch active jobs and find a specific job by id
-async function getJobStatus(apiUrl, accessToken, jobId) {
+async function getJobStatus(apiUrl, jobId) {
   try {
-    const endpoint = `${apiUrl}/devices/${accessToken}/jobs/active`;
+    const endpoint = `${apiUrl}/jobs/${jobId}`;
     const response = await axios.get(endpoint);
-    const jobs = response.data;
-    return jobs.find((j) => j.id === jobId);
+    return response.data;
   } catch (error) {
     console.error(`Error fetching job status for ${jobId}:`, error.message);
     return null;
@@ -222,8 +269,13 @@ async function getJobStatus(apiUrl, accessToken, jobId) {
 
 // Process a single job command asynchronously.
 // The function uses the passed-in "processingJobs" Set to avoid duplicate handling.
-async function processJob(client, apiUrl, accessToken, job, processingJobs) {
-  const jobId = job.id;
+async function processJob(client, apiUrl, accessToken, jobId, processingJobs) {
+  const job = await getJobStatus(apiUrl, jobId);
+  if (!job) {
+    console.error(`Job ${jobId} not found.`);
+    return;
+  }
+
   processingJobs.add(jobId);
 
   let currentStep =
@@ -233,6 +285,7 @@ async function processJob(client, apiUrl, accessToken, job, processingJobs) {
   const totalSteps = job.totalSteps && job.totalSteps > 0 ? job.totalSteps : 1;
   const totalCycles =
     job.totalCycles && job.totalCycles > 0 ? job.totalCycles : 1;
+  const isInfinite = job.isInfinite === true;
 
   // Initial update
   await updateJobStatus(apiUrl, jobId, {
@@ -245,15 +298,15 @@ async function processJob(client, apiUrl, accessToken, job, processingJobs) {
     status: "JOB_IN_PROGRESS",
   });
 
-  // Flag to indicate whether the job was canceled
   let jobCanceled = false;
+
   try {
     let finished = false;
-    // Outer loop: cycles
-    while (currentCycle <= totalCycles && !finished) {
-      // Inner loop: steps
+
+    while (!finished) {
+      // Loop over steps
       while (currentStep <= totalSteps) {
-        const latestJob = await getJobStatus(apiUrl, accessToken, jobId);
+        const latestJob = await getJobStatus(apiUrl, jobId);
         client = await ensureClientAlive(client);
 
         if (latestJob.currentCommand === "cmGetDetector") {
@@ -262,6 +315,7 @@ async function processJob(client, apiUrl, accessToken, job, processingJobs) {
           );
           const detectorDataPacket = await getDetectorData(client);
           const measurements = extractMeasurements(detectorDataPacket);
+          console.log(`Extracted measurements for job ${jobId}:`, measurements);
           await sendDataToApi(apiUrl, accessToken, measurements);
         } else if (latestJob.currentCommand === "sleep") {
           const commandIndex = currentStep - 1;
@@ -291,15 +345,7 @@ async function processJob(client, apiUrl, accessToken, job, processingJobs) {
           );
         }
 
-        // Check if we are at the final step of the final cycle.
-        if (currentStep === totalSteps && currentCycle === totalCycles) {
-          finished = true;
-          break;
-        } else {
-          currentStep++;
-        }
-
-        const updatedJob = await getJobStatus(apiUrl, accessToken, jobId);
+        const updatedJob = await getJobStatus(apiUrl, jobId);
         if (updatedJob && updatedJob.status === "JOB_CANCELED") {
           console.log(
             `Job ${jobId} has been canceled. Stopping further processing.`
@@ -309,7 +355,9 @@ async function processJob(client, apiUrl, accessToken, job, processingJobs) {
           break;
         }
 
-        // Update job progress after each step.
+        currentStep++;
+
+        // Update job progress
         await updateJobStatus(apiUrl, jobId, {
           name: job.name,
           currentStep,
@@ -319,10 +367,28 @@ async function processJob(client, apiUrl, accessToken, job, processingJobs) {
           paused: false,
           status: "JOB_IN_PROGRESS",
         });
+
+        if (currentStep > totalSteps) {
+          break;
+        }
       }
 
-      // If not finished and there are more cycles, reset step counter and increment cycle.
-      if (!finished && currentCycle < totalCycles) {
+      if (jobCanceled) break;
+
+      if (isInfinite) {
+        // Reset step counter and increment cycle for infinite jobs
+        currentStep = 1;
+        await updateJobStatus(apiUrl, jobId, {
+          name: job.name,
+          currentStep,
+          totalSteps,
+          currentCycle: 1,
+          totalCycles: 1,
+          paused: false,
+          status: "JOB_IN_PROGRESS",
+        });
+      } else if (currentCycle < totalCycles) {
+        // For normal jobs, proceed to next cycle if any
         currentCycle++;
         currentStep = 1;
         await updateJobStatus(apiUrl, jobId, {
@@ -335,13 +401,11 @@ async function processJob(client, apiUrl, accessToken, job, processingJobs) {
           status: "JOB_IN_PROGRESS",
         });
       } else {
-        break;
+        finished = true;
       }
     }
 
-    // Only mark the job as succeeded if it wasn't canceled.
     if (jobCanceled) {
-      console.log(`Job ${jobId} processing terminated due to cancellation.`);
       await updateJobStatus(apiUrl, jobId, {
         name: job.name,
         currentStep,
@@ -356,7 +420,7 @@ async function processJob(client, apiUrl, accessToken, job, processingJobs) {
         name: job.name,
         currentStep: totalSteps,
         totalSteps,
-        currentCycle: totalCycles,
+        currentCycle,
         totalCycles,
         paused: false,
         status: "JOB_SUCCEEDED",
@@ -372,16 +436,20 @@ async function processJob(client, apiUrl, accessToken, job, processingJobs) {
 
 // Poll for active jobs and process them concurrently.
 async function pollJobs(client, apiUrl, accessToken, refreshTime, cancelToken) {
+  const processingJobs = new Set(); // Shared tracking set per device
+
   while (cancelToken.active) {
     try {
       const endpoint = `${apiUrl}/devices/${accessToken}/jobs/active`;
       const response = await axios.get(endpoint);
       const jobs = response.data;
+
       for (const job of jobs) {
-        // Process job if queued, etc.
-        // (Assume processJob and related functions are defined as before.)
-        if (job.status === "JOB_QUEUED") {
-          processJob(client, apiUrl, accessToken, job, new Set());
+        if (
+          (job.status === "JOB_QUEUED" || job.status === "JOB_IN_PROGRESS") &&
+          !processingJobs.has(job.id)
+        ) {
+          processJob(client, apiUrl, accessToken, job.id, processingJobs);
         }
       }
     } catch (error) {
@@ -390,7 +458,6 @@ async function pollJobs(client, apiUrl, accessToken, refreshTime, cancelToken) {
         error.message
       );
     }
-    // Wait for the configured refresh interval before polling again.
     await new Promise((resolve) => setTimeout(resolve, refreshTime));
   }
 }
@@ -399,6 +466,7 @@ async function pollJobs(client, apiUrl, accessToken, refreshTime, cancelToken) {
 async function processDevice(device, apiUrl, refreshTime, cancelToken) {
   const { address, accessToken } = device;
   let client;
+  console.log(`Processing device ${accessToken} at ${address}`);
   try {
     client = await createDeviceConnection(address);
     client.deviceAddress = address;
@@ -415,6 +483,7 @@ async function processDevice(device, apiUrl, refreshTime, cancelToken) {
 }
 
 export async function startGateway() {
+  console.log("Starting gateway...");
   const config = await loadConfig();
   const { api_url: apiUrl, devices, jobRefreshTime } = config;
   devices.forEach((device) => {

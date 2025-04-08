@@ -59,7 +59,10 @@
                   {{ t('job.step_of', [activeJob.currentStep ?? 1, activeJob.totalSteps]) }}
                   <span v-if="activeJob.currentCommand">({{ activeJob.currentCommand }})</span>
                 </div>
-                <div>
+                <div v-if="activeJob.isInfinite">
+                  {{ t('job.infinite_job') }}
+                </div>
+                <div v-else>
                   {{ t('job.cycle_of', [activeJob.currentCycle ?? 1, activeJob.totalCycles]) }}
                 </div>
               </div>

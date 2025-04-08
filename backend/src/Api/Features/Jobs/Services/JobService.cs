@@ -11,7 +11,7 @@ namespace Fei.Is.Api.Features.Jobs.Services;
 
 public class JobService(AppDbContext context)
 {
-    public async Task<Result<Job>> CreateJobFromRecipe(Guid deviceId, Guid recipeId, int cycles, CancellationToken cancellationToken)
+    public async Task<Result<Job>> CreateJobFromRecipe(Guid deviceId, Guid recipeId, int cycles, bool isInfite, CancellationToken cancellationToken)
     {
         var recipe = await context
             .Recipes.AsNoTracking()
@@ -32,6 +32,7 @@ public class JobService(AppDbContext context)
             CurrentStep = 1,
             CurrentCycle = 1,
             TotalCycles = cycles,
+            IsInfinite = isInfite,
             Status = JobStatusEnum.JOB_QUEUED
         };
         await context.Jobs.AddAsync(job, cancellationToken);

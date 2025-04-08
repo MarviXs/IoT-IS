@@ -4,11 +4,17 @@ using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
+using Fei.Is.Api.Redis;
+using Fei.Is.Api.SignalR.Dtos;
+using Fei.Is.Api.SignalR.Hubs;
+using Fei.Is.Api.SignalR.Interfaces;
 using FluentResults;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using StackExchange.Redis;
 
 namespace Fei.Is.Api.Features.DataPoints.Commands;
 
@@ -57,7 +63,12 @@ public static class CreateDataPoints
 
     public record Command(List<Request> Request, string DeviceAccessToken) : IRequest<Result<Guid>>;
 
-    public sealed class Handler(AppDbContext appContext, TimeScaleDbContext timescaleContext) : IRequestHandler<Command, Result<Guid>>
+    public sealed class Handler(
+        AppDbContext appContext,
+        TimeScaleDbContext timescaleContext,
+        RedisService redis,
+        IHubContext<IsHub, INotificationsClient> hubContext
+    ) : IRequestHandler<Command, Result<Guid>>
     {
         public async Task<Result<Guid>> Handle(Command message, CancellationToken cancellationToken)
         {
@@ -75,6 +86,26 @@ public static class CreateDataPoints
                 TimeStamp = GetDataPointTimeStampOrCurrentTime(dataPoint.TimeStamp),
                 Value = dataPoint.Value
             });
+
+            var deviceId = device.Id.ToString();
+            foreach (var datapoint in dataPoints)
+            {
+                await redis.Db.StringSetAsync($"device:{deviceId}:connected", "1", TimeSpan.FromMinutes(30), flags: CommandFlags.FireAndForget);
+                await redis.Db.StringSetAsync(
+                    $"device:{deviceId}:lastSeen",
+                    DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(),
+                    flags: CommandFlags.FireAndForget
+                );
+                await redis.Db.StringSetAsync(
+                    $"device:{deviceId}:{datapoint.SensorTag}:last",
+                    datapoint.Value,
+                    TimeSpan.FromHours(1),
+                    flags: CommandFlags.FireAndForget
+                );
+                await hubContext
+                    .Clients.Group(deviceId)
+                    .ReceiveSensorLastDataPoint(new SensorLastDataPointDto(deviceId, datapoint.SensorTag.ToString(), datapoint.Value ?? 0));
+            }
 
             await timescaleContext.BulkInsertAsync(dataPoints, cancellationToken: cancellationToken);
 
