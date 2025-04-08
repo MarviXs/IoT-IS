@@ -2,7 +2,7 @@
   <PageLayout
     :breadcrumbs="[
       { label: t('order.label', 2), to: '/orders' },
-      { label: order?.customerName || 'Order Details', to: `/orders/${orderId}` }
+      { label: order?.customerName || 'Order Details', to: `/orders/${orderId}` },
     ]"
   >
     <template #actions>
@@ -185,7 +185,7 @@ function refreshTable() {
   getOrder(); // Načítaj detaily objednávky
   getOrderItemContainers(pagination.value); // Načítaj kontajnery
 }
-  
+
 function openDeleteContainerDialog(containerId: string) {
   selectedContainerId.value = containerId;
   isDeleteDialogOpen.value = true;

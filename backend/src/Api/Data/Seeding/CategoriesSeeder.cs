@@ -21,8 +21,8 @@ namespace Fei.Is.Api.Data.Seeding
         public void Seed(AppDbContext appDbContext)
         {
             appDbContext.Categories.AddRange(
-            [
-                new Category()
+                [
+                    new Category()
                     {
                         Id = Guid.NewGuid(),
                         CategoryName = "Nejaka burina",
@@ -36,7 +36,9 @@ namespace Fei.Is.Api.Data.Seeding
                         CreatedAt = DateTime.MinValue,
                         UpdatedAt = DateTime.MinValue,
                     }
-            ]);
+                ]
+            );
+            appDbContext.SaveChanges();
         }
     }
 }

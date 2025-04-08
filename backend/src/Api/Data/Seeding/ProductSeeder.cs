@@ -1,4 +1,5 @@
-﻿using Fei.Is.Api.Data.Contexts;
+﻿using System;
+using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models.InformationSystem;
 using NPOI.POIFS.Storage;
 
@@ -8,12 +9,7 @@ namespace Fei.Is.Api.Data.Seeding
     {
         public List<Type> GetDependencies()
         {
-            return new List<Type>()
-            {
-                typeof(Supplier),
-                typeof(Category),
-                typeof(VATCategory)
-            };
+            return new List<Type>() { typeof(Supplier), typeof(Category), typeof(VATCategory) };
         }
 
         public Type GetModel()
@@ -65,6 +61,7 @@ namespace Fei.Is.Api.Data.Seeding
                     VATCategory = vatCategories[0]
                 }
             );
+            dbContext.SaveChanges();
         }
     }
 }

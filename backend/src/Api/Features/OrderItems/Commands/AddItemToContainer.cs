@@ -27,7 +27,8 @@ public static class AddItemToContainer
                         ClaimsPrincipal user,
                         Guid orderId,
                         Guid containerId,
-                        AddItemRequest request) =>
+                        AddItemRequest request
+                    ) =>
                     {
                         // Príkaz teraz obsahuje aj orderId
                         var command = new Command(user, orderId, containerId, request);
@@ -48,17 +49,15 @@ public static class AddItemToContainer
                 .WithOpenApi(o =>
                 {
                     o.Summary = "Add an item to an order container";
-                    o.Description = "Adds an order item to a specified order container by container ID. " +
-                                    "If the product's category is 'Práca', a container with name 'Práca' is used (or created) for the order.";
+                    o.Description =
+                        "Adds an order item to a specified order container by container ID. "
+                        + "If the product's category is 'Práca', a container with name 'Práca' is used (or created) for the order.";
                     return o;
                 });
         }
     }
 
-    public record AddItemRequest(
-        Guid ProductId,
-        int Quantity
-    );
+    public record AddItemRequest(Guid ProductId, int Quantity);
 
     // Command teraz obsahuje aj OrderId
     public record Command(ClaimsPrincipal User, Guid OrderId, Guid ContainerId, AddItemRequest Request) : IRequest<Result>;
@@ -68,8 +67,8 @@ public static class AddItemToContainer
         public async Task<Result> Handle(Command message, CancellationToken cancellationToken)
         {
             // Načítame produkt vrátane jeho kategórie
-            var product = await context.Products
-                .Include(p => p.Category)
+            var product = await context
+                .Products.Include(p => p.Category)
                 .FirstOrDefaultAsync(p => p.Id == message.Request.ProductId, cancellationToken);
 
             if (product == null)
@@ -81,10 +80,10 @@ public static class AddItemToContainer
             if (product.Category?.CategoryName == "Práca")
             {
                 // Načítame objednávku spolu s kontajnermi
-                var order = await context.Orders
-                    .Include(o => o.ItemContainers)
-                        .ThenInclude(c => c.Items)
-                            .ThenInclude(i => i.Product)
+                var order = await context
+                    .Orders.Include(o => o.ItemContainers)
+                    .ThenInclude(c => c.Items)
+                    .ThenInclude(i => i.Product)
                     .FirstOrDefaultAsync(o => o.Id == message.OrderId, cancellationToken);
 
                 if (order == null)
@@ -98,13 +97,7 @@ public static class AddItemToContainer
                 // Ak kontajner neexistuje, vytvoríme ho a priradíme do objednávky
                 if (container == null)
                 {
-                    container = new Fei.Is.Api.Data.Models.InformationSystem.OrderItemContainer
-                    {
-                        Name = "Práca",
-                        Quantity = 1,
-                        PricePerContainer = 0,
-                        TotalPrice = 0
-                    };
+                    container = new Fei.Is.Api.Data.Models.InformationSystem.OrderItemContainer { Name = "Práca", Quantity = 1 };
 
                     order.ItemContainers.Add(container);
                     // Uložíme, aby mal kontajner vygenerované Id, ak je potrebné
@@ -112,19 +105,9 @@ public static class AddItemToContainer
                 }
 
                 // Vytvorenie novej položky objednávky a pridanie do kontajnera "Práca"
-                var orderItem = new OrderItem
-                {
-                    Product = product,
-                    Quantity = message.Request.Quantity
-                };
+                var orderItem = new OrderItem { Product = product, Quantity = message.Request.Quantity };
 
                 container.Items.Add(orderItem);
-
-                // Aktualizácia údajov kontajnera: počet položiek a ceny
-                var PricePerContainer = container.Items.Sum(i => i.Product.PricePerPiecePack * i.Quantity);
-
-                container.PricePerContainer = PricePerContainer;
-                container.TotalPrice = PricePerContainer * container.Quantity;
 
                 await context.SaveChangesAsync(cancellationToken);
                 return Result.Ok();
@@ -132,9 +115,9 @@ public static class AddItemToContainer
             else
             {
                 // Iná logika: ak produkt nepatrí do "Práca", použijeme kontajner podľa poskytnutého ID.
-                var container = await context.OrderItemContainers
-                    .Include(c => c.Items)
-                        .ThenInclude(i => i.Product)
+                var container = await context
+                    .OrderItemContainers.Include(c => c.Items)
+                    .ThenInclude(i => i.Product)
                     .FirstOrDefaultAsync(c => c.Id == message.ContainerId, cancellationToken);
 
                 if (container == null)
@@ -142,18 +125,9 @@ public static class AddItemToContainer
                     return Result.Fail(new NotFoundError());
                 }
 
-                var orderItem = new OrderItem
-                {
-                    Product = product,
-                    Quantity = message.Request.Quantity
-                };
+                var orderItem = new OrderItem { Product = product, Quantity = message.Request.Quantity };
 
                 container.Items.Add(orderItem);
-
-                var PricePerContainer = container.Items.Sum(i => i.Product.PricePerPiecePack * i.Quantity);
-
-                container.PricePerContainer = PricePerContainer;
-                container.TotalPrice = PricePerContainer * container.Quantity;
 
                 await context.SaveChangesAsync(cancellationToken);
                 return Result.Ok();
@@ -168,11 +142,9 @@ public static class AddItemToContainer
     {
         public Validator()
         {
-            RuleFor(r => r.ProductId)
-                .NotEmpty().WithMessage("Product ID is required.");
+            RuleFor(r => r.ProductId).NotEmpty().WithMessage("Product ID is required.");
 
-            RuleFor(r => r.Quantity)
-                .GreaterThan(0).WithMessage("Quantity must be greater than 0.");
+            RuleFor(r => r.Quantity).GreaterThan(0).WithMessage("Quantity must be greater than 0.");
         }
     }
 }

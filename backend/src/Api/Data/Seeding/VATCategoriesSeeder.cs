@@ -18,8 +18,9 @@ namespace Fei.Is.Api.Data.Seeding
 
         public void Seed(AppDbContext appDbContext)
         {
-            appDbContext.AddRange([
-                new VATCategory()
+            appDbContext.AddRange(
+                [
+                    new VATCategory()
                     {
                         Id = Guid.NewGuid(),
                         Name = "Normal",
@@ -35,7 +36,9 @@ namespace Fei.Is.Api.Data.Seeding
                         CreatedAt = DateTime.MinValue,
                         UpdatedAt = DateTime.MinValue,
                     }
-                ]);
+                ]
+            );
+            appDbContext.SaveChanges();
         }
     }
 }

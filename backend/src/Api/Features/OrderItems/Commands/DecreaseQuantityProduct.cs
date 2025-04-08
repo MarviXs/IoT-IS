@@ -1,13 +1,13 @@
+using System.Linq;
 using System.Security.Claims;
 using Carter;
 using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
+using Fei.Is.Api.Data.Models.InformationSystem;
 using FluentResults;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
-using Fei.Is.Api.Data.Models.InformationSystem;
-using System.Linq;
 
 namespace Fei.Is.Api.Features.OrderItemContainer.Commands
 {
@@ -19,7 +19,13 @@ namespace Fei.Is.Api.Features.OrderItemContainer.Commands
             {
                 app.MapPost(
                         "orders/{orderId:guid}/container/{containerId:guid}/product/{productId:guid}/decrease",
-                        async Task<Results<NoContent, NotFound>> (IMediator mediator, ClaimsPrincipal user, Guid orderId, Guid containerId, Guid productId) =>
+                        async Task<Results<NoContent, NotFound>> (
+                            IMediator mediator,
+                            ClaimsPrincipal user,
+                            Guid orderId,
+                            Guid containerId,
+                            Guid productId
+                        ) =>
                         {
                             var command = new Command(user, orderId, containerId, productId);
                             var result = await mediator.Send(command);
@@ -36,7 +42,8 @@ namespace Fei.Is.Api.Features.OrderItemContainer.Commands
                     .WithTags("OrderItem")
                     .WithOpenApi(o =>
                     {
-                        o.Summary = "Decrease the quantity of a product in a container by 1, remove it if quantity reaches 0, and update container pricing";
+                        o.Summary =
+                            "Decrease the quantity of a product in a container by 1, remove it if quantity reaches 0, and update container pricing";
                         return o;
                     });
             }
@@ -57,9 +64,9 @@ namespace Fei.Is.Api.Features.OrderItemContainer.Commands
             public async Task<Result> Handle(Command message, CancellationToken cancellationToken)
             {
                 // Načítame kontajner vrátane jeho položiek (Items) a prislúchajúcich produktov
-                var container = await _context.OrderItemContainers
-                    .Include(c => c.Items)
-                        .ThenInclude(oi => oi.Product)
+                var container = await _context
+                    .OrderItemContainers.Include(c => c.Items)
+                    .ThenInclude(oi => oi.Product)
                     .FirstOrDefaultAsync(c => c.Id == message.ContainerId, cancellationToken);
 
                 if (container == null)
@@ -81,16 +88,6 @@ namespace Fei.Is.Api.Features.OrderItemContainer.Commands
                 if (orderItem.Quantity <= 0)
                 {
                     _context.OrderItems.Remove(orderItem);
-                }
-
-                // Prepočítame celkovú kvantitu v kontejnere ako súčet množstiev všetkých položiek
-                container.PricePerContainer = container.Items.Sum(oi => oi.Quantity * (oi.Product.PricePerPiecePack ?? 0m));
-
-
-                // Ak je definovaná cena za jeden kontajner, aktualizujeme celkovú cenu
-                if (container.PricePerContainer.HasValue)
-                {
-                    container.TotalPrice = container.Quantity * container.PricePerContainer.Value;
                 }
 
                 await _context.SaveChangesAsync(cancellationToken);
