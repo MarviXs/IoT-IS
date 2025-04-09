@@ -17,6 +17,13 @@ public class OrderItemContainer : BaseModel
     [NotMapped]
     public decimal? TotalPrice
     {
+        get { return Items.Select(i => i.Product.PricePerPiecePack * i.Quantity).DefaultIfEmpty(0).Sum(); }
+        set { }
+    }
+
+    [NotMapped]
+    public decimal? TotalPricePerPiece
+    {
         get { return Items.Select(i => i.Product.RetailPrice).DefaultIfEmpty(0).Sum(); }
         set { }
     }

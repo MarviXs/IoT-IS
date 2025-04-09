@@ -64,6 +64,7 @@ public class Program
                         toRemove.Add(seeder);
                     }
                 }
+                dbContext.SaveChanges();
 
                 foreach (var seeder in toRemove)
                 {

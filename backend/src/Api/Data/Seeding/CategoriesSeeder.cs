@@ -35,10 +35,23 @@ namespace Fei.Is.Api.Data.Seeding
                         CategoryName = "Nejaky strom",
                         CreatedAt = DateTime.MinValue,
                         UpdatedAt = DateTime.MinValue,
+                    },
+                    new Category()
+                    {
+                        Id = Guid.NewGuid(),
+                        CategoryName = "Substráty, hnojiva a ostatní materiály",
+                        CreatedAt = DateTime.MinValue,
+                        UpdatedAt = DateTime.MinValue,
+                    },
+                    new Category()
+                    {
+                        Id = Guid.NewGuid(),
+                        CategoryName = "Cibuloviny",
+                        CreatedAt = DateTime.MinValue,
+                        UpdatedAt = DateTime.MinValue,
                     }
                 ]
             );
-            appDbContext.SaveChanges();
         }
     }
 }

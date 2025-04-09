@@ -94,7 +94,6 @@ namespace Fei.Is.Api.Data.Seeding
                     }
                 ]
             );
-            appDbContext.SaveChanges();
         }
     }
 }
