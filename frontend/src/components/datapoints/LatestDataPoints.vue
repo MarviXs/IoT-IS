@@ -65,7 +65,7 @@ const ungroupedSensors = computed(() => {
   return (sensors.value ?? []).filter((sensor) => !sensor.group);
 });
 
-const getGraphColorFromSensor = (sensor: SensorData, index): string => {
+const getGraphColorFromSensor = (sensor: SensorData): string => {
   if (sensor.group) {
     const groupNames = Object.keys(groupedSensors.value);
     const index = groupNames.indexOf(sensor.group);
