@@ -31,6 +31,7 @@ const router = useRouter();
 
 const templateData = ref<DeviceTemplateFormData>({
   name: '',
+  deviceType: 'Generic',
 });
 const sensorsData = ref<SensorFormData[]>([]);
 const submitting = ref(false);

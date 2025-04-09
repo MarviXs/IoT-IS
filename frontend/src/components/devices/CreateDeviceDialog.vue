@@ -2,6 +2,7 @@
   <dialog-common v-model="isDialogOpen">
     <template #title>{{ t('device.add_device') }}</template>
     <template #default>
+      
       <DeviceForm ref="deviceForm" v-model="device" @on-submit="createDevice" :loading="creatingDevice" />
     </template>
   </dialog-common>

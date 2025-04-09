@@ -11,6 +11,18 @@
               class="col-12"
               :label="t('global.name')"
             />
+            <q-select
+              v-model="template.deviceType"
+              :options="[
+                { label: 'Generic', value: 'Generic' },
+                { label: 'NuviaMSU', value: 'NuviaMSU' },
+              ]"
+              class="col-12"
+              label="Device Type"
+              :rules="[(val) => (val && val.length > 0) || t('global.rules.required')]"
+              emit-value
+              map-options
+            />
           </div>
           <q-card-actions align="left" class="text-primary q-mt-sm q-px-none">
             <q-btn
@@ -69,6 +81,7 @@ import { matSensors } from '@quasar/extras/material-icons';
 
 export type DeviceTemplateFormData = {
   name: string;
+  deviceType: 'Generic' | 'NuviaMSU';
 };
 
 const { t } = useI18n();

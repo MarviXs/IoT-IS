@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Carter;
 using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
+using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
 using FluentResults;
@@ -65,11 +66,11 @@ public static class GetDeviceTemplateById
                 return Result.Fail(new ForbiddenError());
             }
 
-            var response = new Response(template.Id, template.Name);
+            var response = new Response(template.Id, template.Name, template.DeviceType);
 
             return Result.Ok(response);
         }
     }
 
-    public record Response(Guid Id, string Name);
+    public record Response(Guid Id, string Name, DeviceType DeviceType);
 }

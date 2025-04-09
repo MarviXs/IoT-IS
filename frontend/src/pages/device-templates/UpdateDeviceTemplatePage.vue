@@ -38,6 +38,7 @@ async function getDeviceTemplate() {
 
   templateData.value = {
     name: data.name,
+    deviceType: data.deviceType,
   };
 }
 getDeviceTemplate();
@@ -54,6 +55,7 @@ async function getDeviceSensors() {
     name: sensor.name,
     unit: sensor.unit,
     accuracyDecimals: sensor.accuracyDecimals,
+    group: sensor.group,
   }));
 }
 getDeviceSensors();

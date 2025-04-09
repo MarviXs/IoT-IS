@@ -88,14 +88,19 @@ public static class GetDeviceById
                         device.DeviceTemplate.Id,
                         device.DeviceTemplate.Name,
                         [
-                            .. device.DeviceTemplate.Sensors.Select(sensor => new SensorResponse(
-                                sensor.Id,
-                                sensor.Tag,
-                                sensor.Name,
-                                sensor.Unit,
-                                sensor.AccuracyDecimals
-                            ))
-                        ]
+                            .. device
+                                .DeviceTemplate.Sensors.OrderBy(sensor => sensor.Order)
+                                .Select(sensor => new SensorResponse(
+                                    sensor.Id,
+                                    sensor.Tag,
+                                    sensor.Name,
+                                    sensor.Unit,
+                                    sensor.AccuracyDecimals,
+                                    sensor.Order,
+                                    sensor.Group
+                                ))
+                        ],
+                        device.DeviceTemplate.DeviceType
                     )
                     : null,
                 device.CreatedAt,
@@ -109,9 +114,9 @@ public static class GetDeviceById
         }
     }
 
-    public record SensorResponse(Guid Id, string Tag, string Name, string? Unit, int? AccuracyDecimals);
+    public record SensorResponse(Guid Id, string Tag, string Name, string? Unit, int? AccuracyDecimals, int Order, string? Group);
 
-    public record TemplateResponse(Guid Id, string Name, SensorResponse[] Sensors);
+    public record TemplateResponse(Guid Id, string Name, SensorResponse[] Sensors, DeviceType DeviceType);
 
     public record Response(
         Guid Id,

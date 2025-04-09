@@ -14,7 +14,7 @@ namespace Fei.Is.Api.Features.Sensors.Commands;
 
 public static class UpdateSensor
 {
-    public record Request(string Tag, string Name, string? Unit, int? AccuracyDecimals);
+    public record Request(string Tag, string Name, string? Unit, int? AccuracyDecimals, string? Group);
 
     public sealed class Endpoint : ICarterModule
     {
@@ -88,6 +88,7 @@ public static class UpdateSensor
             sensor.Name = message.SensorRequest.Name;
             sensor.Unit = message.SensorRequest.Unit;
             sensor.AccuracyDecimals = message.SensorRequest.AccuracyDecimals;
+            sensor.Group = message.SensorRequest.Group;
 
             await context.SaveChangesAsync(cancellationToken);
 
