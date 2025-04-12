@@ -101,6 +101,7 @@ public static class UpdateJob
                 job.CurrentCycle,
                 job.GetCurrentCommand(),
                 job.Paused,
+                job.IsInfinite,
                 job.GetProgress(),
                 job.Status
             );

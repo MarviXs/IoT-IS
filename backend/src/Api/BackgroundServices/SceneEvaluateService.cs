@@ -171,7 +171,7 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
             }
             else if (action.Type == SceneActionType.JOB && action.RecipeId.HasValue && action.DeviceId.HasValue)
             {
-                await jobService.CreateJobFromRecipe(action.DeviceId.Value, action.RecipeId.Value, 1, CancellationToken.None);
+                await jobService.CreateJobFromRecipe(action.DeviceId.Value, action.RecipeId.Value, 1, false, CancellationToken.None);
             }
         }
 

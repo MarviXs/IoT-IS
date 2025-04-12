@@ -120,7 +120,6 @@
       "password_current_wrong": "Aktuálne heslo je nesprávne!",
       "email_invalid": "Prosím, zadajte platnú e-mailovú adresu",
       "link_invalid": "Prosím, zadajte správny link k súboru"
-
     }
   },
   "not_found": {
@@ -255,6 +254,8 @@
     "finished_at": "Ukončenie",
     "status": "Stav",
     "progress": "Priebeh",
+    "infinite": "Nekonečný",
+    "infinity_job": "Nekonečná úloha",
     "controls": {
       "pause": "Pozastaviť",
       "resume": "Pokračovať",

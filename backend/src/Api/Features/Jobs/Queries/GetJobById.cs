@@ -23,9 +23,9 @@ public static class GetJobById
         {
             app.MapGet(
                     "jobs/{jobId:guid}",
-                    async Task<Results<Ok<Response>, NotFound, ForbidHttpResult>> (IMediator mediator, ClaimsPrincipal user, Guid jobId) =>
+                    async Task<Results<Ok<Response>, NotFound>> (IMediator mediator, Guid jobId) =>
                     {
-                        var query = new Query(user, jobId);
+                        var query = new Query(jobId);
                         var result = await mediator.Send(query);
 
                         if (result.HasError<NotFoundError>())
@@ -33,14 +33,10 @@ public static class GetJobById
                             return TypedResults.NotFound();
                         }
 
-                        if (result.HasError<ForbiddenError>())
-                        {
-                            return TypedResults.Forbid();
-                        }
-
                         return TypedResults.Ok(result.Value);
                     }
                 )
+                .AllowAnonymous()
                 .WithName(nameof(GetJobById))
                 .WithTags(nameof(Job))
                 .WithOpenApi(o =>
@@ -51,32 +47,23 @@ public static class GetJobById
         }
     }
 
-    public record Query(ClaimsPrincipal User, Guid JobId) : IRequest<Result<Response>>;
+    public record Query(Guid JobId) : IRequest<Result<Response>>;
 
     public sealed class Handler(AppDbContext context) : IRequestHandler<Query, Result<Response>>
     {
         public async Task<Result<Response>> Handle(Query message, CancellationToken cancellationToken)
         {
-            var jobWithOwnerId = await context
+            var job = await context
                 .Jobs.Where(j => j.Id == message.JobId)
                 .Include(j => j.Device)
-                .ThenInclude(d => d!.SharedWithUsers)
                 .Include(j => j.Commands.OrderBy(c => c.Order))
                 .AsNoTracking()
                 .SingleOrDefaultAsync(cancellationToken);
-
-            var job = jobWithOwnerId;
-            var ownerId = jobWithOwnerId?.Device?.OwnerId;
 
             if (job == null)
             {
                 return Result.Fail(new NotFoundError());
             }
-            if (jobWithOwnerId?.Device == null || jobWithOwnerId?.Device.CanView(message.User) == false)
-            {
-                return Result.Fail(new ForbiddenError());
-            }
-
             var commands = new List<CommandResponse>();
             for (var i = 0; i < job.Commands.Count; i++)
             {
@@ -107,7 +94,7 @@ public static class GetJobById
                     progress = CommandProgress.CommandDone;
                 }
 
-                commands.Add(new CommandResponse(i + 1, command.Name, progress));
+                commands.Add(new CommandResponse(i + 1, command.Name, progress, command.Params));
             }
 
             var response = new Response(
@@ -118,7 +105,9 @@ public static class GetJobById
                 job.TotalSteps,
                 job.CurrentCycle,
                 job.TotalCycles,
+                job.GetCurrentCommand(),
                 job.Paused,
+                job.IsInfinite,
                 job.GetProgress(),
                 job.Status,
                 commands
@@ -136,7 +125,7 @@ public static class GetJobById
         CommandDone = 2
     }
 
-    public record CommandResponse(int Order, string Name, CommandProgress Progress);
+    public record CommandResponse(int Order, string Name, CommandProgress Progress, List<double> Params);
 
     public record Response(
         Guid Id,
@@ -146,7 +135,9 @@ public static class GetJobById
         int TotalSteps,
         int CurrentCycle,
         int TotalCycles,
+        string CurrentCommand,
         bool Paused,
+        bool IsInfinite,
         double Progress,
         JobStatusEnum Status,
         List<CommandResponse> Commands
