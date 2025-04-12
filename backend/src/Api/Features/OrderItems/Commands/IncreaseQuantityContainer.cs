@@ -51,26 +51,18 @@ public static class IncreaseQuantityContainer
             _context = context;
         }
 
-
         public async Task<Result> Handle(Command message, CancellationToken cancellationToken)
         {
             // Fetch the container directly using the ContainerId
-            var container = await _context.OrderItemContainers
-                .FirstOrDefaultAsync(c => c.Id == message.ContainerId, cancellationToken);
+            var container = await _context.OrderItemContainers.FirstOrDefaultAsync(c => c.Id == message.ContainerId, cancellationToken);
 
             if (container == null)
             {
                 return Result.Fail(new NotFoundError());
             }
-            
 
             // Increment the quantity
             container.Quantity += 1;
-            // Recalculate the total price
-            if (container.PricePerContainer.HasValue)
-            {
-                container.TotalPrice = container.Quantity * container.PricePerContainer.Value;
-            }
 
             // Save changes to the database
             await _context.SaveChangesAsync(cancellationToken);

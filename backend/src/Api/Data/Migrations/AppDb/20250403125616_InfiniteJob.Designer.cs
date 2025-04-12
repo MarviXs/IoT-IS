@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Fei.Is.Api.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Fei.Is.Api.Data.Migrations.AppDb
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250403125616_InfiniteJob")]
+    partial class InfiniteJob
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -175,7 +178,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("SubCollectionId");
 
-                    b.ToTable("CollectionItems", (string)null);
+                    b.ToTable("CollectionItems");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.CollectionShare", b =>
@@ -205,7 +208,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("CollectionShare", (string)null);
+                    b.ToTable("CollectionShare");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.Command", b =>
@@ -239,7 +242,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("DeviceTemplateId");
 
-                    b.ToTable("Commands", (string)null);
+                    b.ToTable("Commands");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.Device", b =>
@@ -283,7 +286,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("OwnerId");
 
-                    b.ToTable("Devices", (string)null);
+                    b.ToTable("Devices");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.DeviceCollection", b =>
@@ -317,7 +320,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("RootCollectionId");
 
-                    b.ToTable("DeviceCollections", (string)null);
+                    b.ToTable("DeviceCollections");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.DeviceShare", b =>
@@ -352,7 +355,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("SharingUserId");
 
-                    b.ToTable("DeviceShares", (string)null);
+                    b.ToTable("DeviceShares");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.DeviceTemplate", b =>
@@ -380,7 +383,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("OwnerId");
 
-                    b.ToTable("DeviceTemplates", (string)null);
+                    b.ToTable("DeviceTemplates");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.AdditionalOrder", b =>
@@ -415,7 +418,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("AdditionalOrders", (string)null);
+                    b.ToTable("AdditionalOrders");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Category", b =>
@@ -436,7 +439,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories", (string)null);
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Company", b =>
@@ -473,7 +476,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasKey("Id");
 
-                    b.ToTable("Companies", (string)null);
+                    b.ToTable("Companies");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.DeliveryItem", b =>
@@ -523,7 +526,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("DeliveryNoteId");
 
-                    b.ToTable("DeliveryItems", (string)null);
+                    b.ToTable("DeliveryItems");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.DeliveryNote", b =>
@@ -585,7 +588,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("SupplierId");
 
-                    b.ToTable("DeliveryNotes", (string)null);
+                    b.ToTable("DeliveryNotes");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Invoice", b =>
@@ -625,7 +628,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("SupplierId");
 
-                    b.ToTable("Invoices", (string)null);
+                    b.ToTable("Invoices");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.InvoiceItem", b =>
@@ -664,7 +667,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("InvoiceId");
 
-                    b.ToTable("InvoiceItems", (string)null);
+                    b.ToTable("InvoiceItems");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Order", b =>
@@ -703,7 +706,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("CustomerId");
 
-                    b.ToTable("Orders", (string)null);
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.OrderItem", b =>
@@ -733,7 +736,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("OrderItems", (string)null);
+                    b.ToTable("OrderItems");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.OrderItemContainer", b =>
@@ -770,7 +773,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("OrderId");
 
-                    b.ToTable("OrderItemContainers", (string)null);
+                    b.ToTable("OrderItemContainers");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Product", b =>
@@ -839,7 +842,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("VATCategoryId");
 
-                    b.ToTable("Products", (string)null);
+                    b.ToTable("Products");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.ProductionPlan", b =>
@@ -927,7 +930,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductionPlans", (string)null);
+                    b.ToTable("ProductionPlans");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Summary", b =>
@@ -956,7 +959,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("Summaries", (string)null);
+                    b.ToTable("Summaries");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.Supplier", b =>
@@ -977,7 +980,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasKey("Id");
 
-                    b.ToTable("Suppliers", (string)null);
+                    b.ToTable("Suppliers");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.SystemSetting", b =>
@@ -991,7 +994,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasKey("Key");
 
-                    b.ToTable("SystemSettings", (string)null);
+                    b.ToTable("SystemSettings");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.VATCategory", b =>
@@ -1015,7 +1018,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasKey("Id");
 
-                    b.ToTable("VATCategories", (string)null);
+                    b.ToTable("VATCategories");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.WorkDayDetail", b =>
@@ -1076,7 +1079,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("WorkReportId");
 
-                    b.ToTable("WorkDayDetails", (string)null);
+                    b.ToTable("WorkDayDetails");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.WorkReport", b =>
@@ -1110,7 +1113,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("SupplierId");
 
-                    b.ToTable("WorkReports", (string)null);
+                    b.ToTable("WorkReports");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.Job", b =>
@@ -1163,7 +1166,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("DeviceId");
 
-                    b.ToTable("Jobs", (string)null);
+                    b.ToTable("Jobs");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.JobCommand", b =>
@@ -1203,7 +1206,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("JobId");
 
-                    b.ToTable("JobCommands", (string)null);
+                    b.ToTable("JobCommands");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.Recipe", b =>
@@ -1229,7 +1232,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("DeviceTemplateId");
 
-                    b.ToTable("Recipes", (string)null);
+                    b.ToTable("Recipes");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.RecipeStep", b =>
@@ -1267,7 +1270,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("SubrecipeId");
 
-                    b.ToTable("RecipeSteps", (string)null);
+                    b.ToTable("RecipeSteps");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.RefreshToken", b =>
@@ -1295,7 +1298,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("RefreshTokens", (string)null);
+                    b.ToTable("RefreshTokens");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.Scene", b =>
@@ -1336,7 +1339,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("OwnerId");
 
-                    b.ToTable("Scenes", (string)null);
+                    b.ToTable("Scenes");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.SceneNotification", b =>
@@ -1365,7 +1368,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("SceneId");
 
-                    b.ToTable("SceneNotifications", (string)null);
+                    b.ToTable("SceneNotifications");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.SceneSensorTrigger", b =>
@@ -1397,7 +1400,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.HasIndex("SceneId", "DeviceId", "SensorTag")
                         .IsUnique();
 
-                    b.ToTable("SceneSensorTriggers", (string)null);
+                    b.ToTable("SceneSensorTriggers");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.Sensor", b =>
@@ -1433,7 +1436,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("DeviceTemplateId");
 
-                    b.ToTable("Sensors", (string)null);
+                    b.ToTable("Sensors");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -1925,7 +1928,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsMany("Fei.Is.Api.Data.Models.Scene.Actions#Fei.Is.Api.Data.Models.SceneAction", "Actions", b1 =>
+                    b.OwnsMany("Fei.Is.Api.Data.Models.SceneAction", "Actions", b1 =>
                         {
                             b1.Property<Guid>("SceneId")
                                 .HasColumnType("uuid");
@@ -1951,7 +1954,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                             b1.HasKey("SceneId", "Id");
 
-                            b1.ToTable("Scenes", (string)null);
+                            b1.ToTable("Scenes");
 
                             b1.ToJson("Actions");
 

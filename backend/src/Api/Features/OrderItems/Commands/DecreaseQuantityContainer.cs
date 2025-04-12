@@ -59,8 +59,7 @@ public static class DecreaseQuantityContainer
         public async Task<Result> Handle(Command message, CancellationToken cancellationToken)
         {
             // Fetch the container directly using the ContainerId
-            var container = await _context.OrderItemContainers
-                .FirstOrDefaultAsync(c => c.Id == message.ContainerId, cancellationToken);
+            var container = await _context.OrderItemContainers.FirstOrDefaultAsync(c => c.Id == message.ContainerId, cancellationToken);
 
             if (container == null)
             {
@@ -75,11 +74,6 @@ public static class DecreaseQuantityContainer
 
             // Decrement the quantity
             container.Quantity -= 1;
-            // Recalculate the total price
-            if (container.PricePerContainer.HasValue)
-            {
-                container.TotalPrice = container.Quantity * container.PricePerContainer.Value;
-            }
 
             // Save changes to the database
             await _context.SaveChangesAsync(cancellationToken);

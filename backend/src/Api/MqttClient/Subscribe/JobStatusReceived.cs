@@ -80,6 +80,7 @@ public class JobStatusReceived(AppDbContext appContext, RedisService redis, IHub
             job.CurrentCycle,
             job.GetCurrentCommand(),
             job.Paused,
+            job.IsInfinite,
             job.GetProgress(),
             job.Status
         );

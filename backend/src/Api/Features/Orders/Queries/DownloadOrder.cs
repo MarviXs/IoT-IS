@@ -68,6 +68,7 @@ public static class DownloadOrder
                 .Include(o => o.ItemContainers)
                 .ThenInclude(ic => ic.Items)
                 .ThenInclude(i => i.Product)
+                .ThenInclude(p => p.VATCategory)
                 .Where(o => o.Id == message.Id);
 
             if (!await order.AnyAsync())
@@ -75,7 +76,7 @@ public static class DownloadOrder
                 return Result.Fail(new NotFoundError());
             }
 
-            string path = "C:\\Users\\Jakub\\Downloads\\faktura.xlsx";
+            string path = "C:\\Users\\Admin\\Downloads\\Compressed\\faktura.xlsx";
 
             ExcelGenerator excelGenerator = new();
 

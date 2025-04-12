@@ -19,8 +19,9 @@ namespace Fei.Is.Api.Data.Seeding
 
         public void Seed(AppDbContext appDbContext)
         {
-            appDbContext.Suppliers.AddRange([
-                new Supplier()
+            appDbContext.Suppliers.AddRange(
+                [
+                    new Supplier()
                     {
                         Id = Guid.NewGuid(),
                         Name = "Volmary",
@@ -55,7 +56,8 @@ namespace Fei.Is.Api.Data.Seeding
                         CreatedAt = DateTime.MinValue,
                         UpdatedAt = DateTime.MinValue,
                     }
-                ]);
+                ]
+            );
         }
     }
 }

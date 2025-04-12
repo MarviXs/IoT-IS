@@ -1,13 +1,13 @@
+using System.Linq;
 using System.Security.Claims;
 using Carter;
 using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
+using Fei.Is.Api.Data.Models.InformationSystem;
 using FluentResults;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
-using Fei.Is.Api.Data.Models.InformationSystem;
-using System.Linq;
 
 namespace Fei.Is.Api.Features.OrderItemContainer.Commands
 {
@@ -19,7 +19,13 @@ namespace Fei.Is.Api.Features.OrderItemContainer.Commands
             {
                 app.MapPost(
                         "orders/{orderId:guid}/container/{containerId:guid}/product/{productId:guid}/increase",
-                        async Task<Results<NoContent, NotFound>> (IMediator mediator, ClaimsPrincipal user, Guid orderId, Guid containerId, Guid productId) =>
+                        async Task<Results<NoContent, NotFound>> (
+                            IMediator mediator,
+                            ClaimsPrincipal user,
+                            Guid orderId,
+                            Guid containerId,
+                            Guid productId
+                        ) =>
                         {
                             var command = new Command(user, orderId, containerId, productId);
                             var result = await mediator.Send(command);
@@ -56,9 +62,9 @@ namespace Fei.Is.Api.Features.OrderItemContainer.Commands
             public async Task<Result> Handle(Command message, CancellationToken cancellationToken)
             {
                 // Načítame kontajner vrátane jeho položiek a prislúchajúcich produktov
-                var container = await _context.OrderItemContainers
-                    .Include(c => c.Items)
-                        .ThenInclude(oi => oi.Product)
+                var container = await _context
+                    .OrderItemContainers.Include(c => c.Items)
+                    .ThenInclude(oi => oi.Product)
                     .FirstOrDefaultAsync(c => c.Id == message.ContainerId, cancellationToken);
 
                 if (container == null)
@@ -75,14 +81,6 @@ namespace Fei.Is.Api.Features.OrderItemContainer.Commands
 
                 // Zvýšime množstvo objednávkovej položky o 1
                 orderItem.Quantity += 1;
-
-                // Aktualizujeme celkovú kvantitu v kontejnere ako súčet všetkých položiek
-                container.PricePerContainer = container.Items.Sum(oi => oi.Quantity * (oi.Product.PricePerPiecePack ?? 0m));
-                // Ak je definovaná cena za jeden kontajner, prepocítame celkovú cenu
-                if (container.PricePerContainer.HasValue)
-                {
-                    container.TotalPrice = container.Quantity * container.PricePerContainer.Value;
-                }
 
                 // Uložíme zmeny do databázy
                 await _context.SaveChangesAsync(cancellationToken);
