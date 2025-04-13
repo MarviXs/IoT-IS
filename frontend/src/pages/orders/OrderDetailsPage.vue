@@ -2,7 +2,7 @@
   <PageLayout
     :breadcrumbs="[
       { label: t('order.label', 2), to: '/orders' },
-      { label: order?.customerName || 'Order Details', to: `/orders/${orderId}` },
+      { label: order?.customerName || 'Order Details', to: `/orders/${orderId}` }
     ]"
   >
     <template #actions>
@@ -29,8 +29,10 @@
         class="shadow"
         @on-change="getOrderItemContainers(pagination)"
         @open-delete-dialog="openDeleteContainerDialog"
+        @refresh-summary="handleRefreshSummary"
       />
-      <OrderSummaryCard :summary="orderSummary" :orderId="orderId" />
+      <!-- Odovzdávame aj refreshKey pre OrderSummaryCard -->
+      <OrderSummaryCard :summary="orderSummary" :orderId="orderId" :refreshKey="summaryRefreshKey" />
     </template>
   </PageLayout>
   <!-- Delete Container Dialog -->
@@ -54,6 +56,7 @@ import PageLayout from '@/layouts/PageLayout.vue';
 import OrderItemsService, { OrderItemContainersQueryParams } from '@/api/services/OrderItemsService';
 import OrderService from '@/api/services/OrdersService';
 import { PaginationClient, PaginationTable } from '@/models/Pagination';
+import { mdiDownload } from '@quasar/extras/mdi-v7';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -63,6 +66,9 @@ const isLoadingContainers = ref(false);
 const ordersPaginated = ref<any>([]);
 const isDeleteDialogOpen = ref(false);
 const selectedContainerId = ref<string | null>(null);
+
+// Reaktívny kľúč pre refresh súhrnu (OrderSummaryCard)
+const summaryRefreshKey = ref(0);
 
 const pagination = ref<PaginationClient>({
   sortBy: 'name',
@@ -97,13 +103,14 @@ interface OrderSummary {
   total: number;
 }
 
-var orderId = String(Array.isArray(route.params.id) ? route.params.id[0] : route.params.id);
-
+// Predvolený súhrn (nahradzujte podľa potreby alebo načítajte z API)
 const orderSummary = ref<OrderSummary>({
   vat12: { priceExclVAT: 100, vat: 12, priceInclVAT: 112 },
   vat21: { priceExclVAT: 200, vat: 42, priceInclVAT: 242 },
   total: 354,
 });
+
+var orderId = String(Array.isArray(route.params.id) ? route.params.id[0] : route.params.id);
 
 onMounted(() => {
   orderId = String(Array.isArray(route.params.id) ? route.params.id[0] : route.params.id);
@@ -190,6 +197,13 @@ function openDeleteContainerDialog(containerId: string) {
   selectedContainerId.value = containerId;
   isDeleteDialogOpen.value = true;
 }
+
+// Táto metóda sa volá z OrderItemTable, aby osviežila OrderSummaryCard
+function handleRefreshSummary() {
+  summaryRefreshKey.value++;
+}
+  
+const currentOrderId = orderId;
 </script>
 
 <style scoped>

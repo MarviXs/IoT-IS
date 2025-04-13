@@ -92,6 +92,9 @@ namespace Fei.Is.Api.Features.OrderItemContainer.Commands
 
                 await _context.SaveChangesAsync(cancellationToken);
 
+                // Reload kontajnera pre aktualizáciu computed vlastností (napr. TotalPrice)
+                await _context.Entry(container).ReloadAsync(cancellationToken);
+
                 return Result.Ok();
             }
         }

@@ -19,7 +19,7 @@ namespace Fei.Is.Api.Features.OrderItemContainer.Commands
             {
                 app.MapPost(
                         "orders/{orderId:guid}/container/{containerId:guid}/product/{productId:guid}/increase",
-                        async Task<Results<NoContent, NotFound>> (
+                        async Task<Results<NoContent, NotFound>>(
                             IMediator mediator,
                             ClaimsPrincipal user,
                             Guid orderId,
@@ -62,8 +62,8 @@ namespace Fei.Is.Api.Features.OrderItemContainer.Commands
             public async Task<Result> Handle(Command message, CancellationToken cancellationToken)
             {
                 // Načítame kontajner vrátane jeho položiek a prislúchajúcich produktov
-                var container = await _context
-                    .OrderItemContainers.Include(c => c.Items)
+                var container = await _context.OrderItemContainers
+                    .Include(c => c.Items)
                     .ThenInclude(oi => oi.Product)
                     .FirstOrDefaultAsync(c => c.Id == message.ContainerId, cancellationToken);
 
@@ -84,6 +84,9 @@ namespace Fei.Is.Api.Features.OrderItemContainer.Commands
 
                 // Uložíme zmeny do databázy
                 await _context.SaveChangesAsync(cancellationToken);
+
+                // Reload kontajnera pre aktualizáciu computed vlastností (napr. TotalPrice)
+                await _context.Entry(container).ReloadAsync(cancellationToken);
 
                 return Result.Ok();
             }
