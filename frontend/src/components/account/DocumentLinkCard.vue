@@ -39,6 +39,7 @@ import { ref } from 'vue';
 import { QForm, QInput } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import TemplatesService from '@/api/services/TemplatesService';
+import { toast } from 'vue3-toastify';
 
 defineProps({
   documentType: {
@@ -59,8 +60,14 @@ const qform = ref<QForm>();
 const fileInput = ref<HTMLInputElement | null>(null);
 
 const linkRules = [
-  (val: string) => (val && val.length > 0) || t('global.rules.required'),
   (val: string) => {
+    // Nepíš chybu, ak je pole prázdne
+    if (!val) return true;
+    // Inak validuj dĺžku
+    return val.length > 0 || t('global.rules.required');
+  },
+  (val: string) => {
+    if (!val) return true;
     const urlRegex = /^[\w,\s-]+\.[A-Za-z]{3,4}$/;
     return urlRegex.test(val) || t('account.rules.link_invalid');
   },
@@ -83,17 +90,26 @@ function handleFileSelection(event: Event) {
 async function onFileSave() {
   const file = fileInput.value?.files?.[0];
 
+  if (!file) {
+    toast.error('Empty field!');
+    return;
+
+  }
+
   const formData = new FormData();
   formData.append('File', file);
   formData.append('Identifier', '0');
 
-  TemplatesService.updateTemplate(formData)
-    .then(() => {
-      emit('onSubmit', link.value);
-    })
-    .catch((error) => {
-      console.error('Error uploading file:', error);
-    });
+  try {
+    await TemplatesService.updateTemplate(formData);
+    emit('onSubmit', link.value);
+    toast.success('Document updated successfully');
+
+  } catch (error) {
+    console.error('Error uploading file:', error);
+    toast.error('Couldn\'t upload document');
+
+  }
 }
 </script>
 

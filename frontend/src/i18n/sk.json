@@ -107,6 +107,7 @@
     "price_list": "Cenník",
     "offer_sheet": "List ponuky",
     "add_document": "Pridaj dokument",
+    "search_document": "Vyhľadaj",
     "toasts": {
       "get_user_failed": "Načítanie používateľa zlyhalo! | Načítanie používateľov zlyhalo!",
       "email_update_success": "E-mail bol aktualizovaný!",
@@ -534,6 +535,10 @@
     "hours": "Počet hodín",
     "price_per_hour": "Cena za hodinu",
     "price_excl_vat": "Cena bez DPH"
+  },
+  "forecast": {
+    "label": "Forecast | Forecasts",
+    "id": "ID"
   },
   "order_summary": {
     "summary_title": "Sumár objednávky",

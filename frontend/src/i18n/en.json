@@ -110,6 +110,7 @@
     "price_list": "Price list",
     "offer_sheet": "Offer sheet",
     "add_document": "Add document",
+    "search_document": "Search",
     "toasts": {
       "get_user_failed": "Loading user failed! | Loading users failed!",
       "email_update_success": "Email updated!",
@@ -512,6 +513,10 @@
     "edit_company": "Edit Company",
     "delete_company": "Delete Company",
     "delete_company_desc": "Are you sure you want to delete this company?"
+  },
+  "forecast": {
+    "label": "Forecast | Forecasts",
+    "id": "ID"
   },
   "order_summary": {
     "summary_title": "Order Summary",
