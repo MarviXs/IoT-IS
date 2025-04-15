@@ -2,18 +2,8 @@
   <q-form @submit="onSubmit" ref="productForm">
     <q-card-section class="q-pt-none column q-gutter-md">
       <!-- Základné informácie -->
-      <q-input
-        v-model="product.code"
-        class="col-12"
-        :label="t('product.code')"
-        clearable
-      />
-      <q-input
-        v-model="product.pluCode"
-        class="col-12"
-        :label="t('product.pluCode')"
-        clearable
-      />
+      <q-input v-model="product.code" class="col-12" :label="t('product.code')" clearable />
+      <q-input v-model="product.pluCode" class="col-12" :label="t('product.pluCode')" clearable />
       <q-input
         v-model="product.latinName"
         class="col-12"
@@ -21,24 +11,14 @@
         clearable
         :rules="latinNameRules"
       />
-      <q-input
-        v-model="product.czechName"
-        class="col-12"
-        :label="t('product.czech_name')"
-        clearable
-      />
+      <q-input v-model="product.czechName" class="col-12" :label="t('product.czech_name')" clearable />
       <q-input
         v-model="product.flowerLeafDescription"
         class="col-12"
         :label="t('product.flower_leaf_description')"
         clearable
       />
-      <q-input
-        v-model="product.variety"
-        class="col-12"
-        :label="t('product.variety')"
-        clearable
-      />
+      <q-input v-model="product.variety" class="col-12" :label="t('product.variety')" clearable />
 
       <q-input
         v-model="product.potDiameterPack"
@@ -85,16 +65,9 @@
         :label="t('product.additional_details')"
       >
         <!-- Height (cm) -->
-        <q-input
-          v-model="product.heightCm"
-          class="col-12"
-          :label="t('product.height_cm')"
-          clearable
-        >
+        <q-input v-model="product.heightCm" class="col-12" :label="t('product.height_cm')" clearable>
           <template #prepend>
-            <div class="icon-wrapper">
-              <q-img src="/icons/volmary/height-cm.svg" class="icon-img" />
-            </div>
+            <img src="/icons/volmary/height-cm.svg" class="icon-img" />
           </template>
         </q-input>
 
@@ -106,9 +79,7 @@
           clearable
         >
           <template #prepend>
-            <div class="icon-wrapper">
-              <q-img src="/icons/volmary/seed-requirement-per-1000-plants.svg" class="icon-img" />
-            </div>
+            <img src="/icons/volmary/seed-requirement-per-1000-plants.svg" class="icon-img" />
           </template>
         </q-input>
 
@@ -120,23 +91,14 @@
           clearable
         >
           <template #prepend>
-            <div class="icon-wrapper">
-              <q-img src="/icons/volmary/seed-requirement-per-1000-pots.svg" class="icon-img" />
-            </div>
+            <img src="/icons/volmary/seed-requirement-per-1000-pots.svg" class="icon-img" />
           </template>
         </q-input>
 
         <!-- Sowing Period -->
-        <q-input
-          v-model="product.sowingPeriod"
-          class="col-12"
-          :label="t('product.sowing_period')"
-          clearable
-        >
+        <q-input v-model="product.sowingPeriod" class="col-12" :label="t('product.sowing_period')" clearable>
           <template #prepend>
-            <div class="icon-wrapper">
-              <q-img src="/icons/volmary/sowing-period-month.svg" class="icon-img" />
-            </div>
+            <img src="/icons/volmary/sowing-period-month.svg" class="icon-img" />
           </template>
         </q-input>
 
@@ -148,9 +110,7 @@
           clearable
         >
           <template #prepend>
-            <div class="icon-wrapper">
-              <q-img src="/icons/volmary/germination-temperature-c.svg" class="icon-img" />
-            </div>
+            <img src="/icons/volmary/germination-temperature-c.svg" class="icon-img" />
           </template>
         </q-input>
 
@@ -162,9 +122,7 @@
           clearable
         >
           <template #prepend>
-            <div class="icon-wrapper">
-              <q-img src="/icons/volmary/germination-time-days.svg" class="icon-img" />
-            </div>
+            <img src="/icons/volmary/germination-time-days.svg" class="icon-img" />
           </template>
         </q-input>
 
@@ -176,37 +134,21 @@
           clearable
         >
           <template #prepend>
-            <div class="icon-wrapper">
-              <q-img src="/icons/volmary/cultivation-time-from-sowing-to-young-plants-weeks.svg" class="icon-img" />
-            </div>
+            <img src="/icons/volmary/cultivation-time-from-sowing-to-young-plants-weeks.svg" class="icon-img" />
           </template>
         </q-input>
 
         <!-- Seeds (Mio/Ha) -->
-        <q-input
-          v-model="product.seedsMioHa"
-          class="col-12"
-          :label="t('product.seeds_mio_ha')"
-          clearable
-        >
+        <q-input v-model="product.seedsMioHa" class="col-12" :label="t('product.seeds_mio_ha')" clearable>
           <template #prepend>
-            <div class="icon-wrapper">
-              <q-img src="/icons/volmary/seed-requirement-per-ha.svg" class="icon-img" />
-            </div>
+            <img src="/icons/volmary/seed-requirement-per-ha.svg" class="icon-img" />
           </template>
         </q-input>
 
         <!-- Seed Spacing (cm) -->
-        <q-input
-          v-model="product.seedSpacingCM"
-          class="col-12"
-          :label="t('product.seed_spacing_cm')"
-          clearable
-        >
+        <q-input v-model="product.seedSpacingCM" class="col-12" :label="t('product.seed_spacing_cm')" clearable>
           <template #prepend>
-            <div class="icon-wrapper">
-              <q-img src="/icons/volmary/seed-spacing.svg" class="icon-img" />
-            </div>
+            <img src="/icons/volmary/seed-spacing.svg" class="icon-img" />
           </template>
         </q-input>
 
@@ -218,9 +160,7 @@
           clearable
         >
           <template #prepend>
-            <div class="icon-wrapper">
-              <q-img src="/icons/volmary/cultivation-time-for-vegetables-weeks.svg" class="icon-img" />
-            </div>
+            <img src="/icons/volmary/cultivation-time-for-vegetables-weeks.svg" class="icon-img" />
           </template>
         </q-input>
 
@@ -232,9 +172,7 @@
           clearable
         >
           <template #prepend>
-            <div class="icon-wrapper">
-              <q-img src="/icons/volmary/bulb-planting-requirement-sqm.svg" class="icon-img" />
-            </div>
+            <img src="/icons/volmary/bulb-planting-requirement-sqm.svg" class="icon-img" />
           </template>
         </q-input>
 
@@ -246,9 +184,7 @@
           clearable
         >
           <template #prepend>
-            <div class="icon-wrapper">
-              <q-img src="/icons/volmary/bulb-planting-period-month.svg" class="icon-img" />
-            </div>
+            <img src="/icons/volmary/bulb-planting-period-month.svg" class="icon-img" />
           </template>
         </q-input>
 
@@ -260,9 +196,7 @@
           clearable
         >
           <template #prepend>
-            <div class="icon-wrapper">
-              <q-img src="/icons/volmary/bulb-planting-distance-cm.svg" class="icon-img" />
-            </div>
+            <img src="/icons/volmary/bulb-planting-distance-cm.svg" class="icon-img" />
           </template>
         </q-input>
 
@@ -274,9 +208,7 @@
           clearable
         >
           <template #prepend>
-            <div class="icon-wrapper">
-              <q-img src="/icons/volmary/cultivation-time-for-bulbs-weeks.svg" class="icon-img" />
-            </div>
+            <img src="/icons/volmary/cultivation-time-for-bulbs-weeks.svg" class="icon-img" />
           </template>
         </q-input>
 
@@ -288,37 +220,21 @@
           clearable
         >
           <template #prepend>
-            <div class="icon-wrapper">
-              <q-img src="/icons/volmary/number-of-bulbs-per-pot.svg" class="icon-img" />
-            </div>
+            <img src="/icons/volmary/number-of-bulbs-per-pot.svg" class="icon-img" />
           </template>
         </q-input>
 
         <!-- Plant Spacing (cm) -->
-        <q-input
-          v-model="product.plantSpacingCm"
-          class="col-12"
-          :label="t('product.plant_spacing_cm')"
-          clearable
-        >
+        <q-input v-model="product.plantSpacingCm" class="col-12" :label="t('product.plant_spacing_cm')" clearable>
           <template #prepend>
-            <div class="icon-wrapper">
-              <q-img src="/icons/volmary/plant-spacing-in-cm.svg" class="icon-img" />
-            </div>
+            <img src="/icons/volmary/plant-spacing-in-cm.svg" class="icon-img" />
           </template>
         </q-input>
 
         <!-- Pot Size (cm) -->
-        <q-input
-          v-model="product.potSizeCm"
-          class="col-12"
-          :label="t('product.pot_size_cm')"
-          clearable
-        >
+        <q-input v-model="product.potSizeCm" class="col-12" :label="t('product.pot_size_cm')" clearable>
           <template #prepend>
-            <div class="icon-wrapper">
-              <q-img src="/icons/volmary/pot-size-cm.svg" class="icon-img" />
-            </div>
+            <img src="/icons/volmary/pot-size-cm.svg" class="icon-img" />
           </template>
         </q-input>
 
@@ -330,9 +246,7 @@
           clearable
         >
           <template #prepend>
-            <div class="icon-wrapper">
-              <q-img src="/icons/volmary/cultivation-time-from-young-plant-weeks.svg" class="icon-img" />
-            </div>
+            <img src="/icons/volmary/cultivation-time-from-young-plant-weeks.svg" class="icon-img" />
           </template>
         </q-input>
 
@@ -344,9 +258,7 @@
           clearable
         >
           <template #prepend>
-            <div class="icon-wrapper">
-              <q-img src="/icons/volmary/cultivation-temperature-c.svg" class="icon-img" />
-            </div>
+            <img src="/icons/volmary/cultivation-temperature-c.svg" class="icon-img" />
           </template>
         </q-input>
 
@@ -358,32 +270,21 @@
           clearable
         >
           <template #prepend>
-            <div class="icon-wrapper">
-              <q-img src="/icons/volmary/natural-flowering-time-months.svg" class="icon-img" />
-            </div>
+            <img src="/icons/volmary/natural-flowering-time-months.svg" class="icon-img" />
           </template>
         </q-input>
 
         <!-- Planting Density -->
-        <q-input
-          v-model="product.plantingDensity"
-          class="col-12"
-          :label="t('product.planting_density')"
-          clearable
-        >
+        <q-input v-model="product.plantingDensity" class="col-12" :label="t('product.planting_density')" clearable>
           <template #prepend>
-            <div class="icon-wrapper">
-              <q-img src="/icons/volmary/planting-density.svg" class="icon-img" />
-            </div>
+            <img src="/icons/volmary/planting-density.svg" class="icon-img" />
           </template>
         </q-input>
 
         <!-- Checkboxy pre booleovské vlastnosti -->
         <div class="q-mt-md">
           <div class="row items-center q-mb-sm">
-            <div class="icon-wrapper" style="margin-right:8px;">
-              <q-img src="/icons/volmary/flowering-in-first-year.svg" class="icon-img" />
-            </div>
+            <img src="/icons/volmary/flowering-in-first-year.svg" class="icon-img" style="margin-right: 8px" />
             <q-checkbox
               v-model="product.flowersInFirstYear"
               :label="t('product.flowers_in_first_year')"
@@ -391,9 +292,7 @@
             />
           </div>
           <div class="row items-center">
-            <div class="icon-wrapper" style="margin-right:8px;">
-              <q-img src="/icons/volmary/use-of-growth-inhibitors.svg" class="icon-img" />
-            </div>
+            <img src="/icons/volmary/use-of-growth-inhibitors.svg" class="icon-img" style="margin-right: 8px" />
             <q-checkbox
               v-model="product.growthInhibitorsUsed"
               :label="t('product.growth_inhibitors_used')"
@@ -471,7 +370,7 @@ const props = defineProps<{
   loading?: boolean;
 }>();
 
-const emit = defineEmits(["onSubmit"]);
+const emit = defineEmits(['onSubmit']);
 const { t } = useI18n();
 
 const product = defineModel<ProductFormData>({
@@ -512,8 +411,8 @@ const product = defineModel<ProductFormData>({
     naturalFloweringMonth: '',
     flowersInFirstYear: false,
     growthInhibitorsUsed: false,
-    plantingDensity: ''
-  })
+    plantingDensity: '',
+  }),
 });
 
 const isAdditionalOpen = ref(false);
@@ -523,24 +422,16 @@ function onSubmit() {
   if (!productForm.value?.validate()) {
     return;
   }
-  emit("onSubmit");
+  emit('onSubmit');
 }
 
-const latinNameRules = [(val: string) => (val && val.length > 0) || t("global.rules.required")];
+const latinNameRules = [(val: string) => (val && val.length > 0) || t('global.rules.required')];
 </script>
 
 <style scoped>
-.icon-wrapper {
+.icon-img {
   width: 32px;
   height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.icon-img {
-  max-width: 100%;
-  max-height: 100%;
   object-fit: contain;
 }
 </style>
