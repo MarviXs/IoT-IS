@@ -1,0 +1,201 @@
+{
+  "version": "1.0",
+  "templateData": {
+    "deviceType": "NuviaMSU",
+    "sensors": [
+      {
+        "tag": "dp1",
+        "name": "DP1",
+        "unit": "µSv/h",
+        "accuracyDecimals": 2,
+        "group": "Operator"
+      },
+      {
+        "tag": "currentDP1",
+        "name": "CurrentDP1",
+        "unit": "µSv/h",
+        "accuracyDecimals": 2,
+        "group": "Operator"
+      },
+      {
+        "tag": "cps1",
+        "name": "CPS1",
+        "unit": "cps [60s]",
+        "accuracyDecimals": 2,
+        "group": "Operator"
+      },
+      {
+        "tag": "currentCPS1",
+        "name": "CurrentCPS1",
+        "unit": "cps",
+        "accuracyDecimals": 2,
+        "group": "Operator"
+      },
+      {
+        "tag": "dp2",
+        "name": "DP2",
+        "unit": "µSv/h",
+        "accuracyDecimals": 2,
+        "group": "B klub"
+      },
+      {
+        "tag": "currentDP2",
+        "name": "CurrentDP2",
+        "unit": "µSv/h",
+        "accuracyDecimals": 2,
+        "group": "B klub"
+      },
+      {
+        "tag": "cps2",
+        "name": "CPS2",
+        "unit": "cps [60s]",
+        "accuracyDecimals": 2,
+        "group": "B klub"
+      },
+      {
+        "tag": "currentCPS2",
+        "name": "CurrentCPS2",
+        "unit": "cps [60s]",
+        "accuracyDecimals": 2,
+        "group": "B klub"
+      },
+      {
+        "tag": "dp3",
+        "name": "DP3",
+        "unit": "µSv/h",
+        "accuracyDecimals": 2,
+        "group": "Radon"
+      },
+      {
+        "tag": "currentDP3",
+        "name": "CurrentDP3",
+        "unit": "µSv/h",
+        "accuracyDecimals": 2,
+        "group": "Radon"
+      },
+      {
+        "tag": "cps3",
+        "name": "CPS3",
+        "unit": "cps [60s]",
+        "accuracyDecimals": 2,
+        "group": "Radon"
+      },
+      {
+        "tag": "currentCPS3",
+        "name": "CurrentCPS3",
+        "unit": "cps [60s]",
+        "accuracyDecimals": 2,
+        "group": "Radon"
+      },
+      {
+        "tag": "dp4",
+        "name": "DP4",
+        "unit": "µSv/h",
+        "accuracyDecimals": 2,
+        "group": "Brana"
+      },
+      {
+        "tag": "currentDP4",
+        "name": "CurrentDP4",
+        "unit": "µSv/h",
+        "accuracyDecimals": 2,
+        "group": "Brana"
+      },
+      {
+        "tag": "cps4",
+        "name": "CPS4",
+        "unit": "cps [60s]",
+        "accuracyDecimals": 2,
+        "group": "Brana"
+      },
+      {
+        "tag": "currentCPS4",
+        "name": "CurrentCPS4",
+        "unit": "cps",
+        "accuracyDecimals": 2,
+        "group": "Brana"
+      },
+      {
+        "tag": "dp5",
+        "name": "DP5",
+        "unit": "µSv/h",
+        "accuracyDecimals": 2,
+        "group": "Kocka"
+      },
+      {
+        "tag": "currentDP5",
+        "name": "CurrentDP5",
+        "unit": "µSv/h",
+        "accuracyDecimals": 2,
+        "group": "Kocka"
+      },
+      {
+        "tag": "cps5",
+        "name": "CPS5",
+        "unit": "cps [60s]",
+        "accuracyDecimals": 2,
+        "group": "Kocka"
+      },
+      {
+        "tag": "currentCPS5",
+        "name": "CurrentCPS5",
+        "unit": "cps",
+        "accuracyDecimals": 2,
+        "group": "Kocka"
+      }
+    ],
+    "commands": [
+      {
+        "displayName": "Measure Channel 1",
+        "name": "cmGetDetector",
+        "params": [0]
+      },
+      {
+        "displayName": "Measure Channel 2",
+        "name": "cmGetDetector",
+        "params": [1]
+      },
+      {
+        "displayName": "Measure Channel 3",
+        "name": "cmGetDetector",
+        "params": [2]
+      },
+      {
+        "displayName": "Measure Channel 4",
+        "name": "cmGetDetector",
+        "params": [3]
+      },
+      {
+        "displayName": "Measure Channel 5",
+        "name": "cmGetDetector",
+        "params": [4]
+      },
+      {
+        "displayName": "Reset All Channels",
+        "name": "cmResetAllDetectors",
+        "params": []
+      },
+
+      {
+        "displayName": "Sleep 1 second",
+        "name": "sleep",
+        "params": [1]
+      },
+      {
+        "displayName": "Sleep 5 seconds",
+        "name": "sleep",
+        "params": [5]
+      },
+      {
+        "displayName": "Sleep 30 seconds",
+        "name": "sleep",
+        "params": [30]
+      },
+      {
+        "displayName": "Sleep 1 minute",
+        "name": "sleep",
+        "params": [60]
+      }
+    ]
+  }
+}

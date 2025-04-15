@@ -15,7 +15,7 @@ namespace Fei.Is.Api.Features.DeviceTemplates.Commands;
 
 public static class UpdateDeviceTemplate
 {
-    public record Request(string Name);
+    public record Request(string Name, DeviceType DeviceType = DeviceType.Generic);
 
     public sealed class Endpoint : ICarterModule
     {
@@ -83,6 +83,7 @@ public static class UpdateDeviceTemplate
             }
 
             deviceTemplate.Name = message.Request.Name;
+            deviceTemplate.DeviceType = message.Request.DeviceType;
 
             try
             {
