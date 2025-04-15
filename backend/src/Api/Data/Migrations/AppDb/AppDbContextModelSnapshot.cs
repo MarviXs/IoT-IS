@@ -779,6 +779,15 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("BulbPlantingDistanceCm")
+                        .HasColumnType("text");
+
+                    b.Property<string>("BulbPlantingPeriod")
+                        .HasColumnType("text");
+
+                    b.Property<string>("BulbPlantingRequirementSqM")
+                        .HasColumnType("text");
+
                     b.Property<Guid>("CategoryId")
                         .HasColumnType("uuid");
 
@@ -789,6 +798,21 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("CultivationTemperatureC")
+                        .HasColumnType("text");
+
+                    b.Property<string>("CultivationTimeForBulbsWeeks")
+                        .HasColumnType("text");
+
+                    b.Property<string>("CultivationTimeFromYoungPlant")
+                        .HasColumnType("text");
+
+                    b.Property<string>("CultivationTimeSowingToPlant")
+                        .HasColumnType("text");
+
+                    b.Property<string>("CultivationTimeVegetableWeek")
+                        .HasColumnType("text");
+
                     b.Property<string>("CzechName")
                         .HasColumnType("text");
 
@@ -798,15 +822,45 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.Property<string>("FlowerLeafDescription")
                         .HasColumnType("text");
 
+                    b.Property<bool?>("FlowersInFirstYear")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("GerminationTemperatureC")
+                        .HasColumnType("text");
+
+                    b.Property<string>("GerminationTimeDays")
+                        .HasColumnType("text");
+
+                    b.Property<bool?>("GrowthInhibitorsUsed")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("HeightCm")
+                        .HasColumnType("text");
+
                     b.Property<string>("LatinName")
                         .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("NaturalFloweringMonth")
+                        .HasColumnType("text");
+
+                    b.Property<string>("NumberOfBulbsPerPot")
                         .HasColumnType("text");
 
                     b.Property<string>("PLUCode")
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("PlantSpacingCm")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PlantingDensity")
+                        .HasColumnType("text");
+
                     b.Property<string>("PotDiameterPack")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PotSizeCm")
                         .HasColumnType("text");
 
                     b.Property<decimal?>("PricePerPiecePack")
@@ -814,6 +868,21 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.Property<decimal?>("RetailPrice")
                         .HasColumnType("numeric");
+
+                    b.Property<string>("SeedSpacingCM")
+                        .HasColumnType("text");
+
+                    b.Property<string>("SeedsMioHa")
+                        .HasColumnType("text");
+
+                    b.Property<string>("SeedsPerThousandPlants")
+                        .HasColumnType("text");
+
+                    b.Property<string>("SeedsPerThousandPots")
+                        .HasColumnType("text");
+
+                    b.Property<string>("SowingPeriod")
+                        .HasColumnType("text");
 
                     b.Property<Guid>("SupplierId")
                         .HasColumnType("uuid");
@@ -992,6 +1061,34 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.HasKey("Key");
 
                     b.ToTable("SystemSettings", (string)null);
+                });
+
+            modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.UserFile", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("FileIdentifier")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("LocalFileName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("OriginalFileName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserFiles");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.VATCategory", b =>
@@ -1788,7 +1885,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                         .IsRequired();
 
                     b.HasOne("Fei.Is.Api.Data.Models.InformationSystem.VATCategory", "VATCategory")
-                        .WithMany("Products")
+                        .WithMany()
                         .HasForeignKey("VATCategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -2115,11 +2212,6 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.OrderItemContainer", b =>
                 {
                     b.Navigation("Items");
-                });
-
-            modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.VATCategory", b =>
-                {
-                    b.Navigation("Products");
                 });
 
             modelBuilder.Entity("Fei.Is.Api.Data.Models.InformationSystem.WorkReport", b =>

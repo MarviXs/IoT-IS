@@ -331,7 +331,31 @@
       "update_failed": "Aktualizácia produktu zlyhala!",
       "delete_success": "Produkt bol odstránený!",
       "delete_failed": "Odstránenie produktu zlyhalo!"
-    }
+    },
+    "height_cm": "Výška (cm)",
+    "seeds_per_thousand_plants": "Počet semien na 1000 rastlín",
+    "seeds_per_thousand_pots": "Počet semien na 1000 kvetináčov",
+    "sowing_period": "Obdobie výsevu",
+    "germination_temperature_c": "Teplota klíčenia (°C)",
+    "germination_time_days": "Doba klíčenia (dni)",
+    "cultivation_time_sowing_to_plant": "Doba kultivácie od výsevu do rastliny",
+    "seeds_mio_ha": "Semien (miliónov/ha)",
+    "seed_spacing_cm": "Rozstup semien (cm)",
+    "cultivation_time_vegetable_week": "Doba kultivácie zeleniny (týždne)",
+    "bulb_planting_requirement_sq_m": "Požiadavka na výsadbu cibúľ (m²)",
+    "bulb_planting_period": "Obdobie výsadby cibúľ",
+    "bulb_planting_distance_cm": "Rozstup pri výsadbe cibúľ (cm)",
+    "cultivation_time_for_bulbs_weeks": "Doba kultivácie cibúľ (týždne)",
+    "number_of_bulbs_per_pot": "Počet cibúľ na kvetináč",
+    "plant_spacing_cm": "Rozostup rastlín (cm)",
+    "pot_size_cm": "Veľkosť kvetináča (cm)",
+    "cultivation_time_from_young_plant": "Doba kultivácie od mladej rastliny",
+    "cultivation_temperature_c": "Teplota kultivácie (°C)",
+    "natural_flowering_month": "Pôvodny mesiac kvitnutia",
+    "flowers_in_first_year": "Kvety už prvý rok",
+    "growth_inhibitors_used": "Použité inhibítory rastu",
+    "planting_density": "Hustota výsadby",
+    "additional_details": "Dodatočné detaily"
   },
   "product_category": {
     "label": "Kategória"

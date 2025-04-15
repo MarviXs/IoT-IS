@@ -7,75 +7,96 @@
 
     <q-separator />
 
-    <!-- Sekcia so súhrnnými údajmi -->
-    <q-card-section class="summary-section">
-      <div class="summary-grid">
-        <!-- Prvý riadok: názvy stĺpcov pre hodnoty -->
-        <div class="summary-cell header-label"></div>
-        <div class="summary-cell header-value">{{ t('order_summary.price_excl_vat_label') }}</div>
-        <div class="summary-cell header-value">{{ t('order_summary.vat_label') }}</div>
-        <div class="summary-cell header-value">{{ t('order_summary.price_incl_vat_label') }}</div>
+    <!-- Obsah súhrnu v prechodovom elemente -->
+    <q-slide-transition>
+      <div v-show="isSummaryOpen">
+        <q-card-section class="summary-section">
+          <div class="summary-grid">
+            <!-- Prvý riadok: názvy stĺpcov pre hodnoty -->
+            <div class="summary-cell header-label"></div>
+            <div class="summary-cell header-value">{{ t('order_summary.price_excl_vat_label') }}</div>
+            <div class="summary-cell header-value">{{ t('order_summary.vat_label') }}</div>
+            <div class="summary-cell header-value">{{ t('order_summary.price_incl_vat_label') }}</div>
 
-        <!-- Druhý riadok pre DPH 12 % (vatReduced) -->
-        <div class="summary-cell summary-label">{{ t('order_summary.vat_rate_12') }}</div>
-        <div class="summary-cell summary-value">{{ summary.vatReduced.priceExcVat }}</div>
-        <div class="summary-cell summary-value">{{ summary.vatReduced.vat }}</div>
-        <div class="summary-cell summary-value">{{ summary.vatReduced.priceInclVat }}</div>
+            <!-- Druhý riadok pre DPH 12 % (vatReduced) -->
+            <div class="summary-cell summary-label">{{ t('order_summary.vat_rate_12') }}</div>
+            <div class="summary-cell summary-value">{{ summary.vatReduced.priceExcVat }}</div>
+            <div class="summary-cell summary-value">{{ summary.vatReduced.vat }}</div>
+            <div class="summary-cell summary-value">{{ summary.vatReduced.priceInclVat }}</div>
 
-        <!-- Tretí riadok pre DPH 21 % (vatNormal) -->
-        <div class="summary-cell summary-label">{{ t('order_summary.vat_rate_21') }}</div>
-        <div class="summary-cell summary-value">{{ summary.vatNormal.priceExcVat }}</div>
-        <div class="summary-cell summary-value">{{ summary.vatNormal.vat }}</div>
-        <div class="summary-cell summary-value">{{ summary.vatNormal.priceInclVat }}</div>
+            <!-- Tretí riadok pre DPH 21 % (vatNormal) -->
+            <div class="summary-cell summary-label">{{ t('order_summary.vat_rate_21') }}</div>
+            <div class="summary-cell summary-value">{{ summary.vatNormal.priceExcVat }}</div>
+            <div class="summary-cell summary-value">{{ summary.vatNormal.vat }}</div>
+            <div class="summary-cell summary-value">{{ summary.vatNormal.priceInclVat }}</div>
 
-        <!-- Štvrtý riadok pre celkovú sumu -->
-        <div class="summary-cell summary-label total" style="grid-column: span 3">
-          {{ t('order_summary.total') }}
-        </div>
-        <div class="summary-cell summary-value total">
-          {{ summary.total }}
-        </div>
+            <!-- Štvrtý riadok pre celkovú sumu -->
+            <div class="summary-cell summary-label total" style="grid-column: span 3">
+              {{ t('order_summary.total') }}
+            </div>
+            <div class="summary-cell summary-value total">
+              {{ summary.total }}
+            </div>
+          </div>
+        </q-card-section>
       </div>
-    </q-card-section>
+    </q-slide-transition>
+
+    <!-- Pätička karty s toggle tlačidlom, zníženým paddingom -->
+    <q-card-actions class="small-actions" align="center">
+      <q-btn
+        flat
+        round
+        size="sm"
+        :icon="isSummaryOpen ? mdiChevronUp : mdiChevronDown"
+        color="grey-color"
+        @click="toggleSummary"
+      />
+    </q-card-actions>
   </q-card>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, watch, defineExpose } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { mdiChevronUp, mdiChevronDown } from '@quasar/extras/mdi-v7';
 import OrdersService from '@/api/services/OrdersService';
 
+// Aktualizovaná definícia typu pre props:
+interface Props {
+  orderId: string;
+  refreshKey: number;
+}
+
+const props = defineProps<Props>();
 const { t } = useI18n();
 
-// Definícia typu pre VAT sumár
+// Inicializácia summary s predvolenými hodnotami
 interface VatSummary {
   priceExcVat: number;
   vat: number;
   priceInclVat: number;
 }
 
-// Definícia typu pre súhrn objednávky
 interface OrderSummary {
   vatReduced: VatSummary;
   vatNormal: VatSummary;
   total: number;
 }
 
-// Očakávame, že do komponentu bude poslané orderId
-interface Props {
-  orderId: string;
-}
-
-const props = defineProps<Props>();
-
-// Inicializácia summary s predvolenými hodnotami
 const summary = ref<OrderSummary>({
   vatReduced: { priceExcVat: 0, vat: 0, priceInclVat: 0 },
   vatNormal: { priceExcVat: 0, vat: 0, priceInclVat: 0 },
   total: 0,
 });
 
-// Funkcia pre načítanie súhrnu objednávky z API
+// Riadi zobrazenie obsahu súhrnu
+const isSummaryOpen = ref(true);
+
+function toggleSummary() {
+  isSummaryOpen.value = !isSummaryOpen.value;
+}
+
 async function loadSummary() {
   try {
     const response = await OrdersService.getSummary(props.orderId) as { data: OrderSummary };
@@ -92,13 +113,17 @@ defineExpose({
   getSummary: loadSummary,
 });
 
-// Pri prvom načítaní komponentu
+// Načítať summary pri mount a keď sa zmení orderId
 onMounted(() => {
   loadSummary();
 });
 
-// Ak sa zmení orderId, znovu načítame súhrn
 watch(() => props.orderId, () => {
+  loadSummary();
+});
+
+// Pridáme watcher pre refreshKey; keď sa refreshKey zmení, načíta sa summary znovu.
+watch(() => props.refreshKey, () => {
   loadSummary();
 });
 </script>
@@ -114,9 +139,18 @@ watch(() => props.orderId, () => {
 }
 
 .header-section {
-  padding: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
   background-color: #f5f5f5;
   border-bottom: 1px solid #ddd;
+}
+
+.text-h6 {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #333;
 }
 
 .summary-section {
@@ -136,7 +170,8 @@ watch(() => props.orderId, () => {
   font-size: 0.9em;
 }
 
-.header-label, .header-value {
+.header-label,
+.header-value {
   font-weight: bold;
   color: #333;
 }
@@ -161,5 +196,10 @@ watch(() => props.orderId, () => {
 .total {
   font-size: 1em;
   font-weight: bold;
+}
+
+/* Trieda pre redukovaný padding v pätičke */
+.small-actions {
+  padding: 4px !important;
 }
 </style>

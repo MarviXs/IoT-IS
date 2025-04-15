@@ -18,9 +18,10 @@ import ProductService, { CreateProductParams } from '@/api/services/ProductServi
 
 const isDialogOpen = defineModel<boolean>();
 const emit = defineEmits(['onCreate']);
-
 const { t } = useI18n();
 
+// Rozšírený interface pre produkt, vrátane nových vlastností
+// Uistite sa, že tento interface (ProductFormData) je rovnaký, aký používate v ProductForm.vue
 const product = ref<ProductFormData>({
   code: '',
   pluCode: undefined,
@@ -35,12 +36,37 @@ const product = ref<ProductFormData>({
   category: undefined,
   supplier: undefined,
   vatCategory: undefined,
+  // Nové vlastnosti – predvolené hodnoty (pre text sú prázdny reťazec, pre booleans false)
+  heightCm: '',
+  seedsPerThousandPlants: '',
+  seedsPerThousandPots: '',
+  sowingPeriod: '',
+  germinationTemperatureC: '',
+  germinationTimeDays: '',
+  cultivationTimeSowingToPlant: '',
+  seedsMioHa: '',
+  seedSpacingCM: '',
+  cultivationTimeVegetableWeek: '',
+  bulbPlantingRequirementSqM: '',
+  bulbPlantingPeriod: '',
+  bulbPlantingDistanceCm: '',
+  cultivationTimeForBulbsWeeks: '',
+  numberOfBulbsPerPot: '',
+  plantSpacingCm: '',
+  potSizeCm: '',
+  cultivationTimeFromYoungPlant: '',
+  cultivationTemperatureC: '',
+  naturalFloweringMonth: '',
+  flowersInFirstYear: false,
+  growthInhibitorsUsed: false,
+  plantingDensity: ''
 });
-const productForm = ref();
 
+const productForm = ref();
 const creatingProduct = ref(false);
 
 async function createProduct() {
+  // Vytvoríme CreateProductParams vrátane nových polí
   const createRequest: CreateProductParams = {
     code: product.value.code!,
     pluCode: product.value.pluCode,
@@ -55,6 +81,30 @@ async function createProduct() {
     categoryId: product.value.category?.id!,
     vatCategoryId: product.value.vatCategory?.id!,
     supplierId: product.value.supplier?.id!,
+    // Nové vlastnosti:
+    heightCm: product.value.heightCm,
+    seedsPerThousandPlants: product.value.seedsPerThousandPlants,
+    seedsPerThousandPots: product.value.seedsPerThousandPots,
+    sowingPeriod: product.value.sowingPeriod,
+    germinationTemperatureC: product.value.germinationTemperatureC,
+    germinationTimeDays: product.value.germinationTimeDays,
+    cultivationTimeSowingToPlant: product.value.cultivationTimeSowingToPlant,
+    seedsMioHa: product.value.seedsMioHa,
+    seedSpacingCM: product.value.seedSpacingCM,
+    cultivationTimeVegetableWeek: product.value.cultivationTimeVegetableWeek,
+    bulbPlantingRequirementSqM: product.value.bulbPlantingRequirementSqM,
+    bulbPlantingPeriod: product.value.bulbPlantingPeriod,
+    bulbPlantingDistanceCm: product.value.bulbPlantingDistanceCm,
+    cultivationTimeForBulbsWeeks: product.value.cultivationTimeForBulbsWeeks,
+    numberOfBulbsPerPot: product.value.numberOfBulbsPerPot,
+    plantSpacingCm: product.value.plantSpacingCm,
+    potSizeCm: product.value.potSizeCm,
+    cultivationTimeFromYoungPlant: product.value.cultivationTimeFromYoungPlant,
+    cultivationTemperatureC: product.value.cultivationTemperatureC,
+    naturalFloweringMonth: product.value.naturalFloweringMonth,
+    flowersInFirstYear: product.value.flowersInFirstYear,
+    growthInhibitorsUsed: product.value.growthInhibitorsUsed,
+    plantingDensity: product.value.plantingDensity
   };
 
   creatingProduct.value = true;
@@ -68,7 +118,6 @@ async function createProduct() {
 
   emit('onCreate', data);
   isDialogOpen.value = false;
-
   toast.success(t('device.toasts.create_success'));
 }
 </script>

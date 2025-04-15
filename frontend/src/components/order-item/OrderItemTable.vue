@@ -31,9 +31,6 @@
               <q-btn flat round size="sm" :icon="mdiPlusBox" color="grey-color" @click="openAddItemDialog(props.row.id)">
                 <q-tooltip>{{ $t('order_item.add_item') }}</q-tooltip>
               </q-btn>
-              <q-btn flat round size="sm" :icon="mdiPencil" color="grey-color" @click.stop="openUpdateDialog(props.row.id)">
-                <q-tooltip>{{ $t('global.edit') }}</q-tooltip>
-              </q-btn>
               <q-btn flat round size="sm" :icon="mdiTrashCan" color="grey-color" @click.stop="openDeleteDialog(props.row.id)">
                 <q-tooltip>{{ $t('global.delete') }}</q-tooltip>
               </q-btn>
@@ -195,6 +192,7 @@ export default {
         await OrderItemsService.increaseContainerQuantity(this.currentOrderId, containerId);
         toast.success(this.$t('container.toasts.increase_success'));
         this.refreshTable();
+        this.$emit('refresh-summary');
       } catch (error) {
         console.error('Error increasing quantity:', error);
         toast.error(this.$t('container.toasts.increase_error'));
@@ -207,6 +205,7 @@ export default {
           await OrderItemsService.decreaseContainerQuantity(this.currentOrderId, containerId);
           toast.success(this.$t('container.toasts.decrease_success'));
           this.refreshTable();
+          this.$emit('refresh-summary');
         } else {
           toast.error(this.$t('container.toasts.minimum_quantity'));
         }
@@ -219,11 +218,13 @@ export default {
       this.selectedContainerId = containerId;
       this.isAddItemDialogOpen = true;
       this.refreshTable();
+      this.$emit('refresh-summary');
     },
     handleItemCreated() {
       this.isAddItemDialogOpen = false;
       this.currentOrderId = null;
       this.refreshTable();
+      this.$emit('refresh-summary');
     },
     openUpdateDialog(containerId) {
       alert(this.$t('global.edit'));
@@ -237,6 +238,7 @@ export default {
       this.isDeleteDialogOpen = false;
       this.$emit('onChange');
       this.refreshTable();
+      this.$emit('refresh-summary');
     },
     async increaseProductQuantity(containerId, product) {
       try {
@@ -251,6 +253,7 @@ export default {
         await OrderItemsService.increaseProductQuantity(this.currentOrderId, container.id, item.id);
         toast.success(this.$t('container.toasts.increase_success'));
         this.refreshTable();
+        this.$emit('refresh-summary');
       } catch (error) {
         console.error('Error increasing product quantity:', error);
         toast.error(this.$t('container.toasts.increase_error'));
@@ -269,6 +272,7 @@ export default {
         await OrderItemsService.decreaseProductQuantity(this.currentOrderId, container.id, item.id);
         toast.success(this.$t('container.toasts.decrease_success'));
         this.refreshTable();
+        this.$emit('refresh-summary');
       } catch (error) {
         console.error('Error decreasing product quantity:', error);
         toast.error(this.$t('container.toasts.decrease_error'));

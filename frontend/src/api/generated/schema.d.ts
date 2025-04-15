@@ -388,25 +388,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/products/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get a product by PLUCode */
-        get: operations["GetProductById"];
-        /** Update a product */
-        put: operations["UpdateProduct"];
-        post?: never;
-        /** Delete a product */
-        delete: operations["DeleteProduct"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/device-templates/{id}": {
         parameters: {
             query?: never;
@@ -1079,6 +1060,25 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/products/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a product by id */
+        get: operations["GetProductById"];
+        /** Update a product */
+        put: operations["UpdateProduct"];
+        post?: never;
+        /** Delete a product */
+        delete: operations["DeleteProduct"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/products": {
         parameters: {
             query?: never;
@@ -1310,6 +1310,23 @@ export interface paths {
         /** Get a supplier by Id */
         get: operations["GetSupplierById"];
         put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/templates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Update an document template */
+        put: operations["UpdateTemplate"];
         post?: never;
         delete?: never;
         options?: never;
@@ -1566,6 +1583,11 @@ export interface components {
         "Fei.Is.Api.Data.Enums.Role": "Admin" | "User";
         /** @enum {string} */
         "Fei.Is.Api.Data.Enums.SceneActionType": "JOB" | "NOTIFICATION";
+        /**
+         * Format: int32
+         * @enum {integer}
+         */
+        "Fei.Is.Api.Data.Models.InformationSystem.FileIdentifier": 0 | 1 | 2;
         "Fei.Is.Api.Features.AdminUserManagement.Commands.UpdateUserEmail.Request": {
             email: string;
         };
@@ -2147,6 +2169,29 @@ export interface components {
             variety: string;
             /** Format: uuid */
             vatCategoryId: string;
+            heightCm?: string | null;
+            seedsPerThousandPlants?: string | null;
+            seedsPerThousandPots?: string | null;
+            sowingPeriod?: string | null;
+            germinationTemperatureC?: string | null;
+            germinationTimeDays?: string | null;
+            cultivationTimeSowingToPlant?: string | null;
+            seedsMioHa?: string | null;
+            seedSpacingCM?: string | null;
+            cultivationTimeVegetableWeek?: string | null;
+            bulbPlantingRequirementSqM?: string | null;
+            bulbPlantingPeriod?: string | null;
+            bulbPlantingDistanceCm?: string | null;
+            cultivationTimeForBulbsWeeks?: string | null;
+            numberOfBulbsPerPot?: string | null;
+            plantSpacingCm?: string | null;
+            potSizeCm?: string | null;
+            cultivationTimeFromYoungPlant?: string | null;
+            cultivationTemperatureC?: string | null;
+            naturalFloweringMonth?: string | null;
+            flowersInFirstYear?: boolean | null;
+            growthInhibitorsUsed?: boolean | null;
+            plantingDensity?: string | null;
         };
         "Fei.Is.Api.Features.Products.Commands.CreateProductsFromList.ProductRequest": {
             code?: string | null;
@@ -2194,6 +2239,29 @@ export interface components {
             supplierId?: string | null;
             /** Format: uuid */
             vatCategoryId?: string | null;
+            heightCm?: string | null;
+            seedsPerThousandPlants?: string | null;
+            seedsPerThousandPots?: string | null;
+            sowingPeriod?: string | null;
+            germinationTemperatureC?: string | null;
+            germinationTimeDays?: string | null;
+            cultivationTimeSowingToPlant?: string | null;
+            seedsMioHa?: string | null;
+            seedSpacingCM?: string | null;
+            cultivationTimeVegetableWeek?: string | null;
+            bulbPlantingRequirementSqM?: string | null;
+            bulbPlantingPeriod?: string | null;
+            bulbPlantingDistanceCm?: string | null;
+            cultivationTimeForBulbsWeeks?: string | null;
+            numberOfBulbsPerPot?: string | null;
+            plantSpacingCm?: string | null;
+            potSizeCm?: string | null;
+            cultivationTimeFromYoungPlant?: string | null;
+            cultivationTemperatureC?: string | null;
+            naturalFloweringMonth?: string | null;
+            flowersInFirstYear?: boolean | null;
+            growthInhibitorsUsed?: boolean | null;
+            plantingDensity?: string | null;
         };
         "Fei.Is.Api.Features.Products.Queries.GetProductById.CategoryModel": {
             /** Format: uuid */
@@ -2217,6 +2285,29 @@ export interface components {
             supplier: components["schemas"]["Fei.Is.Api.Features.Products.Queries.GetProductById.SupplierModel"];
             variety: string;
             vatCategory: components["schemas"]["Fei.Is.Api.Features.Products.Queries.GetProductById.VatCategoryModel"];
+            heightCm?: string | null;
+            seedsPerThousandPlants?: string | null;
+            seedsPerThousandPots?: string | null;
+            sowingPeriod?: string | null;
+            germinationTemperatureC?: string | null;
+            germinationTimeDays?: string | null;
+            cultivationTimeSowingToPlant?: string | null;
+            seedsMioHa?: string | null;
+            seedSpacingCM?: string | null;
+            cultivationTimeVegetableWeek?: string | null;
+            bulbPlantingRequirementSqM?: string | null;
+            bulbPlantingPeriod?: string | null;
+            bulbPlantingDistanceCm?: string | null;
+            cultivationTimeForBulbsWeeks?: string | null;
+            numberOfBulbsPerPot?: string | null;
+            plantSpacingCm?: string | null;
+            potSizeCm?: string | null;
+            cultivationTimeFromYoungPlant?: string | null;
+            cultivationTemperatureC?: string | null;
+            naturalFloweringMonth?: string | null;
+            flowersInFirstYear?: boolean | null;
+            growthInhibitorsUsed?: boolean | null;
+            plantingDensity?: string | null;
         };
         "Fei.Is.Api.Features.Products.Queries.GetProductById.SupplierModel": {
             /** Format: uuid */
@@ -2426,6 +2517,11 @@ export interface components {
             unit?: string | null;
             /** Format: int32 */
             accuracyDecimals?: number | null;
+        };
+        "Fei.Is.Api.Features.Templates.Commands.UpdateTemplate.Request": {
+            /** Format: binary */
+            file: string;
+            identifier: components["schemas"]["Fei.Is.Api.Data.Models.InformationSystem.FileIdentifier"];
         };
         "Fei.Is.Api.Features.UserManagement.Queries.GetUserById.Response": {
             /** Format: uuid */
@@ -3373,102 +3469,6 @@ export interface operations {
                 content: {
                     "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
                 };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    GetProductById: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Features.Products.Queries.GetProductById.Response"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    UpdateProduct: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Fei.Is.Api.Features.Products.Commands.UpdateProduct.Request"];
-            };
-        };
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    DeleteProduct: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
             /** @description Not Found */
             404: {
@@ -4833,8 +4833,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                orderId: number;
-                itemId: number;
+                orderId: string;
+                itemId: string;
             };
             cookie?: never;
         };
@@ -5093,6 +5093,102 @@ export interface operations {
         responses: {
             /** @description Created */
             201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GetProductById: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.Products.Queries.GetProductById.Response"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UpdateProduct: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.Products.Commands.UpdateProduct.Request"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DeleteProduct: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -5890,6 +5986,45 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Fei.Is.Api.Features.ProductCategories.Queries.GetSupplierById.Response"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UpdateTemplate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Fei.Is.Api.Features.Templates.Commands.UpdateTemplate.Request"];
+                "application/x-www-form-urlencoded": components["schemas"]["Fei.Is.Api.Features.Templates.Commands.UpdateTemplate.Request"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
                 };
             };
             /** @description Not Found */

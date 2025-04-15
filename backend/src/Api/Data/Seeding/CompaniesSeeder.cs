@@ -18,8 +18,9 @@ namespace Fei.Is.Api.Data.Seeding
 
         public void Seed(AppDbContext appDbContext)
         {
-            appDbContext.Companies.AddRange([
-                new Company
+            appDbContext.Companies.AddRange(
+                [
+                    new Company
                     {
                         Id = Guid.NewGuid(),
                         Title = "Petunia s.r.o.",
@@ -91,7 +92,8 @@ namespace Fei.Is.Api.Data.Seeding
                         CreatedAt = DateTime.MinValue,
                         UpdatedAt = DateTime.MinValue
                     }
-                ]);
+                ]
+            );
         }
     }
 }

@@ -5,6 +5,7 @@ using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models.InformationSystem;
 using Fei.Is.Api.DocumentsGen.Generators;
+using Fei.Is.Api.FileSystem;
 using FluentResults;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -58,7 +59,7 @@ public static class DownloadOrder
 
     public record Query(ClaimsPrincipal User, Guid Id) : IRequest<Result<FileStream>>;
 
-    public sealed class Handler(AppDbContext context) : IRequestHandler<Query, Result<FileStream>>
+    public sealed class Handler(AppDbContext context, IFileSystemService fileSystemService) : IRequestHandler<Query, Result<FileStream>>
     {
         public async Task<Result<FileStream>> Handle(Query message, CancellationToken cancellationToken)
         {
@@ -68,6 +69,7 @@ public static class DownloadOrder
                 .Include(o => o.ItemContainers)
                 .ThenInclude(ic => ic.Items)
                 .ThenInclude(i => i.Product)
+                .ThenInclude(p => p.VATCategory)
                 .Where(o => o.Id == message.Id);
 
             if (!await order.AnyAsync())
@@ -75,7 +77,15 @@ public static class DownloadOrder
                 return Result.Fail(new NotFoundError());
             }
 
-            string path = "C:\\Users\\Jakub\\Downloads\\faktura.xlsx";
+            var fileQuery = context.UserFiles.Where(file => file.FileIdentifier == FileIdentifier.QuotationSheet);
+            if (!await fileQuery.AnyAsync(cancellationToken))
+            {
+                return Result.Fail(new NotFoundError());
+            }
+
+            var templateFile = await fileQuery.FirstAsync(cancellationToken);
+
+            FileStream fileStream = fileSystemService.GetFile(templateFile);
 
             ExcelGenerator excelGenerator = new();
 
@@ -86,7 +96,7 @@ public static class DownloadOrder
                 return Result.Fail(new NotFoundError());
             }
 
-            string retDocPath = excelGenerator.ApplyFields(path, jsonObject);
+            string retDocPath = excelGenerator.ApplyFields(fileStream, templateFile.OriginalFileName, jsonObject);
 
             return new FileStream(retDocPath, FileMode.Open, FileAccess.Read);
         }

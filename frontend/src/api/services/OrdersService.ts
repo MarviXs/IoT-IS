@@ -31,14 +31,18 @@ class OrdersService {
   async deleteOrder(orderId: string) {
     return await client.DELETE('/orders/{orderId}', {
       params: {
-        path: { orderId }
-      }
+        path: { orderId },
+      },
     });
   }
 
   // Nová metóda pre získanie súhrnu objednávky
   async getSummary(orderId: string) {
     return await client.GET('/orders/{orderId}/summary', { params: { path: { orderId } } });
+  }
+
+  async downloadOrderTemplate(orderId: string) {
+    return await client.GET('/orders/{id}/download', { params: { path: { id: orderId } }, parseAs: 'stream' });
   }
 }
 

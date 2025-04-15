@@ -16,6 +16,6 @@ namespace Fei.Is.Api.DocumentsGen.Generators
         protected StubbleVisitorRenderer StubbleRenderer = new StubbleBuilder()
             .Configure(settings => settings.SetEncodingFunction(s => s))
             .Build();
-        public abstract string ApplyFields(string documentPath, JToken values);
+        public abstract string ApplyFields(FileStream file, string newFileName, JToken values);
     }
 }

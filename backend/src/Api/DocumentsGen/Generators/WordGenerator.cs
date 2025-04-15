@@ -12,7 +12,7 @@ namespace Fei.Is.Api.DocumentsGen.Generators
 {
     public class WordGenerator : DocumentGen
     {
-        public override string ApplyFields(string documentPath, JToken values)
+        public override string ApplyFields(FileStream fileStream, string newFileName, JToken values)
         {
             /*XWPFDocument document = new XWPFDocument(OPCPackage.Open(documentPath));
 

@@ -9,6 +9,7 @@ using NPOI.HPSF;
 using NPOI.HSSF.UserModel;
 using NPOI.POIFS.NIO;
 using NPOI.SS.UserModel;
+using NPOI.XSSF.Streaming;
 using NPOI.XSSF.UserModel;
 using Stubble.Core.Interfaces;
 
@@ -16,14 +17,15 @@ namespace Fei.Is.Api.DocumentsGen.Generators
 {
     public class ExcelGenerator : DocumentGen
     {
-        public override string ApplyFields(string documentPath, JToken values)
+        private char decimalSeparator = Convert.ToChar(Thread.CurrentThread.CurrentCulture.NumberFormat.NumberDecimalSeparator);
+        private short numberCellDataFormat;
+        private short dateCellDataFormat;
+        public override string ApplyFields(FileStream fileStream, string newFileName, JToken values)
         {
-            XSSFWorkbook wb;
+            XSSFWorkbook wb = new XSSFWorkbook(fileStream);
 
-            using (FileStream fs = new FileStream(documentPath, FileMode.Open, FileAccess.Read))
-            {
-                wb = new XSSFWorkbook(fs);
-            }
+            numberCellDataFormat = wb.CreateDataFormat().GetFormat($"0{decimalSeparator}00");
+            dateCellDataFormat = wb.CreateDataFormat().GetFormat("dd/MM/yyyy");
 
             for (int i = 0; i < wb.NumberOfSheets; i++)
             {
@@ -32,7 +34,9 @@ namespace Fei.Is.Api.DocumentsGen.Generators
                 ProcessSheet(sheet, values, sheet.GetRow(sheet.FirstRowNum), sheet.GetRow(sheet.LastRowNum));
             }
 
-            string newDocumentPath = Path.Combine(Path.GetTempPath(), Path.GetFileName(documentPath));
+            XSSFFormulaEvaluator.EvaluateAllFormulaCells(wb);
+
+            string newDocumentPath = Path.Combine(Path.GetTempPath(), newFileName);
             using (var fs = new FileStream(newDocumentPath, FileMode.Create, FileAccess.Write))
             {
                 wb.Write(fs);
@@ -101,8 +105,7 @@ namespace Fei.Is.Api.DocumentsGen.Generators
                 {
                     if (cell.CellType == CellType.String && Regex.IsMatch(cell.StringCellValue, REGEX_ITEM_PATTERN))
                     {
-                        string renderedString = StubbleRenderer.Render(cell.StringCellValue, values);
-                        cell.SetCellValue(renderedString);
+                        FillCell(values, cell, cell.StringCellValue);
                     }
                 }
             }
@@ -173,7 +176,30 @@ namespace Fei.Is.Api.DocumentsGen.Generators
 
                 cellValue = cellValue.Remove(cellValue.IndexOf("{{") + 2, 1);
 
-                string renderedString = StubbleRenderer.Render(cellValue, values);
+                FillCell(values, cell, cellValue);
+            }
+        }
+
+        private void FillCell(JToken? values, ICell cell, string cellValue)
+        {
+            if (values is null)
+            {
+                return;
+            }
+
+            string renderedString = StubbleRenderer.Render(cellValue, values);
+            if (double.TryParse(renderedString, out double doubleValue))
+            {
+                cell.SetCellValue(doubleValue);
+                cell.CellStyle.DataFormat = numberCellDataFormat;
+            }
+            else if (DateTime.TryParse(renderedString, out DateTime dateValue))
+            {
+                cell.SetCellValue(dateValue);
+                cell.CellStyle.DataFormat = dateCellDataFormat;
+            }
+            else
+            {
                 cell.SetCellValue(renderedString);
             }
         }
