@@ -5850,7 +5850,8 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["Fei.Is.Api.Features.Templates.Commands.UpdateTemplate.Request"];
+                "multipart/form-data": components["schemas"]["Fei.Is.Api.Features.Templates.Commands.UpdateTemplate.Request"];
+                "application/x-www-form-urlencoded": components["schemas"]["Fei.Is.Api.Features.Templates.Commands.UpdateTemplate.Request"];
             };
         };
         responses: {
