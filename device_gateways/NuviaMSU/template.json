@@ -55,7 +55,7 @@
       {
         "tag": "currentCPS2",
         "name": "CurrentCPS2",
-        "unit": "cps [60s]",
+        "unit": "cps",
         "accuracyDecimals": 2,
         "group": "B klub"
       },
@@ -83,7 +83,7 @@
       {
         "tag": "currentCPS3",
         "name": "CurrentCPS3",
-        "unit": "cps [60s]",
+        "unit": "cps",
         "accuracyDecimals": 2,
         "group": "Radon"
       },
