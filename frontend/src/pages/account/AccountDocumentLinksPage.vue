@@ -35,28 +35,35 @@
         :behavior="'menu'"
         use-chips
         new-value-mode="add"
-      />
+      >
+      </q-select>
 
     </div>
 
     <document-link-card
       id="payroll"
-      :document-type="t('account.payroll')"
+      :document-header="t('account.payroll')"
       :loading="loading"
+      :document-type=0
+      :file-name="userTemplates.find((template) => template.identifier === 'Order')?.fileName || ''"
       @onSubmit="handleDocumentLinkSubmit"
     />
 
     <document-link-card
       id="price-list"
-      :document-type="t('account.price_list')"
+      :document-header="t('account.price_list')"
       :loading="loading"
+      :document-type=1
+      :file-name="userTemplates.find((template) => template.identifier === 'Invoice')?.fileName || ''"
       @onSubmit="handleDocumentLinkSubmit"
     />
 
     <document-link-card
       id="offer-sheet"
-      :document-type="t('account.offer_sheet')"
+      :document-header="t('account.offer_sheet')"
       :loading="loading"
+      :document-type=2
+      :file-name="userTemplates.find((template) => template.identifier === 'QuotationSheet')?.fileName || ''"
       @onSubmit="handleDocumentLinkSubmit"
     />
 
@@ -66,14 +73,14 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import { ref } from 'vue';
+import { ref, onMounted, computed} from 'vue';
 import { mdiPlus } from '@quasar/extras/mdi-v7';
 import SearchBar from '@/components/core/SearchBar.vue';
 import { mdiAccount, mdiFileDocument } from '@quasar/extras/mdi-v7';
 import PageLayout from '@/layouts/PageLayout.vue';
 import DocumentLinkCard from '@/components/account/DocumentLinkCard.vue';
-// import CreateDocumentDialog from '@/components/account/CreateDocumentDialog.vue';
-//import { PaginationClient, PaginationTable } from '@/models/Pagination';
+import TemplatesService from '@/api/services/TemplatesService';
+import { toast } from 'vue3-toastify';
 
 const loading = ref(false);
 const { t } = useI18n();
@@ -123,6 +130,29 @@ function scrollToCard(value: string) {
     }
   }
 }
+
+onMounted(() => {
+  loadData();
+})
+
+const userTemplates = ref([])
+
+function loadData(){
+ 
+  TemplatesService.getTemplates().then((resp) => {
+    userTemplates.value = resp.data;
+    //toast.success('Document fetched successfully');
+    //console.log(resp)
+  }).catch(() => {
+    toast.error('Couldn\'t upload document');
+
+  })
+}
+
+function getFileNameByType(type: number) {
+  return userTemplates.value.find((template) => template.identifier === type)?.fileName || '';
+}
+
 
 
 

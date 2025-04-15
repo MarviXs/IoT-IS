@@ -1,6 +1,9 @@
 import { client } from '@/api/client';
 import type { paths } from '@/api/generated/schema.d.ts';
 
+//export type SuppliersListQueryParams = paths['/templates']['get']['parameters']['query'];
+
+
 class TemplatesService {
   
   async updateTemplate(formData: FormData) {
@@ -9,9 +12,9 @@ class TemplatesService {
       body: formData,
     });
   }
-  /*async getTemplates() {
-    return await client.GET('/templates', {});
-  }*/
+  async getTemplates() {
+    return await client.GET('/templates');
+  }
   
  
 }

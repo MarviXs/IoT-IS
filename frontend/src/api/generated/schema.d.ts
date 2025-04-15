@@ -1307,7 +1307,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** Get UserTemplates */
+        get: operations["GetUserTemplates"];
         /** Update an document template */
         put: operations["UpdateTemplate"];
         post?: never;
@@ -2468,6 +2469,10 @@ export interface components {
             /** Format: binary */
             file: string;
             identifier: components["schemas"]["Fei.Is.Api.Data.Models.InformationSystem.FileIdentifier"];
+        };
+        "Fei.Is.Api.Features.Templates.Queries.GetUserTemplates.Response": {
+            identifier: components["schemas"]["Fei.Is.Api.Data.Models.InformationSystem.FileIdentifier"];
+            fileName: string;
         };
         "Fei.Is.Api.Features.UserManagement.Queries.GetUserById.Response": {
             /** Format: uuid */
@@ -5907,6 +5912,32 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    GetUserTemplates: {
+        parameters: {
+            query?: {
+                SortBy?: string;
+                Descending?: boolean;
+                SearchTerm?: string;
+                PageNumber?: number;
+                PageSize?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.Templates.Queries.GetUserTemplates.Response"][];
+                };
             };
         };
     };

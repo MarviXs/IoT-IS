@@ -1,7 +1,7 @@
 <template>
   <q-card class="shadow q-pa-lg q-mb-md">
     <div class="row items-center q-mb-md">
-      <div class="col-4 text-h6">{{ documentType }}</div>
+      <div class="col-4 text-h6">{{ documentHeader }}</div>
       <div class="col-8">
         <q-input
           ref="linkRef"
@@ -35,14 +35,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { QForm, QInput } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import TemplatesService from '@/api/services/TemplatesService';
 import { toast } from 'vue3-toastify';
 
-defineProps({
-  documentType: {
+const props = defineProps({
+  documentHeader: {
     type: String,
     required: true,
   },
@@ -50,7 +50,16 @@ defineProps({
     type: Boolean,
     required: false,
   },
+  documentType: {
+    type: Number,
+    required: true,
+  },
+  fileName:{
+    type: String,
+    required: true,
+  }
 });
+
 const emit = defineEmits(['onSubmit']);
 const link = defineModel({ type: String, default: '' });
 
@@ -87,7 +96,8 @@ function handleFileSelection(event: Event) {
     link.value = fileName;
   }
 }
-async function onFileSave() {
+
+function onFileSave() {
   const file = fileInput.value?.files?.[0];
 
   if (!file) {
@@ -98,19 +108,23 @@ async function onFileSave() {
 
   const formData = new FormData();
   formData.append('File', file);
-  formData.append('Identifier', '0');
+  formData.append('Identifier', props.documentType.toString());
 
-  try {
-    await TemplatesService.updateTemplate(formData);
-    emit('onSubmit', link.value);
+  TemplatesService.updateTemplate(formData).then(() => {
     toast.success('Document updated successfully');
 
-  } catch (error) {
-    console.error('Error uploading file:', error);
+  }).catch(() => {
     toast.error('Couldn\'t upload document');
 
-  }
+  })
+
+  
 }
+
+watch(() => props.fileName, (newVal) => {
+  link.value = newVal;
+});
+
 </script>
 
 <style lang="scss" scoped></style>
