@@ -20,7 +20,7 @@
       {
         "tag": "cps1",
         "name": "CPS1",
-        "unit": "cps",
+        "unit": "cps [60s]",
         "accuracyDecimals": 2,
         "group": "Operator"
       },
@@ -48,14 +48,14 @@
       {
         "tag": "cps2",
         "name": "CPS2",
-        "unit": "cps",
+        "unit": "cps [60s]",
         "accuracyDecimals": 2,
         "group": "B klub"
       },
       {
         "tag": "currentCPS2",
         "name": "CurrentCPS2",
-        "unit": "cps",
+        "unit": "cps [60s]",
         "accuracyDecimals": 2,
         "group": "B klub"
       },
@@ -76,14 +76,14 @@
       {
         "tag": "cps3",
         "name": "CPS3",
-        "unit": "cps",
+        "unit": "cps [60s]",
         "accuracyDecimals": 2,
         "group": "Radon"
       },
       {
         "tag": "currentCPS3",
         "name": "CurrentCPS3",
-        "unit": "cps",
+        "unit": "cps [60s]",
         "accuracyDecimals": 2,
         "group": "Radon"
       },
@@ -104,7 +104,7 @@
       {
         "tag": "cps4",
         "name": "CPS4",
-        "unit": "cps",
+        "unit": "cps [60s]",
         "accuracyDecimals": 2,
         "group": "Brana"
       },
@@ -132,7 +132,7 @@
       {
         "tag": "cps5",
         "name": "CPS5",
-        "unit": "cps",
+        "unit": "cps [60s]",
         "accuracyDecimals": 2,
         "group": "Kocka"
       },
@@ -146,10 +146,36 @@
     ],
     "commands": [
       {
-        "displayName": "Measure",
+        "displayName": "Measure Channel 1",
         "name": "cmGetDetector",
+        "params": [0]
+      },
+      {
+        "displayName": "Measure Channel 2",
+        "name": "cmGetDetector",
+        "params": [1]
+      },
+      {
+        "displayName": "Measure Channel 3",
+        "name": "cmGetDetector",
+        "params": [2]
+      },
+      {
+        "displayName": "Measure Channel 4",
+        "name": "cmGetDetector",
+        "params": [3]
+      },
+      {
+        "displayName": "Measure Channel 5",
+        "name": "cmGetDetector",
+        "params": [4]
+      },
+      {
+        "displayName": "Reset All Channels",
+        "name": "cmResetAllDetectors",
         "params": []
       },
+
       {
         "displayName": "Sleep 1 second",
         "name": "sleep",
