@@ -17,7 +17,11 @@ public static class DecreaseQuantityContainer
         {
             app.MapPost(
                     "orders/{orderId:guid}/container/{containerId:guid}/decrease",
-                    async Task<Results<NoContent, NotFound, BadRequest>> (IMediator mediator, ClaimsPrincipal user, Guid orderId, Guid containerId) =>
+                    async Task<Results<NoContent, NotFound, BadRequest>> (
+                        IMediator mediator,
+                        ClaimsPrincipal user,
+                        Guid orderId,
+                        Guid containerId) =>
                     {
                         var command = new Command(user, orderId, containerId);
                         var result = await mediator.Send(command);
@@ -58,25 +62,29 @@ public static class DecreaseQuantityContainer
 
         public async Task<Result> Handle(Command message, CancellationToken cancellationToken)
         {
-            // Fetch the container directly using the ContainerId
-            var container = await _context.OrderItemContainers.FirstOrDefaultAsync(c => c.Id == message.ContainerId, cancellationToken);
+            // Načítame kontajner priamo pomocou ContainerId
+            var container = await _context.OrderItemContainers
+                .FirstOrDefaultAsync(c => c.Id == message.ContainerId, cancellationToken);
 
             if (container == null)
             {
                 return Result.Fail(new NotFoundError());
             }
 
-            // Ensure quantity does not drop below 0
+            // Zabezpečíme, aby množstvo nekleslo pod 0
             if (container.Quantity <= 0)
             {
                 return Result.Fail(new BadRequestError("Quantity cannot be decreased below 0."));
             }
 
-            // Decrement the quantity
+            // Zníženie množstva
             container.Quantity -= 1;
 
-            // Save changes to the database
+            // Uložíme zmeny do databázy
             await _context.SaveChangesAsync(cancellationToken);
+
+            // Reload kontajnera pre aktualizáciu computed vlastností (napr. TotalPrice)
+            await _context.Entry(container).ReloadAsync(cancellationToken);
 
             return Result.Ok();
         }
