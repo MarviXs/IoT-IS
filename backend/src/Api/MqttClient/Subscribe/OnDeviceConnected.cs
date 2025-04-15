@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -28,9 +29,9 @@ public class OnDeviceConnected(AppDbContext context, RedisService redis)
         public bool Clean_start { get; init; }
     }
 
-    public async Task<Result> Handle(ArraySegment<byte> payload, CancellationToken cancellationToken)
+    public async Task<Result> Handle(ReadOnlySequence<byte> payload, CancellationToken cancellationToken)
     {
-        string jsonString = Encoding.UTF8.GetString(payload.Array, payload.Offset, payload.Count);
+        string jsonString = Encoding.UTF8.GetString(payload);
         var connectionInfo = JsonSerializer.Deserialize<ConnectionInfo>(
             jsonString,
             new JsonSerializerOptions { PropertyNameCaseInsensitive = true, Converters = { new JsonStringEnumConverter() } }

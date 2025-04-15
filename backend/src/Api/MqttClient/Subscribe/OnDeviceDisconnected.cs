@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -35,9 +36,9 @@ public class OnDeviceDisconnected(AppDbContext context, RedisService redis)
     private readonly AppDbContext _context = context;
     private readonly RedisService _redis = redis;
 
-    public async Task<Result> Handle(ArraySegment<byte> payload, CancellationToken cancellationToken)
+    public async Task<Result> Handle(ReadOnlySequence<byte> payload, CancellationToken cancellationToken)
     {
-        string jsonString = Encoding.UTF8.GetString(payload.Array, payload.Offset, payload.Count);
+        string jsonString = Encoding.UTF8.GetString(payload);
 
         var connectionInfo = JsonSerializer.Deserialize<ConnectionInfo>(jsonString, JsonOptions);
 

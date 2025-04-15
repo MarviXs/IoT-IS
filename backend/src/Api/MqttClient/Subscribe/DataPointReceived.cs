@@ -9,12 +9,13 @@ using Google.FlatBuffers;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
+using System.Buffers;
 
 namespace Fei.Is.Api.MqttClient.Subscribe;
 
 public class DataPointReceived(AppDbContext appContext, RedisService redis, IHubContext<IsHub, INotificationsClient> hubContext)
 {
-    public async Task<Result> Handle(string deviceAccessToken, ArraySegment<byte> payload, CancellationToken cancellationToken)
+    public async Task<Result> Handle(string deviceAccessToken, ReadOnlySequence<byte> payload, CancellationToken cancellationToken)
     {
         var redisKey = $"device:{deviceAccessToken}:id";
 

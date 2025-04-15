@@ -11,12 +11,13 @@ using Google.FlatBuffers;
 using JobFlatBuffers;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using System.Buffers;
 
 namespace Fei.Is.Api.MqttClient.Subscribe;
 
 public class JobStatusReceived(AppDbContext appContext, RedisService redis, IHubContext<IsHub, INotificationsClient> hubContext)
 {
-    public async Task<Result> Handle(string deviceAccessToken, ArraySegment<byte> payload, CancellationToken cancellationToken)
+    public async Task<Result> Handle(string deviceAccessToken, ReadOnlySequence<byte> payload, CancellationToken cancellationToken)
     {
         var redisKey = $"device:{deviceAccessToken}:id";
         var cachedDeviceId = await redis.Db.StringGetAsync(redisKey);

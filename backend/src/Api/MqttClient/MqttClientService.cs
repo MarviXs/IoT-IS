@@ -1,6 +1,5 @@
 using Fei.Is.Api.MqttClient.Subscribe;
 using MQTTnet;
-using MQTTnet.Client;
 using MQTTnet.Formatter;
 using MQTTnet.Protocol;
 using Org.BouncyCastle.Asn1.IsisMtt;
@@ -30,7 +29,7 @@ public class MqttClientService : IHostedService
             return;
         }
 
-        var factory = new MqttFactory();
+        var factory = new MqttClientFactory();
         _mqttClient = factory.CreateMqttClient();
 
         var clientId = Guid.NewGuid().ToString();
@@ -98,22 +97,22 @@ public class MqttClientService : IHostedService
                 if (MqttTopicFilterComparer.Compare(topic, "devices/+/data") == MqttTopicFilterCompareResult.IsMatch)
                 {
                     var dataPointReceived = scope.ServiceProvider.GetRequiredService<DataPointReceived>();
-                    await dataPointReceived.Handle(topicParts[1], args.ApplicationMessage.PayloadSegment, CancellationToken.None);
+                    await dataPointReceived.Handle(topicParts[1], args.ApplicationMessage.Payload, CancellationToken.None);
                 }
                 else if (MqttTopicFilterComparer.Compare(topic, "devices/+/job_from_device") == MqttTopicFilterCompareResult.IsMatch)
                 {
                     var jobStatusReceived = scope.ServiceProvider.GetRequiredService<JobStatusReceived>();
-                    await jobStatusReceived.Handle(topicParts[1], args.ApplicationMessage.PayloadSegment, CancellationToken.None);
+                    await jobStatusReceived.Handle(topicParts[1], args.ApplicationMessage.Payload, CancellationToken.None);
                 }
                 else if (MqttTopicFilterComparer.Compare(topic, "$SYS/brokers/+/clients/+/connected") == MqttTopicFilterCompareResult.IsMatch)
                 {
                     var onDeviceConnected = scope.ServiceProvider.GetRequiredService<OnDeviceConnected>();
-                    await onDeviceConnected.Handle(args.ApplicationMessage.PayloadSegment, CancellationToken.None);
+                    await onDeviceConnected.Handle(args.ApplicationMessage.Payload, CancellationToken.None);
                 }
                 else if (MqttTopicFilterComparer.Compare(topic, "$SYS/brokers/+/clients/+/disconnected") == MqttTopicFilterCompareResult.IsMatch)
                 {
                     var onDeviceDisconnected = scope.ServiceProvider.GetRequiredService<OnDeviceDisconnected>();
-                    await onDeviceDisconnected.Handle(args.ApplicationMessage.PayloadSegment, CancellationToken.None);
+                    await onDeviceDisconnected.Handle(args.ApplicationMessage.Payload, CancellationToken.None);
                 }
             }
             catch (Exception ex)
