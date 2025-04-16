@@ -37,43 +37,41 @@
         new-value-mode="add"
       >
       </q-select>
-
     </div>
 
     <document-link-card
-      id="payroll"
-      :document-header="t('account.payroll')"
+      id="quotation-sheet"
+      :document-header="t('account.quotation_sheet')"
       :loading="loading"
-      :document-type=0
-      :file-name="userTemplates.find((template) => template.identifier === 'Order')?.fileName || ''"
+      :document-type="0"
+      :file-name="userTemplates.find((template) => template.identifier === 'QuotationSheet')?.fileName || ''"
       @onSubmit="handleDocumentLinkSubmit"
     />
 
     <document-link-card
       id="price-list"
-      :document-header="t('account.price_list')"
+      :document-header="t('account.invoice')"
       :loading="loading"
-      :document-type=1
+      :document-type="1"
       :file-name="userTemplates.find((template) => template.identifier === 'Invoice')?.fileName || ''"
       @onSubmit="handleDocumentLinkSubmit"
     />
 
     <document-link-card
       id="offer-sheet"
-      :document-header="t('account.offer_sheet')"
+      :document-header="t('account.order')"
       :loading="loading"
-      :document-type=2
-      :file-name="userTemplates.find((template) => template.identifier === 'QuotationSheet')?.fileName || ''"
+      :document-type="2"
+      :file-name="userTemplates.find((template) => template.identifier === 'Order')?.fileName || ''"
       @onSubmit="handleDocumentLinkSubmit"
     />
-
   </page-layout>
   <!-- <CreateDocumentDialog v-model="isCreateDialogOpen" /> -->
 </template>
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import { ref, onMounted, computed} from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { mdiPlus } from '@quasar/extras/mdi-v7';
 import SearchBar from '@/components/core/SearchBar.vue';
 import { mdiAccount, mdiFileDocument } from '@quasar/extras/mdi-v7';
@@ -93,24 +91,14 @@ function handleDocumentLinkSubmit(link: string) {
 }
 
 const filter = ref('');
-const documentTitles = ref([
-  t('account.payroll'),
-  t('account.price_list'),
-  t('account.offer_sheet'),
-]);
+const documentTitles = ref([t('account.payroll'), t('account.price_list'), t('account.offer_sheet')]);
 
 function onFilter(val: string, update: (fn: () => void) => void) {
   update(() => {
     if (val === '') {
-      documentTitles.value = [
-        t('account.payroll'),
-        t('account.price_list'),
-        t('account.offer_sheet'),
-      ];
+      documentTitles.value = [t('account.payroll'), t('account.price_list'), t('account.offer_sheet')];
     } else {
-      documentTitles.value = documentTitles.value.filter(title =>
-        title.toLowerCase().includes(val.toLowerCase())
-      );
+      documentTitles.value = documentTitles.value.filter((title) => title.toLowerCase().includes(val.toLowerCase()));
     }
   });
 }
@@ -118,7 +106,7 @@ function onFilter(val: string, update: (fn: () => void) => void) {
 const documentMap: Record<string, string> = {
   [t('account.payroll')]: 'payroll',
   [t('account.price_list')]: 'price-list',
-  [t('account.offer_sheet')]: 'offer-sheet'
+  [t('account.offer_sheet')]: 'offer-sheet',
 };
 
 function scrollToCard(value: string) {
@@ -133,27 +121,23 @@ function scrollToCard(value: string) {
 
 onMounted(() => {
   loadData();
-})
+});
 
-const userTemplates = ref([])
+const userTemplates = ref([]);
 
-function loadData(){
- 
-  TemplatesService.getTemplates().then((resp) => {
-    userTemplates.value = resp.data;
-    //toast.success('Document fetched successfully');
-    //console.log(resp)
-  }).catch(() => {
-    toast.error('Couldn\'t upload document');
-
-  })
+function loadData() {
+  TemplatesService.getTemplates()
+    .then((resp) => {
+      userTemplates.value = resp.data;
+      //toast.success('Document fetched successfully');
+      //console.log(resp)
+    })
+    .catch(() => {
+      toast.error("Couldn't upload document");
+    });
 }
 
 function getFileNameByType(type: number) {
   return userTemplates.value.find((template) => template.identifier === type)?.fileName || '';
 }
-
-
-
-
 </script>

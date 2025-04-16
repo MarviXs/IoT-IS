@@ -106,9 +106,9 @@
     "change_role_desc": "Change user's role.",
     "document_links": "Document Links",
     "document_link": "Document",
-    "payroll": "Payroll",
-    "price_list": "Price list",
-    "offer_sheet": "Offer sheet",
+    "quotation_sheet": "Quotation sheet",
+    "invoice": "Invoice",
+    "order": "Order",
     "add_document": "Add document",
     "search_document": "Search",
     "toasts": {
