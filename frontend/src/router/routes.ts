@@ -146,6 +146,10 @@ const routes: RouteRecordRaw[] = [
         path: '/lifecycle/analyze_more/',
         component: () => import('pages/life-cycle/LifeMoreAnalyze.vue'),
       },
+      {
+        path: '/editor/',
+        component: () => import('pages/editor/FlowerpotEditor.vue'),
+      },
     ],
   },
   {
