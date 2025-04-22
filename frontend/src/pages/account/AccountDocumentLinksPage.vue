@@ -43,8 +43,11 @@
       id="quotation-sheet"
       :document-header="t('account.quotation_sheet')"
       :loading="loading"
-      :document-type="0"
-      :file-name="userTemplates.find((template) => template.identifier === 'QuotationSheet')?.fileName || ''"
+      :document-type="EDocumentIdentifier.QuotationSheet"
+      :file-name="
+        userTemplates.find((template) => template.identifier == EDocumentIdentifier[EDocumentIdentifier.QuotationSheet])
+          ?.fileName || ''
+      "
       @onSubmit="handleDocumentLinkSubmit"
     />
 
@@ -52,8 +55,11 @@
       id="price-list"
       :document-header="t('account.invoice')"
       :loading="loading"
-      :document-type="1"
-      :file-name="userTemplates.find((template) => template.identifier === 'Invoice')?.fileName || ''"
+      :document-type="EDocumentIdentifier.Invoice"
+      :file-name="
+        userTemplates.find((template) => template.identifier == EDocumentIdentifier[EDocumentIdentifier.Invoice])
+          ?.fileName || ''
+      "
       @onSubmit="handleDocumentLinkSubmit"
     />
 
@@ -61,8 +67,11 @@
       id="offer-sheet"
       :document-header="t('account.order')"
       :loading="loading"
-      :document-type="2"
-      :file-name="userTemplates.find((template) => template.identifier === 'Order')?.fileName || ''"
+      :document-type="EDocumentIdentifier.Order"
+      :file-name="
+        userTemplates.find((template) => template.identifier == EDocumentIdentifier[EDocumentIdentifier.Order])
+          ?.fileName || ''
+      "
       @onSubmit="handleDocumentLinkSubmit"
     />
   </page-layout>
@@ -79,6 +88,7 @@ import PageLayout from '@/layouts/PageLayout.vue';
 import DocumentLinkCard from '@/components/account/DocumentLinkCard.vue';
 import TemplatesService from '@/api/services/TemplatesService';
 import { toast } from 'vue3-toastify';
+import { EDocumentIdentifier } from '@/api/types/EDocumentIdentifier';
 
 const loading = ref(false);
 const { t } = useI18n();
@@ -129,15 +139,9 @@ function loadData() {
   TemplatesService.getTemplates()
     .then((resp) => {
       userTemplates.value = resp.data;
-      //toast.success('Document fetched successfully');
-      //console.log(resp)
     })
     .catch(() => {
       toast.error("Couldn't upload document");
     });
-}
-
-function getFileNameByType(type: number) {
-  return userTemplates.value.find((template) => template.identifier === type)?.fileName || '';
 }
 </script>

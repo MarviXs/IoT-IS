@@ -14,7 +14,6 @@ namespace Fei.Is.Api.Features.Templates.Queries;
 
 public static class GetUserTemplates
 {
-    public class QueryParameters : SearchParameters { }
 
     public sealed class Endpoint : ICarterModule
     {
@@ -22,9 +21,9 @@ public static class GetUserTemplates
         {
             app.MapGet(
                     "templates",
-                    async Task<Ok<List<Response>>> (IMediator mediator, ClaimsPrincipal user, [AsParameters] QueryParameters parameters) =>
+                    async Task<Ok<List<Response>>> (IMediator mediator, ClaimsPrincipal user) =>
                     {
-                        var query = new Query(user, parameters);
+                        var query = new Query(user);
                         var result = await mediator.Send(query);
                         return TypedResults.Ok(result);
                     }
@@ -39,7 +38,7 @@ public static class GetUserTemplates
         }
     }
 
-    public record Query(ClaimsPrincipal User, QueryParameters Parameters) : IRequest<List<Response>>;
+    public record Query(ClaimsPrincipal User) : IRequest<List<Response>>;
 
     public sealed class Handler(AppDbContext context) : IRequestHandler<Query, List<Response>>
     {
@@ -50,15 +49,15 @@ public static class GetUserTemplates
                 .Select(template => new Response(
                     template.FileIdentifier,
                     template.OriginalFileName // Prístup k názvu zákazníka cez navigačnú vlastnosť
-                    
+
                 ));
 
             return query.ToList();
-            }
+        }
     }
 
     public record Response(
         FileIdentifier Identifier,
-        string FileName   
+        string FileName
     );
 }

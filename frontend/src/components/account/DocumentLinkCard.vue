@@ -11,6 +11,7 @@
           type="text"
           :rules="linkRules"
           lazy-rules
+          :disable="true"
         >
           <template v-slot:append>
             <q-icon name="search" class="cursor-pointer" @click="openFileExplorer" />
@@ -19,27 +20,41 @@
 
         <input ref="fileInput" type="file" style="display: none" @change="handleFileSelection" />
 
-        <q-btn
-          class="float-right q-mt-lg"
-          style="min-width: 95px"
-          color="primary"
-          unelevated
-          :label="t('global.save')"
-          :loading="loading"
-          no-caps
-          @click="onFileSave"
-        ></q-btn>
+        <div class="tw-flex tw-justify-end tw-gap-4">
+          <q-btn
+            class="float-right q-mt-lg"
+            style="min-width: 95px"
+            color="primary"
+            unelevated
+            :label="t('global.download')"
+            :loading="loading"
+            no-caps
+            @click="downloadTemplate"
+          ></q-btn>
+
+          <q-btn
+            class="float-right q-mt-lg"
+            style="min-width: 95px"
+            color="primary"
+            unelevated
+            :label="t('global.save')"
+            :loading="loading"
+            no-caps
+            @click="onFileSave"
+          ></q-btn>
+        </div>
       </div>
     </div>
   </q-card>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue';
+import { PropType, ref, watch } from 'vue';
 import { QForm, QInput } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import TemplatesService from '@/api/services/TemplatesService';
 import { toast } from 'vue3-toastify';
+import { EDocumentIdentifier } from '@/api/types/EDocumentIdentifier';
 
 const props = defineProps({
   documentHeader: {
@@ -51,13 +66,13 @@ const props = defineProps({
     required: false,
   },
   documentType: {
-    type: Number,
+    type: Number as PropType<EDocumentIdentifier>,
     required: true,
   },
-  fileName:{
+  fileName: {
     type: String,
     required: true,
-  }
+  },
 });
 
 const emit = defineEmits(['onSubmit']);
@@ -103,28 +118,49 @@ function onFileSave() {
   if (!file) {
     toast.error('Empty field!');
     return;
-
   }
 
   const formData = new FormData();
   formData.append('File', file);
-  formData.append('Identifier', props.documentType.toString());
+  formData.append('Identifier', EDocumentIdentifier[props.documentType]);
 
-  TemplatesService.updateTemplate(formData).then(() => {
-    toast.success('Document updated successfully');
-
-  }).catch(() => {
-    toast.error('Couldn\'t upload document');
-
-  })
-
-  
+  TemplatesService.updateTemplate(formData)
+    .then(() => {
+      toast.success('Document updated successfully');
+    })
+    .catch(() => {
+      toast.error("Couldn't upload document");
+    });
 }
 
-watch(() => props.fileName, (newVal) => {
-  link.value = newVal;
-});
+function downloadTemplate() {
+  TemplatesService.downloadTemplate(props.documentType)
+    .then((retVal) => {
+      var contentDisposition = retVal.response.headers.get('Content-Disposition');
+      var parts = contentDisposition?.split('filename=');
+      var filename = parts?.length === 2 ? parts[1] : 'order_template.xlsx';
 
+      retVal.response.blob().then((blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', filename);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      });
+    })
+    .catch(() => {
+      toast.error("Couldn't download document");
+    });
+}
+
+watch(
+  () => props.fileName,
+  (newVal) => {
+    link.value = newVal;
+  },
+);
 </script>
 
 <style lang="scss" scoped></style>
