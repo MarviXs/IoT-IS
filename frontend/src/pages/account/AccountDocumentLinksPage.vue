@@ -100,7 +100,7 @@ function handleDocumentLinkSubmit(link: string) {
   loading.value = false;
 }
 
-const filter = ref('');
+const filter = ref(null);
 const documentTitles = ref([t('account.payroll'), t('account.price_list'), t('account.offer_sheet')]);
 
 function onFilter(val: string, update: (fn: () => void) => void) {
