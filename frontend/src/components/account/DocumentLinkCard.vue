@@ -11,7 +11,7 @@
           type="text"
           :rules="linkRules"
           lazy-rules
-          :disable="true"
+          readonly
         >
           <template v-slot:append>
             <q-icon name="search" class="cursor-pointer" @click="openFileExplorer" />
