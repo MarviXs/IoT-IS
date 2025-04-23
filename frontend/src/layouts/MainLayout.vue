@@ -60,7 +60,7 @@
           <side-menu-button to="/scenes" :label="t('scene.label', 2)" :icon="mdiCubeOutline" />
           <side-menu-button to="/products" :label="t('product.label', 2)" :icon="mdiWrench" />
           <side-menu-button to="/lifecycle" :label="t('lifecycle.label', 2)" :icon="mdiSproutOutline" />
-          <side-menu-button to="/editor" :label="t('editor.label', 2)" :icon="mdiSproutOutline" />
+          <side-menu-button to="/editor" :label="t('editor.label', 2)" :icon="mdiPaletteOutline" />
           <side-menu-button
             v-if="authStore.isAdmin"
             to="/user-management"
@@ -97,7 +97,8 @@ import {
   mdiVariable,
   mdiCubeOutline,
   mdiWrench,
-  mdiSproutOutline
+  mdiSproutOutline,
+  mdiPaletteOutline
 } from '@quasar/extras/mdi-v7';
 import { toast } from 'vue3-toastify';
 

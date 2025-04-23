@@ -456,5 +456,8 @@
     "label": "Plant overview | Plants boards",
     "add_plant": "Add plant",
     "add_plants": "Add more plants"
+  },
+  "editor":{
+    "label": "Plant editor"
   }
 }
