@@ -1,0 +1,31 @@
+import { client } from '@/api/client';
+import type { paths } from '@/api/generated/schema.d.ts';
+
+export type GreenHousesQueryParams = paths['/greenhouses']['get']['parameters']['query'];
+export type GreenHousesResponse = paths['/greenhouses']['get']['responses']['200']['content']['application/json'];
+
+export type CreateGreenHouseRequest = paths['/greenhouses']['post']['requestBody']['content']['application/json'];
+
+class GreenHouseService {
+  // Získanie zoznamu skleníkov s možnosťou filtrovania/paginácie
+  async getGreenHouses(queryParams: GreenHousesQueryParams) {
+    return await client.GET('/greenhouses', {
+      params: { query: queryParams },
+    });
+  }
+
+  async createGreenHouse(request: CreateGreenHouseRequest) {
+    return await client.POST('/greenhouses', {
+      body: request,
+    });
+  }
+
+  // Vymazanie skleníka podľa ID
+  async deleteGreenHouse(id: string) {
+    return await client.DELETE('/greenhouses/{id}', {
+      params: { path: { id } },
+    });
+  }
+}
+
+export default new GreenHouseService();

@@ -108,6 +108,9 @@ public class AppDbContext
     public DbSet<Plant> Plants { get; set; }
     public DbSet<PlantAnalysis> PlantAnalyses { get; set; }
     public DbSet<PlantBoard> PlantBoards { get; set; }
+    public DbSet<GreenHouse> Greenhouses { get; set; }
+    public DbSet<EditorBoard> EditorPots { get; set; }
+    public DbSet<EditorPlant> EditorPlants { get; set; }
 
     public override int SaveChanges()
     {

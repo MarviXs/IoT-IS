@@ -147,6 +147,10 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/life-cycle/LifeMoreAnalyze.vue'),
       },
       {
+        path: '/greenhouse/',
+        component: () => import('pages/editor/EditorIntro.vue'),
+      },
+      {
         path: '/editor/',
         component: () => import('pages/editor/FlowerpotEditor.vue'),
       },

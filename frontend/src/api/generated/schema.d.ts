@@ -600,6 +600,42 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/greenhouses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get paginated greenhouses */
+        get: operations["GetGreenHouses"];
+        put?: never;
+        /** Create a greenhouse */
+        post: operations["CreateGreenHouse"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/greenhouses/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Update a greenhouse by Id */
+        put: operations["UpdateGreenHouseById"];
+        post?: never;
+        /** Delete a greenhouse */
+        delete: operations["DeleteGreenHouse"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/devices/{deviceId}/jobs/active": {
         parameters: {
             query?: never;
@@ -1184,6 +1220,19 @@ export interface components {
             readonly hasNext: boolean;
             items: components["schemas"]["Fei.Is.Api.Features.Devices.Queries.GetDevices.Response"][];
         };
+        "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.GreenHouses.Queries.GetGreenHouses.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+            /** Format: int32 */
+            currentPage: number;
+            /** Format: int32 */
+            totalPages: number;
+            /** Format: int32 */
+            pageSize: number;
+            /** Format: int32 */
+            totalCount: number;
+            readonly hasPrevious: boolean;
+            readonly hasNext: boolean;
+            items: components["schemas"]["Fei.Is.Api.Features.GreenHouses.Queries.GetGreenHouses.Response"][];
+        };
         "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Jobs.Queries.GetJobsOnDevice.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
             /** Format: int32 */
             currentPage: number;
@@ -1567,6 +1616,33 @@ export interface components {
             name: string;
             tag: string;
             unit: string;
+        };
+        "Fei.Is.Api.Features.GreenHouses.Commands.CreateGreenHouse.Request": {
+            greenHouseID: string;
+            name: string;
+            /** Format: int32 */
+            width: number;
+            /** Format: int32 */
+            depth: number;
+        };
+        "Fei.Is.Api.Features.GreenHouses.Commands.UpdateGreenHouseById.Request": {
+            name?: string | null;
+            /** Format: int32 */
+            width?: number | null;
+            /** Format: int32 */
+            depth?: number | null;
+        };
+        "Fei.Is.Api.Features.GreenHouses.Queries.GetGreenHouses.Response": {
+            /** Format: uuid */
+            id: string;
+            greenHouseID: string;
+            name: string;
+            /** Format: int32 */
+            width: number;
+            /** Format: int32 */
+            depth: number;
+            /** Format: date-time */
+            dateCreated: string;
         };
         "Fei.Is.Api.Features.Jobs.Commands.CreateJob.Request": {
             /** Format: uuid */
@@ -3611,6 +3687,132 @@ export interface operations {
                 content: {
                     "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
                 };
+            };
+        };
+    };
+    GetGreenHouses: {
+        parameters: {
+            query?: {
+                SortBy?: string;
+                Descending?: boolean;
+                SearchTerm?: string;
+                PageNumber?: number;
+                PageSize?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.GreenHouses.Queries.GetGreenHouses.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"];
+                };
+            };
+        };
+    };
+    CreateGreenHouse: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.GreenHouses.Commands.CreateGreenHouse.Request"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+        };
+    };
+    UpdateGreenHouseById: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.GreenHouses.Commands.UpdateGreenHouseById.Request"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DeleteGreenHouse: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

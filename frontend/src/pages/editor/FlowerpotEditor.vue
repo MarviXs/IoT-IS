@@ -1,43 +1,90 @@
 <template>
   <div>
 
-    <!-- Tlačidlo na pridanie rastliny -->
-    <button @click="showPlantList = true">Pridať rastlinu</button>
-    <!-- Tlačidlo na pridanie megakvetináča -->
-    <button @click="openPotSizeDialog">Pridať megakvetináč</button>
+    <q-btn
+      label="Pridať rastlinu"
+      class="q-mb-sm q-mr-sm"
+      @click="showPlantList = true"
+    />
 
-    <button @click="adjustPlantStates(-1)">
-      Dekrementovať stavy všetkých rastlín
-    </button>
-    <button @click="adjustPlantStates(1)">
-      Inkrementovať stavy všetkých rastlín
-    </button>
+    <q-btn
+      label="Pridať kvetináč"
+      class="q-mb-sm q-mr-sm"
+      @click="openPotSizeDialog"
+    />
+
+    <q-btn
+      label="Predošlí deň"
+      class="q-mb-sm q-mr-sm"
+      @click="adjustPlantStates(-1)"
+    />
+
+    <q-btn
+      label="Nasledujúci deň"
+      class="q-mb-sm"
+      @click="adjustPlantStates(1)"
+    />
 
     <!-- Dialógové okno pre zadanie rozmerov skleníka -->
     <div v-if="showGreenhouseDialog" class="dialog">
       <div class="dialog-content">
-        <h3>Zadajte rozmery skleníka</h3>
-        <label for="greenhouse-width">Šírka skleníka:</label>
-        <input v-model.number="greenhouseWidth" id="greenhouse-width" type="number" min="1" />
-        
-        <label for="greenhouse-height">Výška skleníka:</label>
-        <input v-model.number="greenhouseHeight" id="greenhouse-height" type="number" min="1" />
+        <h3>Zadajte údaje o sklenníku</h3>
+
+        <q-input
+          v-model="greenhouseName"
+          type="text"
+          label="Názov skleníka"
+          dense
+          outlined
+          class="q-mb-md"
+        />
+
+        <q-input
+          v-model.number="greenhouseWidth"
+          type="number"
+          label="Šírka skleníka"
+          min="1"
+          dense
+          outlined
+          class="q-mb-sm"
+        />
+
+        <q-input
+          v-model.number="greenhouseHeight"
+          type="number"
+          label="Hĺbka skleníka"
+          min="1"
+          dense
+          outlined
+          class="q-mb-md"
+        />
 
         <!-- Výber počtu rastlín -->
         <h4>Vyberte počet rastlín:</h4>
-        <div v-for="plant in plantOptions" :key="plant.id" style="margin-bottom: 10px;">
-          <label :for="`plant-${plant.id}`">{{ plant.name }}:</label>
-          <input
-            :id="`plant-${plant.id}`"
-            type="number"
-            min="0"
+        <div v-for="plant in plantOptions" :key="plant.id" class="q-mb-sm">
+          <q-input
             v-model.number="plantSelection[plant.id]"
-            style="width: 60px; margin-left: 10px;"
+            type="number"
+            :label="plant.name"
+            min="0"
+            dense
+            outlined
+            style="width: 120px;"
           />
         </div>
 
-        <button @click="setGreenhouseSize">Nastaviť</button>
-        <button @click="closeGreenhouseDialog">Zrušiť</button>
+        <q-btn
+          label="Nastaviť"
+          class="q-mt-md q-mr-sm"
+          @click="setGreenhouseSize"
+        />
+
+        <q-btn
+          label="Zrušiť"
+          flat
+          class="q-mt-md"
+          @click="closeGreenhouseDialog"
+        />
       </div>
     </div>
 
@@ -47,47 +94,141 @@
         <h3>Vyberte veľkosť rastliny</h3>
         <ul>
           <li v-for="plant in plantOptions" :key="plant.id">
-            <button @click="addRectangle(plant)">{{ plant.name }}</button>
+            <q-btn
+              :key="plant.id"
+              :label="plant.name"
+              class="q-mb-sm q-mr-sm"
+              @click="addRectangle(plant)"
+            />
           </li>
         </ul>
-        <button @click="showPlantList = false">Zrušiť</button>
+        <q-btn
+          label="Zrušiť"
+          flat
+          class="q-mt-md"
+          @click="showPlantList = false"
+        />
       </div>
     </div>
 
     <!-- Zoznam na výber veľkosti megakvetináča -->
-    <div v-if="showPotSizeDialog" class="dialog">
-      <div class="dialog-content">
-        <h3>Vyberte veľkosť megakvetináča</h3>
-        <h4>Definované layouty:</h4>
-        <select v-model="selectedLayout" @change="createMegaPotByLayout">
-          <option disabled value="">Vyber rozloženie</option>
-          <option v-for="layout in predefinedLayouts" :key="layout.label" :value="layout">
-            {{ layout.label }}
-          </option>
-        </select> 
-        <ul>
-          <li v-for="size in potSizes" :key="size.id">
-            <button @click="selectPotSize(size)">{{ size.name }}</button>
-          </li>
-        </ul>
-        <button @click="closePotSizeDialog">Zrušiť</button>
-      </div>
-    </div>
+    <q-dialog v-model="showPotSizeDialog">
+      <q-card class="q-pa-md" style="min-width: 300px;">
+        <q-card-section>
+          <h3>Vyberte veľkosť kvetináča</h3>
+          <h4>Pláty:</h4>
+
+          <q-select
+            v-model="selectedLayout"
+            :options="predefinedLayouts"
+            option-label="label"
+            label="Vyber rozloženie"
+            emit-value
+            map-options
+            @update:model-value="createMegaPotByLayout"
+            outlined
+            dense
+            class="q-mb-md"
+          />
+        </q-card-section>
+
+        <q-card-section>
+          <q-list bordered separator>
+            <q-item v-for="size in potSizes" :key="size.id" clickable @click="selectPotSize(size)">
+              <q-item-section>{{ size.name }}</q-item-section>
+            </q-item>
+          </q-list>
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="Zrušiť" color="primary" @click="closePotSizeDialog" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
 
     <!-- Dialógové okno pre zadanie rozmerov megakvetináča -->
-    <div v-if="showDialog" class="dialog">
-      <div class="dialog-content">
-        <h3>Zadajte rozmery megakvetináča</h3>
-        <label for="columns">Počet stĺpcov:</label>
-        <input v-model.number="columns" type="number" min="1" />
+    <q-dialog v-model="showDialog">
+      <q-card class="q-pa-md" style="min-width: 300px;">
+        <q-card-section>
+          <h3>Zadajte rozmery kvetináča</h3>
 
-        <label for="rows">Počet riadkov:</label>
-        <input v-model.number="rows" type="number" min="1" />
+          <q-input
+            v-model.number="columns"
+            type="number"
+            min="1"
+            label="Počet stĺpcov"
+            outlined
+            dense
+            class="q-mb-sm"
+          />
 
-        <button @click="createMegaPot">Vytvoriť</button>
-        <button @click="closeDialog">Zrušiť</button>
-      </div>
-    </div>
+          <q-input
+            v-model.number="rows"
+            type="number"
+            min="1"
+            label="Počet riadkov"
+            outlined
+            dense
+            class="q-mb-md"
+          />
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn label="Vytvoriť" color="primary" @click="createMegaPot" />
+          <q-btn flat label="Zrušiť" color="primary" @click="closeDialog" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <q-dialog v-model="showUploadDialog">
+      <q-card class="q-pa-md" style="min-width: 350px;">
+        <q-card-section>
+          <h3>Vložte fotografiu</h3>
+
+          <!-- Výber súboru -->
+          <q-file
+            v-model="selectedFile"
+            label="Vyberte súbor"
+            accept="image/*"
+            outlined
+            dense
+            class="q-mb-md"
+          >
+            <template v-slot:append>
+              
+            </template>
+          </q-file>
+
+          <!-- Vstup pre stĺpce -->
+          <q-input
+            v-model.number="columnsImage"
+            type="number"
+            min="1"
+            label="Počet stĺpcov"
+            outlined
+            dense
+            class="q-mb-sm"
+          />
+
+          <!-- Vstup pre riadky -->
+          <q-input
+            v-model.number="rowsImage"
+            type="number"
+            min="1"
+            label="Počet riadkov"
+            outlined
+            dense
+          />
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn label="Vytvoriť" color="primary" @click="handleUploadAndCreate" />
+          <q-btn flat label="Zrušiť" color="primary" @click="showUploadDialog = false" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+
 
     <!-- Konva Stage a Layer -->
     <v-stage
@@ -158,6 +299,8 @@
           @dragmove="handleDragMove"
           @dragend="handleDragEnd"
           @contextmenu="handleContextMenu(item, $event)"
+          @mouseenter="hoveredId = item.id"
+          @mouseleave="hoveredId = null"
         />
         <!-- Zobrazenie názvu rastliny -->
         <v-text
@@ -171,6 +314,7 @@
             fill: 'black',
             align: 'center',
             draggable: false,
+            opacity: plant.id === hoveredId ? 1 : 0,
           }"
         />
         <v-transformer ref="transformer" />
@@ -178,23 +322,35 @@
     </v-stage>
 
     <!-- Informácie o rastlinách -->
-    <div class="plant-info" :style="plantInfoStyle">
+    <div v-show="showPlantInfo" class="plant-info" :style="plantInfoStyle">
       <h3>Informácie o rastlinách</h3>
-      <ul>
-        <li v-for="plant in plants" :key="'info-' + plant.id">
-          <strong>{{ plant.name }}</strong><br />
-          Typ: {{ plant.type }}<br />
-          Druh: {{ plant.species }}<br />
-          Svetlo: {{ plant.light }}<br />
-          Pôda: {{ plant.soil }}<br />
-          Kvetináč: {{ plant.potName }}
-        </li>
-      </ul>
+      <div class="plant-info-scroll">
+        <ul>
+          <li v-for="plant in plants" :key="'info-' + plant.id">
+            <strong @click="toggleDetails(plant.id)" class="clickable">
+              {{ plant.name }}
+            </strong>
+
+            <transition name="fade">
+              <div v-if="expandedPlants.includes(plant.id)" class="plant-details">
+                Typ: {{ plant.type }}<br />
+                Druh: {{ plant.species }}<br />
+                Svetlo: {{ plant.light }}<br />
+                Pôda: {{ plant.soil }}<br />
+                Kvetináč: {{ plant.potName }}
+              </div>
+            </transition>
+          </li>
+        </ul>
+    </div>
     </div>
   </div>
 </template>
 
 <script>
+import GreenHouseService from '@/api/services/GreenHouseService';
+import { timestamp } from '@vueuse/core';
+
 const width = 500;
 const height = 800;
 var changed = false
@@ -202,6 +358,15 @@ var changed = false
 export default {
   data() {
     return {
+      greenhouseName: 'Default Greenhouse',
+      showUploadDialog: false,
+      selectedFile: null,
+      columnsImage: 1,
+      rowsImage: 1,
+      expandedPlants: [],
+      hoveredId: null,
+      hoveredPlantId: null,
+      showPlantInfo: true,
       plantSelection: {
         1: 0, // Malá rastlina
         2: 0, // Stredná rastlina
@@ -314,6 +479,13 @@ export default {
     window.removeEventListener('scroll', this.updatePlantInfoPosition);
   },
   methods: {
+    toggleDetails(id) {
+      if (this.expandedPlants.includes(id)) {
+        this.expandedPlants = this.expandedPlants.filter(pid => pid !== id);
+      } else {
+        this.expandedPlants.push(id);
+      }
+    },
     getMegaPotBounds(megaPot) {
       const pots = megaPot.innerPots;
 
@@ -419,9 +591,9 @@ export default {
         if (!plantOption || !rect) return;
 
         // Spočítaj, koľko dní uplynulo od zasadenia rastliny
-        const plantPlantedDate = new Date(plant.datePlanted);
-        //const parts = plant.datePlanted.split('.').map(p => parseInt(p.trim(), 10));
-        //const plantPlantedDate = new Date(parts[2], parts[1] - 1, parts[0]); 
+        //const plantPlantedDate = new Date(plant.datePlanted);
+        const parts = plant.datePlanted.split('.').map(p => parseInt(p.trim(), 10));
+        const plantPlantedDate = new Date(parts[2], parts[1] - 1, parts[0]); 
         const daysSincePlanted = Math.floor((this.currentSimulatedDate - plantPlantedDate) / (1000 * 60 * 60 * 24)); // rozdiel v dňoch
         console.log(`Dátum výsadby: ${plantPlantedDate.toLocaleDateString()}`);
         console.log(`Počet dní od výsadby: ${daysSincePlanted}`);
@@ -429,6 +601,7 @@ export default {
 
         // Inkrementácia - zväčšiť rastlinu, ak uplynul požadovaný počet dní
         if (daysToAdvance > 0 && plant.state < 2 && daysSincePlanted >= plantOption.states[plant.state].days) {
+          this.showUploadDialog = true
           console.log(plant.state);
           plant.state++;
           const newStage = plantOption.states[plant.state];
@@ -501,6 +674,8 @@ export default {
       this.plantInfoStyle.right = `${10 - scrollLeft}px`;
     },
     setGreenhouseSize() {
+      this.greenhouseName = this.greenhouseName.trim() || 'Default Greenhouse';
+
       this.stageSize = {
           width: this.greenhouseWidth,
           height: this.greenhouseHeight,
@@ -532,6 +707,19 @@ export default {
             this.addRectangle(plant);
           }
         }
+      }
+
+      try {
+        const request = {
+          greenHouseID: crypto.randomUUID(),
+          name: this.greenhouseName,
+          width: this.greenhouseWidth,
+          depth: this.greenhouseHeight,
+          dateCreated: Date.now(),
+        };
+        GreenHouseService.createGreenHouse(request);
+      } catch (error) {
+        console.error('Nepodarilo sa vytvoriť skleník:', error);
       }
     },
     // Funkcia na zavretie dialógu bez zmeny
@@ -999,6 +1187,20 @@ export default {
       (r) => r.type === 'plant' && this.plantPotMap.get(r.id) === pot
     );
   },
+  handleUploadAndCreate() {
+    if (this.selectedFile && this.columnsImage > 0 && this.rowsImage > 0) {
+      // Tu môžeš nahrať obrázok a spracovať layout
+      console.log('Súbor:', this.selectedFile);
+      console.log('Stĺpce:', this.columnsImage);
+      console.log('Riadky:', this.rowsImage);
+      this.showUploadDialog = false;
+    } else {
+      this.$q.notify({
+        type: 'warning',
+        message: 'Vyplňte všetky údaje a nahrajte súbor'
+      });
+    }
+  }
 },
 };
 </script>
@@ -1028,9 +1230,16 @@ export default {
   position: absolute;
   top: 10px;
   right: 10px;
+  margin-top: 50px;
   background: white;
   padding: 10px;
   border: 1px solid black;
   transition: top 0.2s ease-out; /* Pre hladký pohyb */
+}
+
+.plant-info-scroll {
+  max-height: 220px; /* nastavíme menšiu výšku pre samotný obsah */
+  overflow-y: auto;  /* zapneme scrollovanie */
+  padding-right: 10px; /* priestor pre scrollbar */
 }
 </style>
