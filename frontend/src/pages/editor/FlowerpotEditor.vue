@@ -14,13 +14,21 @@
     />
 
     <q-btn
+<<<<<<< HEAD
       label="Predošlí deň"
+=======
+      label="Dekrementovať stavy"
+>>>>>>> fcdfab58d14bb41a1f4e267f24ca468e21d6baa8
       class="q-mb-sm q-mr-sm"
       @click="adjustPlantStates(-1)"
     />
 
     <q-btn
+<<<<<<< HEAD
       label="Nasledujúci deň"
+=======
+      label="Inkrementovať stavy"
+>>>>>>> fcdfab58d14bb41a1f4e267f24ca468e21d6baa8
       class="q-mb-sm"
       @click="adjustPlantStates(1)"
     />
@@ -28,6 +36,7 @@
     <!-- Dialógové okno pre zadanie rozmerov skleníka -->
     <div v-if="showGreenhouseDialog" class="dialog">
       <div class="dialog-content">
+<<<<<<< HEAD
         <h3>Zadajte údaje o sklenníku</h3>
 
         <q-input
@@ -38,6 +47,9 @@
           outlined
           class="q-mb-md"
         />
+=======
+        <h3>Zadajte rozmery skleníka</h3>
+>>>>>>> fcdfab58d14bb41a1f4e267f24ca468e21d6baa8
 
         <q-input
           v-model.number="greenhouseWidth"
@@ -52,7 +64,11 @@
         <q-input
           v-model.number="greenhouseHeight"
           type="number"
+<<<<<<< HEAD
           label="Hĺbka skleníka"
+=======
+          label="Výška skleníka"
+>>>>>>> fcdfab58d14bb41a1f4e267f24ca468e21d6baa8
           min="1"
           dense
           outlined
@@ -358,7 +374,10 @@ var changed = false
 export default {
   data() {
     return {
+<<<<<<< HEAD
       greenhouseName: 'Default Greenhouse',
+=======
+>>>>>>> fcdfab58d14bb41a1f4e267f24ca468e21d6baa8
       showUploadDialog: false,
       selectedFile: null,
       columnsImage: 1,

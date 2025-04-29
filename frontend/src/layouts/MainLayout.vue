@@ -60,7 +60,11 @@
           <side-menu-button to="/scenes" :label="t('scene.label', 2)" :icon="mdiCubeOutline" />
           <side-menu-button to="/products" :label="t('product.label', 2)" :icon="mdiWrench" />
           <side-menu-button to="/lifecycle" :label="t('lifecycle.label', 2)" :icon="mdiSproutOutline" />
+<<<<<<< HEAD
           <side-menu-button to="/greenhouse" :label="t('editor.label', 2)" :icon="mdiPaletteOutline" />
+=======
+          <side-menu-button to="/editor" :label="t('editor.label', 2)" :icon="mdiPaletteOutline" />
+>>>>>>> fcdfab58d14bb41a1f4e267f24ca468e21d6baa8
           <side-menu-button
             v-if="authStore.isAdmin"
             to="/user-management"
