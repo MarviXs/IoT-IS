@@ -5,6 +5,7 @@ export type GreenHousesQueryParams = paths['/greenhouses']['get']['parameters'][
 export type GreenHousesResponse = paths['/greenhouses']['get']['responses']['200']['content']['application/json'];
 
 export type CreateGreenHouseRequest = paths['/greenhouses']['post']['requestBody']['content']['application/json'];
+export type GreenHouseDetailResponse = paths['/greenhouses/{id}']['get']['responses']['200']['content']['application/json'];
 
 class GreenHouseService {
   // Získanie zoznamu skleníkov s možnosťou filtrovania/paginácie
@@ -23,6 +24,12 @@ class GreenHouseService {
   // Vymazanie skleníka podľa ID
   async deleteGreenHouse(id: string) {
     return await client.DELETE('/greenhouses/{id}', {
+      params: { path: { id } },
+    });
+  }
+
+  async getGreenHouseById(id: string) {
+    return await client.GET('/greenhouses/{id}', {
       params: { path: { id } },
     });
   }

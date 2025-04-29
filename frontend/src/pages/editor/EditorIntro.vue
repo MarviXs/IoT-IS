@@ -159,7 +159,7 @@ async function loadGreenhouses() {
 }
 
 function navigateToGreenhouse(id: string) {
-  router.push(`/greenhouses/${id}`);
+  router.push(`/editor/${id}`);
 }
 
 function onRowClick(row: GreenhouseNode) {

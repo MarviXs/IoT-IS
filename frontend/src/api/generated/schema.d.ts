@@ -600,6 +600,25 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/greenhouses/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get greenhouse by ID */
+        get: operations["GetGreenhouseById"];
+        /** Update a greenhouse by Id */
+        put: operations["UpdateGreenHouseById"];
+        post?: never;
+        /** Delete a greenhouse */
+        delete: operations["DeleteGreenHouse"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/greenhouses": {
         parameters: {
             query?: never;
@@ -613,24 +632,6 @@ export interface paths {
         /** Create a greenhouse */
         post: operations["CreateGreenHouse"];
         delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/greenhouses/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Update a greenhouse by Id */
-        put: operations["UpdateGreenHouseById"];
-        post?: never;
-        /** Delete a greenhouse */
-        delete: operations["DeleteGreenHouse"];
         options?: never;
         head?: never;
         patch?: never;
@@ -1633,6 +1634,18 @@ export interface components {
             depth?: number | null;
         };
         "Fei.Is.Api.Features.GreenHouses.Queries.GetGreenHouses.Response": {
+            /** Format: uuid */
+            id: string;
+            greenHouseID: string;
+            name: string;
+            /** Format: int32 */
+            width: number;
+            /** Format: int32 */
+            depth: number;
+            /** Format: date-time */
+            dateCreated: string;
+        };
+        "Fei.Is.Api.Features.GreenHouses.Queries.GetGreenhouseById.Response": {
             /** Format: uuid */
             id: string;
             greenHouseID: string;
@@ -3690,6 +3703,93 @@ export interface operations {
             };
         };
     };
+    GetGreenhouseById: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.GreenHouses.Queries.GetGreenhouseById.Response"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UpdateGreenHouseById: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.GreenHouses.Commands.UpdateGreenHouseById.Request"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DeleteGreenHouse: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     GetGreenHouses: {
         parameters: {
             query?: {
@@ -3755,64 +3855,6 @@ export interface operations {
                 content: {
                     "application/json": string;
                 };
-            };
-        };
-    };
-    UpdateGreenHouseById: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Fei.Is.Api.Features.GreenHouses.Commands.UpdateGreenHouseById.Request"];
-            };
-        };
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    DeleteGreenHouse: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };

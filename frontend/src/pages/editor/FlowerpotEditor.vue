@@ -347,7 +347,7 @@
   </div>
 </template>
 
-<script>
+<script >
 import GreenHouseService from '@/api/services/GreenHouseService';
 import { timestamp } from '@vueuse/core';
 
@@ -358,6 +358,7 @@ var changed = false
 export default {
   data() {
     return {
+      ghouseid: null,
       greenhouseName: 'Default Greenhouse',
       showUploadDialog: false,
       selectedFile: null,
@@ -474,6 +475,21 @@ export default {
   },
   mounted() {
     window.addEventListener('scroll', this.updatePlantInfoPosition);
+    this.ghouseid = this.$route.params.id;
+    console.log("TU JE ID:", this.ghouseid);
+
+    if (this.ghouseid) {
+      GreenHouseService.getGreenHouseById(this.ghouseid)
+        .then(response => {
+          // napr. ulož názov skleníka
+          this.greenhouseName = response.data.name;
+          console.log("Načítaný skleník:", response.data);
+        })
+        .catch(error => {
+          console.error("Chyba pri načítaní skleníka:", error);
+        });
+    }
+
   },
   beforeUnmount() {
     window.removeEventListener('scroll', this.updatePlantInfoPosition);

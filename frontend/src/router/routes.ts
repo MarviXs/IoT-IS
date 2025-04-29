@@ -154,6 +154,10 @@ const routes: RouteRecordRaw[] = [
         path: '/editor/',
         component: () => import('pages/editor/FlowerpotEditor.vue'),
       },
+      {
+        path: '/editor/:id',
+        component: () => import('pages/editor/FlowerpotEditor.vue'),
+      },
     ],
   },
   {

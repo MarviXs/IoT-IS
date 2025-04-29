@@ -459,5 +459,15 @@
   },
   "editor":{
     "label": "Plant editor"
+  },
+  "greenhouse": {
+    "label": "Greenhouse",
+    "add_greenhouse": "Add greenhouse",
+    "name": "Name",
+    "width": "Width",
+    "height": "Height",
+    "created_at": "Created at",
+    "edit": "Edit",
+    "delete": "Delete"
   }
 }
