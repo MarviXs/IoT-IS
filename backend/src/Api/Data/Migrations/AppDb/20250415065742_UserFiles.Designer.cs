@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Fei.Is.Api.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Fei.Is.Api.Data.Migrations.AppDb
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250415065742_UserFiles")]
+    partial class UserFiles
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -363,9 +366,6 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("DeviceType")
-                        .HasColumnType("integer");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -782,15 +782,6 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("BulbPlantingDistanceCm")
-                        .HasColumnType("text");
-
-                    b.Property<string>("BulbPlantingPeriod")
-                        .HasColumnType("text");
-
-                    b.Property<string>("BulbPlantingRequirementSqM")
-                        .HasColumnType("text");
-
                     b.Property<Guid>("CategoryId")
                         .HasColumnType("uuid");
 
@@ -801,21 +792,6 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("CultivationTemperatureC")
-                        .HasColumnType("text");
-
-                    b.Property<string>("CultivationTimeForBulbsWeeks")
-                        .HasColumnType("text");
-
-                    b.Property<string>("CultivationTimeFromYoungPlant")
-                        .HasColumnType("text");
-
-                    b.Property<string>("CultivationTimeSowingToPlant")
-                        .HasColumnType("text");
-
-                    b.Property<string>("CultivationTimeVegetableWeek")
-                        .HasColumnType("text");
-
                     b.Property<string>("CzechName")
                         .HasColumnType("text");
 
@@ -825,45 +801,15 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.Property<string>("FlowerLeafDescription")
                         .HasColumnType("text");
 
-                    b.Property<bool?>("FlowersInFirstYear")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("GerminationTemperatureC")
-                        .HasColumnType("text");
-
-                    b.Property<string>("GerminationTimeDays")
-                        .HasColumnType("text");
-
-                    b.Property<bool?>("GrowthInhibitorsUsed")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("HeightCm")
-                        .HasColumnType("text");
-
                     b.Property<string>("LatinName")
                         .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("NaturalFloweringMonth")
-                        .HasColumnType("text");
-
-                    b.Property<string>("NumberOfBulbsPerPot")
                         .HasColumnType("text");
 
                     b.Property<string>("PLUCode")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("PlantSpacingCm")
-                        .HasColumnType("text");
-
-                    b.Property<string>("PlantingDensity")
-                        .HasColumnType("text");
-
                     b.Property<string>("PotDiameterPack")
-                        .HasColumnType("text");
-
-                    b.Property<string>("PotSizeCm")
                         .HasColumnType("text");
 
                     b.Property<decimal?>("PricePerPiecePack")
@@ -871,21 +817,6 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.Property<decimal?>("RetailPrice")
                         .HasColumnType("numeric");
-
-                    b.Property<string>("SeedSpacingCM")
-                        .HasColumnType("text");
-
-                    b.Property<string>("SeedsMioHa")
-                        .HasColumnType("text");
-
-                    b.Property<string>("SeedsPerThousandPlants")
-                        .HasColumnType("text");
-
-                    b.Property<string>("SeedsPerThousandPots")
-                        .HasColumnType("text");
-
-                    b.Property<string>("SowingPeriod")
-                        .HasColumnType("text");
 
                     b.Property<Guid>("SupplierId")
                         .HasColumnType("uuid");
@@ -1515,15 +1446,9 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.Property<Guid>("DeviceTemplateId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Group")
-                        .HasColumnType("text");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<int>("Order")
-                        .HasColumnType("integer");
 
                     b.Property<string>("Tag")
                         .IsRequired()

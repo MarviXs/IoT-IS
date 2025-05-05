@@ -8,6 +8,16 @@
         unelevated
         no-caps
         size="15px"
+        label="Import Template"
+        :icon="mdiPlus"
+        @click="importTemplateDialogOpen = true"
+      />
+      <q-btn
+        class="shadow col-grow col-lg-auto"
+        color="primary"
+        unelevated
+        no-caps
+        size="15px"
         label="Create Template"
         :icon="mdiPlus"
         to="/device-templates/create"
@@ -63,6 +73,7 @@
     :template-id="deleteTemplateId"
     @on-deleted="getTemplates(pagination)"
   />
+  <ImportDeviceTemplateDialog v-model="importTemplateDialogOpen" @on-imported="getTemplates(pagination)" />
 </template>
 
 <script setup lang="ts">
@@ -78,6 +89,7 @@ import { handleError } from '@/utils/error-handler';
 import { DeviceTemplatesQueryParams, DeviceTemplatesResponse } from '@/api/services/DeviceTemplateService';
 import { QTableProps } from 'quasar';
 import DeleteDeviceTemplateDialog from '@/components/device-templates/DeleteDeviceTemplateDialog.vue';
+import ImportDeviceTemplateDialog from '@/components/device-templates/ImportDeviceTemplateDialog.vue';
 import { watchDebounced } from '@vueuse/core';
 
 const { t, locale } = useI18n();
@@ -94,9 +106,10 @@ const pagination = ref<PaginationClient>({
 const templatesPaginated = ref<DeviceTemplatesResponse>();
 const templates = computed(() => templatesPaginated.value?.items ?? []);
 
+const importTemplateDialogOpen = ref(false);
+
 const loadingTemplates = ref(false);
 const deleteDialogOpen = ref(false);
-
 const deleteTemplateId = ref<string>();
 
 async function getTemplates(paginationTable: PaginationTable) {

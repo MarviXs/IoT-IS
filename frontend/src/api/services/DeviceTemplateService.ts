@@ -11,6 +11,9 @@ export type CreateDeviceTemplateRequest =
 export type UpdateDeviceTemplateRequest =
   paths['/device-templates/{id}']['put']['requestBody']['content']['application/json'];
 
+export type ImportDeviceTemplateRequest =
+  paths['/device-templates/import']['post']['requestBody']['content']['application/json'];
+
 class DeviceTemplateService {
   async getDeviceTemplates(queryParams: DeviceTemplatesQueryParams) {
     return await client.GET('/device-templates', { params: { query: queryParams } });
@@ -30,6 +33,10 @@ class DeviceTemplateService {
 
   async deleteDeviceTemplate(deviceTemplateId: string) {
     return await client.DELETE('/device-templates/{id}', { params: { path: { id: deviceTemplateId } } });
+  }
+
+  async importDeviceTemplate(body: ImportDeviceTemplateRequest) {
+    return await client.POST('/device-templates/import', { body });
   }
 }
 

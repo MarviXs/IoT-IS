@@ -8,7 +8,7 @@
         ref="dataTagNameRef"
         v-model="dataPointTag.name"
         :rules="nameRules"
-        class="col-12 col-md-6 col-lg-grow"
+        class="col-12 col-md-12 col-lg-grow"
         :label="t('global.name')"
       />
       <q-input
@@ -25,6 +25,7 @@
         class="col-12 col-md-6 col-lg-2"
         :label="t('device.unit')"
       />
+      <q-input ref="groupRef" v-model="dataPointTag.group" class="col-12 col-md-6 col-lg-2" label="Group" />
       <q-input
         ref="decimalRef"
         v-model.number="dataPointTag.accuracyDecimals"
@@ -37,14 +38,14 @@
       />
       <div class="col-12 col-lg-shrink self-center flex items-center">
         <q-space></q-space>
-        <q-btn flat round color="grey-color" :icon="mdiTrashCanOutline" @click="emit('remove')" />
+        <q-btn flat round color="grey-color" :icon="mdiCloseCircle" @click="emit('remove')" />
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { mdiTrashCanOutline } from '@quasar/extras/mdi-v7';
+import { mdiCloseCircle } from '@quasar/extras/mdi-v7';
 import { QInput } from 'quasar';
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -56,6 +57,7 @@ export type SensorFormData = {
   name: string;
   unit?: string | null;
   accuracyDecimals?: number | null;
+  group?: string | null;
 };
 
 const dataPointTag = defineModel<SensorFormData>({

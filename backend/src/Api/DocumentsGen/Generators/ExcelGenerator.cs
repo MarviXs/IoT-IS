@@ -20,14 +20,9 @@ namespace Fei.Is.Api.DocumentsGen.Generators
         private char decimalSeparator = Convert.ToChar(Thread.CurrentThread.CurrentCulture.NumberFormat.NumberDecimalSeparator);
         private short numberCellDataFormat;
         private short dateCellDataFormat;
-        public override string ApplyFields(string documentPath, JToken values)
+        public override string ApplyFields(FileStream fileStream, string newFileName, JToken values)
         {
-            XSSFWorkbook wb;
-
-            using (FileStream fs = new FileStream(documentPath, FileMode.Open, FileAccess.Read))
-            {
-                wb = new XSSFWorkbook(fs);
-            }
+            XSSFWorkbook wb = new XSSFWorkbook(fileStream);
 
             numberCellDataFormat = wb.CreateDataFormat().GetFormat($"0{decimalSeparator}00");
             dateCellDataFormat = wb.CreateDataFormat().GetFormat("dd/MM/yyyy");
@@ -41,7 +36,7 @@ namespace Fei.Is.Api.DocumentsGen.Generators
 
             XSSFFormulaEvaluator.EvaluateAllFormulaCells(wb);
 
-            string newDocumentPath = Path.Combine(Path.GetTempPath(), Path.GetFileName(documentPath));
+            string newDocumentPath = Path.Combine(Path.GetTempPath(), newFileName);
             using (var fs = new FileStream(newDocumentPath, FileMode.Create, FileAccess.Write))
             {
                 wb.Write(fs);

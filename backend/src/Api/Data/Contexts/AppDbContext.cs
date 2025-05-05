@@ -64,6 +64,7 @@ public class AppDbContext
         modelBuilder.ApplyConfiguration(new OrderItemContainerConfiguration());
         modelBuilder.ApplyConfiguration(new VATCategoryConfiguration());
         modelBuilder.ApplyConfiguration(new SystemSettingConfiguration());
+        modelBuilder.ApplyConfiguration(new UserFileConfiguration());
     }
 
     //IoT tables
@@ -102,6 +103,7 @@ public class AppDbContext
     public DbSet<WorkDayDetail> WorkDayDetails { get; set; }
     public DbSet<WorkReport> WorkReports { get; set; }
     public DbSet<OrderItemContainer> OrderItemContainers { get; set; }
+    public DbSet<UserFile> UserFiles { get; set; }
 
     public override int SaveChanges()
     {

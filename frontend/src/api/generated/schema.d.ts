@@ -618,6 +618,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/device-templates/import": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Import a device template */
+        post: operations["ImportDeviceTemplate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/devices/{deviceId}/jobs/active": {
         parameters: {
             query?: never;
@@ -1334,6 +1351,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/templates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Update an document template */
+        put: operations["UpdateTemplate"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/vat-category": {
         parameters: {
             query?: never;
@@ -1574,6 +1608,8 @@ export interface components {
         /** @enum {string} */
         "Fei.Is.Api.Data.Enums.DeviceSharePermission": "Editor" | "Viewer";
         /** @enum {string} */
+        "Fei.Is.Api.Data.Enums.DeviceType": "Generic" | "NuviaMSU";
+        /** @enum {string} */
         "Fei.Is.Api.Data.Enums.JobStatusEnum": "JOB_QUEUED" | "JOB_IN_PROGRESS" | "JOB_PAUSED" | "JOB_SUCCEEDED" | "JOB_REJECTED" | "JOB_FAILED" | "JOB_TIMED_OUT" | "JOB_CANCELED";
         /** @enum {string} */
         "Fei.Is.Api.Data.Enums.NotificationSeverity": "Info" | "Warning" | "Serious" | "Critical";
@@ -1581,6 +1617,11 @@ export interface components {
         "Fei.Is.Api.Data.Enums.Role": "Admin" | "User";
         /** @enum {string} */
         "Fei.Is.Api.Data.Enums.SceneActionType": "JOB" | "NOTIFICATION";
+        /**
+         * Format: int32
+         * @enum {integer}
+         */
+        "Fei.Is.Api.Data.Models.InformationSystem.FileIdentifier": 0 | 1 | 2;
         "Fei.Is.Api.Features.AdminUserManagement.Commands.UpdateUserEmail.Request": {
             email: string;
         };
@@ -1785,14 +1826,40 @@ export interface components {
         };
         "Fei.Is.Api.Features.DeviceTemplates.Commands.CreateDeviceTemplate.Request": {
             name: string;
+            deviceType: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceType"];
+        };
+        "Fei.Is.Api.Features.DeviceTemplates.Commands.ImportDeviceTemplate.DeviceCommandRequest": {
+            displayName: string;
+            name: string;
+            params: number[];
+        };
+        "Fei.Is.Api.Features.DeviceTemplates.Commands.ImportDeviceTemplate.Request": {
+            templateData: components["schemas"]["Fei.Is.Api.Features.DeviceTemplates.Commands.ImportDeviceTemplate.TemplateRequest"];
+            version: string;
+        };
+        "Fei.Is.Api.Features.DeviceTemplates.Commands.ImportDeviceTemplate.SensorRequest": {
+            tag: string;
+            name: string;
+            unit?: string | null;
+            /** Format: int32 */
+            accuracyDecimals?: number | null;
+            group?: string | null;
+        };
+        "Fei.Is.Api.Features.DeviceTemplates.Commands.ImportDeviceTemplate.TemplateRequest": {
+            name: string;
+            commands: components["schemas"]["Fei.Is.Api.Features.DeviceTemplates.Commands.ImportDeviceTemplate.DeviceCommandRequest"][];
+            sensors: components["schemas"]["Fei.Is.Api.Features.DeviceTemplates.Commands.ImportDeviceTemplate.SensorRequest"][];
+            deviceType: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceType"];
         };
         "Fei.Is.Api.Features.DeviceTemplates.Commands.UpdateDeviceTemplate.Request": {
             name: string;
+            deviceType: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceType"];
         };
         "Fei.Is.Api.Features.DeviceTemplates.Queries.GetDeviceTemplateById.Response": {
             /** Format: uuid */
             id: string;
             name: string;
+            deviceType: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceType"];
         };
         "Fei.Is.Api.Features.DeviceTemplates.Queries.GetDeviceTemplates.Response": {
             /** Format: uuid */
@@ -1839,12 +1906,16 @@ export interface components {
             unit?: string | null;
             /** Format: int32 */
             accuracyDecimals?: number | null;
+            /** Format: int32 */
+            order: number;
+            group?: string | null;
         };
         "Fei.Is.Api.Features.Devices.Queries.GetDeviceById.TemplateResponse": {
             /** Format: uuid */
             id: string;
             name: string;
             sensors: components["schemas"]["Fei.Is.Api.Features.Devices.Queries.GetDeviceById.SensorResponse"][];
+            deviceType: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceType"];
         };
         "Fei.Is.Api.Features.Devices.Queries.GetDevices.Response": {
             /** Format: uuid */
@@ -2479,6 +2550,7 @@ export interface components {
             unit?: string | null;
             /** Format: int32 */
             accuracyDecimals?: number | null;
+            group?: string | null;
         };
         "Fei.Is.Api.Features.Sensors.Commands.UpdateSensor.Request": {
             tag: string;
@@ -2486,6 +2558,7 @@ export interface components {
             unit?: string | null;
             /** Format: int32 */
             accuracyDecimals?: number | null;
+            group?: string | null;
         };
         "Fei.Is.Api.Features.Sensors.Queries.GetDeviceTemplateSensors.Response": {
             /** Format: uuid */
@@ -2495,6 +2568,9 @@ export interface components {
             unit?: string | null;
             /** Format: int32 */
             accuracyDecimals?: number | null;
+            /** Format: int32 */
+            order: number;
+            group?: string | null;
         };
         "Fei.Is.Api.Features.Sensors.Queries.GetSensorById.Response": {
             /** Format: uuid */
@@ -2504,6 +2580,11 @@ export interface components {
             unit?: string | null;
             /** Format: int32 */
             accuracyDecimals?: number | null;
+        };
+        "Fei.Is.Api.Features.Templates.Commands.UpdateTemplate.Request": {
+            /** Format: binary */
+            file: string;
+            identifier: components["schemas"]["Fei.Is.Api.Data.Models.InformationSystem.FileIdentifier"];
         };
         "Fei.Is.Api.Features.UserManagement.Queries.GetUserById.Response": {
             /** Format: uuid */
@@ -4151,6 +4232,39 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["Fei.Is.Api.Features.DeviceTemplates.Commands.CreateDeviceTemplate.Request"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+        };
+    };
+    ImportDeviceTemplate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.DeviceTemplates.Commands.ImportDeviceTemplate.Request"];
             };
         };
         responses: {
@@ -5993,6 +6107,45 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Fei.Is.Api.Features.ProductCategories.Queries.GetSupplierById.Response"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UpdateTemplate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Fei.Is.Api.Features.Templates.Commands.UpdateTemplate.Request"];
+                "application/x-www-form-urlencoded": components["schemas"]["Fei.Is.Api.Features.Templates.Commands.UpdateTemplate.Request"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
                 };
             };
             /** @description Not Found */
