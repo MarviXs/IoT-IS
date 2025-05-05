@@ -18,6 +18,7 @@ namespace Fei.Is.Api.Features.Products.Commands
         // Rozšírený Request record s novými vlastnosťami pre Product
         public record Request(
             string PLUCode,
+            string? EANCode,
             string? Code,
             string LatinName,
             string? CzechName,
@@ -31,6 +32,10 @@ namespace Fei.Is.Api.Features.Products.Commands
             Guid CategoryId,
             Guid? SupplierId,
             Guid? VATCategoryId,
+            string? CCode,
+            string? Country,
+            string? City,
+            int? GreenhouseNumber,
             // Nové vlastnosti:
             string? HeightCm,
             string? SeedsPerThousandPlants,
@@ -134,6 +139,11 @@ namespace Fei.Is.Api.Features.Products.Commands
                 product.PricePerPiecePack = message.Request.PricePerPiecePack;
                 product.DiscountedPriceWithoutVAT = message.Request.DiscountedPriceWithoutVAT;
                 product.RetailPrice = message.Request.RetailPrice;
+                product.CCode = message.Request.CCode;
+                product.Country = message.Request.Country;
+                product.City = message.Request.City;
+                product.GreenhouseNumber = message.Request.GreenhouseNumber;
+            
 
                 // Aktualizácia kategórie, ak sa zmenila
                 if (message.Request.CategoryId != product.Category.Id)

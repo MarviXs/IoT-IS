@@ -16,6 +16,29 @@ namespace Fei.Is.Api.Features.Products.Commands;
 public static class CreateProductsFromList
 {
     public record Request(List<ProductRequest> Products);
+    public static class EanGenerator
+    {
+        private const string Prefix = "859"; // GS1 prefix pro ČR/SR
+
+
+        public static string GenerateEan13FromPlu(string pluCode)
+        {
+            var paddedPlu = pluCode.PadLeft(9, '0');
+            var baseCode = Prefix + paddedPlu;
+
+            int sum = 0;
+            for (int i = 0; i < baseCode.Length; i++)
+            {
+                int digit = baseCode[i] - '0';
+                sum += digit * ((i % 2 == 0) ? 1 : 3);
+            }
+
+            var mod = sum % 10;
+            var checkDigit = mod == 0 ? 0 : 10 - mod;
+
+            return baseCode + checkDigit;
+        }
+    }
 
     public record ProductRequest(
         string? Code,
@@ -85,10 +108,13 @@ public static class CreateProductsFromList
 
             await context.Products.AddRangeAsync(
                 message.Request.Products.Select(item =>
-                {
+                {   
+                    var pluCode = pluCodeService.GetPLUCode();
+                    var eanCode = EanGenerator.GenerateEan13FromPlu(pluCode);
                     var product = new Product()
                     {
-                        PLUCode = pluCodeService.GetPLUCode(),
+                        PLUCode = pluCode,
+                        EANCode = eanCode,
                         Code = item.Code,
                         LatinName = item.LatinName,
                         CzechName = item.CzechName,

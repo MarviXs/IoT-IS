@@ -1062,6 +1062,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/products/ean/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a product's EAN code by id */
+        get: operations["GetProductEan"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/products/passport/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a product passport by id (Latin name + location details) */
+        get: operations["GetProductPassport"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/products": {
         parameters: {
             query?: never;
@@ -2079,6 +2113,7 @@ export interface components {
         "Fei.Is.Api.Features.Products.Commands.CreateProduct.Request": {
             code?: string | null;
             pluCode?: string | null;
+            eanCode?: string | null;
             latinName: string;
             czechName?: string | null;
             flowerLeafDescription?: string | null;
@@ -2098,6 +2133,10 @@ export interface components {
             variety: string;
             /** Format: uuid */
             vatCategoryId: string;
+            country?: string | null;
+            city?: string | null;
+            /** Format: int32 */
+            greenhouseNumber?: number | null;
             heightCm?: string | null;
             seedsPerThousandPlants?: string | null;
             seedsPerThousandPots?: string | null;
@@ -2148,6 +2187,7 @@ export interface components {
         };
         "Fei.Is.Api.Features.Products.Commands.UpdateProduct.Request": {
             pluCode: string;
+            eanCode?: string | null;
             code?: string | null;
             latinName: string;
             czechName?: string | null;
@@ -2168,6 +2208,11 @@ export interface components {
             supplierId?: string | null;
             /** Format: uuid */
             vatCategoryId?: string | null;
+            cCode?: string | null;
+            country?: string | null;
+            city?: string | null;
+            /** Format: int32 */
+            greenhouseNumber?: number | null;
             heightCm?: string | null;
             seedsPerThousandPlants?: string | null;
             seedsPerThousandPots?: string | null;
@@ -2199,6 +2244,7 @@ export interface components {
         };
         "Fei.Is.Api.Features.Products.Queries.GetProductById.Response": {
             pluCode: string;
+            eanCode?: string | null;
             code?: string | null;
             latinName: string;
             czechName?: string | null;
@@ -2214,6 +2260,11 @@ export interface components {
             supplier: components["schemas"]["Fei.Is.Api.Features.Products.Queries.GetProductById.SupplierModel"];
             variety: string;
             vatCategory: components["schemas"]["Fei.Is.Api.Features.Products.Queries.GetProductById.VatCategoryModel"];
+            cCode?: string | null;
+            country?: string | null;
+            city?: string | null;
+            /** Format: int32 */
+            greenhouseNumber?: number | null;
             heightCm?: string | null;
             seedsPerThousandPlants?: string | null;
             seedsPerThousandPots?: string | null;
@@ -2249,6 +2300,18 @@ export interface components {
             name: string;
             /** Format: double */
             rate: number;
+        };
+        "Fei.Is.Api.Features.Products.Queries.GetProductEan.Response": {
+            eanCode: string;
+        };
+        "Fei.Is.Api.Features.Products.Queries.GetProductPassport.Response": {
+            latinName: string;
+            gardeningIdNumber: string;
+            codeForPassportC: string;
+            country: string;
+            city: string;
+            /** Format: int32 */
+            greenhouseNumber: number;
         };
         "Fei.Is.Api.Features.Products.Queries.GetProducts.Response": {
             /** Format: uuid */
@@ -5079,6 +5142,64 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GetProductEan: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.Products.Queries.GetProductEan.Response"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GetProductPassport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.Products.Queries.GetProductPassport.Response"];
+                };
             };
             /** @description Not Found */
             404: {

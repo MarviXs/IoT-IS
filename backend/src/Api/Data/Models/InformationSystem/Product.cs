@@ -5,6 +5,7 @@ namespace Fei.Is.Api.Data.Models.InformationSystem
     public class Product : BaseModel
     {
         public string PLUCode { get; set; }
+        public string EANCode { get; set; }
         public string? Code { get; set; }
         public string LatinName { get; set; }
         public string? CzechName { get; set; }
@@ -17,6 +18,10 @@ namespace Fei.Is.Api.Data.Models.InformationSystem
         public string Variety { get; set; }
         public Supplier Supplier { get; set; }
         public VATCategory VATCategory { get; set; }
+        public string? CCode { get; set; }
+        public string? Country { get; set; }
+        public string? City { get; set; }
+        public int? GreenhouseNumber { get; set; }
 
         public string? HeightCm { get; set; }
         public string? SeedsPerThousandPlants { get; set; }

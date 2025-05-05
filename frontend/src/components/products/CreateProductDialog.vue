@@ -25,6 +25,7 @@ const { t } = useI18n();
 const product = ref<ProductFormData>({
   code: '',
   pluCode: undefined,
+  eanCode: undefined,
   latinName: '',
   czechName: undefined,
   flowerLeafDescription: undefined,
@@ -36,6 +37,10 @@ const product = ref<ProductFormData>({
   category: undefined,
   supplier: undefined,
   vatCategory: undefined,
+  cCode: undefined,
+  country: undefined,
+  city: undefined,
+  greenhouseNumber: undefined,
   // Nové vlastnosti – predvolené hodnoty (pre text sú prázdny reťazec, pre booleans false)
   heightCm: '',
   seedsPerThousandPlants: '',
@@ -81,6 +86,10 @@ async function createProduct() {
     categoryId: product.value.category?.id!,
     vatCategoryId: product.value.vatCategory?.id!,
     supplierId: product.value.supplier?.id!,
+    cCode: product.value.cCode,
+    country: product.value.country,
+    city: product.value.city,
+    greenhouseNumber: product.value.greenhouseNumber,
     // Nové vlastnosti:
     heightCm: product.value.heightCm,
     seedsPerThousandPlants: product.value.seedsPerThousandPlants,
