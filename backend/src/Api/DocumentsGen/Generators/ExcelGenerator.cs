@@ -1,17 +1,7 @@
-﻿using System.Runtime.InteropServices.JavaScript;
-using System.Text.Json.Nodes;
-using System.Text.RegularExpressions;
-using MathNet.Numerics.Distributions;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Newtonsoft.Json;
+﻿using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
-using NPOI.HPSF;
-using NPOI.HSSF.UserModel;
-using NPOI.POIFS.NIO;
 using NPOI.SS.UserModel;
-using NPOI.XSSF.Streaming;
 using NPOI.XSSF.UserModel;
-using Stubble.Core.Interfaces;
 
 namespace Fei.Is.Api.DocumentsGen.Generators
 {
@@ -27,12 +17,24 @@ namespace Fei.Is.Api.DocumentsGen.Generators
             numberCellDataFormat = wb.CreateDataFormat().GetFormat($"0{decimalSeparator}00");
             dateCellDataFormat = wb.CreateDataFormat().GetFormat("dd/MM/yyyy");
 
+
             for (int i = 0; i < wb.NumberOfSheets; i++)
             {
                 ISheet sheet = wb.GetSheetAt(i);
 
                 ProcessSheet(sheet, values, sheet.GetRow(sheet.FirstRowNum), sheet.GetRow(sheet.LastRowNum));
+
+                var draw = sheet.DrawingPatriarch as XSSFDrawing;
+
+                if (draw == null)
+                    continue;
+
+                var shapes = draw?.GetShapes();
+
+                ProcessImages(sheet, shapes, wb);
             }
+
+
 
             XSSFFormulaEvaluator.EvaluateAllFormulaCells(wb);
 
@@ -43,6 +45,62 @@ namespace Fei.Is.Api.DocumentsGen.Generators
             }
 
             return newDocumentPath;
+        }
+
+        private void ProcessImages(ISheet sheet, List<XSSFShape> shapes, IWorkbook wb)
+        {
+            if (shapes.Count == 0)
+                return;
+
+
+            List<XSSFPicture> pictures = shapes
+                .Where(shape => shape is XSSFPicture)
+                .Select(shape => (XSSFPicture)shape)
+                .ToList();
+
+            XSSFCreationHelper creationHelper = wb.GetCreationHelper() as XSSFCreationHelper;
+
+            foreach (IRow row in sheet)
+            {
+                foreach (ICell cell in row)
+                {
+                    if (cell.CellType == CellType.String && Regex.IsMatch(cell.StringCellValue, REGEX_IMAGE_PATTERN))
+                    {
+                        string cellValue = cell.StringCellValue;
+                        string imageName = Regex.Match(cellValue, REGEX_IMAGE_PATTERN).Groups[1].Value;
+
+                        XSSFPicture picture = pictures.FirstOrDefault(p => p.ShapeName.Equals(imageName));
+
+                        if (picture is null)
+                            continue;
+
+                        XSSFClientAnchor anchor = creationHelper.CreateClientAnchor() as XSSFClientAnchor;
+                        anchor.Col1 = cell.ColumnIndex;
+                        anchor.Col2 = cell.ColumnIndex + picture.ClientAnchor.Col2 - picture.ClientAnchor.Col1;
+                        anchor.Row1 = cell.RowIndex;
+                        anchor.Row2 = cell.RowIndex + picture.ClientAnchor.Row2 - picture.ClientAnchor.Row1;
+                        anchor.Dx1 = picture.ClientAnchor.Dx1;
+                        anchor.Dx2 = picture.ClientAnchor.Dx2;
+                        anchor.Dy1 = picture.ClientAnchor.Dy1;
+                        anchor.Dy2 = picture.ClientAnchor.Dy2;
+
+                        int pictureIndex = wb.AddPicture(picture.PictureData.Data, picture.PictureData.PictureType);
+                        sheet.DrawingPatriarch.CreatePicture(anchor, pictureIndex);
+
+                        cell.SetCellValue("");
+                    }
+                }
+            }
+
+            foreach (XSSFPicture xssfPicture in pictures)
+            {
+                XSSFDrawing drawing = xssfPicture.GetDrawing();
+                String rId = xssfPicture.GetCTPicture().blipFill.blip.embed;
+                drawing.GetPackagePart().RemoveRelationship(rId);
+                drawing.GetPackagePart().Package.DeletePartRecursive(drawing.GetRelationById(rId).GetPackagePart().PartName);
+
+                drawing.GetCTDrawing().CellAnchors.RemoveAll(x => x.picture.blipFill.blip.embed == rId);
+            }
         }
 
         private void ProcessSheet(ISheet sheet, JToken values, IRow startRow, IRow endRow)
@@ -172,6 +230,9 @@ namespace Fei.Is.Api.DocumentsGen.Generators
             }
             if (cell != null && cell.CellType == CellType.String && Regex.IsMatch(cell.StringCellValue, REGEX_LIST_ITEM_PATTERN))
             {
+                if (Regex.IsMatch(cell.StringCellValue, REGEX_IMAGE_PATTERN))
+                    return;
+
                 string cellValue = cell.StringCellValue;
 
                 cellValue = cellValue.Remove(cellValue.IndexOf("{{") + 2, 1);
@@ -200,13 +261,23 @@ namespace Fei.Is.Api.DocumentsGen.Generators
             }
             else
             {
+                if (Regex.IsMatch(cellValue, REGEX_IMAGE_PATTERN))
+                    return;
+
                 cell.SetCellValue(renderedString);
             }
         }
 
         private void DeleteRow(ISheet sheet, IRow row)
         {
-            sheet.ShiftRows(row.RowNum + 1, sheet.LastRowNum, -1);
+            if (row.RowNum == sheet.LastRowNum)
+            {
+                sheet.RemoveRow(row);
+            }
+            else
+            {
+                sheet.ShiftRows(row.RowNum + 1, sheet.LastRowNum, -1);
+            }
         }
     }
 }

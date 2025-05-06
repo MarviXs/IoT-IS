@@ -44,6 +44,10 @@ class OrdersService {
   async downloadOrderTemplate(orderId: string) {
     return await client.GET('/orders/{id}/download', { params: { path: { id: orderId } }, parseAs: 'stream' });
   }
+
+  async downloadPlantsPassports(orderId: string) {
+    return await client.GET('/orders/{id}/passports', { params: { path: { id: orderId } }, parseAs: 'stream' });
+  }
 }
 
 export default new OrdersService();

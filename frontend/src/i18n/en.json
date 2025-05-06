@@ -110,6 +110,7 @@
     "quotation_sheet": "Quotation sheet",
     "invoice": "Invoice",
     "order": "Order",
+    "passports": "Plant passports",
     "add_document": "Add document",
     "search_document": "Search",
     "toasts": {
@@ -477,7 +478,8 @@
       "transfer": "Transfer"
     },
     "details": "Order details",
-    "download_template": "Download template"
+    "download_quotation_sheet": "Download quotation sheet",
+    "download_plants_passports": "Download plants passports"
   },
   "order_item": {
     "id": "ID",

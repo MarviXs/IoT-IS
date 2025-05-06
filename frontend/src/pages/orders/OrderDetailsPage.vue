@@ -2,7 +2,7 @@
   <PageLayout
     :breadcrumbs="[
       { label: t('order.label', 2), to: '/orders' },
-      { label: order?.customerName || 'Order Details', to: `/orders/${orderId}` }
+      { label: order?.customerName || 'Order Details', to: `/orders/${orderId}` },
     ]"
   >
     <template #actions>
@@ -12,9 +12,19 @@
         unelevated
         no-caps
         size="15px"
-        :label="t('order.download_template')"
+        :label="t('order.download_quotation_sheet')"
         :icon="mdiDownload"
-        @click="downloadOrderTemplate"
+        @click="downloadQuotationSheet"
+      />
+      <q-btn
+        class="shadow col-grow col-lg-auto"
+        color="primary"
+        unelevated
+        no-caps
+        size="15px"
+        :label="t('order.download_plants_passports')"
+        :icon="mdiDownload"
+        @click="downloadPlantsPassports"
       />
     </template>
     <template #default>
@@ -117,11 +127,29 @@ onMounted(() => {
   refreshTable(); // Po úvodnom mount načítaj dáta
 });
 
-function downloadOrderTemplate() {
+function downloadQuotationSheet() {
   OrderService.downloadOrderTemplate(orderId).then((retVal) => {
     var contentDisposition = retVal.response.headers.get('Content-Disposition');
     var parts = contentDisposition?.split('filename=');
     var filename = parts?.length === 2 ? parts[1] : 'order_template.xlsx';
+
+    retVal.response.blob().then((blob) => {
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+  });
+}
+
+function downloadPlantsPassports() {
+  OrderService.downloadPlantsPassports(orderId).then((retVal) => {
+    var contentDisposition = retVal.response.headers.get('Content-Disposition');
+    var parts = contentDisposition?.split('filename=');
+    var filename = parts?.length === 2 ? parts[1] : 'plants_passports.xlsx';
 
     retVal.response.blob().then((blob) => {
       const url = window.URL.createObjectURL(blob);
@@ -202,7 +230,7 @@ function openDeleteContainerDialog(containerId: string) {
 function handleRefreshSummary() {
   summaryRefreshKey.value++;
 }
-  
+
 const currentOrderId = orderId;
 </script>
 

@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.RegularExpressions;
 
 namespace Fei.Is.Api.Data.Models.InformationSystem;
 
@@ -81,4 +82,27 @@ public class Order : BaseModel
         }
         set { }
     }
+
+    [NotMapped]
+    public List<PlantPassport> Passports
+    {
+        get
+        {
+            List<Product> products = ItemContainers.SelectMany(i => i.Items.Select(i => i.Product)).ToList();
+            return products.GroupBy(p => new { p.CCode, p.Country }).Select(g =>
+            {
+                var latinNames = g.Select(p => new NameContainer(p.LatinName)).ToList();
+                var batchName = g.First().CCode;
+                var country = g.First().Country;
+                return new PlantPassport(latinNames, batchName, country);
+            }).ToList();
+        }
+        set { }
+    }
+
+    [NotMapped]
+    public record PlantPassport(List<NameContainer> NameContainers, string BatchName, string Country);
+
+    [NotMapped]
+    public record NameContainer(string LatinName);
 }

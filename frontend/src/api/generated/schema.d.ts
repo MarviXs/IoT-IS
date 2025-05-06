@@ -847,6 +847,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/orders/{id}/passports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Download plants passports */
+        get: operations["DownloadPlantsPassports"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/orders/{id}": {
         parameters: {
             query?: never;
@@ -1639,7 +1656,7 @@ export interface components {
          * Format: int32
          * @enum {integer}
          */
-        "Fei.Is.Api.Data.Models.InformationSystem.FileIdentifier": 0 | 1 | 2;
+        "Fei.Is.Api.Data.Models.InformationSystem.FileIdentifier": 0 | 1 | 2 | 3;
         "Fei.Is.Api.Features.AdminUserManagement.Commands.UpdateUserEmail.Request": {
             email: string;
         };
@@ -4719,6 +4736,26 @@ export interface operations {
         };
     };
     DownloadOrder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DownloadPlantsPassports: {
         parameters: {
             query?: never;
             header?: never;

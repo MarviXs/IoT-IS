@@ -46,8 +46,5 @@ namespace Fei.Is.Api.Data.Models.InformationSystem
         public bool? FlowersInFirstYear { get; set; }
         public bool? GrowthInhibitorsUsed { get; set; }
         public string? PlantingDensity { get; set; }
-        
-
-        // ...ďalšie polia podľa nepreškrtnutých názvov z vašej tabuľky...
     }
 }

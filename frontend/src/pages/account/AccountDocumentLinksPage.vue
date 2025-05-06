@@ -74,6 +74,18 @@
       "
       @onSubmit="handleDocumentLinkSubmit"
     />
+
+    <document-link-card
+      id="plant-passport"
+      :document-header="t('account.passports')"
+      :loading="loading"
+      :document-type="EDocumentIdentifier.PlantPassport"
+      :file-name="
+        userTemplates.find((template) => template.identifier == EDocumentIdentifier[EDocumentIdentifier.PlantPassport])
+          ?.fileName || ''
+      "
+      @onSubmit="handleDocumentLinkSubmit"
+    />
   </page-layout>
   <!-- <CreateDocumentDialog v-model="isCreateDialogOpen" /> -->
 </template>
