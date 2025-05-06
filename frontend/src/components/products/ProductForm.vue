@@ -5,6 +5,12 @@
       <q-input v-model="product.code" class="col-12" :label="t('product.code')" clearable />
       <q-input v-model="product.pluCode" class="col-12" :label="t('product.pluCode')" clearable />
       <q-input
+        v-model="product.eanCode"
+        class="col-12"
+        :label="t('product.eanCode')"
+        clearable
+      />
+      <q-input
         v-model="product.latinName"
         class="col-12"
         :label="t('product.latin_name')"
@@ -54,6 +60,33 @@
       <CategorySelect v-model="product.category" />
       <SuppliersSelect v-model="product.supplier" />
       <VATCategoriesSelect v-model="product.vatCategory" />
+
+      <q-input
+        v-model="product.cCode"
+        class="col-12"
+        :label="t('product.CCode')"
+        clearable
+      />
+      <q-input
+        v-model="product.country"
+        class="col-12"
+        :label="t('product.country')"
+        clearable
+      />
+      <q-input
+        v-model="product.city"
+        class="col-12"
+        :label="t('product.city')"
+        clearable
+      />
+      <q-input
+        v-model="product.greenhouseNumber"
+        class="col-12"
+        :label="t('product.greenhouseNumber')"
+        :type="'number'"
+        clearable
+      />
+      
 
       <!-- Kolaps pre Additional Details -->
       <q-expansion-item
@@ -329,6 +362,7 @@ import { mdiChevronDown } from '@quasar/extras/mdi-v7';
 export interface ProductFormData {
   code: string | null | undefined;
   pluCode: string | null | undefined;
+  eanCode: string | null | undefined;
   latinName: string;
   czechName: string | null | undefined;
   flowerLeafDescription: string | null | undefined;
@@ -340,6 +374,10 @@ export interface ProductFormData {
   category: CategorySelectData | undefined;
   supplier: SupplierSelectData | undefined;
   vatCategory: VATCategorySelectData | undefined;
+  cCode: string | null | undefined;
+  country: string | null | undefined;
+  city: string | null | undefined;
+  greenhouseNumber: number | null | undefined;
   // Nové vlastnosti
   heightCm: string | null | undefined;
   seedsPerThousandPlants: string | null | undefined;
@@ -377,6 +415,7 @@ const product = defineModel<ProductFormData>({
   default: () => ({
     code: '',
     pluCode: '',
+    eanCode: '',
     latinName: '',
     czechName: '',
     flowerLeafDescription: '',
@@ -388,6 +427,10 @@ const product = defineModel<ProductFormData>({
     category: undefined,
     supplier: undefined,
     vatCategory: undefined,
+    cCode: undefined,
+    country: undefined,
+    city: undefined,
+    greenhouseNubmer: undefined,
     // Nové polia
     heightCm: '',
     seedsPerThousandPlants: '',

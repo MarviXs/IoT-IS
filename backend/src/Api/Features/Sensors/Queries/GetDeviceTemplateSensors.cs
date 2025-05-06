@@ -58,6 +58,7 @@ public static class GetDeviceTemplateSensors
             var templateWithSensors = await context
                 .DeviceTemplates.Where(template => template.Id == request.TemplateId)
                 .Include(template => template.Sensors)
+                .AsNoTracking()
                 .SingleOrDefaultAsync(cancellationToken);
 
             if (templateWithSensors == null)
@@ -71,12 +72,21 @@ public static class GetDeviceTemplateSensors
             }
 
             var sensors = templateWithSensors
-                .Sensors.Select(sensor => new Response(sensor.Id, sensor.Tag, sensor.Name, sensor.Unit, sensor.AccuracyDecimals))
+                .Sensors.Select(sensor => new Response(
+                    sensor.Id,
+                    sensor.Tag,
+                    sensor.Name,
+                    sensor.Unit,
+                    sensor.AccuracyDecimals,
+                    sensor.Order,
+                    sensor.Group
+                ))
+                .OrderBy(sensor => sensor.Order)
                 .ToList();
 
             return Result.Ok(sensors);
         }
     }
 
-    public record Response(Guid Id, string Tag, string Name, string? Unit, int? AccuracyDecimals);
+    public record Response(Guid Id, string Tag, string Name, string? Unit, int? AccuracyDecimals, int Order, string? Group);
 }

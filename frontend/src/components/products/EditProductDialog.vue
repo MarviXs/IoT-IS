@@ -41,6 +41,7 @@ async function getProduct() {
   product.value = {
     code: data.code,
     pluCode: data.pluCode,
+    eanCode: data.eanCode,
     latinName: data.latinName,
     czechName: data.czechName,
     flowerLeafDescription: data.flowerLeafDescription,
@@ -52,6 +53,10 @@ async function getProduct() {
     category: data.category as ProductFormData['category'],
     supplier: data.supplier as ProductFormData['supplier'],
     vatCategory: data.vatCategory as ProductFormData['vatCategory'],
+    cCode: data.cCode,
+    country: data.country,
+    city: data.city,
+    greenhouseNumber: data.greenhouseNumber,
     // Nové vlastnosti
     heightCm: data.heightCm,
     seedsPerThousandPlants: data.seedsPerThousandPlants,
@@ -85,6 +90,7 @@ const productForm = ref();
 async function updateProduct() {
   const updateRequest: UpdateProductRequest = {
     pluCode: product.value.pluCode!,
+    eanCode: product.value.eanCode,
     code: product.value.code,
     latinName: product.value.latinName,
     czechName: product.value.czechName,
@@ -97,6 +103,10 @@ async function updateProduct() {
     categoryId: product.value.category!.id,
     vatCategoryId: product.value.vatCategory!.id,
     supplierId: product.value.supplier!.id,
+    cCode: product.value.cCode,
+    country: product.value.country,
+    city: product.value.city,
+    greenhouseNumber: product.value.greenhouseNumber,
     // Nové vlastnosti:
     heightCm: product.value.heightCm,
     seedsPerThousandPlants: product.value.seedsPerThousandPlants,

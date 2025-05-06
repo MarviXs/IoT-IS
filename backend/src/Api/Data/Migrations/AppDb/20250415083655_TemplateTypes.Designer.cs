@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Fei.Is.Api.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Fei.Is.Api.Data.Migrations.AppDb
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250415083655_TemplateTypes")]
+    partial class TemplateTypes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -791,20 +794,11 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.Property<string>("BulbPlantingRequirementSqM")
                         .HasColumnType("text");
 
-                    b.Property<string>("CCode")
-                        .HasColumnType("text");
-
                     b.Property<Guid>("CategoryId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("City")
-                        .HasColumnType("text");
-
                     b.Property<string>("Code")
                         .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Country")
                         .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
@@ -831,10 +825,6 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.Property<decimal?>("DiscountedPriceWithoutVAT")
                         .HasColumnType("numeric");
 
-                    b.Property<string>("EANCode")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<string>("FlowerLeafDescription")
                         .HasColumnType("text");
 
@@ -846,9 +836,6 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.Property<string>("GerminationTimeDays")
                         .HasColumnType("text");
-
-                    b.Property<int?>("GreenhouseNumber")
-                        .HasColumnType("integer");
 
                     b.Property<bool?>("GrowthInhibitorsUsed")
                         .HasColumnType("boolean");

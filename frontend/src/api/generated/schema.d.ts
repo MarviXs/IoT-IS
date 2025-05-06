@@ -618,6 +618,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/device-templates/import": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Import a device template */
+        post: operations["ImportDeviceTemplate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/devices/{deviceId}/jobs/active": {
         parameters: {
             query?: never;
@@ -1057,6 +1074,40 @@ export interface paths {
         post?: never;
         /** Delete a product */
         delete: operations["DeleteProduct"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/products/ean/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a product's EAN code by id */
+        get: operations["GetProductEan"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/products/passport/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a product passport by id (Latin name + location details) */
+        get: operations["GetProductPassport"];
+        put?: never;
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -1575,6 +1626,8 @@ export interface components {
         /** @enum {string} */
         "Fei.Is.Api.Data.Enums.DeviceSharePermission": "Editor" | "Viewer";
         /** @enum {string} */
+        "Fei.Is.Api.Data.Enums.DeviceType": "Generic" | "NuviaMSU";
+        /** @enum {string} */
         "Fei.Is.Api.Data.Enums.JobStatusEnum": "JOB_QUEUED" | "JOB_IN_PROGRESS" | "JOB_PAUSED" | "JOB_SUCCEEDED" | "JOB_REJECTED" | "JOB_FAILED" | "JOB_TIMED_OUT" | "JOB_CANCELED";
         /** @enum {string} */
         "Fei.Is.Api.Data.Enums.NotificationSeverity": "Info" | "Warning" | "Serious" | "Critical";
@@ -1791,14 +1844,40 @@ export interface components {
         };
         "Fei.Is.Api.Features.DeviceTemplates.Commands.CreateDeviceTemplate.Request": {
             name: string;
+            deviceType: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceType"];
+        };
+        "Fei.Is.Api.Features.DeviceTemplates.Commands.ImportDeviceTemplate.DeviceCommandRequest": {
+            displayName: string;
+            name: string;
+            params: number[];
+        };
+        "Fei.Is.Api.Features.DeviceTemplates.Commands.ImportDeviceTemplate.Request": {
+            templateData: components["schemas"]["Fei.Is.Api.Features.DeviceTemplates.Commands.ImportDeviceTemplate.TemplateRequest"];
+            version: string;
+        };
+        "Fei.Is.Api.Features.DeviceTemplates.Commands.ImportDeviceTemplate.SensorRequest": {
+            tag: string;
+            name: string;
+            unit?: string | null;
+            /** Format: int32 */
+            accuracyDecimals?: number | null;
+            group?: string | null;
+        };
+        "Fei.Is.Api.Features.DeviceTemplates.Commands.ImportDeviceTemplate.TemplateRequest": {
+            name: string;
+            commands: components["schemas"]["Fei.Is.Api.Features.DeviceTemplates.Commands.ImportDeviceTemplate.DeviceCommandRequest"][];
+            sensors: components["schemas"]["Fei.Is.Api.Features.DeviceTemplates.Commands.ImportDeviceTemplate.SensorRequest"][];
+            deviceType: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceType"];
         };
         "Fei.Is.Api.Features.DeviceTemplates.Commands.UpdateDeviceTemplate.Request": {
             name: string;
+            deviceType: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceType"];
         };
         "Fei.Is.Api.Features.DeviceTemplates.Queries.GetDeviceTemplateById.Response": {
             /** Format: uuid */
             id: string;
             name: string;
+            deviceType: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceType"];
         };
         "Fei.Is.Api.Features.DeviceTemplates.Queries.GetDeviceTemplates.Response": {
             /** Format: uuid */
@@ -1845,12 +1924,16 @@ export interface components {
             unit?: string | null;
             /** Format: int32 */
             accuracyDecimals?: number | null;
+            /** Format: int32 */
+            order: number;
+            group?: string | null;
         };
         "Fei.Is.Api.Features.Devices.Queries.GetDeviceById.TemplateResponse": {
             /** Format: uuid */
             id: string;
             name: string;
             sensors: components["schemas"]["Fei.Is.Api.Features.Devices.Queries.GetDeviceById.SensorResponse"][];
+            deviceType: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceType"];
         };
         "Fei.Is.Api.Features.Devices.Queries.GetDevices.Response": {
             /** Format: uuid */
@@ -2119,6 +2202,7 @@ export interface components {
         "Fei.Is.Api.Features.Products.Commands.CreateProduct.Request": {
             code?: string | null;
             pluCode?: string | null;
+            eanCode?: string | null;
             latinName: string;
             czechName?: string | null;
             flowerLeafDescription?: string | null;
@@ -2138,6 +2222,10 @@ export interface components {
             variety: string;
             /** Format: uuid */
             vatCategoryId: string;
+            country?: string | null;
+            city?: string | null;
+            /** Format: int32 */
+            greenhouseNumber?: number | null;
             heightCm?: string | null;
             seedsPerThousandPlants?: string | null;
             seedsPerThousandPots?: string | null;
@@ -2188,6 +2276,7 @@ export interface components {
         };
         "Fei.Is.Api.Features.Products.Commands.UpdateProduct.Request": {
             pluCode: string;
+            eanCode?: string | null;
             code?: string | null;
             latinName: string;
             czechName?: string | null;
@@ -2208,6 +2297,11 @@ export interface components {
             supplierId?: string | null;
             /** Format: uuid */
             vatCategoryId?: string | null;
+            cCode?: string | null;
+            country?: string | null;
+            city?: string | null;
+            /** Format: int32 */
+            greenhouseNumber?: number | null;
             heightCm?: string | null;
             seedsPerThousandPlants?: string | null;
             seedsPerThousandPots?: string | null;
@@ -2239,6 +2333,7 @@ export interface components {
         };
         "Fei.Is.Api.Features.Products.Queries.GetProductById.Response": {
             pluCode: string;
+            eanCode?: string | null;
             code?: string | null;
             latinName: string;
             czechName?: string | null;
@@ -2254,6 +2349,11 @@ export interface components {
             supplier: components["schemas"]["Fei.Is.Api.Features.Products.Queries.GetProductById.SupplierModel"];
             variety: string;
             vatCategory: components["schemas"]["Fei.Is.Api.Features.Products.Queries.GetProductById.VatCategoryModel"];
+            cCode?: string | null;
+            country?: string | null;
+            city?: string | null;
+            /** Format: int32 */
+            greenhouseNumber?: number | null;
             heightCm?: string | null;
             seedsPerThousandPlants?: string | null;
             seedsPerThousandPots?: string | null;
@@ -2289,6 +2389,18 @@ export interface components {
             name: string;
             /** Format: double */
             rate: number;
+        };
+        "Fei.Is.Api.Features.Products.Queries.GetProductEan.Response": {
+            eanCode: string;
+        };
+        "Fei.Is.Api.Features.Products.Queries.GetProductPassport.Response": {
+            latinName: string;
+            gardeningIdNumber: string;
+            codeForPassportC: string;
+            country: string;
+            city: string;
+            /** Format: int32 */
+            greenhouseNumber: number;
         };
         "Fei.Is.Api.Features.Products.Queries.GetProducts.Response": {
             /** Format: uuid */
@@ -2456,6 +2568,7 @@ export interface components {
             unit?: string | null;
             /** Format: int32 */
             accuracyDecimals?: number | null;
+            group?: string | null;
         };
         "Fei.Is.Api.Features.Sensors.Commands.UpdateSensor.Request": {
             tag: string;
@@ -2463,6 +2576,7 @@ export interface components {
             unit?: string | null;
             /** Format: int32 */
             accuracyDecimals?: number | null;
+            group?: string | null;
         };
         "Fei.Is.Api.Features.Sensors.Queries.GetDeviceTemplateSensors.Response": {
             /** Format: uuid */
@@ -2472,6 +2586,9 @@ export interface components {
             unit?: string | null;
             /** Format: int32 */
             accuracyDecimals?: number | null;
+            /** Format: int32 */
+            order: number;
+            group?: string | null;
         };
         "Fei.Is.Api.Features.Sensors.Queries.GetSensorById.Response": {
             /** Format: uuid */
@@ -4160,6 +4277,39 @@ export interface operations {
             };
         };
     };
+    ImportDeviceTemplate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.DeviceTemplates.Commands.ImportDeviceTemplate.Request"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+        };
+    };
     GetActiveJobs: {
         parameters: {
             query?: never;
@@ -5128,6 +5278,64 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GetProductEan: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.Products.Queries.GetProductEan.Response"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GetProductPassport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.Products.Queries.GetProductPassport.Response"];
+                };
             };
             /** @description Not Found */
             404: {

@@ -5,6 +5,8 @@ using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Data.Models.InformationSystem;
 using Fei.Is.Api.Extensions;
+using Fei.Is.Api.Services.EANCode;
+using Fei.Is.Api.Services.PLUCode;
 using FluentResults;
 using FluentValidation;
 using MediatR;
@@ -15,10 +17,11 @@ namespace Fei.Is.Api.Features.Products.Commands
 {
     public static class CreateProduct
     {
-        // Rozšírený Request record vrátane nových polí pre Product
+
         public record Request(
             string? Code,
             string? PLUCode,
+            string? EANCode,
             string LatinName,
             string? CzechName,
             string? FlowerLeafDescription,
@@ -31,7 +34,9 @@ namespace Fei.Is.Api.Features.Products.Commands
             Guid SupplierId,
             string Variety,
             Guid VATCategoryId,
-            // Nové vlastnosti:
+            string? Country,
+            string? City,
+            int? GreenhouseNumber,
             string? HeightCm,
             string? SeedsPerThousandPlants,
             string? SeedsPerThousandPots,
@@ -66,71 +71,66 @@ namespace Fei.Is.Api.Features.Products.Commands
                         async Task<Results<Created<Guid>, ValidationProblem>> (IMediator mediator, ClaimsPrincipal user, Request request) =>
                         {
                             var command = new Command(request, user);
-
                             var result = await mediator.Send(command);
 
                             if (result.HasError<ValidationError>())
-                            {
                                 return TypedResults.ValidationProblem(result.ToValidationErrors());
-                            }
 
                             return TypedResults.Created(result.Value.ToString(), result.Value);
                         }
                     )
                     .WithName(nameof(CreateProduct))
                     .WithTags(nameof(Product))
-                    .WithOpenApi(o =>
-                    {
-                        o.Summary = "Create a product";
-                        return o;
-                    });
+                    .WithOpenApi(o => { o.Summary = "Create a product"; return o; });
             }
         }
 
         public record Command(Request Request, ClaimsPrincipal User) : IRequest<Result<Guid>>;
 
-        public sealed class Handler(AppDbContext context, IValidator<Command> validator, PLUCodeService pluCodeService)
-            : IRequestHandler<Command, Result<Guid>>
+        public sealed class Handler : IRequestHandler<Command, Result<Guid>>
         {
+            private readonly AppDbContext _context;
+            private readonly IValidator<Command> _validator;
+            private readonly PLUCodeService _pluCodeService;
+            private readonly EANCodeService _eanCodeService;
+
+            public Handler(AppDbContext context, IValidator<Command> validator, PLUCodeService pluCodeService, EANCodeService eanCodeService)
+            {
+                _context = context;
+                _validator = validator;
+                _pluCodeService = pluCodeService;
+                _eanCodeService = eanCodeService;
+            }
+
             public async Task<Result<Guid>> Handle(Command message, CancellationToken cancellationToken)
             {
-                var result = await validator.ValidateAsync(message, cancellationToken);
-                if (!result.IsValid)
-                {
-                    return Result.Fail(new ValidationError(result));
-                }
+                var validation = await _validator.ValidateAsync(message, cancellationToken);
+                if (!validation.IsValid)
+                    return Result.Fail(new ValidationError(validation));
 
-                if (context.Products.Any(p => p.Code == message.Request.Code))
-                {
+                if (await _context.Products.AnyAsync(p => p.Code == message.Request.Code, cancellationToken))
                     return Result.Fail(new BadRequestError("Product with this code already exists"));
-                }
 
-                var supplier = context.Suppliers.Where(s => s.Id == message.Request.SupplierId);
-                if (!await supplier.AnyAsync(cancellationToken))
-                {
+                if (!await _context.Suppliers.AnyAsync(s => s.Id == message.Request.SupplierId, cancellationToken))
                     return Result.Fail(new BadRequestError("Supplier does not exist"));
-                }
 
-                var vatCategory = context.VATCategories.Where(v => v.Id == message.Request.VATCategoryId);
-                if (!await vatCategory.AnyAsync(cancellationToken))
-                {
+                if (!await _context.VATCategories.AnyAsync(v => v.Id == message.Request.VATCategoryId, cancellationToken))
                     return Result.Fail(new BadRequestError("VAT Category does not exist"));
-                }
 
                 var pluCode = string.IsNullOrEmpty(message.Request.PLUCode)
-                    ? await pluCodeService.GetPLUCodeAsync(cancellationToken)
-                    : message.Request.PLUCode;
+                    ? await _pluCodeService.GetPLUCodeAsync(cancellationToken)
+                    : message.Request.PLUCode!;
 
-                var category = context.Categories.Where(c => c.Id == message.Request.CategoryId);
-                if (!await category.AnyAsync(cancellationToken))
-                {
+                if (!await _context.Categories.AnyAsync(c => c.Id == message.Request.CategoryId, cancellationToken))
                     return Result.Fail(new BadRequestError("Category does not exist"));
-                }
+
+                var eanCode = _eanCodeService.FromPlu(pluCode);
 
                 var product = new Product
                 {
                     PLUCode = pluCode,
                     Code = message.Request.Code,
+                    EANCode = eanCode,
                     LatinName = message.Request.LatinName,
                     CzechName = message.Request.CzechName,
                     FlowerLeafDescription = message.Request.FlowerLeafDescription,
@@ -138,10 +138,14 @@ namespace Fei.Is.Api.Features.Products.Commands
                     PricePerPiecePack = message.Request.PricePerPiecePack,
                     DiscountedPriceWithoutVAT = message.Request.DiscountedPriceWithoutVAT,
                     RetailPrice = message.Request.RetailPrice,
-                    Supplier = await supplier.FirstAsync(cancellationToken),
+                    Supplier = await _context.Suppliers.FirstAsync(s => s.Id == message.Request.SupplierId, cancellationToken),
                     Variety = message.Request.Variety,
-                    VATCategory = await vatCategory.FirstAsync(cancellationToken),
-                    Category = await category.FirstAsync(cancellationToken),
+                    VATCategory = await _context.VATCategories.FirstAsync(v => v.Id == message.Request.VATCategoryId, cancellationToken),
+                    Category = await _context.Categories.FirstAsync(c => c.Id == message.Request.CategoryId, cancellationToken),
+                    CCode = message.Request.Code,
+                    Country = message.Request.Country,
+                    City = message.Request.City,
+                    GreenhouseNumber = message.Request.GreenhouseNumber,
                     // Nové vlastnosti:
                     HeightCm = message.Request.HeightCm,
                     SeedsPerThousandPlants = message.Request.SeedsPerThousandPlants,
@@ -168,8 +172,8 @@ namespace Fei.Is.Api.Features.Products.Commands
                     PlantingDensity = message.Request.PlantingDensity
                 };
 
-                await context.Products.AddAsync(product, cancellationToken);
-                await context.SaveChangesAsync(cancellationToken);
+                await _context.Products.AddAsync(product, cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
 
                 return Result.Ok(product.Id);
             }
@@ -183,7 +187,6 @@ namespace Fei.Is.Api.Features.Products.Commands
                 RuleFor(r => r.Request.SupplierId).NotEmpty().WithMessage("SupplierId is required");
                 RuleFor(r => r.Request.Variety).NotEmpty().WithMessage("Variety is required");
                 RuleFor(r => r.Request.VATCategoryId).NotEmpty().WithMessage("VAT Category Id is required");
-                // Pridajte validácie pre nové polia podľa potreby
             }
         }
     }

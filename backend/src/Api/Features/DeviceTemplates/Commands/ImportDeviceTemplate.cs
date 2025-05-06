@@ -9,20 +9,30 @@ using FluentResults;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.EntityFrameworkCore;
 
 namespace Fei.Is.Api.Features.DeviceTemplates.Commands;
 
-public static class CreateDeviceTemplate
+public static class ImportDeviceTemplate
 {
-    public record Request(string Name, DeviceType DeviceType = DeviceType.Generic);
+    public record DeviceCommandRequest(string DisplayName, string Name, List<double> Params);
+
+    public record SensorRequest(string Tag, string Name, string? Unit, int? AccuracyDecimals, string? Group);
+
+    public record TemplateRequest(
+        string Name,
+        List<DeviceCommandRequest> Commands,
+        List<SensorRequest> Sensors,
+        DeviceType DeviceType = DeviceType.Generic
+    );
+
+    public record Request(TemplateRequest TemplateData, string Version);
 
     public sealed class Endpoint : ICarterModule
     {
         public void AddRoutes(IEndpointRouteBuilder app)
         {
             app.MapPost(
-                    "device-templates",
+                    "device-templates/import",
                     async Task<Results<Created<Guid>, ValidationProblem>> (IMediator mediator, ClaimsPrincipal user, Request request) =>
                     {
                         var command = new Command(request, user);
@@ -37,11 +47,11 @@ public static class CreateDeviceTemplate
                         return TypedResults.Created(result.Value.ToString(), result.Value);
                     }
                 )
-                .WithName(nameof(CreateDeviceTemplate))
+                .WithName(nameof(ImportDeviceTemplate))
                 .WithTags(nameof(DeviceTemplate))
                 .WithOpenApi(o =>
                 {
-                    o.Summary = "Create a device template";
+                    o.Summary = "Import a device template";
                     return o;
                 });
         }
@@ -62,11 +72,41 @@ public static class CreateDeviceTemplate
             var template = new DeviceTemplate
             {
                 OwnerId = message.User.GetUserId(),
-                Name = message.Request.Name,
-                DeviceType = message.Request.DeviceType
+                Name = message.Request.TemplateData.Name,
+                DeviceType = message.Request.TemplateData.DeviceType,
             };
 
             await context.DeviceTemplates.AddAsync(template, cancellationToken);
+            await context.SaveChangesAsync(cancellationToken);
+
+            foreach (var command in message.Request.TemplateData.Commands)
+            {
+                var deviceCommand = new Data.Models.Command
+                {
+                    DisplayName = command.DisplayName,
+                    Name = command.Name,
+                    Params = command.Params,
+                    DeviceTemplateId = template.Id
+                };
+
+                await context.Commands.AddAsync(deviceCommand, cancellationToken);
+            }
+
+            foreach (var sensor in message.Request.TemplateData.Sensors)
+            {
+                var deviceSensor = new Sensor
+                {
+                    Tag = sensor.Tag,
+                    Name = sensor.Name,
+                    Unit = sensor.Unit,
+                    Order = message.Request.TemplateData.Sensors.IndexOf(sensor),
+                    AccuracyDecimals = sensor.AccuracyDecimals,
+                    DeviceTemplateId = template.Id,
+                    Group = sensor.Group
+                };
+
+                await context.Sensors.AddAsync(deviceSensor, cancellationToken);
+            }
             await context.SaveChangesAsync(cancellationToken);
 
             return Result.Ok(template.Id);
@@ -77,7 +117,7 @@ public static class CreateDeviceTemplate
     {
         public Validator()
         {
-            RuleFor(x => x.Request.Name).NotEmpty().WithMessage("Name is required");
+            RuleFor(x => x.Request.TemplateData.Name).NotEmpty().WithMessage("Name is required");
         }
     }
 }

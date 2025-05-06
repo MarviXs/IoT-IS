@@ -7,6 +7,7 @@ using FluentResults;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Asn1.Eac;
 
 namespace Fei.Is.Api.Features.Products.Queries
 {
@@ -68,6 +69,7 @@ namespace Fei.Is.Api.Features.Products.Queries
 
                 var response = new Response(
                     PLUCode: product.PLUCode,
+                    EANCode: product.EANCode,
                     Code: product.Code,
                     LatinName: product.LatinName,
                     CzechName: product.CzechName,
@@ -80,6 +82,10 @@ namespace Fei.Is.Api.Features.Products.Queries
                     Supplier: new SupplierModel(product.Supplier.Id, product.Supplier.Name),
                     Variety: product.Variety,
                     VATCategory: new VatCategoryModel(product.VATCategory.Id, product.VATCategory.Name, product.VATCategory.Rate),
+                    CCode: product.CCode,
+                    Country: product.Country,
+                    City: product.City,
+                    GreenhouseNumber: product.GreenhouseNumber,
                     // Nové vlastnosti:
                     HeightCm: product.HeightCm,
                     SeedsPerThousandPlants: product.SeedsPerThousandPlants,
@@ -112,6 +118,7 @@ namespace Fei.Is.Api.Features.Products.Queries
 
         public record Response(
             string PLUCode,
+            string? EANCode,
             string? Code,
             string LatinName,
             string? CzechName,
@@ -124,6 +131,11 @@ namespace Fei.Is.Api.Features.Products.Queries
             SupplierModel Supplier,
             string Variety,
             VatCategoryModel VATCategory,
+            string? CCode,
+            string? Country,
+            string? City,
+            int? GreenhouseNumber,
+        
             // Nové vlastnosti:
             string? HeightCm,
             string? SeedsPerThousandPlants,
