@@ -5,6 +5,7 @@ using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Data.Models.InformationSystem;
 using Fei.Is.Api.Extensions;
+using Fei.Is.Api.Services.PLUCode;
 using FluentResults;
 using FluentValidation;
 using MediatR;
@@ -108,7 +109,7 @@ public static class CreateProductsFromList
 
             await context.Products.AddRangeAsync(
                 message.Request.Products.Select(item =>
-                {   
+                {
                     var pluCode = pluCodeService.GetPLUCode();
                     var eanCode = EanGenerator.GenerateEan13FromPlu(pluCode);
                     var product = new Product()

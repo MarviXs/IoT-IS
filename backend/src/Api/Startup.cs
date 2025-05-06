@@ -5,12 +5,13 @@ using Fei.Is.Api.Common.OpenAPI;
 using Fei.Is.Api.Extensions;
 using Fei.Is.Api.Features.Auth;
 using Fei.Is.Api.Features.Jobs.Services;
-using Fei.Is.Api.Features.Products;
-using Fei.Is.Api.FileSystem;
 using Fei.Is.Api.MqttClient;
 using Fei.Is.Api.MqttClient.Publish;
 using Fei.Is.Api.MqttClient.Subscribe;
 using Fei.Is.Api.Redis;
+using Fei.Is.Api.Services.EANCode;
+using Fei.Is.Api.Services.FileSystem;
+using Fei.Is.Api.Services.PLUCode;
 using Fei.Is.Api.SignalR.Hubs;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
@@ -70,6 +71,7 @@ public class Startup(IConfiguration configuration)
         services.AddHostedService<JobTimeOutService>();
 
         services.AddScoped<PLUCodeService>();
+        services.AddScoped<EANCodeService>();
         services.AddHostedService<SceneEvaluateService>();
 
         services.AddScoped<IFileSystemService, LocalFileSystem>();
