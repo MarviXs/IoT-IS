@@ -5,12 +5,11 @@ using Carter;
 using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models.InformationSystem;
-using Fei.Is.Api.FileSystem;
+using Fei.Is.Api.Services.FileSystem;
 using FluentResults;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
-using Stubble.Core.Contexts;
 
 namespace Fei.Is.Api.Features.Templates.Queries;
 
