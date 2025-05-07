@@ -716,11 +716,14 @@ export default {
     setGreenhouseSize() {
       this.greenhouseName = this.greenhouseName.trim() || 'Default Greenhouse';
 
-      this.stageSize = {
-          width: this.greenhouseWidth * 1000,
-          height: this.greenhouseHeight * 1000,
-      };
+      this.greenhouseWidth = this.greenhouseWidth * 1000;
+      this.greenhouseHeight = this.greenhouseHeight * 1000;
 
+      this.stageSize = {
+          width: this.greenhouseWidth ,//* 1000,
+          height: this.greenhouseHeight,// * 1000,
+      };
+      
       this.plants2 = [];
       for (const plant of this.plantOptions) {
         const count = this.plantSelection[plant.id] || 0;

@@ -65,15 +65,14 @@ public class AppDbContext
         modelBuilder.ApplyConfiguration(new WorkDayDetailConfiguration());
         modelBuilder.ApplyConfiguration(new OrderItemContainerConfiguration());
         modelBuilder.ApplyConfiguration(new VATCategoryConfiguration());
+        modelBuilder.ApplyConfiguration(new SystemSettingConfiguration());
+        modelBuilder.ApplyConfiguration(new UserFileConfiguration());
 
         //Life-cycle configurations
         modelBuilder.ApplyConfiguration(new PlantConfiguration());
         modelBuilder.ApplyConfiguration(new PlantAnalysisConfiguration());
         modelBuilder.ApplyConfiguration(new PlantBoardConfiguration());
-
-        modelBuilder.ApplyDataSeeds();
-        modelBuilder.ApplyConfiguration(new SystemSettingConfiguration());
-        modelBuilder.ApplyConfiguration(new UserFileConfiguration());
+        
     }
 
     //IoT tables

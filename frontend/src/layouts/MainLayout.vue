@@ -99,11 +99,11 @@ import {
   mdiFileTreeOutline,
   mdiCubeOutline,
   mdiWrench,
-  mdiSproutOutline,
-  mdiPaletteOutline
   mdiBellRingOutline,
   mdiDomain,
   mdiOrderBoolAscending,
+  mdiSproutOutline,
+  mdiPaletteOutline
 } from '@quasar/extras/mdi-v7';
 import { toast } from 'vue3-toastify';
 
