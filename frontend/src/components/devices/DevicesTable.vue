@@ -43,13 +43,6 @@
         </q-td>
       </template>
 
-      <template #body-cell-jobstatus="jobProps">
-        <q-td auto-width :props="jobProps">
-          Job status
-          <!-- <JobStatusIcon :status="getLastJobStatus(jobProps.row)" /> -->
-        </q-td>
-      </template>
-
       <template #body-cell-actions="propsActions">
         <q-td auto-width :props="propsActions">
           <q-btn :icon="mdiChartLine" color="grey-color" flat round :to="`/devices/${propsActions.row.id}`"

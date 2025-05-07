@@ -22,6 +22,11 @@ const routes: RouteRecordRaw[] = [
       },
 
       {
+        path: '/account/document-links',
+        component: () => import('pages/account/AccountDocumentLinksPage.vue'),
+      },
+
+      {
         path: 'user-management',
         component: () => import('pages/account/UserManagementPage.vue'),
         meta: { requiresAdmin: true },
@@ -107,12 +112,25 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/scenes/CreateScenePage.vue'),
       },
       {
+        path: '/scenes/:id',
+        component: () => import('pages/scenes/UpdateScenePage.vue'),
+      },
+      {
+        path: '/notifications',
+        component: () => import('pages/notifications/NotificationListPage.vue'),
+      },
+      {
         path: '/products',
         component: () => import('pages/products/AllProductsPage.vue'),
       },
       {
         path: '/orders',
         component: () => import('pages/orders/AllOrdersPage.vue'),
+      },
+      {
+        path: '/orders/:id',
+        component: () => import('pages/orders/OrderDetailsPage.vue'),
+        name: 'OrderDetails',
       },
       {
         path: '/companies',

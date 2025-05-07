@@ -14,7 +14,7 @@ namespace Fei.Is.Api.Features.Sensors.Commands;
 
 public static class UpdateDeviceTemplateSensors
 {
-    public record Request(Guid? Id, string Tag, string Name, string? Unit, int? AccuracyDecimals);
+    public record Request(Guid? Id, string Tag, string Name, string? Unit, int? AccuracyDecimals, string? Group);
 
     public sealed class Endpoint : ICarterModule
     {
@@ -85,33 +85,24 @@ public static class UpdateDeviceTemplateSensors
                 return Result.Fail(new ForbiddenError());
             }
 
-            // Delete sensors that are not in the request
-            var sensorIds = message.SensorRequest.Select(s => s.Id).ToList();
-            var sensorsToDelete = template.Sensors.Where(s => !sensorIds.Contains(s.Id)).ToList();
-            context.Sensors.RemoveRange(sensorsToDelete);
+            // Remove all existing sensors for the template
+            context.Sensors.RemoveRange(template.Sensors);
 
+            // Re-add sensors in request order
             foreach (var sensorRequest in message.SensorRequest)
             {
-                var sensor = template.Sensors.FirstOrDefault(s => s.Id == sensorRequest.Id);
-                if (sensor == null)
+                var sensor = new Sensor
                 {
-                    sensor = new Sensor
-                    {
-                        Tag = sensorRequest.Tag,
-                        Name = sensorRequest.Name,
-                        Unit = sensorRequest.Unit,
-                        AccuracyDecimals = sensorRequest.AccuracyDecimals,
-                        DeviceTemplateId = template.Id
-                    };
-                    context.Sensors.Add(sensor);
-                }
-                else
-                {
-                    sensor.Tag = sensorRequest.Tag;
-                    sensor.Name = sensorRequest.Name;
-                    sensor.Unit = sensorRequest.Unit;
-                    sensor.AccuracyDecimals = sensorRequest.AccuracyDecimals;
-                }
+                    Id = sensorRequest.Id ?? Guid.NewGuid(),
+                    Tag = sensorRequest.Tag,
+                    Name = sensorRequest.Name,
+                    Unit = sensorRequest.Unit,
+                    Order = message.SensorRequest.IndexOf(sensorRequest),
+                    AccuracyDecimals = sensorRequest.AccuracyDecimals,
+                    DeviceTemplateId = template.Id,
+                    Group = sensorRequest.Group
+                };
+                context.Sensors.Add(sensor);
             }
 
             template.UpdatedAt = DateTime.UtcNow;

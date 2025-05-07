@@ -24,6 +24,5 @@ public class ProductionPlan : BaseModel
     public int S84 { get; set; }
     public int TotalQuantity { get; set; }
     public int ActualQuantity { get; set; }
-
     public Product Product { get; set; }
 }

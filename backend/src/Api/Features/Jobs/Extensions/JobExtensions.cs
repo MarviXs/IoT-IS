@@ -27,6 +27,19 @@ public static class JobExtensions
         return progress;
     }
 
+    //Get current command
+    public static string GetCurrentCommand(this Job job)
+    {
+        if (job == null)
+        {
+            return "";
+        }
+
+        var currentCommand = job.Commands.ElementAtOrDefault(job.CurrentStep - 1)?.Name ?? string.Empty;
+
+        return currentCommand;
+    }
+
     public static IQueryable<Job> GetActiveJobs(this IQueryable<Job> jobs, Guid deviceId)
     {
         return jobs.Where(j => j.DeviceId == deviceId)

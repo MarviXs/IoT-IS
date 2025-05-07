@@ -3,6 +3,7 @@ using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Formatter;
 using MQTTnet.Protocol;
+using Org.BouncyCastle.Asn1.IsisMtt;
 
 namespace Fei.Is.Api.MqttClient;
 
@@ -14,10 +15,20 @@ public class MqttClientService : IHostedService
 
     private readonly ILogger<MqttClientService> _logger;
 
+    private readonly bool _isMqttEnabled = true;
+
     public MqttClientService(IServiceScopeFactory serviceScopeFactory, IConfiguration configuration, ILogger<MqttClientService> logger)
     {
         _serviceScopeFactory = serviceScopeFactory;
         _logger = logger;
+
+        bool isMqttEnabled = configuration.GetValue<bool>("MqttSettings:Enabled");
+        if (!isMqttEnabled)
+        {
+            _isMqttEnabled = false;
+            _logger.LogWarning("MQTT is disabled in the configuration.");
+            return;
+        }
 
         var factory = new MqttFactory();
         _mqttClient = factory.CreateMqttClient();
@@ -116,6 +127,11 @@ public class MqttClientService : IHostedService
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
+        if (!_isMqttEnabled)
+        {
+            _logger.LogWarning("MQTT is disabled. Skipping MQTT client startup.");
+            return;
+        }
         Reconnect_Using_Timer(cancellationToken);
     }
 

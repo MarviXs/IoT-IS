@@ -1,0 +1,3 @@
+### Get Active Jobs from Device Endpoint Test Request
+GET http://localhost:5097/devices/XLbYLWnhsx8rnDifjfEFeOOo/jobs/active
+Accept: application/json

@@ -62,11 +62,11 @@ public static class GetProducts
 
             var pagedQuery = query
                 .Sort(message.Parameters.SortBy ?? nameof(Product.PLUCode), message.Parameters.Descending)
-                .Select((product) => new Response(product.Id, product.Code, product.PLUCode, product.Category.Id, product.Supplier.Id));
+                .Select((product) => new Response(product.Id, product.Code,product.LatinName, product.CzechName, product.PLUCode, product.Category.Id, product.Supplier.Id));
 
             return pagedQuery.Paginate(message.Parameters).ToPagedList(totalCount, message.Parameters.PageNumber, message.Parameters.PageSize);
         }
     }
 
-    public record Response(Guid Id, string? code, string pluCode, Guid categoryId, Guid supplierId);
+    public record Response(Guid Id, string? code, string LatinName, string? CzechName, string pluCode, Guid categoryId, Guid supplierId);
 }

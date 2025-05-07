@@ -12,6 +12,7 @@ public record JobUpdateDto(
     int currentCycle,
     string currentCommand,
     bool paused,
+    bool isInfinite,
     double progress,
     JobStatusEnum status
 );

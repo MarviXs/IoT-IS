@@ -2,6 +2,7 @@
   <dialog-common v-model="isDialogOpen">
     <template #title>{{ t('device.add_device') }}</template>
     <template #default>
+      
       <DeviceForm ref="deviceForm" v-model="device" @on-submit="createDevice" :loading="creatingDevice" />
     </template>
   </dialog-common>
@@ -28,6 +29,7 @@ const device = ref<DeviceFormData>({
   name: '',
   accessToken: '',
   deviceTemplate: undefined,
+  protocol: undefined,
 });
 const deviceForm = ref();
 
@@ -36,6 +38,7 @@ async function createDevice() {
     name: device.value.name,
     templateId: device.value.deviceTemplate?.id,
     accessToken: device.value.accessToken ?? '',
+    protocol: device.value.protocol,
   };
 
   creatingDevice.value = true;

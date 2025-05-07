@@ -13,6 +13,10 @@
 			"path": "../docker"
 		},
 		{
+			"name": "Device Gateways",
+			"path": "../device_gateways"
+		},
+		{
 			"path": "../.github"
 		}
 	],

@@ -11,7 +11,9 @@
             type="number"
             lazy-rules
             :rules="repetitionRules"
+            :disable="jobToRun.isInfinite"
           />
+          <q-checkbox v-model="jobToRun.isInfinite" dense :label="t('job.infinite_job')" />
         </q-card-section>
         <q-card-actions align="right" class="text-primary">
           <q-btn v-close-popup flat :label="t('global.cancel')" no-caps />
@@ -36,7 +38,6 @@ import { QInput } from 'quasar';
 import { toast } from 'vue3-toastify';
 import { handleError } from '@/utils/error-handler';
 import { useI18n } from 'vue-i18n';
-import { isFormValid } from '@/utils/form-validation';
 import DialogCommon from '../core/DialogCommon.vue';
 import JobService from '@/api/services/JobService';
 import { RecipeSelectData } from '@/components/recipes/RecipeSelect.vue';
@@ -57,6 +58,7 @@ const { t } = useI18n();
 const jobToRun = ref<StartJobRequest>({
   cycles: 1,
   recipeId: '',
+  isInfinite: false,
 });
 const selectedRecipe = ref<RecipeSelectData>();
 const jobIsStarting = ref(false);
@@ -76,7 +78,7 @@ async function runJob() {
     return;
   }
 
-  jobToRun.value = { cycles: 1, recipeId: '' };
+  jobToRun.value = { cycles: 1, recipeId: '', isInfinite: false };
 
   isDialogOpen.value = false;
   toast.success(t('job.toasts.start_success'));

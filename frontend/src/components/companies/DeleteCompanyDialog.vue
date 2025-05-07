@@ -29,7 +29,7 @@ const isDeleteInProgress = ref(false);
 
 async function handleDelete() {
   isDeleteInProgress.value = true;
-  const { error } = await CompanyService.deleteCompany(Number(props.companyId));
+  const { error } = await CompanyService.deleteCompany(props.companyId);
   isDeleteInProgress.value = false;
 
   if (error) {

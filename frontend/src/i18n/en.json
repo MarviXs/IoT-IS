@@ -3,6 +3,7 @@
     "open": "Open",
     "edit": "Edit",
     "delete": "Delete",
+    "download": "Download",
     "save": "Save",
     "cancel": "Cancel",
     "close": "Close",
@@ -29,6 +30,7 @@
     "permissions": "Permissions",
     "n_of_m": "{0} of {1}",
     "refresh": "Refresh",
+    "actions": "Actions",
     "automatic_refresh_interval": "Automatic refresh interval",
     "enter_refresh_interval_s": "Enter refresh interval in seconds (0 to disable)",
     "rules": {
@@ -103,6 +105,13 @@
     "update_password_other_desc": "Update account's password.",
     "change_role": "Change role",
     "change_role_desc": "Change user's role.",
+    "document_links": "Document Links",
+    "document_link": "Document",
+    "quotation_sheet": "Quotation sheet",
+    "invoice": "Invoice",
+    "order": "Order",
+    "add_document": "Add document",
+    "search_document": "Search",
     "toasts": {
       "get_user_failed": "Loading user failed! | Loading users failed!",
       "email_update_success": "Email updated!",
@@ -114,7 +123,8 @@
     },
     "rules": {
       "password_current_wrong": "Current password is wrong!",
-      "email_invalid": "Please enter a valid email address"
+      "email_invalid": "Please enter a valid email address",
+      "link_invalid": "Please enter a valid link"
     }
   },
   "not_found": {
@@ -273,6 +283,8 @@
     "finished_at": "Finished at",
     "status": "Status",
     "progress": "Progress",
+    "infinite": "Infinite",
+    "infinite_job": "Infinite job",
     "controls": {
       "pause": "Pause",
       "resume": "Resume",
@@ -329,13 +341,13 @@
     "czech_name": "Czech Name",
     "latin_name": "Latin Name",
     "code": "Code",
+    "variety": "Variety",
     "flower_leaf_description": "Flower Leaf Description",
     "pot_diameter_pack": "Pot Diameter Pack",
     "price_per_piece_pack": "Price Per Piece Pack",
     "price_per_piece_pack_vat": "Price Per Piece Pack VAT",
     "discounted_price_without_vat": "Discounted Price Without VAT",
     "retail_price": "Retail Price",
-    "variety": "Variety",
     "add_product": "Add Product",
     "edit_product": "Edit Product",
     "import_products": "Import Products",
@@ -349,7 +361,31 @@
       "update_failed": "Updating product failed!",
       "delete_success": "Product deleted!",
       "delete_failed": "Deleting product failed!"
-    }
+    },
+    "height_cm": "Height (cm)",
+    "seeds_per_thousand_plants": "Seeds per Thousand Plants",
+    "seeds_per_thousand_pots": "Seeds per Thousand Pots",
+    "sowing_period": "Sowing Period",
+    "germination_temperature_c": "Germination Temperature (°C)",
+    "germination_time_days": "Germination Time (days)",
+    "cultivation_time_sowing_to_plant": "Cultivation Time from Sowing to Plant",
+    "seeds_mio_ha": "Seeds (Mio/Ha)",
+    "seed_spacing_cm": "Seed Spacing (cm)",
+    "cultivation_time_vegetable_week": "Cultivation Time for Vegetables (weeks)",
+    "bulb_planting_requirement_sq_m": "Bulb Planting Requirement (sq.m)",
+    "bulb_planting_period": "Bulb Planting Period",
+    "bulb_planting_distance_cm": "Bulb Planting Distance (cm)",
+    "cultivation_time_for_bulbs_weeks": "Cultivation Time for Bulbs (weeks)",
+    "number_of_bulbs_per_pot": "Number of Bulbs per Pot",
+    "plant_spacing_cm": "Plant Spacing (cm)",
+    "pot_size_cm": "Pot Size (cm)",
+    "cultivation_time_from_young_plant": "Cultivation Time from Young Plant",
+    "cultivation_temperature_c": "Cultivation Temperature (°C)",
+    "natural_flowering_month": "Natural Flowering Month",
+    "flowers_in_first_year": "Flowers in First Year",
+    "growth_inhibitors_used": "Growth Inhibitors Used",
+    "planting_density": "Planting Density",
+    "additional_details": "Additional Details"
   },
   "product_category": {
     "label": "Category"
@@ -439,7 +475,31 @@
       "cash": "Cash",
       "card": "Card",
       "transfer": "Transfer"
-    }
+    },
+    "details": "Order details",
+    "download_template": "Download template"
+  },
+  "order_item": {
+    "id": "ID",
+    "product_number": "Product Number",
+    "variety_name": "Variety Name",
+    "oneContainer": "Price for one container",
+    "total": "Total price",
+    "quantity": "Quantity",
+    "add_item": "Add item",
+    "delete_item": "Delete item",
+    "delete_item_desc": "Are you sure you want to delete this item?",
+    "toasts": {
+      "delete_success": "Item deleted successfully",
+      "add_success": "Item added successfully",
+      "add_failed": "Failed to add item",
+      "delete_failed": "Failed to delete item"
+    },
+    "work_order": "Work Order",
+    "name": "Name",
+    "hours": "Hours",
+    "price_per_hour": "Price per Hour",
+    "price_excl_vat": "Price Excl. VAT"
   },
   "company": {
     "label": "Company | Companies",
@@ -450,7 +510,10 @@
     "street": "Street",
     "city": "City",
     "psc": "Postal code",
-    "add_company": "Add Company"
+    "add_company": "Add Company",
+    "edit_company": "Edit Company",
+    "delete_company": "Delete Company",
+    "delete_company_desc": "Are you sure you want to delete this company?"
   },
   "lifecycle":{
     "label": "Plant overview | Plants boards",
@@ -469,5 +532,18 @@
     "created_at": "Created at",
     "edit": "Edit",
     "delete": "Delete"
+  },
+  "forecast": {
+    "label": "Forecast | Forecasts",
+    "id": "ID"
+  },
+  "order_summary": {
+    "summary_title": "Order Summary",
+    "vat_rate_12": "VAT rate 12%",
+    "vat_rate_21": "VAT rate 21%",
+    "total": "Total",
+    "price_excl_vat_label": "Price excl. VAT",
+    "vat_label": "VAT",
+    "price_incl_vat_label": "Price incl. VAT"
   }
 }

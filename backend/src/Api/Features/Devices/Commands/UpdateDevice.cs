@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Carter;
 using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
+using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
 using Fei.Is.Api.Features.Devices.Extensions;
@@ -15,7 +16,7 @@ namespace Fei.Is.Api.Features.Devices.Commands;
 
 public static class UpdateDevice
 {
-    public record Request(string Name, string AccessToken, Guid? TemplateId);
+    public record Request(string Name, string AccessToken, Guid? TemplateId, DeviceConnectionProtocol Protocol);
 
     public sealed class Endpoint : ICarterModule
     {
@@ -91,6 +92,7 @@ public static class UpdateDevice
             device.Name = message.Request.Name;
             device.AccessToken = message.Request.AccessToken;
             device.DeviceTemplateId = message.Request.TemplateId;
+            device.Protocol = message.Request.Protocol;
 
             await context.SaveChangesAsync(cancellationToken);
 
@@ -106,6 +108,7 @@ public static class UpdateDevice
         {
             RuleFor(r => r.DeviceId).NotEmpty().WithMessage("Device ID is required");
             RuleFor(r => r.Request.Name).NotEmpty().WithMessage("Name is required");
+            RuleFor(r => r.Request.AccessToken).NotEmpty().WithMessage("Access token is required");
         }
     }
 }

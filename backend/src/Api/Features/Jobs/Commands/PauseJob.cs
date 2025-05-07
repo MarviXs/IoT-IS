@@ -56,12 +56,22 @@ public static class PauseJob
         public async Task<Result<Guid>> Handle(Command message, CancellationToken cancellationToken)
         {
             var job = await context.Jobs.Include(j => j.Device).FirstOrDefaultAsync(j => j.Id == message.JobId, cancellationToken);
-            if (job == null)
+            if (job == null || job.Device == null)
             {
                 return Result.Fail(new NotFoundError());
             }
 
-            return await publishJobControl.Execute(job.Device.AccessToken, message.JobId, JobControl.JOB_PAUSE);
+            if (job.Device.Protocol == DeviceConnectionProtocol.MQTT)
+            {
+                return await publishJobControl.Execute(job.Device.AccessToken, message.JobId, JobControl.JOB_PAUSE);
+            }
+            else
+            {
+                job.Status = JobStatusEnum.JOB_PAUSED;
+                context.Jobs.Update(job);
+                await context.SaveChangesAsync(cancellationToken);
+                return Result.Ok(job.Id);
+            }
         }
     }
 }

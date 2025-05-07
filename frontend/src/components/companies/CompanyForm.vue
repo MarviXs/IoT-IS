@@ -2,7 +2,6 @@
   <q-form @submit="onSubmit" ref="companyForm">
     <q-card-section class="q-pt-none column q-gutter-md">
       <q-input v-model="company.title" class="col-12" :label="t('company.name')" clearable :rules="titleRules" />
-      <q-input v-model="company.title2" class="col-12" :label="t('company.name2')" clearable />
       <q-input v-model="company.ic" class="col-12" :label="t('company.IC')" clearable :rules="icRules" />
       <q-input v-model="company.dic" class="col-12" :label="t('company.DIC')" clearable />
       <q-input v-model="company.street" class="col-12" :label="t('company.street')" clearable />
@@ -30,7 +29,6 @@ import { useI18n } from 'vue-i18n';
 
 export interface CompanyFormData {
   title: string;
-  title2: string | null | undefined;
   ic: string;
   dic: string | null | undefined;
   street: string | null | undefined;

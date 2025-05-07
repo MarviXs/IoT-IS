@@ -8,4 +8,6 @@ public class Sensor : BaseModel
     public required string Tag { get; set; }
     public string? Unit { get; set; }
     public int? AccuracyDecimals { get; set; }
+    public int Order { get; set; } = 0;
+    public string? Group { get; set; }
 }

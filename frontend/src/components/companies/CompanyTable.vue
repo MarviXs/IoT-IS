@@ -1,7 +1,7 @@
 <template>
   <q-table
     v-model:pagination="pagination"
-    :rows="companiesFiltered"
+    :rows="companies"
     :columns="columns"
     :loading="props.loading"
     flat
@@ -49,29 +49,27 @@
 
 <script setup lang="ts">
 import { QTableProps } from 'quasar';
-import { PropType, computed, ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { mdiFileSearchOutline, mdiPencil, mdiTrashCan } from '@quasar/extras/mdi-v7';
 import { PaginationClient } from '@/models/Pagination';
-//import { CompaniesResponse } from '@/api/services/CompanyService';
 import EditCompanyDialog from './EditCompanyDialog.vue';
 import DeleteCompanyDialog from './DeleteCompanyDialog.vue';
+import { PropType } from 'vue';
 
 const props = defineProps({
-  /*companies: {
-    type: Object as PropType<CompaniesResponse>,
-    required: false,
-    default: null,
-  },*/
   loading: {
     type: Boolean,
     required: true,
   },
 });
 
-const pagination = defineModel<PaginationClient>('pagination');
+const companies = defineModel<Array<any>>('companies', {
+  type: Array as PropType<Array<any>>,
+  default: [],
+});
 
-const companiesFiltered = computed(() => props.companies?.items ?? []);
+const pagination = defineModel<PaginationClient>('pagination');
 
 const emit = defineEmits(['onChange', 'onRequest']);
 
@@ -91,27 +89,6 @@ const columns = computed<QTableProps['columns']>(() => [
     field: 'ic',
     align: 'left',
     sortable: true,
-  },
-  {
-    name: 'dic',
-    label: t('company.DIC'),
-    field: 'dic',
-    align: 'left',
-    sortable: false,
-  },
-  {
-    name: 'street',
-    label: t('company.street'),
-    field: 'ulice',
-    align: 'left',
-    sortable: true,
-  },
-  {
-    name: 'city',
-    label: t('company.city'),
-    field: 'city',
-    align: 'left',
-    sortable: false,
   },
   {
     name: 'actions',

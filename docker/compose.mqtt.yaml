@@ -1,0 +1,13 @@
+name: iot-is
+services:
+  emqx:
+    image: emqx/emqx:5.8.1
+    restart: unless-stopped
+    ports:
+      - "1883:1883" # MQTT
+      - "8883:8883" # MQTT over SSL/TLS
+      - "18083:18083" # Dashboard
+    volumes:
+      - ./emqx/cluster.hocon:/opt/emqx/data/configs/cluster.hocon
+      - ./emqx/acl.conf:/opt/emqx/etc/acl.conf
+      - ./emqx/init_user.json:/opt/emqx/init_user.json

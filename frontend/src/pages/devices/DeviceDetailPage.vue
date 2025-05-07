@@ -57,20 +57,7 @@
             @refresh="getDevice"
           ></DataPointChartJS>
         </div>
-
-        <div class="col-12 col-md-4 col-lg-3 col-xl-2" v-for="(sensor, index) in sensors">
-          <LatestDataPointCard
-            ref="latestDataPointCards"
-            :key="sensor.id"
-            :device-id="device.id"
-            :sensor-tag="sensor.tag"
-            :name="sensor.name"
-            :unit="sensor.unit ?? ''"
-            :accuracy-decimals="sensor.accuracyDecimals ?? 2"
-            :color="getGraphColor(index)"
-            :last-value="sensor.lastValue ?? null"
-          />
-        </div>
+        <LatestDataPoints v-model:sensors="sensors" />
       </div>
     </template>
   </PageLayout>
@@ -99,6 +86,7 @@ import { getGraphColor } from '@/utils/colors';
 import { useSignalR } from '@/composables/useSignalR';
 import { LastDataPoint } from '@/models/LastDataPoint';
 import DataPointService from '@/api/services/DataPointService';
+import LatestDataPoints from '@/components/datapoints/LatestDataPoints.vue';
 
 const { t } = useI18n();
 const { connection, connect } = useSignalR();
@@ -125,6 +113,7 @@ const sensors = computed<SensorData[]>(() => {
         unit: sensor.unit,
         accuracyDecimals: sensor.accuracyDecimals,
         lastValue: lastDataPoints.value.find((dp) => dp.deviceId === device.value?.id && dp.tag === sensor.tag)?.value,
+        group: sensor.group,
       };
     }) ?? []
   );

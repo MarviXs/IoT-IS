@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Carter;
 using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
+using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
 using FluentResults;
@@ -14,7 +15,7 @@ namespace Fei.Is.Api.Features.DeviceTemplates.Commands;
 
 public static class CreateDeviceTemplate
 {
-    public record Request(string Name);
+    public record Request(string Name, DeviceType DeviceType = DeviceType.Generic);
 
     public sealed class Endpoint : ICarterModule
     {
@@ -57,11 +58,12 @@ public static class CreateDeviceTemplate
             {
                 return Result.Fail(new ValidationError(result));
             }
-            
+
             var template = new DeviceTemplate
             {
                 OwnerId = message.User.GetUserId(),
                 Name = message.Request.Name,
+                DeviceType = message.Request.DeviceType
             };
 
             await context.DeviceTemplates.AddAsync(template, cancellationToken);

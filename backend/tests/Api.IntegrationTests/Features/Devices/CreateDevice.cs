@@ -40,6 +40,6 @@ public class CreateDeviceRequestFake : Faker<CreateDevice.Request>
 {
     public CreateDeviceRequestFake(Guid templateId)
     {
-        CustomInstantiator(f => new CreateDevice.Request(f.Commerce.ProductName(), f.Internet.Mac(), templateId));
+        CustomInstantiator(f => new CreateDevice.Request(f.Commerce.ProductName(), f.Internet.Mac(), templateId, DeviceConnectionProtocol.HTTP));
     }
 }

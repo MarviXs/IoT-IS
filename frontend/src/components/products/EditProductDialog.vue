@@ -17,6 +17,7 @@ import ProductForm, { ProductFormData } from './ProductForm.vue';
 import ProductService, { UpdateProductRequest } from '@/api/services/ProductService';
 
 const isDialogOpen = defineModel<boolean>();
+
 const props = defineProps({
   productId: {
     type: String,
@@ -27,7 +28,9 @@ const emit = defineEmits(['onUpdate']);
 
 const { t } = useI18n();
 
+// Inicializácia objektu produktu s novými vlastnosťami
 const product = ref<ProductFormData>({} as ProductFormData);
+
 async function getProduct() {
   const { data, error } = await ProductService.getProduct(props.productId);
   if (error) {
@@ -38,6 +41,7 @@ async function getProduct() {
   product.value = {
     code: data.code,
     pluCode: data.pluCode,
+    eanCode: data.eanCode,
     latinName: data.latinName,
     czechName: data.czechName,
     flowerLeafDescription: data.flowerLeafDescription,
@@ -49,6 +53,34 @@ async function getProduct() {
     category: data.category as ProductFormData['category'],
     supplier: data.supplier as ProductFormData['supplier'],
     vatCategory: data.vatCategory as ProductFormData['vatCategory'],
+    cCode: data.cCode,
+    country: data.country,
+    city: data.city,
+    greenhouseNumber: data.greenhouseNumber,
+    // Nové vlastnosti
+    heightCm: data.heightCm,
+    seedsPerThousandPlants: data.seedsPerThousandPlants,
+    seedsPerThousandPots: data.seedsPerThousandPots,
+    sowingPeriod: data.sowingPeriod,
+    germinationTemperatureC: data.germinationTemperatureC,
+    germinationTimeDays: data.germinationTimeDays,
+    cultivationTimeSowingToPlant: data.cultivationTimeSowingToPlant,
+    seedsMioHa: data.seedsMioHa,
+    seedSpacingCM: data.seedSpacingCM,
+    cultivationTimeVegetableWeek: data.cultivationTimeVegetableWeek,
+    bulbPlantingRequirementSqM: data.bulbPlantingRequirementSqM,
+    bulbPlantingPeriod: data.bulbPlantingPeriod,
+    bulbPlantingDistanceCm: data.bulbPlantingDistanceCm,
+    cultivationTimeForBulbsWeeks: data.cultivationTimeForBulbsWeeks,
+    numberOfBulbsPerPot: data.numberOfBulbsPerPot,
+    plantSpacingCm: data.plantSpacingCm,
+    potSizeCm: data.potSizeCm,
+    cultivationTimeFromYoungPlant: data.cultivationTimeFromYoungPlant,
+    cultivationTemperatureC: data.cultivationTemperatureC,
+    naturalFloweringMonth: data.naturalFloweringMonth,
+    flowersInFirstYear: data.flowersInFirstYear,
+    growthInhibitorsUsed: data.growthInhibitorsUsed,
+    plantingDensity: data.plantingDensity
   };
 }
 
@@ -58,6 +90,7 @@ const productForm = ref();
 async function updateProduct() {
   const updateRequest: UpdateProductRequest = {
     pluCode: product.value.pluCode!,
+    eanCode: product.value.eanCode,
     code: product.value.code,
     latinName: product.value.latinName,
     czechName: product.value.czechName,
@@ -68,8 +101,36 @@ async function updateProduct() {
     discountedPriceWithoutVAT: product.value.discountedPriceWithoutVAT,
     retailPrice: product.value.retailPrice,
     categoryId: product.value.category!.id,
-    supplierId: product.value.supplier!.id,
     vatCategoryId: product.value.vatCategory!.id,
+    supplierId: product.value.supplier!.id,
+    cCode: product.value.cCode,
+    country: product.value.country,
+    city: product.value.city,
+    greenhouseNumber: product.value.greenhouseNumber,
+    // Nové vlastnosti:
+    heightCm: product.value.heightCm,
+    seedsPerThousandPlants: product.value.seedsPerThousandPlants,
+    seedsPerThousandPots: product.value.seedsPerThousandPots,
+    sowingPeriod: product.value.sowingPeriod,
+    germinationTemperatureC: product.value.germinationTemperatureC,
+    germinationTimeDays: product.value.germinationTimeDays,
+    cultivationTimeSowingToPlant: product.value.cultivationTimeSowingToPlant,
+    seedsMioHa: product.value.seedsMioHa,
+    seedSpacingCM: product.value.seedSpacingCM,
+    cultivationTimeVegetableWeek: product.value.cultivationTimeVegetableWeek,
+    bulbPlantingRequirementSqM: product.value.bulbPlantingRequirementSqM,
+    bulbPlantingPeriod: product.value.bulbPlantingPeriod,
+    bulbPlantingDistanceCm: product.value.bulbPlantingDistanceCm,
+    cultivationTimeForBulbsWeeks: product.value.cultivationTimeForBulbsWeeks,
+    numberOfBulbsPerPot: product.value.numberOfBulbsPerPot,
+    plantSpacingCm: product.value.plantSpacingCm,
+    potSizeCm: product.value.potSizeCm,
+    cultivationTimeFromYoungPlant: product.value.cultivationTimeFromYoungPlant,
+    cultivationTemperatureC: product.value.cultivationTemperatureC,
+    naturalFloweringMonth: product.value.naturalFloweringMonth,
+    flowersInFirstYear: product.value.flowersInFirstYear,
+    growthInhibitorsUsed: product.value.growthInhibitorsUsed,
+    plantingDensity: product.value.plantingDensity
   };
 
   updatingProduct.value = true;
@@ -94,8 +155,10 @@ watch(
       getProduct();
     }
   },
-  { immediate: true },
+  { immediate: true }
 );
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+/* Prípadné doplnkové štýly */
+</style>

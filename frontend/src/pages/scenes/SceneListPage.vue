@@ -15,7 +15,7 @@
     <template #default>
       <q-table
         v-model:pagination="pagination"
-        :rows="[]"
+        :rows="scenes"
         :columns="columns"
         :loading="loadingScenes"
         flat
@@ -34,9 +34,37 @@
           </div>
         </template>
 
+        <template #body-cell-active="props">
+          <q-td auto-width :props="props">
+            <q-toggle
+              v-model="props.row.isEnabled"
+              color="primary"
+              @update:model-value="enableScene(props.row.id, props.row.isEnabled)"
+            />
+          </q-td>
+        </template>
+
         <template #body-cell-name="props">
           <q-td :props="props">
             <RouterLink :to="`/scenes/${props.row.id}`">{{ props.row.name }}</RouterLink>
+          </q-td>
+        </template>
+
+        <template #body-cell-triggeredAt="propsContact">
+          <q-td auto-width :props="propsContact">
+            {{ formatTimeToDistance(propsContact.row.lastTriggeredAt) }}
+            <q-tooltip v-if="propsContact.row.lastTriggeredAt" content-style="font-size: 11px" :offset="[0, 4]">
+              {{ new Date(propsContact.row.lastTriggeredAt).toLocaleString() }}
+            </q-tooltip>
+          </q-td>
+        </template>
+
+        <template #body-cell-updatedAt="propsContact">
+          <q-td auto-width :props="propsContact">
+            {{ formatTimeToDistance(propsContact.row.updatedAt) }}
+            <q-tooltip v-if="propsContact.row.updatedAt" content-style="font-size: 11px" :offset="[0, 4]">
+              {{ new Date(propsContact.row.updatedAt).toLocaleString() }}
+            </q-tooltip>
           </q-td>
         </template>
 
@@ -57,6 +85,7 @@
       </q-table>
     </template>
   </PageLayout>
+  <DeleteSceneDialog v-model="deleteDialogOpen" :scene-id="deleteSceneId" @onDeleted="getScenes(pagination)" />
 </template>
 
 <script setup lang="ts">
@@ -69,7 +98,9 @@ import { handleError } from '@/utils/error-handler';
 import { DeviceTemplatesQueryParams, DeviceTemplatesResponse } from '@/api/services/DeviceTemplateService';
 import { QTableProps } from 'quasar';
 import { watchDebounced } from '@vueuse/core';
-import SceneService from '@/api/services/SceneService';
+import SceneService, { ScenesPaginatedResponse, ScenesQueryParams } from '@/api/services/SceneService';
+import DeleteSceneDialog from '@/components/scenes/DeleteSceneDialog.vue';
+import { formatTimeToDistance } from '@/utils/date-utils';
 
 const { t, locale } = useI18n();
 const filter = ref('');
@@ -81,15 +112,15 @@ const pagination = ref<PaginationClient>({
   rowsPerPage: 10,
   rowsNumber: 0,
 });
-const scenesPaginated = ref<DeviceTemplatesResponse>();
+const scenesPaginated = ref<ScenesPaginatedResponse>();
 const scenes = computed(() => scenesPaginated.value?.items ?? []);
 
 const loadingScenes = ref(false);
 const deleteDialogOpen = ref(false);
-const deleteSceneId = ref<string>();
+const deleteSceneId = ref<string>('');
 
 async function getScenes(paginationTable: PaginationTable) {
-  const paginationQuery: DeviceTemplatesQueryParams = {
+  const paginationQuery: ScenesQueryParams = {
     SortBy: paginationTable.sortBy,
     Descending: paginationTable.descending,
     SearchTerm: filter.value,
@@ -115,6 +146,15 @@ async function getScenes(paginationTable: PaginationTable) {
 }
 getScenes(pagination.value);
 
+async function enableScene(id: string, isEnabled: boolean) {
+  const { error } = await SceneService.enableScene(id, isEnabled);
+  if (error) {
+    const errorMessage = isEnabled ? 'Failed to enable scene' : 'Failed to disable scene';
+    handleError(error, errorMessage);
+    return;
+  }
+}
+
 function openDeleteDialog(id: string) {
   deleteSceneId.value = id;
   deleteDialogOpen.value = true;
@@ -122,21 +162,31 @@ function openDeleteDialog(id: string) {
 
 const columns = computed<QTableProps['columns']>(() => [
   {
+    name: 'active',
+    label: 'Active',
+    field: 'isEnabled',
+    sortable: true,
+    align: 'center',
+  },
+  {
     name: 'name',
     label: t('global.name'),
     field: 'name',
     sortable: true,
     align: 'left',
   },
-
+  {
+    name: 'triggeredAt',
+    label: 'Triggered At',
+    field: 'lastTriggeredAt',
+    sortable: true,
+    align: 'right',
+  },
   {
     name: 'updatedAt',
     label: 'Updated At',
     field: 'updatedAt',
     sortable: true,
-    format(val, row) {
-      return new Date(val).toLocaleString(locale.value);
-    },
     align: 'right',
   },
 

@@ -42,17 +42,17 @@
     </q-header>
 
     <q-drawer v-model="leftDrawerOpen" show-if-above class="shadow bg-white">
-      <div class="column q-px-lg full-height">
+      <div class="column q-px-lg no-wrap">
         <router-link class="q-my-lg q-mx-auto full-width" to="/">
           <q-img src="../assets/logo.png" height="3.7rem" fit="contain" no-spinner no-transition />
         </router-link>
         <div class="links">
-          <!-- <side-menu-button
+          <side-menu-button
             to="/notifications"
             :exact="true"
             :label="t('notification.label', 2)"
             :icon="mdiBellRingOutline"
-          /> -->
+          />
           <side-menu-button to="/device-templates" :label="t('device_template.label', 2)" :icon="mdiContentCopy" />
           <side-menu-button to="/devices" :label="t('device.label', 2)" :icon="mdiMemory" />
           <side-menu-button to="/collections" :label="t('collection.label', 2)" :icon="mdiFileTreeOutline" />
@@ -61,6 +61,11 @@
           <side-menu-button to="/products" :label="t('product.label', 2)" :icon="mdiWrench" />
           <side-menu-button to="/lifecycle" :label="t('lifecycle.label', 2)" :icon="mdiSproutOutline" />
           <side-menu-button to="/greenhouse" :label="t('editor.label', 2)" :icon="mdiPaletteOutline" />
+          <template v-if="isIotOnly() == false">
+            <side-menu-button to="/products" :label="t('product.label', 2)" :icon="mdiWrench" />
+            <side-menu-button to="/companies" :label="t('company.label', 2)" :icon="mdiDomain" />
+            <side-menu-button to="/orders" :label="t('order.label', 2)" :icon="mdiOrderBoolAscending" />
+          </template>
           <side-menu-button
             v-if="authStore.isAdmin"
             to="/user-management"
@@ -87,18 +92,18 @@ import {
   mdiAccountCircle,
   mdiLogout,
   mdiAccountOutline,
-  mdiFolderOutline,
   mdiListStatus,
   mdiAccountGroup,
   mdiContentCopy,
   mdiMemory,
-  mdiFileTree,
   mdiFileTreeOutline,
-  mdiVariable,
   mdiCubeOutline,
   mdiWrench,
   mdiSproutOutline,
   mdiPaletteOutline
+  mdiBellRingOutline,
+  mdiDomain,
+  mdiOrderBoolAscending,
 } from '@quasar/extras/mdi-v7';
 import { toast } from 'vue3-toastify';
 
@@ -114,5 +119,9 @@ function logout() {
 
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value;
+}
+
+function isIotOnly() {
+  return String(process.env.VITE_IOT_ONLY).toLowerCase() == 'true';
 }
 </script>

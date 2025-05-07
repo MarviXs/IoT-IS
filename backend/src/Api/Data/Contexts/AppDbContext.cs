@@ -44,6 +44,8 @@ public class AppDbContext
         modelBuilder.ApplyConfiguration(new DeviceTemplateConfiguration());
         modelBuilder.ApplyConfiguration(new DeviceConfiguration());
         modelBuilder.ApplyConfiguration(new CollectionItemConfiguration());
+        modelBuilder.ApplyConfiguration(new SceneConfiguration());
+        modelBuilder.ApplyConfiguration(new SceneSensorTriggerConfiguration());
 
         //IS configurations
         modelBuilder.ApplyConfiguration(new AdditionalOrderConfiguration());
@@ -61,7 +63,7 @@ public class AppDbContext
         modelBuilder.ApplyConfiguration(new SummaryConfiguration());
         modelBuilder.ApplyConfiguration(new SupplierConfiguration());
         modelBuilder.ApplyConfiguration(new WorkDayDetailConfiguration());
-        modelBuilder.ApplyConfiguration(new WorkReportConfiguration());
+        modelBuilder.ApplyConfiguration(new OrderItemContainerConfiguration());
         modelBuilder.ApplyConfiguration(new VATCategoryConfiguration());
 
         //Life-cycle configurations
@@ -70,6 +72,8 @@ public class AppDbContext
         modelBuilder.ApplyConfiguration(new PlantBoardConfiguration());
 
         modelBuilder.ApplyDataSeeds();
+        modelBuilder.ApplyConfiguration(new SystemSettingConfiguration());
+        modelBuilder.ApplyConfiguration(new UserFileConfiguration());
     }
 
     //IoT tables
@@ -84,6 +88,9 @@ public class AppDbContext
     public DbSet<DeviceCollection> DeviceCollections { get; set; }
     public DbSet<CollectionItem> CollectionItems { get; set; }
     public DbSet<DeviceShare> DeviceShares { get; set; }
+    public DbSet<Scene> Scenes { get; set; }
+    public DbSet<SceneSensorTrigger> SceneSensorTriggers { get; set; }
+    public DbSet<SceneNotification> SceneNotifications { get; set; }
 
     //IS tables
     public DbSet<RefreshToken> RefreshTokens { get; set; }
@@ -101,8 +108,11 @@ public class AppDbContext
     public DbSet<ProductionPlan> ProductionPlans { get; set; }
     public DbSet<Summary> Summaries { get; set; }
     public DbSet<Supplier> Suppliers { get; set; }
+    public DbSet<SystemSetting> SystemSettings { get; set; }
     public DbSet<WorkDayDetail> WorkDayDetails { get; set; }
     public DbSet<WorkReport> WorkReports { get; set; }
+    public DbSet<OrderItemContainer> OrderItemContainers { get; set; }
+    public DbSet<UserFile> UserFiles { get; set; }
 
     //Life-cycle tables
     public DbSet<Plant> Plants { get; set; }

@@ -4,11 +4,14 @@ using Fei.Is.Api.BackgroundServices;
 using Fei.Is.Api.Common.OpenAPI;
 using Fei.Is.Api.Extensions;
 using Fei.Is.Api.Features.Auth;
-using Fei.Is.Api.Features.Products;
+using Fei.Is.Api.Features.Jobs.Services;
 using Fei.Is.Api.MqttClient;
 using Fei.Is.Api.MqttClient.Publish;
 using Fei.Is.Api.MqttClient.Subscribe;
 using Fei.Is.Api.Redis;
+using Fei.Is.Api.Services.EANCode;
+using Fei.Is.Api.Services.FileSystem;
+using Fei.Is.Api.Services.PLUCode;
 using Fei.Is.Api.SignalR.Hubs;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
@@ -22,6 +25,8 @@ public class Startup(IConfiguration configuration)
 
     public void ConfigureServices(IServiceCollection services)
     {
+        bool isMqttEnabled = Configuration.GetValue<bool>("MqttSettings:Enabled");
+
         // Add services to the container.
         services.ConfigurePostgresContext(Configuration);
         services.ConfigureTimescaleContext(Configuration);
@@ -55,6 +60,7 @@ public class Startup(IConfiguration configuration)
         });
 
         // Add services
+        services.AddScoped<JobService>();
         services.AddScoped<TokenService>();
         services.AddSingleton<RedisService>();
 
@@ -65,6 +71,10 @@ public class Startup(IConfiguration configuration)
         services.AddHostedService<JobTimeOutService>();
 
         services.AddScoped<PLUCodeService>();
+        services.AddScoped<EANCodeService>();
+        services.AddHostedService<SceneEvaluateService>();
+
+        services.AddScoped<IFileSystemService, LocalFileSystem>();
 
         //MQTT Services
         services.AddScoped<JobStatusReceived>();

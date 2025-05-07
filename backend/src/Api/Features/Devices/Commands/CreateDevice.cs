@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Carter;
 using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
+using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
 using FluentResults;
@@ -13,7 +14,7 @@ namespace Fei.Is.Api.Features.Devices.Commands;
 
 public static class CreateDevice
 {
-    public record Request(string Name, string AccessToken, Guid? TemplateId);
+    public record Request(string Name, string AccessToken, Guid? TemplateId, DeviceConnectionProtocol Protocol);
 
     public sealed class Endpoint : ICarterModule
     {
@@ -71,7 +72,8 @@ public static class CreateDevice
                 OwnerId = message.User.GetUserId(),
                 Name = message.Request.Name,
                 AccessToken = message.Request.AccessToken,
-                DeviceTemplateId = message.Request.TemplateId
+                DeviceTemplateId = message.Request.TemplateId,
+                Protocol = message.Request.Protocol,
             };
 
             await context.Devices.AddAsync(device, cancellationToken);
@@ -86,6 +88,7 @@ public static class CreateDevice
         public Validator()
         {
             RuleFor(r => r.Request.Name).NotEmpty().WithMessage("Name is required");
+            RuleFor(r => r.Request.AccessToken).NotEmpty().WithMessage("Access token is required");
         }
     }
 }

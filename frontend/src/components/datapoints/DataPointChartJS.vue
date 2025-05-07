@@ -112,6 +112,7 @@ export type SensorData = {
   unit?: string | null;
   accuracyDecimals?: number | null;
   lastValue?: number | null;
+  group?: string;
 };
 
 const props = defineProps({
@@ -164,6 +165,16 @@ async function updateTimeRange(timeRange: TimeRange) {
   currentXMax.value = timeRange.to;
 
   await getDataPoints();
+}
+
+function getSensorColor(sensor: SensorData, index: number): string {
+  if (sensor.group) {
+    const uniqueGroups = Array.from(new Set(props.sensors.filter((s) => s.group).map((s) => s.group)));
+    const groupIndex = uniqueGroups.indexOf(sensor.group);
+    return getGraphColor(groupIndex);
+  }
+
+  return getGraphColor(index);
 }
 
 const dataPoints = reactive<Map<string, DataPoint[]>>(new Map());
@@ -240,8 +251,8 @@ function updateChartData() {
           x: dataPoint.ts,
           y: dataPoint.value,
         })) ?? [],
-      backgroundColor: transparentize(getGraphColor(index), 0.5),
-      borderColor: getGraphColor(index),
+      backgroundColor: transparentize(getSensorColor(sensor, index), 0.5),
+      borderColor: getSensorColor(sensor, index),
       cubicInterpolationMode: graphOptions.value.interpolationMethod === 'bezier' ? 'monotone' : 'default',
       showLine: graphOptions.value.lineStyle === 'lines' || graphOptions.value.lineStyle === 'linesmarkers',
       borderWidth: graphOptions.value.lineWidth,

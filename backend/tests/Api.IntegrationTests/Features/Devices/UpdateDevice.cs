@@ -45,6 +45,6 @@ public class UpdateDeviceRequestFake : Faker<UpdateDevice.Request>
 {
     public UpdateDeviceRequestFake(Guid templateId)
     {
-        CustomInstantiator(f => new UpdateDevice.Request(f.Commerce.ProductName(), f.Internet.Mac(), templateId));
+        CustomInstantiator(f => new UpdateDevice.Request(f.Commerce.ProductName(), f.Internet.Mac(), templateId, DeviceConnectionProtocol.HTTP));
     }
 }

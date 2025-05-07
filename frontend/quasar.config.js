@@ -44,7 +44,7 @@ export default configure((/* ctx */) => {
       // 'line-awesome',
       // 'roboto-font-latin-ext', // this or either 'roboto-font', NEVER both!
       // 'roboto-font', // optional, you are not bound to it
-      // 'material-icons', // optional, you are not bound to it
+       'material-icons', // optional, you are not bound to it
     ],
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#build
@@ -65,6 +65,7 @@ export default configure((/* ctx */) => {
       // analyze: true,
       env: {
         VITE_API_URL: process.env.VITE_API_URL,
+        VITE_IOT_ONLY: process.env.VITE_IOT_ONLY,
       },
       // rawDefine: {}
       // ignorePublicFolder: true,
@@ -108,7 +109,7 @@ export default configure((/* ctx */) => {
           bodyClasses: true,
         },
         brand: {
-          primary: '#657cfd',
+          primary: '#526cff',
           secondary: '#6d6d6d',
         },
       },

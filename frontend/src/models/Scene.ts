@@ -1,12 +1,21 @@
 import { RulesLogic } from 'json-logic-js';
 
+interface SceneAction {
+  type: 'JOB' | 'NOTIFICATION';
+  deviceId?: string | null;
+  recipeId?: string | null;
+  notificationMessage?: string | null;
+  notificationSeverity?: 'Info' | 'Warning' | 'Serious' | 'Critical' | null;
+}
+
 interface Scene {
   id?: string;
   name: string;
   description?: string;
-  isActive: boolean;
-  triggerType: 'scheduled' | 'conditional';
-  condition: { if: [RulesLogic, string, string] };
+  isEnabled: boolean;
+  condition: RulesLogic;
+  actions: SceneAction[];
+  cooldownAfterTriggerTime: number;
 }
 
-export type { Scene };
+export type { Scene, SceneAction };

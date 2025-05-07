@@ -5,10 +5,10 @@
       label="Device"
       :options="deviceOptions"
       outlined
-      class="q-ma-xs"
       emit-value
       map-options
       :rules="deviceRules"
+      class="q-mr-sm"
       style="min-width: 150px"
     />
     <q-select
@@ -16,8 +16,8 @@
       label="Sensor"
       :options="sensorTagOptions"
       outlined
-      class="q-ma-xs"
       emit-value
+      class="q-mr-sm"
       map-options
       style="min-width: 150px"
       :rules="sensorTagRules"
@@ -27,14 +27,14 @@
 
 <script setup lang="ts">
 import { computed, PropType } from 'vue';
-import { DevicesWithSensorsResponse } from '@/api/services/DeviceService';
+import { SceneDevice } from '@/api/services/DeviceService';
 import { JsonLogicVar } from 'json-logic-js';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
 
 const props = defineProps({
-  devices: { type: Array as PropType<DevicesWithSensorsResponse>, required: true },
+  devices: { type: Array as PropType<SceneDevice>, required: true },
 });
 const selectedDevice = defineModel<JsonLogicVar>({ required: true });
 
