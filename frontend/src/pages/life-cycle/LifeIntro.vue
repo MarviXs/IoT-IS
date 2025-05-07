@@ -52,7 +52,7 @@
           </q-td>
         </template>
         <template #body-cell-name="props">
-          <q-td :props="props" @click="onRowClick(props.row)">
+          <q-td :props="props">
             <q-tree
               v-model:selected="selected"
               v-model:expanded="expandedNodes"
@@ -63,19 +63,6 @@
               children-key="items"
             >
               <template #default-header="treeProp">
-                <q-icon
-                  :name="mdiChartLine"
-                  class="q-mr-sm"
-                  @click="navigateToLifecycle(treeProp.node.id)"
-                  color="blue"
-                  size="1.2rem"
-                />
-                <span
-                  @click="navigateToLifecycle(treeProp.node.id)"
-                  class="cursor-pointer text-blue"
-                >
-                  {{ treeProp.node.name }}
-                </span>
                 <q-space></q-space>
                 <q-btn :icon="mdiDotsVertical" color="grey-color" flat round>
                   <q-menu anchor="bottom right" self="top right">
@@ -92,7 +79,7 @@
                           <div>Edit</div>
                         </div>
                       </q-item>
-                      <q-item v-close-popup clickable @click="deleteLifecycle(treeProp.node.id)">
+                      <q-item v-close-popup clickable @click="deleteLifecycle(treeProp.node.plantBoardId)">
                         <div class="row items-center q-gutter-sm">
                           <q-icon color="grey-9" size="24px" :name="mdiTrashCan" />
                           <div>Delete</div>
@@ -135,7 +122,7 @@ const expandedNodes = ref<string[]>([]);
 const isLoadingCollections = ref(false);
 const collections = ref<CollectionNode[]>([]);
 
-const columns = computed(() => [
+const columns = computed(() => [  
   {
     name: 'plantBoardId',
     label: t('Planting board ID'),
@@ -143,7 +130,14 @@ const columns = computed(() => [
     required: true,
     style: 'text-align: left;',
     headerStyle: 'text-align: center;'
-  },  
+  }, 
+  {
+    name: 'name',
+    required: true,
+    label: '',
+    align: 'left',
+    field: '',
+  }, 
   {
     name: 'rows',
     label: t('Board Rows'),
@@ -173,6 +167,7 @@ async function loadCollections() {
     collections.value = response.data?.items.map(item => ({
       id: item.id,
       plantBoardId: item.plantBoardId,
+      name: item.id,
       rows: item.rows,
       cols: item.cols,
       createdAt: item.createdAt.substring(0, 10),
@@ -199,6 +194,7 @@ function onPlantBoardClick(row: CollectionNode) {
 interface CollectionNode {
   id: string;
   plantBoardId: string;
+  name: string;
   rows: number;
   cols: number;
   createdAt: string;
@@ -211,7 +207,7 @@ onMounted(() => {
 
 async function deleteLifecycle(id: string) {
   try {
-    await LifeCycleService.deletePlant(id);
+    await LifeCycleService.deletePlantboard(id);
     await loadCollections();
   } catch (error) {
     console.error('Chyba pri odstraňovaní životného cyklu:', error);

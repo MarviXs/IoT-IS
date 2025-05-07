@@ -4,7 +4,6 @@ using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models.LifeCycleSystem;
 using FluentResults;
-using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
@@ -18,8 +17,8 @@ public static class DeletePlantBoard
         public void AddRoutes(IEndpointRouteBuilder app)
         {
             app.MapDelete(
-                    "lifeboard/{id:Guid}",
-                    async Task<Results<NoContent, NotFound, ForbidHttpResult>> (IMediator mediator, ClaimsPrincipal user, Guid id) =>
+                    "lifeboard/{id}",
+                    async Task<Results<NoContent, NotFound, ForbidHttpResult>> (IMediator mediator, ClaimsPrincipal user, string id) =>
                     {
                         var command = new Command(user, id);
                         var result = await mediator.Send(command);
@@ -42,13 +41,14 @@ public static class DeletePlantBoard
         }
     }
 
-    public record Command(ClaimsPrincipal User, Guid PlantBoardId) : IRequest<Result>;
+    public record Command(ClaimsPrincipal User, string PlantBoardId) : IRequest<Result>;
 
     public sealed class Handler(AppDbContext context) : IRequestHandler<Command, Result>
     {
         public async Task<Result> Handle(Command message, CancellationToken cancellationToken)
         {
-            var query = context.PlantBoards.Where(plantBoard => plantBoard.Id == message.PlantBoardId);
+            var query = context.PlantBoards
+                .Where(plantBoard => plantBoard.PlantBoardId == message.PlantBoardId);
 
             if (!await query.AnyAsync(cancellationToken))
             {

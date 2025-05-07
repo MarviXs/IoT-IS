@@ -21,8 +21,14 @@
 
     <q-btn
       label="Nasledujúci deň"
-      class="q-mb-sm"
+      class="q-mb-sm q-mr-sm"
       @click="adjustPlantStates(1)"
+    />
+
+    <q-btn
+      label="Uložiť"
+      class="q-mb-sm"
+      @click="saveState()"
     />
 
     <!-- Dialógové okno pre zadanie rozmerov skleníka -->
@@ -33,7 +39,7 @@
         <q-input
           v-model="greenhouseName"
           type="text"
-          label="Názov skleníka"
+          label="Greenhouse name"
           dense
           outlined
           class="q-mb-md"
@@ -42,7 +48,7 @@
         <q-input
           v-model.number="greenhouseWidth"
           type="number"
-          label="Šírka skleníka"
+          label="Width (meters)"
           min="1"
           dense
           outlined
@@ -52,7 +58,7 @@
         <q-input
           v-model.number="greenhouseHeight"
           type="number"
-          label="Hĺbka skleníka"
+          label="Depth (meters)"
           min="1"
           dense
           outlined
@@ -358,6 +364,7 @@ var changed = false
 export default {
   data() {
     return {
+      loaded: false,
       ghouseid: null,
       greenhouseName: 'Default Greenhouse',
       showUploadDialog: false,
@@ -385,7 +392,7 @@ export default {
       },
       greenhouseWidth: 600,
       greenhouseHeight: 400,
-      showGreenhouseDialog: true,
+      showGreenhouseDialog: false,
       stageSize: {
         width: width,
         height: height,
@@ -396,25 +403,32 @@ export default {
       },
       predefinedLayouts: [
         {
-          label: '12 stĺpcov x 10 riadkov (40x40)',
-          columns: 12,
-          rows: 10,
-          width: 40,
-          height: 40
+          label: '13 stĺpcov x 20 riadkov (18x18)',
+          columns: 13,
+          rows: 20,
+          width: 18,
+          height: 18
         },
         {
-          label: '15 stĺpcov x 8 riadkov (30x30)',
+          label: '15 stĺpcov x 30 riadkov (15x15)',
           columns: 15,
-          rows: 8,
+          rows: 30,
+          width: 15,
+          height: 15
+        },
+        {
+          label: '10 stĺpcov x 16 riadkov (30x30)',
+          columns: 10,
+          rows: 16,
           width: 30,
           height: 30
         },
         {
-          label: '10 stĺpcov x 6 riadkov (50x50)',
+          label: '10 stĺpcov x 18 riadkov (26x26)',
           columns: 10,
-          rows: 6,
-          width: 50,
-          height: 50
+          rows: 18,
+          width: 26,
+          height: 26
         }
       ],
       rectangles: [],
@@ -484,10 +498,20 @@ export default {
           // napr. ulož názov skleníka
           this.greenhouseName = response.data.name;
           console.log("Načítaný skleník:", response.data);
+          this.showGreenhouseDialog = false
+          this.greenhouseWidth = response.data.width;
+          this.greenhouseHeight = response.data.depth;
+          this.greenhouseName = response.data.name;
+          this.greenHouseID = response.data.id;
+          this.loaded = true;
+          this.loadState();
+          //this.setGreenhouseSize();
         })
         .catch(error => {
           console.error("Chyba pri načítaní skleníka:", error);
         });
+    }else{
+      this.showGreenhouseDialog = true;
     }
 
   },
@@ -693,8 +717,8 @@ export default {
       this.greenhouseName = this.greenhouseName.trim() || 'Default Greenhouse';
 
       this.stageSize = {
-          width: this.greenhouseWidth,
-          height: this.greenhouseHeight,
+          width: this.greenhouseWidth * 1000,
+          height: this.greenhouseHeight * 1000,
       };
 
       this.plants2 = [];
@@ -724,18 +748,23 @@ export default {
           }
         }
       }
-
-      try {
-        const request = {
-          greenHouseID: crypto.randomUUID(),
-          name: this.greenhouseName,
-          width: this.greenhouseWidth,
-          depth: this.greenhouseHeight,
-          dateCreated: Date.now(),
-        };
-        GreenHouseService.createGreenHouse(request);
-      } catch (error) {
-        console.error('Nepodarilo sa vytvoriť skleník:', error);
+      if (this.loaded == false){
+        try {
+          const request = {
+            greenHouseID: crypto.randomUUID(),
+            name: this.greenhouseName,
+            width: this.greenhouseWidth,
+            depth: this.greenhouseHeight,
+            dateCreated: Date.now(),
+          };
+          GreenHouseService.createGreenHouse(request).then(response => {
+          // napr. ulož názov skleníka
+          this.ghouseid = response.data;
+          //this.setGreenhouseSize();
+        })
+        } catch (error) {
+          console.error('Nepodarilo sa vytvoriť skleník:', error);
+        }
       }
     },
     // Funkcia na zavretie dialógu bez zmeny
@@ -786,7 +815,7 @@ export default {
       event.evt.preventDefault(); // Zruší natívne kontextové menu
 
       // Môžeš pridať potvrdenie (voliteľne)
-      if (!confirm("Chceš odstrániť celý megakvetináč?")) return;
+      if (!confirm("Chceš odstrániť celý plát?")) return;
 
       // Odstrániť všetky rastliny, ktoré boli v tomto megakvetináči
       for (const pot of megaPot.innerPots) {
@@ -1215,6 +1244,66 @@ export default {
         type: 'warning',
         message: 'Vyplňte všetky údaje a nahrajte súbor'
       });
+    }
+  },
+  saveStatus() {
+    console.log("saving");
+    this.plants.forEach(async plant => {
+      const parsedDate = new Date(plant.datePlanted); // Ak to je string "6. 5. 2025"
+      const isoDate = parsedDate.toISOString();
+      const payload = {
+        name: plant.name,
+        type: plant.type,
+        species: plant.species,
+        light: plant.light,
+        soil: plant.soil,
+        potName: plant.potName,
+        posX: Math.round(plant.x),
+        posY: Math.round(plant.y),
+        width: plant.width,
+        height: plant.height,
+        dateCreated: isoDate,
+        currentState: 'plant.state',
+        currentDay: plant.state,
+        editorBoardId: plant.editorBoardId ?? '', // ak môže byť null
+        greenHouseId: '11144706-aad4-4ad8-8c59-529194090155',//this.ghouseid,
+        plantId: 'id',
+        stage: 'stage',
+      };
+
+      try {
+        const response = await GreenHouseService.createEditorPlant(payload);
+        console.log("Saved plant:", response);
+      } catch (error) {
+        console.error("Failed to save plant:", error);
+      }
+    });
+  },
+  saveState() {
+    const stateToSave = {
+      ...this.$data,
+      plantPotMap: Array.from(this.plantPotMap.entries()),
+      currentSimulatedDate: this.currentSimulatedDate.toISOString(),
+    };
+    localStorage.setItem(this.ghouseid, JSON.stringify(stateToSave));
+  },
+  loadState() {
+    const saved = localStorage.getItem(this.ghouseid);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+
+      Object.keys(parsed).forEach((key) => {
+        if (key === 'plantPotMap') {
+          this.plantPotMap = new Map(parsed.plantPotMap);
+        } else if (key === 'currentSimulatedDate') {
+          this.currentSimulatedDate = new Date(parsed[key]);
+        } else {
+          this[key] = parsed[key];
+        }
+      });
+
+      this.plantPotMap = new Map(parsed.plantPotMap);
+      this.currentSimulatedDate = new Date(parsed.currentSimulatedDate);
     }
   }
 },

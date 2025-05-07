@@ -388,7 +388,7 @@ const savePlant = async () => {
               health: "healthy",
               plantId: res_id.response.status === 409 ? res_id.response.statusText : responsePlantID,
               analysisDate: new Date(plantProperties.value.date).toISOString(),
-              imageName: plantProperties.value.photoName,
+              imageName: plantProperties.value.photoName || 'Obrazok',
             };
 
             await LifeCycleService.createAnalysis(requestAnalysis);

@@ -7,6 +7,10 @@ export type GreenHousesResponse = paths['/greenhouses']['get']['responses']['200
 export type CreateGreenHouseRequest = paths['/greenhouses']['post']['requestBody']['content']['application/json'];
 export type GreenHouseDetailResponse = paths['/greenhouses/{id}']['get']['responses']['200']['content']['application/json'];
 
+export type CreateEditorPlantRequest = paths['/editorplants']['post']['requestBody']['content']['application/json'];
+export type CreateEditorPlantResponse = paths['/editorplants']['post']['responses']['201']['content']['application/json'];
+
+
 class GreenHouseService {
   // Získanie zoznamu skleníkov s možnosťou filtrovania/paginácie
   async getGreenHouses(queryParams: GreenHousesQueryParams) {
@@ -31,6 +35,12 @@ class GreenHouseService {
   async getGreenHouseById(id: string) {
     return await client.GET('/greenhouses/{id}', {
       params: { path: { id } },
+    });
+  }
+
+  async createEditorPlant(request: CreateEditorPlantRequest) {
+    return await client.POST('/editorplants', {
+      body: request,
     });
   }
 }

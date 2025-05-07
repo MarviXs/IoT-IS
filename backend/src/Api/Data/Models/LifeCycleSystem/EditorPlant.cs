@@ -15,7 +15,7 @@ namespace Fei.Is.Api.Data.Models.LifeCycleSystem
         public string CurrentState { get; set; } = string.Empty;
         public string PlantDetails => $"{Name} - {Type} - Day {CurrentDay} - {Stage} - {CurrentState}";
         public string EditorBoardId { get; set; }
-        public string GreenHouseId { get; set; }
+        public Guid GreenHouseId { get; set; }
         public GreenHouse GreenHouse { get; set; }
     }
 }

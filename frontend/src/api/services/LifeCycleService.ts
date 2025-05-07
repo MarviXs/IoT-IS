@@ -41,6 +41,10 @@ class LifeCycleService {
     return await client.DELETE('/lifecycles/plant/{id}', { params: { path: { id } } });
   }
 
+  async deletePlantboard(id: string) {
+    return await client.DELETE('/lifeboard/{id}', { params: { path: { id } } });
+  }
+
   async createPlant(request: CreatePlantRequest) {
     return await client.POST('/lifecycles/plants', { body: request });
   }

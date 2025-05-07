@@ -44,8 +44,10 @@ public static class GetEditorPlantsByGreenHouseId
     {
         public async Task<List<Response>> Handle(Query message, CancellationToken cancellationToken)
         {
-            var query = context.EditorPlants.AsNoTracking().Where(p => p.GreenHouseId == message.GreenHouseId);
-
+            var greenhouseGuid = Guid.Parse(message.GreenHouseId);
+            var query = context.EditorPlants
+                .AsNoTracking()
+                .Where(p => p.GreenHouseId == greenhouseGuid);
             // Apply search term if provided
             if (!string.IsNullOrEmpty(message.Parameters.SearchTerm))
             {
@@ -93,6 +95,6 @@ public static class GetEditorPlantsByGreenHouseId
         string Stage,
         string CurrentState,
         string PlantDetails,
-        string GreenHouseId
+        Guid GreenHouseId
     );
 }

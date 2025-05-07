@@ -49,7 +49,6 @@ namespace Fei.Is.Api.Data.Configuration.LifeCycleSystem
                 .HasMaxLength(100);
 
             builder.Property(p => p.EditorBoardId)
-                .IsRequired()
                 .HasMaxLength(100);
 
             builder.Ignore(p => p.PlantDetails);
@@ -57,7 +56,8 @@ namespace Fei.Is.Api.Data.Configuration.LifeCycleSystem
             builder.HasOne<EditorBoard>()
                    .WithMany(b => b.Plants)
                    .HasForeignKey(p => p.EditorBoardId)
-                   .OnDelete(DeleteBehavior.Cascade);
+                   .OnDelete(DeleteBehavior.Cascade)
+                   .IsRequired(false);
             
             builder.HasOne(b => b.GreenHouse)
                    .WithMany(g => g.Plants)

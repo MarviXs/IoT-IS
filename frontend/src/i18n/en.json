@@ -464,8 +464,8 @@
     "label": "Greenhouse",
     "add_greenhouse": "Add greenhouse",
     "name": "Name",
-    "width": "Width",
-    "height": "Height",
+    "width": "Width(meters)",
+    "height": "Depth(meters)",
     "created_at": "Created at",
     "edit": "Edit",
     "delete": "Delete"

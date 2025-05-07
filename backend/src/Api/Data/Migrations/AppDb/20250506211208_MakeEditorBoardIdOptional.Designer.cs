@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Fei.Is.Api.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Fei.Is.Api.Data.Migrations.AppDb
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250506211208_MakeEditorBoardIdOptional")]
+    partial class MakeEditorBoardIdOptional
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -500,73 +503,73 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                         {
                             Id = new Guid("479b6c63-f552-4a6e-b706-62ec96edb896"),
                             City = "Příbram",
-                            CreatedAt = new DateTime(2025, 5, 7, 7, 56, 17, 550, DateTimeKind.Utc).AddTicks(9749),
+                            CreatedAt = new DateTime(2025, 5, 6, 21, 12, 6, 328, DateTimeKind.Utc).AddTicks(3669),
                             Dic = "CZ25735641",
                             Ic = "25735641",
                             Psc = "26101",
                             Title = "Petunia s.r.o.",
                             Ulice = "Třemošenská 658",
-                            UpdatedAt = new DateTime(2025, 5, 7, 7, 56, 17, 550, DateTimeKind.Utc).AddTicks(9750)
+                            UpdatedAt = new DateTime(2025, 5, 6, 21, 12, 6, 328, DateTimeKind.Utc).AddTicks(3679)
                         },
                         new
                         {
                             Id = new Guid("7337c6db-43d7-4c10-aeb3-3ef2f853f7d3"),
                             City = "Stará Huť",
-                            CreatedAt = new DateTime(2025, 5, 7, 7, 56, 17, 550, DateTimeKind.Utc).AddTicks(9760),
+                            CreatedAt = new DateTime(2025, 5, 6, 21, 12, 6, 328, DateTimeKind.Utc).AddTicks(3711),
                             Dic = "CZ696123003",
                             Ic = "71070877",
                             Psc = "26202",
                             Title = "Štamberková Monika",
                             Ulice = "K Vršíčku 91",
-                            UpdatedAt = new DateTime(2025, 5, 7, 7, 56, 17, 550, DateTimeKind.Utc).AddTicks(9760)
+                            UpdatedAt = new DateTime(2025, 5, 6, 21, 12, 6, 328, DateTimeKind.Utc).AddTicks(3711)
                         },
                         new
                         {
                             Id = new Guid("f51a5725-b267-4c19-9cf0-444bb7c32b6e"),
                             City = "Dřísy",
-                            CreatedAt = new DateTime(2025, 5, 7, 7, 56, 17, 550, DateTimeKind.Utc).AddTicks(9765),
+                            CreatedAt = new DateTime(2025, 5, 6, 21, 12, 6, 328, DateTimeKind.Utc).AddTicks(3723),
                             Dic = "CZ27469613",
                             Ic = "27469613",
                             Psc = "27714",
                             Title = "Arboeko s.r.o.",
                             Ulice = "Lhota 244",
-                            UpdatedAt = new DateTime(2025, 5, 7, 7, 56, 17, 550, DateTimeKind.Utc).AddTicks(9766)
+                            UpdatedAt = new DateTime(2025, 5, 6, 21, 12, 6, 328, DateTimeKind.Utc).AddTicks(3724)
                         },
                         new
                         {
                             Id = new Guid("91827187-f264-44b2-b6e3-697a752aa968"),
                             City = "Olbramkostel",
-                            CreatedAt = new DateTime(2025, 5, 7, 7, 56, 17, 550, DateTimeKind.Utc).AddTicks(9771),
+                            CreatedAt = new DateTime(2025, 5, 6, 21, 12, 6, 328, DateTimeKind.Utc).AddTicks(3735),
                             Dic = "CZ28282711",
                             Ic = "28282711",
                             Psc = "67151",
                             Title = "Moravol s.r.o.",
                             Ulice = "Olbramkostel 41",
-                            UpdatedAt = new DateTime(2025, 5, 7, 7, 56, 17, 550, DateTimeKind.Utc).AddTicks(9771)
+                            UpdatedAt = new DateTime(2025, 5, 6, 21, 12, 6, 328, DateTimeKind.Utc).AddTicks(3736)
                         },
                         new
                         {
                             Id = new Guid("be97065a-c6e9-4b03-a173-c1c85f9b42db"),
                             City = "Horní Benešov",
-                            CreatedAt = new DateTime(2025, 5, 7, 7, 56, 17, 550, DateTimeKind.Utc).AddTicks(9775),
+                            CreatedAt = new DateTime(2025, 5, 6, 21, 12, 6, 328, DateTimeKind.Utc).AddTicks(3754),
                             Dic = "CZ29296721",
                             Ic = "29296721",
                             Psc = "79312",
                             Title = "LM Agroton s.r.o.",
                             Ulice = "Mírová 407",
-                            UpdatedAt = new DateTime(2025, 5, 7, 7, 56, 17, 550, DateTimeKind.Utc).AddTicks(9775)
+                            UpdatedAt = new DateTime(2025, 5, 6, 21, 12, 6, 328, DateTimeKind.Utc).AddTicks(3755)
                         },
                         new
                         {
                             Id = new Guid("3b29e227-bb97-441f-878e-d4b1111b3ebb"),
                             City = "Třebechovice pod Orebem",
-                            CreatedAt = new DateTime(2025, 5, 7, 7, 56, 17, 550, DateTimeKind.Utc).AddTicks(9779),
+                            CreatedAt = new DateTime(2025, 5, 6, 21, 12, 6, 328, DateTimeKind.Utc).AddTicks(3761),
                             Dic = "CZ6203071741",
                             Ic = "46212152",
                             Psc = "50346",
                             Title = "Jan Zatloukal - Zahradnictví Blešno",
                             Ulice = "Blešno 127",
-                            UpdatedAt = new DateTime(2025, 5, 7, 7, 56, 17, 550, DateTimeKind.Utc).AddTicks(9779)
+                            UpdatedAt = new DateTime(2025, 5, 6, 21, 12, 6, 328, DateTimeKind.Utc).AddTicks(3763)
                         });
                 });
 
@@ -1391,7 +1394,11 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.Property<Guid?>("EditorBoardId1")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("GreenHouseId")
+                    b.Property<string>("GreenHouseId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("GreenHouseId1")
                         .HasColumnType("uuid");
 
                     b.Property<int>("Height")
@@ -1429,7 +1436,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasIndex("EditorBoardId1");
 
-                    b.HasIndex("GreenHouseId");
+                    b.HasIndex("GreenHouseId1");
 
                     b.ToTable("EditorPlants");
                 });
@@ -2168,7 +2175,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
 
                     b.HasOne("Fei.Is.Api.Data.Models.LifeCycleSystem.GreenHouse", "GreenHouse")
                         .WithMany("Plants")
-                        .HasForeignKey("GreenHouseId")
+                        .HasForeignKey("GreenHouseId1")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

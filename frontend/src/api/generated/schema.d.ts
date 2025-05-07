@@ -600,6 +600,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/editorplants": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create an editor plant */
+        post: operations["CreateEditorPlant"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/greenhouses/{id}": {
         parameters: {
             query?: never;
@@ -890,6 +907,23 @@ export interface paths {
         post?: never;
         /** Delete a plant */
         delete: operations["DeletePlant"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/greenhouses/{greenhouseId}/plants": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get paginated plants by GreenHouseId */
+        get: operations["GetEditorPlantsByGreenHouseId"];
+        put?: never;
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -1618,6 +1652,27 @@ export interface components {
             tag: string;
             unit: string;
         };
+        "Fei.Is.Api.Features.EditorPlants.Commands.CreateEditorPlant.Request": {
+            plantID: string;
+            name: string;
+            type: string;
+            /** Format: int32 */
+            width: number;
+            /** Format: int32 */
+            height: number;
+            /** Format: int32 */
+            posX: number;
+            /** Format: int32 */
+            posY: number;
+            /** Format: date-time */
+            dateCreated: string;
+            /** Format: int32 */
+            currentDay: number;
+            stage: string;
+            currentState: string;
+            editorBoardId: string;
+            greenHouseId: string;
+        };
         "Fei.Is.Api.Features.GreenHouses.Commands.CreateGreenHouse.Request": {
             greenHouseID: string;
             name: string;
@@ -1632,6 +1687,27 @@ export interface components {
             width?: number | null;
             /** Format: int32 */
             depth?: number | null;
+        };
+        "Fei.Is.Api.Features.GreenHouses.Queries.GetEditorPlantsByGreenHouseId.Response": {
+            plantID: string;
+            name: string;
+            type: string;
+            /** Format: int32 */
+            width: number;
+            /** Format: int32 */
+            height: number;
+            /** Format: int32 */
+            posX: number;
+            /** Format: int32 */
+            posY: number;
+            /** Format: date-time */
+            dateCreated: string;
+            /** Format: int32 */
+            currentDay: number;
+            stage: string;
+            currentState: string;
+            plantDetails: string;
+            greenHouseId: string;
         };
         "Fei.Is.Api.Features.GreenHouses.Queries.GetGreenHouses.Response": {
             /** Format: uuid */
@@ -3703,6 +3779,48 @@ export interface operations {
             };
         };
     };
+    CreateEditorPlant: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.EditorPlants.Commands.CreateEditorPlant.Request"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+        };
+    };
     GetGreenhouseById: {
         parameters: {
             query?: never;
@@ -4409,6 +4527,34 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    GetEditorPlantsByGreenHouseId: {
+        parameters: {
+            query?: {
+                SortBy?: string;
+                Descending?: boolean;
+                SearchTerm?: string;
+                PageNumber?: number;
+                PageSize?: number;
+            };
+            header?: never;
+            path: {
+                greenhouseId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.GreenHouses.Queries.GetEditorPlantsByGreenHouseId.Response"][];
+                };
             };
         };
     };
