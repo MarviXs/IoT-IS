@@ -919,6 +919,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/orders/{id}/products": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get all products of an order with LatinName, CzechName, etc. */
+        get: operations["GetOrderProducts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/orders": {
         parameters: {
             query?: never;
@@ -2606,6 +2623,39 @@ export interface components {
             paymentMethod: string;
             contactPhone: string;
             note?: string | null;
+        };
+        "Fei.Is.Api.Features.Orders.Queries.GetOrderProducts.Response": {
+            /** Format: uuid */
+            productId: string;
+            latinName: string;
+            czechName?: string | null;
+            flowerLeafDescription?: string | null;
+            potDiameterPack?: string | null;
+            /** Format: int32 */
+            greenhouseNumber?: number | null;
+            heightCm?: string | null;
+            seedsPerThousandPlants?: string | null;
+            seedsPerThousandPots?: string | null;
+            sowingPeriod?: string | null;
+            germinationTemperatureC?: string | null;
+            germinationTimeDays?: string | null;
+            cultivationTimeSowingToPlant?: string | null;
+            seedsMioHa?: string | null;
+            seedSpacingCM?: string | null;
+            cultivationTimeVegetableWeek?: string | null;
+            bulbPlantingRequirementSqM?: string | null;
+            bulbPlantingPeriod?: string | null;
+            bulbPlantingDistanceCm?: string | null;
+            cultivationTimeForBulbsWeeks?: string | null;
+            numberOfBulbsPerPot?: string | null;
+            plantSpacingCm?: string | null;
+            potSizeCm?: string | null;
+            cultivationTimeFromYoungPlant?: string | null;
+            cultivationTemperatureC?: string | null;
+            naturalFloweringMonth?: string | null;
+            flowersInFirstYear?: boolean | null;
+            growthInhibitorsUsed?: boolean | null;
+            plantingDensity?: string | null;
         };
         "Fei.Is.Api.Features.Orders.Queries.GetOrders.Response": {
             /** Format: uuid */
@@ -5428,6 +5478,35 @@ export interface operations {
                 };
                 content: {
                     "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GetOrderProducts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.Orders.Queries.GetOrderProducts.Response"][];
                 };
             };
             /** @description Not Found */
