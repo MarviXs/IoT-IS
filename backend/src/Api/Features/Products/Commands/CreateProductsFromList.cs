@@ -17,10 +17,10 @@ namespace Fei.Is.Api.Features.Products.Commands;
 public static class CreateProductsFromList
 {
     public record Request(List<ProductRequest> Products);
+
     public static class EanGenerator
     {
         private const string Prefix = "859"; // GS1 prefix pro ČR/SR
-
 
         public static string GenerateEan13FromPlu(string pluCode)
         {
@@ -115,7 +115,6 @@ public static class CreateProductsFromList
                     var product = new Product()
                     {
                         PLUCode = pluCode,
-                        EANCode = eanCode,
                         Code = item.Code,
                         LatinName = item.LatinName,
                         CzechName = item.CzechName,

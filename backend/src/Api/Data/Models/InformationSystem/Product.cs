@@ -5,7 +5,6 @@ namespace Fei.Is.Api.Data.Models.InformationSystem
     public class Product : BaseModel
     {
         public string PLUCode { get; set; }
-        public string EANCode { get; set; }
         public string? Code { get; set; }
         public string LatinName { get; set; }
         public string? CzechName { get; set; }

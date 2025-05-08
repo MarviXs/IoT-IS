@@ -10,13 +10,13 @@ namespace Fei.Is.Api.DocumentsGen.Generators
         private char decimalSeparator = Convert.ToChar(Thread.CurrentThread.CurrentCulture.NumberFormat.NumberDecimalSeparator);
         private short numberCellDataFormat;
         private short dateCellDataFormat;
-        public override string ApplyFields(FileStream fileStream, string newFileName, JToken values)
+
+        public override string ApplyFields(FileStream fileStream, string newFileName, JToken values, Dictionary<string, string>? images = null)
         {
             XSSFWorkbook wb = new XSSFWorkbook(fileStream);
 
             numberCellDataFormat = wb.CreateDataFormat().GetFormat($"0{decimalSeparator}00");
             dateCellDataFormat = wb.CreateDataFormat().GetFormat("dd/MM/yyyy");
-
 
             for (int i = 0; i < wb.NumberOfSheets; i++)
             {
@@ -31,10 +31,8 @@ namespace Fei.Is.Api.DocumentsGen.Generators
 
                 var shapes = draw?.GetShapes();
 
-                ProcessImages(sheet, shapes, wb);
+                ProcessImages(sheet, shapes, wb, images);
             }
-
-
 
             XSSFFormulaEvaluator.EvaluateAllFormulaCells(wb);
 
@@ -47,16 +45,12 @@ namespace Fei.Is.Api.DocumentsGen.Generators
             return newDocumentPath;
         }
 
-        private void ProcessImages(ISheet sheet, List<XSSFShape> shapes, IWorkbook wb)
+        private void ProcessImages(ISheet sheet, List<XSSFShape> shapes, IWorkbook wb, Dictionary<string, string> images)
         {
             if (shapes.Count == 0)
                 return;
 
-
-            List<XSSFPicture> pictures = shapes
-                .Where(shape => shape is XSSFPicture)
-                .Select(shape => (XSSFPicture)shape)
-                .ToList();
+            List<XSSFPicture> pictures = shapes.Where(shape => shape is XSSFPicture).Select(shape => (XSSFPicture)shape).ToList();
 
             XSSFCreationHelper creationHelper = wb.GetCreationHelper() as XSSFCreationHelper;
 
@@ -84,7 +78,22 @@ namespace Fei.Is.Api.DocumentsGen.Generators
                         anchor.Dy1 = picture.ClientAnchor.Dy1;
                         anchor.Dy2 = picture.ClientAnchor.Dy2;
 
-                        int pictureIndex = wb.AddPicture(picture.PictureData.Data, picture.PictureData.PictureType);
+                        int pictureIndex = -1;
+                        if (images is not null && images.ContainsKey(imageName))
+                        {
+                            string imagePath = images[imageName];
+                            using FileStream imageStream = new FileStream(imagePath, FileMode.Open, FileAccess.Read);
+                            byte[] imageData = new byte[imageStream.Length];
+                            imageStream.Read(imageData, 0, (int)imageStream.Length);
+                            pictureIndex = wb.AddPicture(imageData, picture.PictureData.PictureType);
+
+                            imageStream.Close();
+                            File.Delete(imagePath);
+                        }
+                        else
+                        {
+                            pictureIndex = wb.AddPicture(picture.PictureData.Data, picture.PictureData.PictureType);
+                        }
                         sheet.DrawingPatriarch.CreatePicture(anchor, pictureIndex);
 
                         cell.SetCellValue("");

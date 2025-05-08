@@ -111,6 +111,7 @@
     "invoice": "Invoice",
     "order": "Order",
     "passports": "Plant passports",
+    "product_sticker": "Product sticker",
     "add_document": "Add document",
     "search_document": "Search",
     "toasts": {

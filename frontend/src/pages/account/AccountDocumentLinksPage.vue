@@ -86,8 +86,19 @@
       "
       @onSubmit="handleDocumentLinkSubmit"
     />
+
+    <document-link-card
+      id="product-sticker"
+      :document-header="t('account.product_sticker')"
+      :loading="loading"
+      :document-type="EDocumentIdentifier.ProductSticker"
+      :file-name="
+        userTemplates.find((template) => template.identifier == EDocumentIdentifier[EDocumentIdentifier.ProductSticker])
+          ?.fileName || ''
+      "
+      @onSubmit="handleDocumentLinkSubmit"
+    />
   </page-layout>
-  <!-- <CreateDocumentDialog v-model="isCreateDialogOpen" /> -->
 </template>
 
 <script setup lang="ts">

@@ -3,4 +3,5 @@ export enum EDocumentIdentifier {
   Invoice,
   Order,
   PlantPassport,
+  ProductSticker,
 }

@@ -14,9 +14,7 @@ namespace Fei.Is.Api.DocumentsGen.Generators
         protected const string REGEX_LIST_END_PATTERN = "{{/(.*?)}}";
         protected const string REGEX_LIST_END_FORMAT = "{{/%s}}";
         protected const string REGEX_IMAGE_PATTERN = "{{image:(.*?)}}";
-        protected StubbleVisitorRenderer StubbleRenderer = new StubbleBuilder()
-            .Configure(settings => settings.SetEncodingFunction(s => s))
-            .Build();
-        public abstract string ApplyFields(FileStream file, string newFileName, JToken values);
+        protected StubbleVisitorRenderer StubbleRenderer = new StubbleBuilder().Configure(settings => settings.SetEncodingFunction(s => s)).Build();
+        public abstract string ApplyFields(FileStream file, string newFileName, JToken values, Dictionary<string, string>? images = null);
     }
 }

@@ -12,6 +12,7 @@
         QuotationSheet,
         Invoice,
         Order,
-        PlantPassport
+        PlantPassport,
+        ProductSticker,
     }
 }

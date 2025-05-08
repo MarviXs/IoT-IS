@@ -838,7 +838,7 @@ export interface paths {
             cookie?: never;
         };
         /** Download order */
-        get: operations["DownloadOrder"];
+        get: operations["DownloadProductSticker"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1071,6 +1071,23 @@ export interface paths {
          * @description Adds an order item to a specified order container by container ID. If the product's category is 'Práca', a container with name 'Práca' is used (or created) for the order.
          */
         post: operations["AddItemToContainer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/products/{id}/sticker": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Download product sticker */
+        get: operations["DownloadProductSticker"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1656,7 +1673,7 @@ export interface components {
          * Format: int32
          * @enum {integer}
          */
-        "Fei.Is.Api.Data.Models.InformationSystem.FileIdentifier": 0 | 1 | 2 | 3;
+        "Fei.Is.Api.Data.Models.InformationSystem.FileIdentifier": 0 | 1 | 2 | 3 | 4;
         "Fei.Is.Api.Features.AdminUserManagement.Commands.UpdateUserEmail.Request": {
             email: string;
         };
@@ -4735,7 +4752,7 @@ export interface operations {
             };
         };
     };
-    DownloadOrder: {
+    DownloadProductSticker: {
         parameters: {
             query?: never;
             header?: never;
@@ -5220,6 +5237,26 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DownloadProductSticker: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
             /** @description Not Found */
             404: {
                 headers: {

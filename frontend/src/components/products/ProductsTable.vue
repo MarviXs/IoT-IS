@@ -66,7 +66,7 @@ import { mdiFileSearchOutline, mdiPencil, mdiTrashCan } from '@quasar/extras/mdi
 import { PaginationClient } from '@/models/Pagination';
 import EditProductDialog from './EditProductDialog.vue';
 import DeleteProductDialog from './DeleteProductDialog.vue';
-import { Document, Packer, Paragraph, TextRun, AlignmentType, PageOrientation } from 'docx';
+import ProductService from '@/api/services/ProductService';
 
 const props = defineProps({
   loading: {
@@ -139,66 +139,20 @@ function openDeleteDialog(productId: string) {
 }
 
 function downloadProductAsDocx(product: any) {
-  const doc = new Document({
-    sections: [
-      {
-        properties: {
-          page: {
-            size: {
-              orientation: PageOrientation.PORTRAIT,
-              width: 1984, // 7 cm width (567 * 7)
-              height: 1728, // 3 cm height
-            },
-            margin: {
-              top: 0,
-              bottom: 0,
-              left: 0,
-              right: 0,
-            },
-          },
-        },
-        children: [
-          new Paragraph({
-            alignment: AlignmentType.CENTER,
-            children: [
-              new TextRun({
-                text: `${product.latinName ?? ''} – ${product.czechName ?? ''}`,
-                bold: true,
-                size: 14, 
-              }),
-            ],
-            spacing: { after: 100 },
-          }),
-          new Paragraph({
-            alignment: AlignmentType.LEFT,
-            children: [
-              new TextRun({ text: `EAN: ${product.eanCode ?? ''}`, size: 14 }),
-            ],
-          }),
-          new Paragraph({
-            alignment: AlignmentType.LEFT,
-            children: [
-              new TextRun({ text: `PLU: ${product.pluCode ?? ''}`, size: 14 }),
-            ],
-          }),
-          new Paragraph({
-            alignment: AlignmentType.LEFT,
-            children: [
-              new TextRun({ text: `Variety: ${product.variety ?? ''}`, size: 14 }),
-            ],
-          }),
-        ],
-      },
-    ],
-  });
+  ProductService.downloadProductSticker(product.id).then((retVal) => {
+    var contentDisposition = retVal.response.headers.get('Content-Disposition');
+    var parts = contentDisposition?.split('filename=');
+    var filename = parts?.length === 2 ? parts[1] : 'order_template.xlsx';
 
-  Packer.toBlob(doc).then((blob) => {
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `produkt_${product.code || 'data'}.docx`;
-    link.click();
+    retVal.response.blob().then((blob) => {
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
   });
 }
-
-
 </script>
