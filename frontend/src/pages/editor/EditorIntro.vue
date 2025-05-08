@@ -147,8 +147,8 @@ async function loadGreenhouses() {
     greenhouses.value = response.data?.items.map(item => ({
       id: item.id,
       name: item.name,
-      width: item.width,
-      height: item.depth,
+      width: item.width / 1000,
+      height: item.depth / 1000,
       createdAt: item.dateCreated.substring(0, 10),
     })) || [];
   } catch (error) {

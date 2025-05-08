@@ -445,9 +445,16 @@ export default {
       columns: 1,
       rows: 1,
       potSizes: [
-        { id: 1, name: 'Malý', width: 100, height: 100, shape: 'square' },
-        { id: 2, name: 'Stredný', width: 150, height: 150, shape: 'circle' },
-        { id: 3, name: 'Veľký', width: 200, height: 200, shape: 'square' },
+        { id: 1, name: 'Kvetináč 85x85', width: 85, height: 85, shape: 'square' },
+        { id: 2, name: 'Kvetináč Ø95', width: 95, height: 95, shape: 'circle' },
+        { id: 3, name: 'Kvetináč Ø105', width: 105, height: 105, shape: 'circle' },
+        { id: 4, name: 'Kvetináč Ø115', width: 115, height: 115, shape: 'circle' },
+        { id: 5, name: 'Kvetináč Ø120', width: 120, height: 120, shape: 'circle' },
+        { id: 6, name: 'Kvetináč Ø135', width: 135, height: 135, shape: 'circle' },
+        { id: 7, name: 'Kvetináč Ø165', width: 165, height: 165, shape: 'circle' },
+        { id: 8, name: 'Kvetináč Ø175', width: 175, height: 175, shape: 'circle' },
+        { id: 9, name: 'Kvetináč Ø185', width: 185, height: 185, shape: 'circle' },
+        { id: 10, name: 'Kvetináč Ø205', width: 205, height: 205, shape: 'circle' }
       ],
       selectedPotSize: null,
       plantOptions: [
@@ -457,7 +464,7 @@ export default {
           type: 'Bylina',
           currentState: 0,
           states: [
-            { stage: 'mladá', width: 30, height: 30, days: 7 },
+            { stage: 'mladá', width: 15, height: 15, days: 7 },
             { stage: 'dospelá', width: 50, height: 50, days: 14 },
             { stage: 'zrelá', width: 70, height: 70, days: 21 }
           ]
@@ -468,7 +475,7 @@ export default {
           type: 'Krovina',
           currentState: 0,
           states: [
-            { stage: 'mladá', width: 40, height: 40, days: 10 },
+            { stage: 'mladá', width: 25, height: 25, days: 10 },
             { stage: 'dospelá', width: 100, height: 100, days: 20 },
             { stage: 'zrelá', width: 140, height: 140, days: 30 }
           ]
@@ -479,7 +486,7 @@ export default {
           type: 'Strom',
           currentState: 0,
           states: [
-            { stage: 'mladá', width: 90, height: 90, days: 14 },
+            { stage: 'mladá', width: 30, height: 30, days: 14 },
             { stage: 'dospelá', width: 150, height: 150, days: 28 },
             { stage: 'zrelá', width: 210, height: 210, days: 42 }
           ]
@@ -564,7 +571,6 @@ export default {
         height: bounds.height
       };
 
-      // ✅ Skleník – hranice
       if (
         newBounds.x < 0 ||
         newBounds.y < 0 ||
@@ -577,7 +583,6 @@ export default {
         return;
       }
 
-      // ✅ Kolízia s inými megakvetináčmi
       for (let i = 0; i < this.megaPots.length; i++) {
         if (i === megaPotIndex) continue;
 
@@ -597,7 +602,6 @@ export default {
         }
       }
 
-      // ✅ Ak všetko v poriadku – aplikuj pohyb
       megaPot.innerPots.forEach((innerPot) => {
         innerPot.x += dx;
         innerPot.y += dy;
@@ -1227,7 +1231,7 @@ export default {
     }
 
     this.selectedLayout = bestLayout;
-    console.log(`✅ Automaticky zvolený layout: ${bestLayout.label}`);
+    console.log(`Automaticky zvolený layout: ${bestLayout.label}`);
     this.createMegaPotByLayout();
   },
   isPotOccupied(pot) {
