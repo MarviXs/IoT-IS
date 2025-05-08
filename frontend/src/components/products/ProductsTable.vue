@@ -30,6 +30,17 @@
             {{ t('global.delete') }}
           </q-tooltip>
         </q-btn>
+        <q-btn
+          icon="cloud_download"
+          color="grey-color"
+          flat
+          round
+          @click.stop="downloadProductAsDocx(propsActions.row)"
+        >
+          <q-tooltip content-style="font-size: 11px" :offset="[0, 4]">
+            {{ t('global.download') }}
+          </q-tooltip>
+        </q-btn>
       </q-td>
     </template>
   </q-table>
@@ -55,6 +66,7 @@ import { mdiFileSearchOutline, mdiPencil, mdiTrashCan } from '@quasar/extras/mdi
 import { PaginationClient } from '@/models/Pagination';
 import EditProductDialog from './EditProductDialog.vue';
 import DeleteProductDialog from './DeleteProductDialog.vue';
+import { Document, Packer, Paragraph, TextRun, AlignmentType, PageOrientation } from 'docx';
 
 const props = defineProps({
   loading: {
@@ -125,4 +137,68 @@ function openDeleteDialog(productId: string) {
   isDeleteDialogOpen.value = true;
   productToDelete.value = productId;
 }
+
+function downloadProductAsDocx(product: any) {
+  const doc = new Document({
+    sections: [
+      {
+        properties: {
+          page: {
+            size: {
+              orientation: PageOrientation.PORTRAIT,
+              width: 1984, // 7 cm width (567 * 7)
+              height: 1728, // 3 cm height
+            },
+            margin: {
+              top: 0,
+              bottom: 0,
+              left: 0,
+              right: 0,
+            },
+          },
+        },
+        children: [
+          new Paragraph({
+            alignment: AlignmentType.CENTER,
+            children: [
+              new TextRun({
+                text: `${product.latinName ?? ''} – ${product.czechName ?? ''}`,
+                bold: true,
+                size: 14, 
+              }),
+            ],
+            spacing: { after: 100 },
+          }),
+          new Paragraph({
+            alignment: AlignmentType.LEFT,
+            children: [
+              new TextRun({ text: `EAN: ${product.eanCode ?? ''}`, size: 14 }),
+            ],
+          }),
+          new Paragraph({
+            alignment: AlignmentType.LEFT,
+            children: [
+              new TextRun({ text: `PLU: ${product.pluCode ?? ''}`, size: 14 }),
+            ],
+          }),
+          new Paragraph({
+            alignment: AlignmentType.LEFT,
+            children: [
+              new TextRun({ text: `Variety: ${product.variety ?? ''}`, size: 14 }),
+            ],
+          }),
+        ],
+      },
+    ],
+  });
+
+  Packer.toBlob(doc).then((blob) => {
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `produkt_${product.code || 'data'}.docx`;
+    link.click();
+  });
+}
+
+
 </script>

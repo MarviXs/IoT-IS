@@ -25,6 +25,7 @@
     "chartjs-adapter-date-fns": "^3.0.0",
     "chartjs-plugin-zoom": "^2.0.1",
     "date-fns": "^3.6.0",
+    "docx": "^9.5.0",
     "export-to-csv": "^1.4.0",
     "json-logic-js": "^2.0.5",
     "jwt-decode": "^4.0.0",
