@@ -2,13 +2,13 @@
 using Fei.Is.Api.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 
-namespace Fei.Is.Api.Features.Products
+namespace Fei.Is.Api.Services.PLUCode
 {
     public class PLUCodeService(AppDbContext context)
     {
         private readonly AppDbContext _context = context;
         private readonly Random _random = new Random();
-        private const int maxRetries = 5;
+        private const int MAX_RETRIES = 5;
 
         public string GetPLUCode()
         {
@@ -17,7 +17,7 @@ namespace Fei.Is.Api.Features.Products
 
             do
             {
-                if (retryCount >= maxRetries)
+                if (retryCount >= MAX_RETRIES)
                 {
                     throw new InvalidOperationException("Unable to generate a unique PLU Code after several attempts.");
                 }
@@ -37,7 +37,7 @@ namespace Fei.Is.Api.Features.Products
 
             do
             {
-                if (retryCount >= maxRetries)
+                if (retryCount >= MAX_RETRIES)
                 {
                     throw new InvalidOperationException("Unable to generate a unique PLU Code after several attempts.");
                 }

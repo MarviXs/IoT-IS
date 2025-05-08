@@ -1,6 +1,6 @@
 ﻿using Fei.Is.Api.Data.Models.InformationSystem;
 
-namespace Fei.Is.Api.FileSystem
+namespace Fei.Is.Api.Services.FileSystem
 {
     public interface IFileSystemService
     {

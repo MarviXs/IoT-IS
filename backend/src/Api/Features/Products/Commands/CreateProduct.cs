@@ -5,6 +5,8 @@ using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Data.Models.InformationSystem;
 using Fei.Is.Api.Extensions;
+using Fei.Is.Api.Services.EANCode;
+using Fei.Is.Api.Services.PLUCode;
 using FluentResults;
 using FluentValidation;
 using MediatR;
@@ -13,33 +15,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fei.Is.Api.Features.Products.Commands
 {
-    public static class EanGenerator
-    {
-        private const string Prefix = "859"; // GS1 prefix pro ČR/SR
-
-
-        public static string GenerateEan13FromPlu(string pluCode)
-        {
-            var paddedPlu = pluCode.PadLeft(9, '0');
-            var baseCode = Prefix + paddedPlu;
-
-            int sum = 0;
-            for (int i = 0; i < baseCode.Length; i++)
-            {
-                int digit = baseCode[i] - '0';
-                sum += digit * ((i % 2 == 0) ? 1 : 3);
-            }
-
-            var mod = sum % 10;
-            var checkDigit = mod == 0 ? 0 : 10 - mod;
-
-            return baseCode + checkDigit;
-        }
-    }
-
     public static class CreateProduct
     {
-        
+
         public record Request(
             string? Code,
             string? PLUCode,
@@ -114,12 +92,14 @@ namespace Fei.Is.Api.Features.Products.Commands
             private readonly AppDbContext _context;
             private readonly IValidator<Command> _validator;
             private readonly PLUCodeService _pluCodeService;
+            private readonly EANCodeService _eanCodeService;
 
-            public Handler(AppDbContext context, IValidator<Command> validator, PLUCodeService pluCodeService)
+            public Handler(AppDbContext context, IValidator<Command> validator, PLUCodeService pluCodeService, EANCodeService eanCodeService)
             {
                 _context = context;
                 _validator = validator;
                 _pluCodeService = pluCodeService;
+                _eanCodeService = eanCodeService;
             }
 
             public async Task<Result<Guid>> Handle(Command message, CancellationToken cancellationToken)
@@ -144,8 +124,7 @@ namespace Fei.Is.Api.Features.Products.Commands
                 if (!await _context.Categories.AnyAsync(c => c.Id == message.Request.CategoryId, cancellationToken))
                     return Result.Fail(new BadRequestError("Category does not exist"));
 
-                // Vygeneruje EAN-13 z PLU
-                var eanCode = EanGenerator.GenerateEan13FromPlu(pluCode);
+                var eanCode = _eanCodeService.FromPlu(pluCode);
 
                 var product = new Product
                 {
@@ -208,7 +187,6 @@ namespace Fei.Is.Api.Features.Products.Commands
                 RuleFor(r => r.Request.SupplierId).NotEmpty().WithMessage("SupplierId is required");
                 RuleFor(r => r.Request.Variety).NotEmpty().WithMessage("Variety is required");
                 RuleFor(r => r.Request.VATCategoryId).NotEmpty().WithMessage("VAT Category Id is required");
-                // Přidejte validace pro nové vlastnosti dle potřeby
             }
         }
     }
