@@ -70,19 +70,19 @@
                       <q-item v-close-popup clickable @click="addRecord(treeProp.node.plantBoardId)">
                         <div class="row items-center q-gutter-sm">
                           <q-icon color="grey-9" size="24px" :name="mdiSeedPlusOutline" />
-                          <div>Add record</div>
+                          <div>{{ t('lifecycle.add_record') }}</div>
                         </div>
                       </q-item>
                       <q-item v-close-popup clickable>
                         <div class="row items-center q-gutter-sm">
                           <q-icon color="grey-9" size="24px" :name="mdiPencil" />
-                          <div>Edit</div>
+                          <div>{{ t('lifecycle.edit') }}</div>
                         </div>
                       </q-item>
                       <q-item v-close-popup clickable @click="deleteLifecycle(treeProp.node.plantBoardId)">
                         <div class="row items-center q-gutter-sm">
                           <q-icon color="grey-9" size="24px" :name="mdiTrashCan" />
-                          <div>Delete</div>
+                          <div>{{ t('lifecycle.delete') }}</div>
                         </div>
                       </q-item>
                     </q-list>
@@ -125,7 +125,7 @@ const collections = ref<CollectionNode[]>([]);
 const columns = computed(() => [  
   {
     name: 'plantBoardId',
-    label: t('Planting board ID'),
+    label: t('lifecycle.plant_board_id'),
     field: 'plantBoardId',
     required: true,
     style: 'text-align: left;',
@@ -140,19 +140,19 @@ const columns = computed(() => [
   }, 
   {
     name: 'rows',
-    label: t('Board Rows'),
+    label: t('lifecycle.rows'),
     field: 'rows',
     required: true,
   },
   {
     name: 'cols',
-    label: t('Board Columns'),
+    label: t('lifecycle.columns'),
     field: 'cols',
     required: true
   },
   {
     name: 'createdAt',
-    label: t('Created date'),
+    label: t('lifecycle.create_date'),
     field: 'createdAt',
     required: true
   },

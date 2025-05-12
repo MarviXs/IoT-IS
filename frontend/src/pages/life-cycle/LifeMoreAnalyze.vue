@@ -2,7 +2,7 @@
   <q-page class="q-pa-lg">
     <q-card class="q-px-lg q-py-md shadow-2">
       <q-card-section>
-        <div class="text-h5 text-primary">Add New Plants</div>
+        <div class="text-h5 text-primary">{{ t('lifecycle.add_plants') }}</div>
       </q-card-section>
       <q-separator />
 
@@ -17,7 +17,7 @@
                 :src="plantProperties.photo"
                 @change="onCropChange"
               />
-              <q-btn label="Crop" color="primary" class="q-mt-md" @click="applyCrop" />
+              <q-btn :label="t('lifecycle.crop')" color="primary" class="q-mt-md" @click="applyCrop" />
             </div>
             <div v-else>
               <q-img
@@ -44,7 +44,7 @@
                 class="q-mt-md"
                 color="primary"
                 :icon="mdiUpload"
-                label="Upload Photo"
+                :label="t('lifecycle.upload_photo')"
                 @click="triggerFileInput"
               />
               <input
@@ -64,14 +64,14 @@
               <q-input
                 v-model="plantProperties.id"
                 outlined
-                label="PlantBoard ID"
+                :label="t('lifecycle.plantboard_id')"
                 dense
                 class="q-mb-md"
               />
               <q-input
                 v-model="plantProperties.rows"
                 outlined
-                label="Rows"
+                :label="t('lifecycle.rows')"
                 dense
                 type="number"
                 class="q-mb-md"
@@ -79,7 +79,7 @@
               <q-input
                 v-model="plantProperties.cols"
                 outlined
-                label="Cols"
+                :label="t('lifecycle.columns')"
                 dense
                 type="number"
                 class="q-mb-md"
@@ -87,7 +87,7 @@
               <q-input
                 v-model="plantProperties.leafCount"
                 outlined
-                label="Leaf Count"
+                :label="t('lifecycle.leafcount')"
                 dense
                 type="number"
                 class="q-mb-md"
@@ -95,7 +95,7 @@
               <q-input
                 v-model="plantProperties.area"
                 outlined
-                label="Area (cm2)"
+                :label="t('lifecycle.areacm2')"
                 dense
                 type="number"
                 class="q-mb-md"
@@ -103,21 +103,21 @@
               <q-input
                 v-model="plantProperties.type"
                 outlined
-                label="Plant Type"
+                :label="t('lifecycle.plant_type')"
                 dense
                 class="q-mb-md"
               />
               <q-input
                 v-model="plantProperties.disease"
                 outlined
-                label="Disease"
+                :label="t('lifecycle.disease')"
                 dense
                 class="q-mb-md"
               />
               <q-input
                 v-model="plantProperties.date"
                 outlined
-                label="Date"
+                :label="t('lifecycle.date')"
                 type="date"
                 dense
                 class="q-mb-md"
@@ -129,21 +129,21 @@
 
       <q-separator />
       <q-card-section align="right">
-        <q-btn label="Save Plant" color="primary" :icon="mdiCheck" class="q-mr-sm" @click="savePlant"/>
-        <q-btn label="Cancel" color="secondary" flat @click="goBack"/>
+        <q-btn :label="t('lifecycle.save_plant')" color="primary" :icon="mdiCheck" class="q-mr-sm" @click="savePlant"/>
+        <q-btn :label="t('lifecycle.cancel')" color="secondary" flat @click="goBack"/>
       </q-card-section>
     </q-card>
 
     <q-dialog v-model="dialogOpen">
       <q-card>
         <q-card-section>
-          <div class="text-h6">Enter Disease Name</div>
+          <div class="text-h6">{{ t('lifecycle.enter_disease') }}</div>
           <q-input v-model="diseaseInput" label="Disease Name" dense autofocus />
         </q-card-section>
 
         <q-card-actions>
-          <q-btn label="Cancel" color="secondary" @click="dialogOpen = false" />
-          <q-btn label="Save" color="primary" @click="saveDisease" />
+          <q-btn :label="t('lifecycle.cancel')" color="secondary" @click="dialogOpen = false" />
+          <q-btn :label="t('lifecycle.save_disease')" color="primary" @click="saveDisease" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -152,11 +152,11 @@
     <q-dialog v-model="dialogOpen2">
       <q-card>
         <q-card-section>
-          <div class="text-h6">Naozaj chcete odstrániť chorobu "{{ selectedDisease }}"?</div>
+          <div class="text-h6">{{ t('lifecycle.confirm_delete_disease', { disease: selectedDisease }) }}</div>
         </q-card-section>
         <q-card-actions align="right">
-          <q-btn flat label="Nie" color="grey" v-close-popup />
-          <q-btn flat label="Áno" color="red" @click="removeDisease" />
+          <q-btn flat :label="t('lifecycle.no')" color="grey" v-close-popup />
+          <q-btn flat :label="t('lifecycle.yes')" color="red" @click="removeDisease" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -173,8 +173,9 @@ import { mdiCheck, mdiUpload } from '@quasar/extras/mdi-v7';
 import { Cropper as VueAdvancedCropper } from 'vue-advanced-cropper';
 import 'vue-advanced-cropper/dist/style.css';
 import LifeCycleService from '@/api/services/LifeCycleService';
-import { he, ro } from 'date-fns/locale';
+import { useI18n } from 'vue-i18n';
 
+const { t } = useI18n();
 const plantProperties = ref({
   id: '',
   leafCount: '',

@@ -2,31 +2,31 @@
   <div>
 
     <q-btn
-      label="Pridať rastlinu"
+      :label="t('greenhouse.add_plant')"
       class="q-mb-sm q-mr-sm"
       @click="showPlantList = true"
     />
 
     <q-btn
-      label="Pridať kvetináč"
+      :label="t('greenhouse.add_pot')"
       class="q-mb-sm q-mr-sm"
       @click="openPotSizeDialog"
     />
 
     <q-btn
-      label="Predošlí deň"
+      :label="t('greenhouse.p_day')"
       class="q-mb-sm q-mr-sm"
       @click="adjustPlantStates(-1)"
     />
 
     <q-btn
-      label="Nasledujúci deň"
+      :label="t('greenhouse.n_day')"
       class="q-mb-sm q-mr-sm"
       @click="adjustPlantStates(1)"
     />
 
     <q-btn
-      label="Uložiť"
+      :label="t('greenhouse.save')"
       class="q-mb-sm"
       @click="saveState()"
     />
@@ -34,12 +34,12 @@
     <!-- Dialógové okno pre zadanie rozmerov skleníka -->
     <div v-if="showGreenhouseDialog" class="dialog">
       <div class="dialog-content">
-        <h3>Zadajte údaje o sklenníku</h3>
+        <h3>{{ t('greenhouse.enter_details') }}</h3>
 
         <q-input
           v-model="greenhouseName"
           type="text"
-          label="Greenhouse name"
+          :label="t('greenhouse.greenhouse_name')"
           dense
           outlined
           class="q-mb-md"
@@ -48,7 +48,7 @@
         <q-input
           v-model.number="greenhouseWidth"
           type="number"
-          label="Width (meters)"
+          :label="t('greenhouse.width_meters')"
           min="1"
           dense
           outlined
@@ -58,7 +58,7 @@
         <q-input
           v-model.number="greenhouseHeight"
           type="number"
-          label="Depth (meters)"
+          :label="t('greenhouse.length_meters')"
           min="1"
           dense
           outlined
@@ -66,7 +66,7 @@
         />
 
         <!-- Výber počtu rastlín -->
-        <h4>Vyberte počet rastlín:</h4>
+        <h4>{{ t('greenhouse.choose_plants') }}</h4>
         <div v-for="plant in plantOptions" :key="plant.id" class="q-mb-sm">
           <q-input
             v-model.number="plantSelection[plant.id]"
@@ -80,13 +80,13 @@
         </div>
 
         <q-btn
-          label="Nastaviť"
+          :label="t('greenhouse.create')"
           class="q-mt-md q-mr-sm"
           @click="setGreenhouseSize"
         />
 
         <q-btn
-          label="Zrušiť"
+          :label="t('greenhouse.cancel')"
           flat
           class="q-mt-md"
           @click="closeGreenhouseDialog"
@@ -97,7 +97,7 @@
     <!-- Zoznam na výber veľkosti rastliny -->
     <div v-if="showPlantList" class="dialog">
       <div class="dialog-content">
-        <h3>Vyberte veľkosť rastliny</h3>
+        <h3>{{ t('greenhouse.choose_plant') }}</h3>
         <ul>
           <li v-for="plant in plantOptions" :key="plant.id">
             <q-btn
@@ -109,7 +109,7 @@
           </li>
         </ul>
         <q-btn
-          label="Zrušiť"
+          :label="t('greenhouse.cancel')"
           flat
           class="q-mt-md"
           @click="showPlantList = false"
@@ -121,14 +121,14 @@
     <q-dialog v-model="showPotSizeDialog">
       <q-card class="q-pa-md" style="min-width: 300px;">
         <q-card-section>
-          <h3>Vyberte veľkosť kvetináča</h3>
-          <h4>Pláty:</h4>
+          <h3>{{ t('greenhouse.choose_pot') }}</h3>
+          <h4>{{ t('greenhouse.plantboards') }}</h4>
 
           <q-select
             v-model="selectedLayout"
             :options="predefinedLayouts"
             option-label="label"
-            label="Vyber rozloženie"
+            :label = "t('greenhouse.create')"
             emit-value
             map-options
             @update:model-value="createMegaPotByLayout"
@@ -147,7 +147,7 @@
         </q-card-section>
 
         <q-card-actions align="right">
-          <q-btn flat label="Zrušiť" color="primary" @click="closePotSizeDialog" />
+          <q-btn flat :label="t('greenhouse.cancel')" color="primary" @click="closePotSizeDialog" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -156,13 +156,13 @@
     <q-dialog v-model="showDialog">
       <q-card class="q-pa-md" style="min-width: 300px;">
         <q-card-section>
-          <h3>Zadajte rozmery kvetináča</h3>
+          <h3>{{ t('greenhouse.set_plantboard_size') }}</h3>
 
           <q-input
             v-model.number="columns"
             type="number"
             min="1"
-            label="Počet stĺpcov"
+            :label="t('greenhouse.cols')"
             outlined
             dense
             class="q-mb-sm"
@@ -172,7 +172,7 @@
             v-model.number="rows"
             type="number"
             min="1"
-            label="Počet riadkov"
+            :label="t('greenhouse.rows')"
             outlined
             dense
             class="q-mb-md"
@@ -180,8 +180,8 @@
         </q-card-section>
 
         <q-card-actions align="right">
-          <q-btn label="Vytvoriť" color="primary" @click="createMegaPot" />
-          <q-btn flat label="Zrušiť" color="primary" @click="closeDialog" />
+          <q-btn :label="t('greenhouse.create')" color="primary" @click="createMegaPot" />
+          <q-btn flat :label="t('greenhouse.cancel')" color="primary" @click="closeDialog" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -189,12 +189,12 @@
     <q-dialog v-model="showUploadDialog">
       <q-card class="q-pa-md" style="min-width: 350px;">
         <q-card-section>
-          <h3>Vložte fotografiu</h3>
+          <h3>{{ t('greenhouse.upload_plant_image') }}</h3>
 
           <!-- Výber súboru -->
           <q-file
             v-model="selectedFile"
-            label="Vyberte súbor"
+            :label="t('greenhouse.choose_file')"
             accept="image/*"
             outlined
             dense
@@ -210,7 +210,7 @@
             v-model.number="columnsImage"
             type="number"
             min="1"
-            label="Počet stĺpcov"
+            :label="t('greenhouse.cols')"
             outlined
             dense
             class="q-mb-sm"
@@ -221,15 +221,15 @@
             v-model.number="rowsImage"
             type="number"
             min="1"
-            label="Počet riadkov"
+            :label="t('greenhouse.rows')"
             outlined
             dense
           />
         </q-card-section>
 
         <q-card-actions align="right">
-          <q-btn label="Vytvoriť" color="primary" @click="handleUploadAndCreate" />
-          <q-btn flat label="Zrušiť" color="primary" @click="showUploadDialog = false" />
+          <q-btn :label="t('greenhouse.create')" color="primary" @click="handleUploadAndCreate" />
+          <q-btn flat :label="t('greenhouse.cancel')" color="primary" @click="showUploadDialog = false" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -329,7 +329,7 @@
 
     <!-- Informácie o rastlinách -->
     <div v-show="showPlantInfo" class="plant-info" :style="plantInfoStyle">
-      <h3>Informácie o rastlinách</h3>
+      <h3>{{ t('greenhouse.plant_informations') }}</h3>
       <div class="plant-info-scroll">
         <ul>
           <li v-for="plant in plants" :key="'info-' + plant.id">
@@ -339,11 +339,11 @@
 
             <transition name="fade">
               <div v-if="expandedPlants.includes(plant.id)" class="plant-details">
-                Typ: {{ plant.type }}<br />
-                Druh: {{ plant.species }}<br />
-                Svetlo: {{ plant.light }}<br />
-                Pôda: {{ plant.soil }}<br />
-                Kvetináč: {{ plant.potName }}
+                {{ t('greenhouse.type') }}: {{ plant.type }}<br />
+                {{ t('greenhouse.species') }}: {{ plant.species }}<br />
+                {{ t('greenhouse.light') }}: {{ plant.light }}<br />
+                {{ t('greenhouse.soil') }}: {{ plant.soil }}<br />
+                {{ t('greenhouse.pot') }}: {{ plant.potName }}
               </div>
             </transition>
           </li>
@@ -358,12 +358,20 @@ import GreenHouseService from '@/api/services/GreenHouseService';
 import OrdersService from '@/api/services/OrdersService'; 
 import ProductService from '@/api/services/ProductService';
 import { timestamp } from '@vueuse/core';
+import { useI18n } from 'vue-i18n';
+
 
 const width = 500;
 const height = 800;
 var changed = false
 
 export default {
+  setup() {
+    const { t } = useI18n(); 
+    return {
+      t
+    }
+  },
   data() {
     return {
       loaded: false,

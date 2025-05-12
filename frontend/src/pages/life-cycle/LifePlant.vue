@@ -1,5 +1,5 @@
 <template>
-  <PageLayout :breadcrumbs="[{ label: 'Plants lifecycles' }]">
+  <PageLayout :breadcrumbs="[{ label: t('lifecycle.label') }]">
     <template #actions>
       <q-btn
         class="shadow"
@@ -8,7 +8,7 @@
         unelevated
         no-caps
         size="15px"
-        :label="'Add Record'"
+        :label="t('lifecycle.add_record')"
         :icon="mdiPlus"
         @click="addRecord()"
       />
@@ -52,7 +52,7 @@
       <q-dialog v-model="showImageDialog">
       <q-card style="width: 100%; ">
         <q-card-section>
-          <div class="text-h6">Plant Image</div>
+          <div class="text-h6">{{ t('lifecycle.plant_image') }}</div>
         </q-card-section>
         <q-card-section>
           <q-img v-if="plantImage" style="width: 100%; " :src="plantImage" fit="contain">
@@ -62,7 +62,7 @@
               :style="{ top: `${squareTop}px`, left: `${squareLeft}px`, width: '50px', height: '50px' }"
             ></div>
           </q-img>
-          <div v-else class="text-red">Image not found</div>
+          <div v-else class="text-red">{{ t('lifecycle.image_not_found') }}</div>
         </q-card-section>
         <q-card-actions align="right">
           <q-btn flat label="Close" color="primary" @click="showImageDialog = false" />
@@ -79,8 +79,10 @@ import { useRoute, useRouter } from 'vue-router';
 import LifeCycleService from '@/api/services/LifeCycleService';
 import PageLayout from '@/layouts/PageLayout.vue';
 import { mdiPlus } from '@quasar/extras/mdi-v7';
+import { useI18n } from 'vue-i18n';
 import axios from 'axios';
 
+const { t } = useI18n();
 const showImageDialog = ref(false);
 const plantImage = ref<string | null>(null);
 
@@ -104,12 +106,12 @@ const plants = ref<{
 
 // Table columns
 const columns = ref([
-  { name: 'id', required: true, label: 'Plant ID', align: 'left', field: 'plantId', sortable: true },
-  { name: 'disease', required: true, label: 'Disease', align: 'left', field: 'disease', sortable: true },
-  { name: 'area', required: true, label: 'Size', align: 'left', field: 'area', sortable: true },
-  { name: 'leafCount', required: true, label: 'Leaf Count', align: 'left', field: 'leafCount', sortable: true },
-  { name: 'date', required: true, label: 'Date', align: 'left', field: 'analysisDate', sortable: true },
-  { name: 'progress', required: true, label: 'Progress', align: 'left', field: 'progress', sortable: false },
+  { name: 'id', required: true, label: t('lifecycle.plant_id'), align: 'left', field: 'plantId', sortable: true },
+  { name: 'disease', required: true, label: t('lifecycle.disease'), align: 'left', field: 'disease', sortable: true },
+  { name: 'area', required: true, label: t('lifecycle.size'), align: 'left', field: 'area', sortable: true },
+  { name: 'leafCount', required: true, label: t('lifecycle.leafcount'), align: 'left', field: 'leafCount', sortable: true },
+  { name: 'date', required: true, label: t('lifecycle.date'), align: 'left', field: 'analysisDate', sortable: true },
+  { name: 'progress', required: true, label: t('lifecycle.progress'), align: 'left', field: 'progress', sortable: false },
 ]);
 
 function formatDate(date: string | null): string {

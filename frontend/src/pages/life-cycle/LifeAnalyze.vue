@@ -2,7 +2,7 @@
   <q-page class="q-pa-lg">
     <q-card class="q-px-lg q-py-md shadow-2">
       <q-card-section>
-        <div class="text-h5 text-primary">Add New Plant</div>
+        <div class="text-h5 text-primary">{{ t('lifecycle.add_plant') }}</div>
       </q-card-section>
       <q-separator />
 
@@ -33,7 +33,7 @@
               class="q-mt-md"
               color="primary"
               :icon="mdiUpload"
-              label="Upload Photo"
+              :label="t('lifecycle.upload_photo')"
               @click="triggerFileInput"
             />
             <input
@@ -52,14 +52,14 @@
               <q-input
                 v-model="plantProperties.id"
                 outlined
-                label="Plant ID"
+                :label="t('lifecycle.pid')"
                 dense
                 class="q-mb-md"
               />
               <q-input
                 v-model="plantProperties.height"
                 outlined
-                label="Height (cm)"
+                :label="t('lifecycle.height')"
                 dense
                 type="number"
                 class="q-mb-md"
@@ -67,7 +67,7 @@
               <q-input
                 v-model="plantProperties.width"
                 outlined
-                label="Width (cm)"
+                :label="t('lifecycle.width')"
                 dense
                 type="number"
                 class="q-mb-md"
@@ -75,7 +75,7 @@
               <q-input
                 v-model="plantProperties.leafCount"
                 outlined
-                label="Leaf Count"
+                :label="t('lifecycle.leafcount')"
                 dense
                 type="number"
                 class="q-mb-md"
@@ -83,28 +83,28 @@
               <q-input
                 v-model="plantProperties.area"
                 outlined
-                label="Area"
+                :label="t('lifecycle.areacm2')"
                 dense
                 class="q-mb-md"
               />
               <q-input
                 v-model="plantProperties.type"
                 outlined
-                label="Plant Type"
+                :label="t('lifecycle.plant_type')"
                 dense
                 class="q-mb-md"
               />
               <q-input
                 v-model="plantProperties.disease"
                 outlined
-                label="Disease"
+                :label="t('lifecycle.disease')"
                 dense
                 class="q-mb-md"
               />
               <q-input
                 v-model="plantProperties.date"
                 outlined
-                label="Date"
+                :label="t('lifecycle.date')"
                 type="date"
                 dense
                 class="q-mb-md"
@@ -116,8 +116,8 @@
 
       <q-separator />
       <q-card-section align="right">
-        <q-btn label="Save Plant" color="primary" :icon="mdiCheck" class="q-mr-sm" @click="savePlant"/>
-        <q-btn label="Cancel" color="secondary" flat @click="goBack"/>
+        <q-btn :label="t('lifecycle.save_plant')" color="primary" :icon="mdiCheck" class="q-mr-sm" @click="savePlant"/>
+        <q-btn :label="t('lifecycle.cancel')" color="secondary" flat @click="goBack"/>
       </q-card-section>
     </q-card>
   </q-page>
@@ -128,7 +128,9 @@ import { ref, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { mdiCheck, mdiUpload } from '@quasar/extras/mdi-v7';
 import LifeCycleService from '@/api/services/LifeCycleService'; // Importujte svoj service
+import { useI18n } from 'vue-i18n';
 
+const { t } = useI18n();
 
 const plantProperties = ref({
   id: '',

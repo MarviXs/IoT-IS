@@ -65,19 +65,19 @@
                       <q-item v-close-popup clickable @click="addRecord(treeProp.node.plantId)">
                         <div class="row items-center q-gutter-sm">
                           <q-icon color="grey-9" size="24px" :name="mdiSeedPlusOutline" />
-                          <div>Add record</div>
+                          <div>{{ t('lifecycle.add_record') }}</div>
                         </div>
                       </q-item>
                       <q-item v-close-popup clickable>
                         <div class="row items-center q-gutter-sm">
                           <q-icon color="grey-9" size="24px" :name="mdiPencil" />
-                          <div>Edit</div>
+                          <div>{{ t('lifecycle.edit') }}</div>
                         </div>
                       </q-item>
                       <q-item v-close-popup clickable @click="deleteLifecycle(treeProp.node.id)">
                         <div class="row items-center q-gutter-sm">
                           <q-icon color="grey-9" size="24px" :name="mdiTrashCan" />
-                          <div>Delete</div>
+                          <div>{{ t('lifecycle.delete') }}</div>
                         </div>
                       </q-item>
                     </q-list>
@@ -138,7 +138,7 @@ const plantId = route.params.id;
 const columns = computed(() => [
 {
     name: 'plantId',
-    label: t('Plant ID'),
+    label: t('lifecycle.plant_id'),
     field: 'plantId',
     required: true,
     style: 'text-align: left;',
@@ -146,20 +146,20 @@ const columns = computed(() => [
   },  
 {
     name: 'name',
-    label: t('Plant Name'),
+    label: t('lifecycle.plant_name'),
     field: 'name',
     required: true,
     headerStyle: 'text-align: center;'
   },
   {
     name: 'type',
-    label: t('Plant Type'),
+    label: t('lifecycle.plant_type'),
     field: 'type',
     required: true
   },
   {
     name: 'days',
-    label: t('Days'),
+    label: t('lifecycle.days'),
     field: 'days',
     required: true
   },
