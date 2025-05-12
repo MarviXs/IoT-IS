@@ -355,6 +355,8 @@
 
 <script >
 import GreenHouseService from '@/api/services/GreenHouseService';
+import OrdersService from '@/api/services/OrdersService'; 
+import ProductService from '@/api/services/ProductService';
 import { timestamp } from '@vueuse/core';
 
 const width = 500;
@@ -459,14 +461,13 @@ export default {
       selectedPotSize: null,
       plantOptions: [
         {
-          id: 1,
-          name: 'Malá Rastlina',
-          type: 'Bylina',
-          currentState: 0,
-          states: [
+          id: 1, // productId
+          name: 'Malá Rastlina', // czechName
+          type: 'Bylina', //latinName
+          currentState: 0, // vzdy nula
+          states: [ // vzdy budu dve
             { stage: 'mladá', width: 15, height: 15, days: 7 },
-            { stage: 'dospelá', width: 50, height: 50, days: 14 },
-            { stage: 'zrelá', width: 70, height: 70, days: 21 }
+            { stage: 'dospelá', width: 20, height: 20, days: 14 },
           ]
         },
         {
@@ -498,6 +499,37 @@ export default {
     window.addEventListener('scroll', this.updatePlantInfoPosition);
     this.ghouseid = this.$route.params.id;
     console.log("TU JE ID:", this.ghouseid);
+
+    OrdersService.getOrderProducts() // tu bude id objednavky
+      .then(response => {
+        const products = response.data;
+
+        this.plantOptions = products.map(product => ({
+          id: product.productId,
+          name: product.czechName,
+          type: product.latinName,
+          currentState: 0,
+          states: [
+            {
+              stage: 'young',
+              width: isNaN(parseInt(product.plantSpacingCm)) ? 0 : parseInt(product.plantSpacingCm),
+              height: isNaN(parseInt(product.plantSpacingCm)) ? 0 : parseInt(product.plantSpacingCm),
+              days: isNaN(parseInt(product.cultivationTimeFromYoungPlant)) ? 0 : parseInt(product.cultivationTimeFromYoungPlant)
+            },
+            {
+              stage: 'seed',
+              width: isNaN(parseInt(product.seedSpacingCM)) ? 0 : parseInt(product.seedSpacingCM),
+              height: isNaN(parseInt(product.seedSpacingCM)) ? 0 : parseInt(product.seedSpacingCM),
+              days: isNaN(parseInt(product.cultivationTimeVegetableWeek)) ? 0 : parseInt(product.cultivationTimeVegetableWeek)
+            }
+          ]
+        }));
+
+        console.log("Načítaná objednávka:", plantOptions);
+      })
+      .catch(error => {
+        console.error("Chyba pri načítaní objednávky:", error);
+      });
 
     if (this.ghouseid) {
       GreenHouseService.getGreenHouseById(this.ghouseid)
@@ -635,9 +667,9 @@ export default {
         if (!plantOption || !rect) return;
 
         // Spočítaj, koľko dní uplynulo od zasadenia rastliny
-        //const plantPlantedDate = new Date(plant.datePlanted);
+        const plantPlantedDate = new Date(plant.datePlanted);
         const parts = plant.datePlanted.split('.').map(p => parseInt(p.trim(), 10));
-        const plantPlantedDate = new Date(parts[2], parts[1] - 1, parts[0]); 
+        //const plantPlantedDate = new Date(parts[2], parts[1] - 1, parts[0]); 
         const daysSincePlanted = Math.floor((this.currentSimulatedDate - plantPlantedDate) / (1000 * 60 * 60 * 24)); // rozdiel v dňoch
         console.log(`Dátum výsadby: ${plantPlantedDate.toLocaleDateString()}`);
         console.log(`Počet dní od výsadby: ${daysSincePlanted}`);
