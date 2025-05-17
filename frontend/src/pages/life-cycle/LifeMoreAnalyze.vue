@@ -174,6 +174,7 @@ import { Cropper as VueAdvancedCropper } from 'vue-advanced-cropper';
 import 'vue-advanced-cropper/dist/style.css';
 import LifeCycleService from '@/api/services/LifeCycleService';
 import { useI18n } from 'vue-i18n';
+import { CONFIG } from '@/config';
 
 const { t } = useI18n();
 const plantProperties = ref({
@@ -291,7 +292,7 @@ const uploadPhoto = async (file: File) => {
   formData.append('cols', plantProperties.value.cols.toString());
   isLoading.value = true;
   try {
-    const response = await fetch('http://localhost:5000/upload', {
+    const response = await fetch(`${CONFIG.API_BASE_URL}${CONFIG.UPLOAD_ENDPOINT}`, {
       method: 'POST',
       body: formData,
     });
@@ -411,18 +412,6 @@ const savePlant = async () => {
 const goBack = () => {
   router.back();
 };
-
-/*const getClickPosition = (event: MouseEvent) => {
-  const imgElement = event.target as HTMLImageElement;
-  const rect = imgElement.getBoundingClientRect();
-  console.log(`X: ${event.clientX - rect.left}, Y: ${event.clientY - rect.top}`);
-
-  // Pridanie novej pozície do poľa
-  clickPositions.value.push({
-    x: event.clientX - rect.left,
-    y: event.clientY - rect.top
-  });
-};*/
 
 const getClickPosition = (event: MouseEvent) => {
   if (!tmpResponse || !tmpResponse.nums) {

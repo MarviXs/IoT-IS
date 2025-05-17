@@ -330,6 +330,7 @@
     <!-- Informácie o rastlinách -->
     <div v-show="showPlantInfo" class="plant-info" :style="plantInfoStyle">
       <h3>{{ t('greenhouse.plant_informations') }}</h3>
+      <h4>{{ currentSimulatorDay }}</h4>
       <div class="plant-info-scroll">
         <ul>
           <li v-for="plant in plants" :key="'info-' + plant.id">
@@ -400,8 +401,8 @@ export default {
         border: '1px solid black',
         transition: 'top 0.2s ease-out', // Pre hladký pohyb pri skrolovaní
       },
-      greenhouseWidth: 600,
-      greenhouseHeight: 400,
+      greenhouseWidth: 6,
+      greenhouseHeight: 4,
       showGreenhouseDialog: false,
       stageSize: {
         width: width,
@@ -454,6 +455,7 @@ export default {
       showPotSizeDialog: false,
       columns: 1,
       rows: 1,
+      currentSimulatorDay: new Date().toLocaleDateString(),
       potSizes: [
         { id: 1, name: 'Kvetináč 85x85', width: 85, height: 85, shape: 'square' },
         { id: 2, name: 'Kvetináč Ø95', width: 95, height: 95, shape: 'circle' },
@@ -508,9 +510,59 @@ export default {
     this.ghouseid = this.$route.params.id;
     console.log("TU JE ID:", this.ghouseid);
 
-    OrdersService.getOrderProducts() // tu bude id objednavky
+    ProductService.getProducts()
       .then(response => {
-        const products = response.data;
+        const items = response.data.items;
+
+        this.plantOptions = items.map((product, index) => {
+          ProductService.getProduct(product.id)
+            .then(res => {
+              console.log(`Product pre ${product.id}:`, res.data);
+            })
+            .catch(err => {
+              console.error(`Chyba pre ${product.id}:`, {
+                message: err.message,
+                status: err.response?.status,
+                data: err.response?.data
+              });
+            });
+
+          let states;
+          if (index % 3 === 0) {
+            states = [
+              { stage: "mladá", width: 15, height: 15, days: 7 },
+              { stage: "dospelá", width: 20, height: 20, days: 14 }
+            ];
+          } else if (index % 3 === 1) {
+            states = [
+              { stage: "mladá", width: 25, height: 25, days: 10 },
+              { stage: "dospelá", width: 100, height: 100, days: 20 },
+              { stage: "zrelá", width: 140, height: 140, days: 30 }
+            ];
+          } else {
+            states = [
+              { stage: "mladá", width: 30, height: 30, days: 14 },
+              { stage: "dospelá", width: 150, height: 150, days: 28 },
+              { stage: "zrelá", width: 210, height: 210, days: 42 }
+            ];
+          }
+
+          return {
+            id: product.id,
+            name: product.czechName,
+            type: product.latinName,
+            currentState: 0,
+            states: states
+          };
+        });
+
+        console.log("Plant Options:", plantOptions);
+      });
+
+    OrdersService.getOrderProducts(this.ghouseid) // tu bude id objednavky
+      .then(response => {
+        console.log("AHOJ", response.data)
+        const products = response;
 
         this.plantOptions = products.map(product => ({
           id: product.productId,
@@ -666,6 +718,7 @@ export default {
     adjustPlantStates(daysToAdvance = 1) {
       // Posunúť globálny dátum o požadovaný počet dní
       this.currentSimulatedDate.setDate(this.currentSimulatedDate.getDate() + daysToAdvance);
+      this.currentSimulatorDay = this.currentSimulatedDate.toLocaleDateString();
       console.log(`Aktuálny dátum: ${this.currentSimulatedDate.toLocaleDateString()}`);
 
       this.plants.forEach(plant => {
@@ -675,9 +728,9 @@ export default {
         if (!plantOption || !rect) return;
 
         // Spočítaj, koľko dní uplynulo od zasadenia rastliny
-        const plantPlantedDate = new Date(plant.datePlanted);
+        //const plantPlantedDate = new Date(plant.datePlanted);
         const parts = plant.datePlanted.split('.').map(p => parseInt(p.trim(), 10));
-        //const plantPlantedDate = new Date(parts[2], parts[1] - 1, parts[0]); 
+        const plantPlantedDate = new Date(parts[2], parts[1] - 1, parts[0]); 
         const daysSincePlanted = Math.floor((this.currentSimulatedDate - plantPlantedDate) / (1000 * 60 * 60 * 24)); // rozdiel v dňoch
         console.log(`Dátum výsadby: ${plantPlantedDate.toLocaleDateString()}`);
         console.log(`Počet dní od výsadby: ${daysSincePlanted}`);
@@ -862,7 +915,7 @@ export default {
       event.evt.preventDefault(); // Zruší natívne kontextové menu
 
       // Môžeš pridať potvrdenie (voliteľne)
-      if (!confirm("Chceš odstrániť celý plát?")) return;
+      if (!confirm(this.t('greenhouse.delete_confirm'))) return;
 
       // Odstrániť všetky rastliny, ktoré boli v tomto megakvetináči
       for (const pot of megaPot.innerPots) {
@@ -1004,7 +1057,7 @@ export default {
         }
       },
       // Pridá rastlinu na základe vybraného typu
-    addRectangle(plantOption, next = true, tmpState = 0, tmpDate = new Date().toLocaleDateString()) {
+    addRectangle(plantOption, next = true, tmpState = 0, tmpDate = new Date().toLocaleDateString('sk-SK')) {
       var plantName = '';
       if (next){
         plantName = plantOption.name + ' ' + this.nextId;
@@ -1313,7 +1366,7 @@ export default {
         currentState: 'plant.state',
         currentDay: plant.state,
         editorBoardId: plant.editorBoardId ?? '', // ak môže byť null
-        greenHouseId: '11144706-aad4-4ad8-8c59-529194090155',//this.ghouseid,
+        greenHouseId: '27f4635b-738e-4356-b927-886de5f1c3fd',//this.ghouseid,
         plantId: 'id',
         stage: 'stage',
       };

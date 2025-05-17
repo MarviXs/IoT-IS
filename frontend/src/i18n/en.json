@@ -587,7 +587,9 @@
     "species": "Species",
     "light": "Light",
     "soil": "Soil",
-    "pot": "Pot"
+    "pot": "Pot",
+    "delete_confirm": "Do you want to delete the pot?",
+    "choose_file": "Choose file"
   },
   "forecast": {
     "label": "Forecast | Forecasts",

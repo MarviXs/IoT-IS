@@ -129,6 +129,7 @@ import { useRouter, useRoute } from 'vue-router';
 import { mdiCheck, mdiUpload } from '@quasar/extras/mdi-v7';
 import LifeCycleService from '@/api/services/LifeCycleService'; // Importujte svoj service
 import { useI18n } from 'vue-i18n';
+import { CONFIG } from '@/config';
 
 const { t } = useI18n();
 
@@ -168,7 +169,7 @@ const uploadPhoto = async (file: File) => {
   formData.append('mode', '0');
 
   try {
-    const response = await fetch('http://localhost:5000/upload', {
+    const response = await fetch(`${CONFIG.API_BASE_URL}${CONFIG.UPLOAD_ENDPOINT}`, {
       method: 'POST',
       body: formData,
     });

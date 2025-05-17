@@ -81,6 +81,7 @@ import PageLayout from '@/layouts/PageLayout.vue';
 import { mdiPlus } from '@quasar/extras/mdi-v7';
 import { useI18n } from 'vue-i18n';
 import axios from 'axios';
+import { CONFIG } from '@/config';
 
 const { t } = useI18n();
 const showImageDialog = ref(false);
@@ -170,7 +171,7 @@ async function logImageName(row: any) {
   }
 
   try {
-    const response = await axios.get(`http://localhost:5000/image/${row.imageName}`);
+    const response = await axios.get(`ht${CONFIG.API_BASE_URL}/image/${row.imageName}`);
     plantImage.value = response.data.plantImage; // Base64 string
     showImageDialog.value = true; // Open dialog
   } catch (error) {
