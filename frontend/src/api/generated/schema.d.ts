@@ -635,6 +635,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/greenhouses/{greenhouseId}/boards": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get editor boards by GreenHouseId */
+        get: operations["GetEditorBoardsByGreenHouseId"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/editorboards": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create an editor board */
+        post: operations["CreateEditorBoard"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/editorplants": {
         parameters: {
             query?: never;
@@ -2239,6 +2273,27 @@ export interface components {
             tag: string;
             unit: string;
         };
+        "Fei.Is.Api.Features.EditorBoards.Commands.CreateEditorBoard.Request": {
+            editorBoardID: string;
+            name: string;
+            /** Format: int32 */
+            columns: number;
+            /** Format: int32 */
+            rows: number;
+            /** Format: int32 */
+            width: number;
+            /** Format: int32 */
+            height: number;
+            /** Format: int32 */
+            posX: number;
+            /** Format: int32 */
+            posY: number;
+            shape: string;
+            /** Format: date-time */
+            dateCreated: string;
+            /** Format: uuid */
+            greenHouseId: string;
+        };
         "Fei.Is.Api.Features.EditorPlants.Commands.CreateEditorPlant.Request": {
             plantID: string;
             name: string;
@@ -2275,6 +2330,27 @@ export interface components {
             width?: number | null;
             /** Format: int32 */
             depth?: number | null;
+        };
+        "Fei.Is.Api.Features.GreenHouses.Queries.GetEditorBoardsByGreenHouseId.Response": {
+            editorBoardID: string;
+            name: string;
+            /** Format: int32 */
+            columns: number;
+            /** Format: int32 */
+            rows: number;
+            /** Format: int32 */
+            width: number;
+            /** Format: int32 */
+            height: number;
+            /** Format: int32 */
+            posX: number;
+            /** Format: int32 */
+            posY: number;
+            shape: string;
+            /** Format: date-time */
+            dateCreated: string;
+            /** Format: uuid */
+            greenHouseId: string;
         };
         "Fei.Is.Api.Features.GreenHouses.Queries.GetEditorPlantsByGreenHouseId.Response": {
             plantID: string;
@@ -4791,6 +4867,76 @@ export interface operations {
                 };
                 content: {
                     "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+        };
+    };
+    GetEditorBoardsByGreenHouseId: {
+        parameters: {
+            query?: {
+                SortBy?: string;
+                Descending?: boolean;
+                SearchTerm?: string;
+                PageNumber?: number;
+                PageSize?: number;
+            };
+            header?: never;
+            path: {
+                greenhouseId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.GreenHouses.Queries.GetEditorBoardsByGreenHouseId.Response"][];
+                };
+            };
+        };
+    };
+    CreateEditorBoard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.EditorBoards.Commands.CreateEditorBoard.Request"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
                 };
             };
         };

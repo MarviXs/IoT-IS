@@ -359,6 +359,8 @@ import GreenHouseService from '@/api/services/GreenHouseService';
 import OrdersService from '@/api/services/OrdersService'; 
 import ProductService from '@/api/services/ProductService';
 import { timestamp } from '@vueuse/core';
+import { parse } from 'date-fns';
+import { ro } from 'date-fns/locale';
 import { useI18n } from 'vue-i18n';
 
 
@@ -510,53 +512,61 @@ export default {
     this.ghouseid = this.$route.params.id;
     console.log("TU JE ID:", this.ghouseid);
 
-    ProductService.getProducts()
-      .then(response => {
+      ProductService.getProducts()
+      .then(async response => {
         const items = response.data.items;
 
-        this.plantOptions = items.map((product, index) => {
-          ProductService.getProduct(product.id)
-            .then(res => {
-              console.log(`Product pre ${product.id}:`, res.data);
-            })
-            .catch(err => {
+        // Použijeme Promise.all na všetky podprodukty
+        const plantOptions = await Promise.all(
+          items.map(async (product) => {
+            try {
+              const res = await ProductService.getProduct(product.id);
+
+              const states = [
+                {
+                  stage: "mladá",
+                  width: parseInt(res.data.seedSpacingCM),
+                  height: parseInt(res.data.seedSpacingCM),
+                  days: parseInt(res.data.cultivationTimeForBulbsWeeks) * 7
+                },
+                {
+                  stage: "dospelá",
+                  width: parseInt(res.data.plantSpacingCm),
+                  height: parseInt(res.data.plantSpacingCm),
+                  days: parseInt(res.data.cultivationTimeFromYoungPlant)
+                }
+              ];
+
+              return {
+                id: product.id,
+                name: product.czechName,
+                type: product.latinName,
+                currentState: 0,
+                states: states
+              };
+            } catch (err) {
               console.error(`Chyba pre ${product.id}:`, {
                 message: err.message,
                 status: err.response?.status,
                 data: err.response?.data
               });
-            });
 
-          let states;
-          if (index % 3 === 0) {
-            states = [
-              { stage: "mladá", width: 15, height: 15, days: 7 },
-              { stage: "dospelá", width: 20, height: 20, days: 14 }
-            ];
-          } else if (index % 3 === 1) {
-            states = [
-              { stage: "mladá", width: 25, height: 25, days: 10 },
-              { stage: "dospelá", width: 100, height: 100, days: 20 },
-              { stage: "zrelá", width: 140, height: 140, days: 30 }
-            ];
-          } else {
-            states = [
-              { stage: "mladá", width: 30, height: 30, days: 14 },
-              { stage: "dospelá", width: 150, height: 150, days: 28 },
-              { stage: "zrelá", width: 210, height: 210, days: 42 }
-            ];
-          }
+              return {
+                id: product.id,
+                name: product.czechName,
+                type: product.latinName,
+                currentState: 0,
+                states: []
+              };
+            }
+          })
+        );
 
-          return {
-            id: product.id,
-            name: product.czechName,
-            type: product.latinName,
-            currentState: 0,
-            states: states
-          };
-        });
-
+        this.plantOptions = plantOptions;
         console.log("Plant Options:", plantOptions);
+      })
+      .catch(err => {
+        console.error("Chyba pri načítaní produktov:", err);
       });
 
     OrdersService.getOrderProducts(this.ghouseid) // tu bude id objednavky
@@ -594,17 +604,16 @@ export default {
     if (this.ghouseid) {
       GreenHouseService.getGreenHouseById(this.ghouseid)
         .then(response => {
-          // napr. ulož názov skleníka
           this.greenhouseName = response.data.name;
           console.log("Načítaný skleník:", response.data);
           this.showGreenhouseDialog = false
-          this.greenhouseWidth = response.data.width;
-          this.greenhouseHeight = response.data.depth;
+          this.greenhouseWidth = response.data.width / 1000;
+          this.greenhouseHeight = response.data.depth / 1000;
           this.greenhouseName = response.data.name;
           this.greenHouseID = response.data.id;
           this.loaded = true;
           this.loadState();
-          //this.setGreenhouseSize();
+          this.setGreenhouseSize();
         })
         .catch(error => {
           console.error("Chyba pri načítaní skleníka:", error);
@@ -817,8 +826,8 @@ export default {
       this.greenhouseHeight = this.greenhouseHeight * 1000;
 
       this.stageSize = {
-          width: this.greenhouseWidth ,//* 1000,
-          height: this.greenhouseHeight,// * 1000,
+          width: this.greenhouseWidth ,
+          height: this.greenhouseHeight,
       };
       
       this.plants2 = [];
@@ -883,12 +892,18 @@ export default {
       const startY = 100 + this.megaPots.length * 50;
 
       const newMegaPot = {
+        id: crypto.randomUUID(),
         x: startX,
         y: startY,
         width: columns * width,
         height: rows * height,
         draggable: true,
         innerPots: [],
+        rows: rows,
+        columns: columns,
+        shape: this.selectedLayout.shape || 'square',
+        name: this.selectedLayout.label,
+        dateCreated: new Date().toLocaleDateString('sk-SK'),
       };
 
       for (let row = 0; row < rows; row++) {
@@ -982,6 +997,9 @@ export default {
           height: this.rows * potHeight,
           draggable: true,
           innerPots: [], // <-- Sem budeme pushovať vnútorné kvetináče//
+          shape: potShape, // <-- sem pridávame shape
+          rows: this.rows || 1,
+          columns: this.columns || 1,
         };
 
         // Generovanie vnútorných kvetináčov pre tento megakvetináč
@@ -1347,9 +1365,54 @@ export default {
     }
   },
   saveStatus() {
-    console.log("saving");
+    console.log("saving pots", this.megaPots[0].rows, this.megaPots[0].columns, this.megaPots[0].innerPots[0].x, this.megaPots[0].innerPots[0].y, this.megaPots[0].name);
+    this.megaPots.forEach(async pot => {
+      console.log("Saving pot:", pot.dateCreated);
+      let parsedDate;
+      try {
+        const [day, month, year] = pot.dateCreated.split('.').map(s => parseInt(s.trim()));
+        parsedDate = new Date(year, month - 1, day);
+      } catch (e) {
+        console.error("Neplatný dátum:", pot.dateCreated);
+        return;
+      }
+
+      const isoDate = parsedDate.toISOString();
+      const payload = {
+        editorBoardId: pot.id,
+        name: pot.name,
+        rows: pot.rows,
+        columns: pot.columns,
+        shape: pot.shape,
+        posX: Math.round(pot.innerPots[0].x),
+        posY: Math.round(pot.innerPots[0].y),
+        width: pot.width || 0,
+        height: pot.height || 0,
+        dateCreated: isoDate,
+        greenHouseId: this.ghouseid,
+        greenHouseId1: this.ghouseid,
+      };
+
+      try {
+        const response = await GreenHouseService.createEditorPot(payload);
+        console.log("Saved pot:", response);
+      } catch (error) {
+        console.error("Failed to save pot:", error);
+      }
+    });
+
+    /*PLANTS*/
+    console.log("saving plants");
     this.plants.forEach(async plant => {
-      const parsedDate = new Date(plant.datePlanted); // Ak to je string "6. 5. 2025"
+      let parsedDate;
+      try {
+        const [day, month, year] = plant.datePlanted.split('.').map(s => parseInt(s.trim()));
+        parsedDate = new Date(year, month - 1, day);
+      } catch (e) {
+        console.error("Neplatný dátum:", plant.datePlanted);
+        return;
+      }
+
       const isoDate = parsedDate.toISOString();
       const payload = {
         name: plant.name,
@@ -1365,8 +1428,8 @@ export default {
         dateCreated: isoDate,
         currentState: 'plant.state',
         currentDay: plant.state,
-        editorBoardId: plant.editorBoardId ?? '', // ak môže byť null
-        greenHouseId: '27f4635b-738e-4356-b927-886de5f1c3fd',//this.ghouseid,
+        editorBoardId: plant.editorBoardId ?? '',
+        greenHouseId: this.ghouseid,
         plantId: 'id',
         stage: 'stage',
       };
@@ -1386,9 +1449,80 @@ export default {
       currentSimulatedDate: this.currentSimulatedDate.toISOString(),
     };
     localStorage.setItem(this.ghouseid, JSON.stringify(stateToSave));
+
+    this.saveStatus();
   },
-  loadState() {
-    const saved = localStorage.getItem(this.ghouseid);
+  async loadState() {
+
+    try {
+      const response = await GreenHouseService.getBoardsByGreenHouseId(this.ghouseid);
+      console.log("Loaded pot:", response);
+
+      response.data.forEach(pot => {
+        const parsedDate = new Date(pot.dateCreated);
+        const isoDate = parsedDate.toISOString('sk-SK');
+        const payload = {
+          id: pot.id,
+          name: pot.name,
+          rows: pot.rows,
+          columns: pot.columns,
+          shape: pot.shape,
+          x: Math.round(pot.innerPots[0].x),
+          y: Math.round(pot.innerPots[0].y),
+          width: pot.width || 0,
+          height: pot.height || 0,
+          dateCreated: isoDate,
+          draggable: true,
+          innerPots: [],
+        };
+
+        for (let row = 0; row < rows; row++) {
+          for (let col = 0; col < columns; col++) {
+            const innerPot = {
+              x: startX + col * width,
+              y: startY + row * height,
+              width: payload.width / payload.columns,
+              height: payload.height / payload.rows,
+              shape: payload.shape || 'square',
+              innerPlants: [],
+            };
+            newMegaPot.innerPots.push(innerPot);
+          }
+        }
+        this.megaPots.push(payload);
+      });
+
+    } catch (error) {
+      console.error("Failed to load pots:", error);
+    }
+
+    try {
+      const response = await GreenHouseService.getPlantsByGreenHouseId(this.ghouseid);
+      console.log("Loaded plant:", response);
+
+      response.data.forEach(plant => {
+        const parsedDate = new Date(plant.dateCreated);
+        const isoDate = parsedDate.toISOString('sk-SK');
+        const payload = {
+          plantId: plant.plantId,
+          name: plant.name,
+          type: plant.type,
+          posX: Math.round(plant.posX),
+          posY: Math.round(plant.posY),
+          stage: plant.stage,
+          currentDay: plant.currentDay,
+          currentState: plant.currentState,
+          width: plant.width,
+          height: plant.height,
+          datePlanted: isoDate,
+        };
+        this.plants.push(payload);
+      });
+    } catch (error) {
+      console.error("Failed to load plant:", error);
+    }
+
+    /*const saved = localStorage.getItem(this.ghouseid);
     if (saved) {
       const parsed = JSON.parse(saved);
 
@@ -1404,7 +1538,7 @@ export default {
 
       this.plantPotMap = new Map(parsed.plantPotMap);
       this.currentSimulatedDate = new Date(parsed.currentSimulatedDate);
-    }
+    }*/
   }
 },
 };

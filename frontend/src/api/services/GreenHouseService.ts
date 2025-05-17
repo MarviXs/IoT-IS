@@ -10,6 +10,9 @@ export type GreenHouseDetailResponse = paths['/greenhouses/{id}']['get']['respon
 export type CreateEditorPlantRequest = paths['/editorplants']['post']['requestBody']['content']['application/json'];
 export type CreateEditorPlantResponse = paths['/editorplants']['post']['responses']['201']['content']['application/json'];
 
+export type CreateEditorPotRequest = paths['/editorboards']['post']['requestBody']['content']['application/json'];
+export type CreateEditorPotResponse = paths['/editorboards']['post']['responses']['201']['content']['application/json'];
+
 
 class GreenHouseService {
   // Získanie zoznamu skleníkov s možnosťou filtrovania/paginácie
@@ -25,7 +28,6 @@ class GreenHouseService {
     });
   }
 
-  // Vymazanie skleníka podľa ID
   async deleteGreenHouse(id: string) {
     return await client.DELETE('/greenhouses/{id}', {
       params: { path: { id } },
@@ -38,8 +40,26 @@ class GreenHouseService {
     });
   }
 
+  async getPlantsByGreenHouseId(greenhouseId: string) {
+    return await client.GET('/greenhouses/{greenhouseId}/plants', {
+      params: { path: { greenhouseId } },
+    });
+  }
+
+  async getBoardsByGreenHouseId(greenhouseId: string) {
+    return await client.GET('/greenhouses/{greenhouseId}/boards', {
+      params: { path: { greenhouseId } },
+    });
+  }
+
   async createEditorPlant(request: CreateEditorPlantRequest) {
     return await client.POST('/editorplants', {
+      body: request,
+    });
+  }
+
+  async createEditorPot(request: CreateEditorPotRequest) {
+    return await client.POST('/editorboards', {
       body: request,
     });
   }

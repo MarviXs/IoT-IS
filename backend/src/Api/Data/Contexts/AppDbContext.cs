@@ -72,7 +72,6 @@ public class AppDbContext
         modelBuilder.ApplyConfiguration(new PlantConfiguration());
         modelBuilder.ApplyConfiguration(new PlantAnalysisConfiguration());
         modelBuilder.ApplyConfiguration(new PlantBoardConfiguration());
-        
     }
 
     //IoT tables

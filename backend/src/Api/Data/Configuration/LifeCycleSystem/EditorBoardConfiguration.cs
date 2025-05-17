@@ -44,11 +44,6 @@ namespace Fei.Is.Api.Data.Configuration.LifeCycleSystem
                 .IsRequired();
 
             builder.Ignore(b => b.Label);
-
-            builder.HasMany(b => b.Plants)
-                   .WithOne()
-                   .HasForeignKey("EditorBoardId")
-                   .OnDelete(DeleteBehavior.Cascade);
             
             builder.HasOne(b => b.GreenHouse)
                    .WithMany(g => g.Pots)

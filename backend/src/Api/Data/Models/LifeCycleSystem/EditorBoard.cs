@@ -14,7 +14,7 @@ namespace Fei.Is.Api.Data.Models.LifeCycleSystem
         public DateTime DateCreated { get; set; }
         public ICollection<EditorPlant> Plants { get; set; } = new List<EditorPlant>();
         public string Label => $"{Columns} stĺpcov x {Rows} riadkov ({Width}x{Height})";
-        public string GreenHouseId { get; set; }
+        public Guid GreenHouseId { get; set; }
         public GreenHouse GreenHouse { get; set; }
     }
 }
