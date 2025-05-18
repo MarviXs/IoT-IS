@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fei.Is.Api.Features.EditorPlants.Commands;
 
-public static class CreateEditorPlant
+public static class CreateEditorPlants
 {
     public record Request(
         string PlantID,
@@ -36,10 +36,10 @@ public static class CreateEditorPlant
         {
             app.MapPost(
                     "editorplants",
-                    async Task<Results<Created<Guid>, ValidationProblem, Conflict<string>>> (
-                        IMediator mediator, ClaimsPrincipal user, Request request) =>
+                    async Task<Results<Created<List<Guid>>, ValidationProblem, Conflict<string>>> (
+                        IMediator mediator, ClaimsPrincipal user, List<Request> requests) =>
                     {
-                        var command = new Command(request, user);
+                        var command = new Command(requests, user);
 
                         var result = await mediator.Send(command);
 
@@ -54,25 +54,25 @@ public static class CreateEditorPlant
                             return TypedResults.Conflict(errorMessage);
                         }
 
-                        return TypedResults.Created(result.Value.ToString(), result.Value);
+                        return TypedResults.Created("/editorplants", result.Value);
                     }
                 )
-                .WithName(nameof(CreateEditorPlant))
+                .WithName(nameof(CreateEditorPlants))
                 .WithTags(nameof(EditorPlant))
                 .WithOpenApi(o =>
                 {
-                    o.Summary = "Create an editor plant";
+                    o.Summary = "Create multiple editor plants";
                     return o;
                 });
         }
     }
 
-    public record Command(Request Request, ClaimsPrincipal User) : IRequest<Result<Guid>>;
+    public record Command(List<Request> Requests, ClaimsPrincipal User) : IRequest<Result<List<Guid>>>;
 
     public sealed class Handler(AppDbContext context, IValidator<Command> validator)
-        : IRequestHandler<Command, Result<Guid>>
+        : IRequestHandler<Command, Result<List<Guid>>>
     {
-        public async Task<Result<Guid>> Handle(Command message, CancellationToken cancellationToken)
+        public async Task<Result<List<Guid>>> Handle(Command message, CancellationToken cancellationToken)
         {
             var validation = await validator.ValidateAsync(message, cancellationToken);
             if (!validation.IsValid)
@@ -80,35 +80,43 @@ public static class CreateEditorPlant
                 return Result.Fail(new ValidationError(validation));
             }
 
-            var existing = await context.EditorPlants
-                .FirstOrDefaultAsync(p => p.PlantID == message.Request.PlantID, cancellationToken);
+            var createdIds = new List<Guid>();
 
-            if (existing != null)
+            foreach (var request in message.Requests)
             {
-                return Result.Ok(existing.Id);
+                var existing = await context.EditorPlants
+                    .FirstOrDefaultAsync(p => p.PlantID == request.PlantID, cancellationToken);
+
+                if (existing != null)
+                {
+                    createdIds.Add(existing.Id);
+                    continue;
+                }
+
+                var plant = new EditorPlant
+                {
+                    PlantID = request.PlantID,
+                    Name = request.Name,
+                    Type = request.Type,
+                    Width = request.Width,
+                    Height = request.Height,
+                    PosX = request.PosX,
+                    PosY = request.PosY,
+                    DateCreated = request.DateCreated,
+                    CurrentDay = request.CurrentDay,
+                    Stage = request.Stage,
+                    CurrentState = request.CurrentState,
+                    EditorBoardId = request.EditorBoardId,
+                    GreenHouseId = request.GreenHouseId
+                };
+
+                await context.EditorPlants.AddAsync(plant, cancellationToken);
+                createdIds.Add(plant.Id);
             }
 
-            var plant = new EditorPlant
-            {
-                PlantID = message.Request.PlantID,
-                Name = message.Request.Name,
-                Type = message.Request.Type,
-                Width = message.Request.Width,
-                Height = message.Request.Height,
-                PosX = message.Request.PosX,
-                PosY = message.Request.PosY,
-                DateCreated = message.Request.DateCreated,
-                CurrentDay = message.Request.CurrentDay,
-                Stage = message.Request.Stage,
-                CurrentState = message.Request.CurrentState,
-                EditorBoardId = message.Request.EditorBoardId,
-                GreenHouseId = message.Request.GreenHouseId
-            };
-
-            await context.EditorPlants.AddAsync(plant, cancellationToken);
             await context.SaveChangesAsync(cancellationToken);
 
-            return Result.Ok(plant.Id);
+            return Result.Ok(createdIds);
         }
     }
 
@@ -116,15 +124,23 @@ public static class CreateEditorPlant
     {
         public Validator()
         {
-            RuleFor(r => r.Request.PlantID).NotEmpty();
-            RuleFor(r => r.Request.Name).NotEmpty();
-            RuleFor(r => r.Request.Type).NotEmpty();
-            RuleFor(r => r.Request.Width).GreaterThan(0);
-            RuleFor(r => r.Request.Height).GreaterThan(0);
-            RuleFor(r => r.Request.Stage).NotEmpty();
-            RuleFor(r => r.Request.CurrentState).NotEmpty();
-            RuleFor(r => r.Request.EditorBoardId).MaximumLength(100);
-            RuleFor(r => r.Request.GreenHouseId).NotEmpty();
+            RuleForEach(r => r.Requests).SetValidator(new RequestValidator());
+        }
+    }
+
+    public sealed class RequestValidator : AbstractValidator<Request>
+    {
+        public RequestValidator()
+        {
+            RuleFor(r => r.PlantID).NotEmpty();
+            RuleFor(r => r.Name).NotEmpty();
+            RuleFor(r => r.Type).NotEmpty();
+            RuleFor(r => r.Width).GreaterThan(0);
+            RuleFor(r => r.Height).GreaterThan(0);
+            RuleFor(r => r.Stage).NotEmpty();
+            RuleFor(r => r.CurrentState).NotEmpty();
+            RuleFor(r => r.EditorBoardId).MaximumLength(100);
+            RuleFor(r => r.GreenHouseId).NotEmpty();
         }
     }
 }

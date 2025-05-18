@@ -52,7 +52,7 @@ class GreenHouseService {
     });
   }
 
-  async createEditorPlant(request: CreateEditorPlantRequest) {
+  async createEditorPlants(request: CreateEditorPlantRequest) {
     return await client.POST('/editorplants', {
       body: request,
     });
