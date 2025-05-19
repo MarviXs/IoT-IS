@@ -3,7 +3,7 @@
     <q-card-section class="q-pt-none column q-gutter-md">
       <q-input
         :model-value="containerData.name"
-        @update:model-value="val => updateContainerData('name', val)"
+        @update:model-value="(val) => updateContainerData('name', val)"
         :label="t('order_item.container_name')"
         :rules="nameRules"
         outlined
@@ -12,27 +12,17 @@
 
       <q-input
         :model-value="containerData.quantity"
-        @update:model-value="val => updateContainerData('quantity', Number(val))"
+        @update:model-value="(val) => updateContainerData('quantity', Number(val))"
         :label="t('order_item.quantity')"
         type="number"
         :rules="quantityRules"
         outlined
         dense
       />
-
-      <q-input
-        :model-value="containerData.pricePerContainer"
-        @update:model-value="val => updateContainerData('pricePerContainer', Number(val))"
-        :label="t('order_item.price_per_container')"
-        type="number"
-        :rules="priceRules"
-        outlined
-        dense
-      />
     </q-card-section>
 
     <q-card-actions align="right" class="text-primary">
-      <q-btn flat :label="t('global.cancel')" no-caps @click="cancel"/>
+      <q-btn flat :label="t('global.cancel')" no-caps @click="cancel" />
       <q-btn
         unelevated
         color="primary"
@@ -70,7 +60,6 @@ const containerForm = ref<HTMLFormElement>();
 // Validation rules
 const nameRules = [(val: string) => (val && val.trim().length > 0) || t('global.rules.required')];
 const quantityRules = [(val: number) => (val && val > 0) || t('global.rules.required')];
-const priceRules = [(val: number) => (val != null && val >= 0) || t('global.rules.required')];
 
 function updateContainerData(key: keyof AddOrderContainerRequest, value: unknown) {
   const newData = { ...props.containerData, [key]: value };

@@ -480,7 +480,8 @@
     },
     "details": "Order details",
     "download_quotation_sheet": "Download quotation sheet",
-    "download_plants_passports": "Download plants passports"
+    "download_plants_passports": "Download plants passports",
+    "update_order": "Update order"
   },
   "order_item": {
     "id": "ID",
@@ -502,7 +503,16 @@
     "name": "Name",
     "hours": "Hours",
     "price_per_hour": "Price per Hour",
-    "price_excl_vat": "Price Excl. VAT"
+    "price_excl_vat": "Price Excl. VAT",
+    "container_name": "Container Name"
+  },
+  "container": {
+    "toasts": {
+      "decrease_success": "Item quantity decreased successfully",
+      "decrease_failed": "Failed to decrease item quantity",
+      "increase_success": "Item quantity increased successfully",
+      "increase_failed": "Failed to increase item quantity"
+    }
   },
   "company": {
     "label": "Company | Companies",
