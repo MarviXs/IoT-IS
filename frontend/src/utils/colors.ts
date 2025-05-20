@@ -35,6 +35,13 @@ export const graphColors = [
   '#743411',
 ];
 
+export const notificationColors: Record<string, string> = {
+  Info: 'primary',
+  Warning: 'orange-9',
+  Serious: 'red-7',
+  Critical: 'negative',
+};
+
 export function getGraphColor(index: number): string {
   const colorCount = graphColors.length;
   return graphColors[index % colorCount];

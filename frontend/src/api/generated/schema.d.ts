@@ -5703,6 +5703,7 @@ export interface operations {
     GetSceneNotifications: {
         parameters: {
             query?: {
+                DeviceId?: string;
                 SortBy?: string;
                 Descending?: boolean;
                 SearchTerm?: string;
