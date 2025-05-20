@@ -13,15 +13,20 @@ namespace Fei.Is.Api.Features.LifeCycles.Queries;
 
 public static class GetPlantsByBoard
 {
-    public class QueryParameters : SearchParameters {}
+    public class QueryParameters : SearchParameters { }
 
     public sealed class Endpoint : ICarterModule
     {
         public void AddRoutes(IEndpointRouteBuilder app)
         {
             app.MapGet(
-                    "lifecycles/{plantBoardId}",
-                    async Task<Ok<PagedList<Response>>> (IMediator mediator, ClaimsPrincipal user, string plantBoardId, [AsParameters] QueryParameters parameters) =>
+                    "lifecycles/{plantBoardId:guid}",
+                    async Task<Ok<PagedList<Response>>> (
+                        IMediator mediator,
+                        ClaimsPrincipal user,
+                        Guid plantBoardId,
+                        [AsParameters] QueryParameters parameters
+                    ) =>
                     {
                         var query = new Query(user, plantBoardId, parameters);
                         var result = await mediator.Send(query);
@@ -38,7 +43,7 @@ public static class GetPlantsByBoard
         }
     }
 
-    public record Query(ClaimsPrincipal User, string PlantBoardId, QueryParameters Parameters) : IRequest<PagedList<Response>>;
+    public record Query(ClaimsPrincipal User, Guid PlantBoardId, QueryParameters Parameters) : IRequest<PagedList<Response>>;
 
     public sealed class Handler(AppDbContext context) : IRequestHandler<Query, PagedList<Response>>
     {
@@ -50,8 +55,7 @@ public static class GetPlantsByBoard
             if (!string.IsNullOrEmpty(message.Parameters.SearchTerm))
             {
                 query = query.Where(plant =>
-                    plant.Name.Contains(message.Parameters.SearchTerm) ||
-                    plant.Type.Contains(message.Parameters.SearchTerm)
+                    plant.Name.Contains(message.Parameters.SearchTerm) || plant.Type.Contains(message.Parameters.SearchTerm)
                 );
             }
 
@@ -59,18 +63,12 @@ public static class GetPlantsByBoard
             var totalCount = await query.CountAsync(cancellationToken);
 
             // Apply sorting
-            var pagedQuery = query.Select(plant => new Response(
-                plant.Id,
-                plant.PlantId,
-                plant.Name,
-                plant.Type,
-                plant.DatePlanted
-            ));
+            var pagedQuery = query.Select(plant => new Response(plant.Id, plant.PlantId, plant.Name, plant.Type, plant.DatePlanted));
 
             // Paginate the results
             return pagedQuery.Paginate(message.Parameters).ToPagedList(totalCount, message.Parameters.PageNumber, message.Parameters.PageSize);
         }
     }
 
-    public record Response(Guid Id, string PlantId, string Name, string Type, DateTime DatePlanted);
+    public record Response(Guid Id, Guid PlantId, string Name, string Type, DateTime DatePlanted);
 }

@@ -16,36 +16,35 @@ public static class GetGreenhouseById
         public void AddRoutes(IEndpointRouteBuilder app)
         {
             app.MapGet(
-                "greenhouses/{id:Guid}",
-                async Task<Results<Ok<Response>, NotFound>> (AppDbContext context, Guid id) =>
-                {
-                    var greenhouse = await context.Greenhouses
-                        .AsNoTracking()
-                        .FirstOrDefaultAsync(g => g.Id == id);
-
-                    if (greenhouse is null)
+                    "greenhouses/{id:Guid}",
+                    async Task<Results<Ok<Response>, NotFound>> (AppDbContext context, Guid id) =>
                     {
-                        return TypedResults.NotFound();
+                        var greenhouse = await context.Greenhouses.AsNoTracking().FirstOrDefaultAsync(g => g.Id == id);
+
+                        if (greenhouse is null)
+                        {
+                            return TypedResults.NotFound();
+                        }
+
+                        var response = new Response(
+                            Id: greenhouse.Id,
+                            GreenHouseID: greenhouse.GreenHouseID,
+                            Name: greenhouse.Name,
+                            Width: greenhouse.Width,
+                            Depth: greenhouse.Depth,
+                            DateCreated: greenhouse.DateCreated
+                        );
+
+                        return TypedResults.Ok(response);
                     }
-
-                    var response = new Response(
-                        Id: greenhouse.Id,
-                        GreenHouseID: greenhouse.GreenHouseID,
-                        Name: greenhouse.Name,
-                        Width: greenhouse.Width,
-                        Depth: greenhouse.Depth,
-                        DateCreated: greenhouse.DateCreated
-                    );
-
-                    return TypedResults.Ok(response);
-                })
-            .WithName("GetGreenhouseById")
-            .WithTags(nameof(GreenHouse))
-            .WithOpenApi(o =>
-            {
-                o.Summary = "Get greenhouse by ID";
-                return o;
-            });
+                )
+                .WithName("GetGreenhouseById")
+                .WithTags(nameof(GreenHouse))
+                .WithOpenApi(o =>
+                {
+                    o.Summary = "Get greenhouse by ID";
+                    return o;
+                });
         }
     }
 
@@ -55,9 +54,7 @@ public static class GetGreenhouseById
     {
         public async Task<Result<Response>> Handle(Query request, CancellationToken cancellationToken)
         {
-            var greenhouse = await context.Greenhouses
-                .AsNoTracking()
-                .FirstOrDefaultAsync(g => g.Id == request.Id, cancellationToken);
+            var greenhouse = await context.Greenhouses.AsNoTracking().FirstOrDefaultAsync(g => g.Id == request.Id, cancellationToken);
 
             if (greenhouse is null)
             {
@@ -77,12 +74,5 @@ public static class GetGreenhouseById
         }
     }
 
-    public record Response(
-        Guid Id,
-        string GreenHouseID,
-        string Name,
-        int Width,
-        int Depth,
-        DateTime DateCreated
-    );
+    public record Response(Guid Id, Guid GreenHouseID, string Name, int Width, int Depth, DateTime DateCreated);
 }

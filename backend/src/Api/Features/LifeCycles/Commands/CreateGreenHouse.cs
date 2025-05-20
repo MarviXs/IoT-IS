@@ -14,12 +14,7 @@ namespace Fei.Is.Api.Features.GreenHouses.Commands;
 
 public static class CreateGreenHouse
 {
-    public record Request(
-        string GreenHouseID,
-        string Name,
-        int Width,
-        int Depth
-    );
+    public record Request(Guid GreenHouseID, string Name, int Width, int Depth);
 
     public sealed class Endpoint : ICarterModule
     {
@@ -28,7 +23,10 @@ public static class CreateGreenHouse
             app.MapPost(
                     "greenhouses",
                     async Task<Results<Created<Guid>, ValidationProblem, Conflict<string>>> (
-                        IMediator mediator, ClaimsPrincipal user, Request request) =>
+                        IMediator mediator,
+                        ClaimsPrincipal user,
+                        Request request
+                    ) =>
                     {
                         var command = new Command(request, user);
 
@@ -60,8 +58,7 @@ public static class CreateGreenHouse
 
     public record Command(Request Request, ClaimsPrincipal User) : IRequest<Result<Guid>>;
 
-    public sealed class Handler(AppDbContext context, IValidator<Command> validator)
-        : IRequestHandler<Command, Result<Guid>>
+    public sealed class Handler(AppDbContext context, IValidator<Command> validator) : IRequestHandler<Command, Result<Guid>>
     {
         public async Task<Result<Guid>> Handle(Command message, CancellationToken cancellationToken)
         {
@@ -71,8 +68,7 @@ public static class CreateGreenHouse
                 return Result.Fail(new ValidationError(validation));
             }
 
-            var existing = await context.Greenhouses
-                .FirstOrDefaultAsync(g => g.GreenHouseID == message.Request.GreenHouseID, cancellationToken);
+            var existing = await context.Greenhouses.FirstOrDefaultAsync(g => g.GreenHouseID == message.Request.GreenHouseID, cancellationToken);
 
             if (existing != null)
             {
@@ -85,7 +81,7 @@ public static class CreateGreenHouse
                 Name = message.Request.Name,
                 Width = message.Request.Width,
                 Depth = message.Request.Depth,
-                DateCreated = DateTime.UtcNow	
+                DateCreated = DateTime.UtcNow
             };
 
             await context.Greenhouses.AddAsync(greenhouse, cancellationToken);

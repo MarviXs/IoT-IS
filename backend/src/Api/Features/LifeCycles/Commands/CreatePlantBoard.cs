@@ -14,11 +14,7 @@ namespace Fei.Is.Api.Features.LifeCycles.Commands;
 
 public static class CreatePlantBoard
 {
-    public record Request(
-        string PlantBoardId,
-        int Rows,
-        int Cols
-    );
+    public record Request(Guid PlantBoardId, int Rows, int Cols);
 
     public sealed class Endpoint : ICarterModule
     {
@@ -58,8 +54,7 @@ public static class CreatePlantBoard
 
     public record Command(Request Request) : IRequest<Result<Guid>>;
 
-    public sealed class Handler(AppDbContext context, IValidator<Command> validator)
-        : IRequestHandler<Command, Result<Guid>>
+    public sealed class Handler(AppDbContext context, IValidator<Command> validator) : IRequestHandler<Command, Result<Guid>>
     {
         public async Task<Result<Guid>> Handle(Command message, CancellationToken cancellationToken)
         {
@@ -69,8 +64,10 @@ public static class CreatePlantBoard
                 return Result.Fail(new ValidationError(result));
             }
 
-            var existingBoard = await context.PlantBoards
-                .FirstOrDefaultAsync(pb => pb.PlantBoardId == message.Request.PlantBoardId, cancellationToken);
+            var existingBoard = await context.PlantBoards.FirstOrDefaultAsync(
+                pb => pb.PlantBoardId == message.Request.PlantBoardId,
+                cancellationToken
+            );
 
             if (existingBoard != null)
             {

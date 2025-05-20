@@ -50,8 +50,7 @@ public static class GetLifeCycles
             if (!string.IsNullOrEmpty(message.Parameters.SearchTerm))
             {
                 query = query.Where(plant =>
-                    plant.Name.Contains(message.Parameters.SearchTerm) ||
-                    plant.Type.Contains(message.Parameters.SearchTerm)
+                    plant.Name.Contains(message.Parameters.SearchTerm) || plant.Type.Contains(message.Parameters.SearchTerm)
                 );
             }
 
@@ -60,19 +59,13 @@ public static class GetLifeCycles
 
             // Apply sorting
             var pagedQuery = query
-                //.Sort(message.Parameters.SortBy ?? nameof(Plant.Name), message.Parameters.Descending)
-                .Select(plant => new Response(
-                    plant.Id,
-                    plant.PlantId,
-                    plant.Name,
-                    plant.Type,
-                    plant.DatePlanted
-                ));
+            //.Sort(message.Parameters.SortBy ?? nameof(Plant.Name), message.Parameters.Descending)
+            .Select(plant => new Response(plant.Id, plant.PlantId, plant.Name, plant.Type, plant.DatePlanted));
 
             // Paginate the results
             return pagedQuery.Paginate(message.Parameters).ToPagedList(totalCount, message.Parameters.PageNumber, message.Parameters.PageSize);
         }
     }
 
-    public record Response(Guid Id, string plantId, string Name, string Type, DateTime DatePlanted);
+    public record Response(Guid Id, Guid PlantId, string Name, string Type, DateTime DatePlanted);
 }

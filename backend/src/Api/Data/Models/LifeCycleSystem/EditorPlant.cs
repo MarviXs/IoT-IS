@@ -2,7 +2,7 @@ namespace Fei.Is.Api.Data.Models.LifeCycleSystem
 {
     public class EditorPlant : BaseModel
     {
-        public string PlantID { get; set; }
+        public Guid PlantID { get; set; }
         public string Name { get; set; } = string.Empty;
         public string Type { get; set; } = string.Empty;
         public int Width { get; set; }
@@ -14,8 +14,8 @@ namespace Fei.Is.Api.Data.Models.LifeCycleSystem
         public string Stage { get; set; } = string.Empty;
         public string CurrentState { get; set; } = string.Empty;
         public string PlantDetails => $"{Name} - {Type} - Day {CurrentDay} - {Stage} - {CurrentState}";
-        public string EditorBoardId { get; set; }
+        public Guid EditorBoardId { get; set; }
         public Guid GreenHouseId { get; set; }
-        public GreenHouse GreenHouse { get; set; }
+        public GreenHouse? GreenHouse { get; set; }
     }
 }

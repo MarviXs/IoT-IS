@@ -16,27 +16,27 @@ public static class UpdateGreenHouseById
         public void AddRoutes(IEndpointRouteBuilder app)
         {
             app.MapPut(
-                "greenhouses/{id:Guid}",
-                async Task<Results<NoContent, NotFound>> (IMediator mediator, Guid id, Request request) =>
-                {
-                    var command = new Command(id, request);
-                    var result = await mediator.Send(command);
-
-                    if (result.HasError<NotFoundError>())
+                    "greenhouses/{id:guid}",
+                    async Task<Results<NoContent, NotFound>> (IMediator mediator, Guid id, Request request) =>
                     {
-                        return TypedResults.NotFound();
-                    }
+                        var command = new Command(id, request);
+                        var result = await mediator.Send(command);
 
-                    return TypedResults.NoContent();
-                }
-            )
-            .WithName("UpdateGreenHouseById")
-            .WithTags(nameof(GreenHouse))
-            .WithOpenApi(o =>
-            {
-                o.Summary = "Update a greenhouse by Id";
-                return o;
-            });
+                        if (result.HasError<NotFoundError>())
+                        {
+                            return TypedResults.NotFound();
+                        }
+
+                        return TypedResults.NoContent();
+                    }
+                )
+                .WithName("UpdateGreenHouseById")
+                .WithTags(nameof(GreenHouse))
+                .WithOpenApi(o =>
+                {
+                    o.Summary = "Update a greenhouse by Id";
+                    return o;
+                });
         }
     }
 
@@ -46,8 +46,7 @@ public static class UpdateGreenHouseById
     {
         public async Task<Result> Handle(Command request, CancellationToken cancellationToken)
         {
-            var greenhouse = await context.Greenhouses
-                .FirstOrDefaultAsync(g => g.Id == request.Id, cancellationToken);
+            var greenhouse = await context.Greenhouses.FirstOrDefaultAsync(g => g.Id == request.Id, cancellationToken);
 
             if (greenhouse == null)
             {
@@ -65,9 +64,5 @@ public static class UpdateGreenHouseById
         }
     }
 
-    public record Request(
-        string? Name,
-        int? Width,
-        int? Depth
-    );
+    public record Request(string? Name, int? Width, int? Depth);
 }

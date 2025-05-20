@@ -14,13 +14,7 @@ namespace Fei.Is.Api.Features.LifeCycles.Commands;
 
 public static class CreatePlant
 {
-    public record Request(
-        string PlantId,
-        string Name,
-        string Type,
-        DateTime DatePlanted,
-        string PlantBoardId
-    );
+    public record Request(Guid PlantId, string Name, string Type, DateTime DatePlanted, Guid PlantBoardId);
 
     public sealed class Endpoint : ICarterModule
     {
@@ -28,7 +22,11 @@ public static class CreatePlant
         {
             app.MapPost(
                     "lifecycles/plants",
-                    async Task<Results<Created<Guid>, ValidationProblem, Conflict<string>>> (IMediator mediator, ClaimsPrincipal user, Request request) =>
+                    async Task<Results<Created<Guid>, ValidationProblem, Conflict<string>>> (
+                        IMediator mediator,
+                        ClaimsPrincipal user,
+                        Request request
+                    ) =>
                     {
                         var command = new Command(request, user);
 
@@ -60,8 +58,7 @@ public static class CreatePlant
 
     public record Command(Request Request, ClaimsPrincipal User) : IRequest<Result<Guid>>;
 
-    public sealed class Handler(AppDbContext context, IValidator<Command> validator)
-        : IRequestHandler<Command, Result<Guid>>
+    public sealed class Handler(AppDbContext context, IValidator<Command> validator) : IRequestHandler<Command, Result<Guid>>
     {
         public async Task<Result<Guid>> Handle(Command message, CancellationToken cancellationToken)
         {
@@ -71,16 +68,14 @@ public static class CreatePlant
                 return Result.Fail(new ValidationError(result));
             }
 
-            var existingPlant = await context.Plants
-                .FirstOrDefaultAsync(p => p.PlantId == message.Request.PlantId, cancellationToken);
-        
+            var existingPlant = await context.Plants.FirstOrDefaultAsync(p => p.PlantId == message.Request.PlantId, cancellationToken);
+
             if (existingPlant != null)
             {
                 return Result.Ok(existingPlant.Id);
             }
 
-            var plantBoard = await context.PlantBoards
-                .FirstOrDefaultAsync(pb => pb.PlantBoardId == message.Request.PlantBoardId, cancellationToken);
+            var plantBoard = await context.PlantBoards.FirstOrDefaultAsync(pb => pb.PlantBoardId == message.Request.PlantBoardId, cancellationToken);
 
             if (plantBoard == null)
             {

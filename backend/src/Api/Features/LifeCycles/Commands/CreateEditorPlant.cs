@@ -15,7 +15,7 @@ namespace Fei.Is.Api.Features.EditorPlants.Commands;
 public static class CreateEditorPlants
 {
     public record Request(
-        string PlantID,
+        Guid PlantID,
         string Name,
         string Type,
         int Width,
@@ -26,7 +26,7 @@ public static class CreateEditorPlants
         int CurrentDay,
         string Stage,
         string CurrentState,
-        string EditorBoardId,
+        Guid EditorBoardId,
         Guid GreenHouseId
     );
 
@@ -37,7 +37,10 @@ public static class CreateEditorPlants
             app.MapPost(
                     "editorplants",
                     async Task<Results<Created<List<Guid>>, ValidationProblem, Conflict<string>>> (
-                        IMediator mediator, ClaimsPrincipal user, List<Request> requests) =>
+                        IMediator mediator,
+                        ClaimsPrincipal user,
+                        List<Request> requests
+                    ) =>
                     {
                         var command = new Command(requests, user);
 
@@ -69,8 +72,7 @@ public static class CreateEditorPlants
 
     public record Command(List<Request> Requests, ClaimsPrincipal User) : IRequest<Result<List<Guid>>>;
 
-    public sealed class Handler(AppDbContext context, IValidator<Command> validator)
-        : IRequestHandler<Command, Result<List<Guid>>>
+    public sealed class Handler(AppDbContext context, IValidator<Command> validator) : IRequestHandler<Command, Result<List<Guid>>>
     {
         public async Task<Result<List<Guid>>> Handle(Command message, CancellationToken cancellationToken)
         {
@@ -84,8 +86,7 @@ public static class CreateEditorPlants
 
             foreach (var request in message.Requests)
             {
-                var existing = await context.EditorPlants
-                    .FirstOrDefaultAsync(p => p.PlantID == request.PlantID, cancellationToken);
+                var existing = await context.EditorPlants.FirstOrDefaultAsync(p => p.PlantID == request.PlantID, cancellationToken);
 
                 if (existing != null)
                 {
@@ -139,7 +140,6 @@ public static class CreateEditorPlants
             RuleFor(r => r.Height).GreaterThan(0);
             RuleFor(r => r.Stage).NotEmpty();
             RuleFor(r => r.CurrentState).NotEmpty();
-            RuleFor(r => r.EditorBoardId).MaximumLength(100);
             RuleFor(r => r.GreenHouseId).NotEmpty();
         }
     }

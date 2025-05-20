@@ -15,7 +15,7 @@ namespace Fei.Is.Api.Features.EditorBoards.Commands;
 public static class CreateEditorBoard
 {
     public record Request(
-        string EditorBoardID,
+        Guid EditorBoardID,
         string Name,
         int Columns,
         int Rows,
@@ -35,7 +35,10 @@ public static class CreateEditorBoard
             app.MapPost(
                     "editorboards",
                     async Task<Results<Created<Guid>, ValidationProblem, Conflict<string>>> (
-                        IMediator mediator, ClaimsPrincipal user, Request request) =>
+                        IMediator mediator,
+                        ClaimsPrincipal user,
+                        Request request
+                    ) =>
                     {
                         var command = new Command(request, user);
 
@@ -67,8 +70,7 @@ public static class CreateEditorBoard
 
     public record Command(Request Request, ClaimsPrincipal User) : IRequest<Result<Guid>>;
 
-    public sealed class Handler(AppDbContext context, IValidator<Command> validator)
-        : IRequestHandler<Command, Result<Guid>>
+    public sealed class Handler(AppDbContext context, IValidator<Command> validator) : IRequestHandler<Command, Result<Guid>>
     {
         public async Task<Result<Guid>> Handle(Command message, CancellationToken cancellationToken)
         {
@@ -78,8 +80,7 @@ public static class CreateEditorBoard
                 return Result.Fail(new ValidationError(validation));
             }
 
-            var existing = await context.EditorPots
-                .FirstOrDefaultAsync(b => b.EditorBoardID == message.Request.EditorBoardID, cancellationToken);
+            var existing = await context.EditorPots.FirstOrDefaultAsync(b => b.EditorBoardID == message.Request.EditorBoardID, cancellationToken);
 
             if (existing != null)
             {
@@ -112,7 +113,6 @@ public static class CreateEditorBoard
     {
         public Validator()
         {
-            RuleFor(r => r.Request.EditorBoardID).NotEmpty().MaximumLength(100);
             RuleFor(r => r.Request.Name).NotEmpty().MaximumLength(100);
             RuleFor(r => r.Request.Columns).GreaterThan(0);
             RuleFor(r => r.Request.Rows).GreaterThan(0);

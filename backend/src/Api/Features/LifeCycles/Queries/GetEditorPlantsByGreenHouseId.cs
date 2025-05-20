@@ -13,7 +13,7 @@ namespace Fei.Is.Api.Features.GreenHouses.Queries;
 
 public static class GetEditorPlantsByGreenHouseId
 {
-    public class QueryParameters : SearchParameters {}
+    public class QueryParameters : SearchParameters { }
 
     public sealed class Endpoint : ICarterModule
     {
@@ -21,7 +21,12 @@ public static class GetEditorPlantsByGreenHouseId
         {
             app.MapGet(
                     "greenhouses/{greenhouseId}/plants",
-                    async Task<Ok<List<Response>>> (IMediator mediator, ClaimsPrincipal user, string greenhouseId, [AsParameters] QueryParameters parameters) =>
+                    async Task<Ok<List<Response>>> (
+                        IMediator mediator,
+                        ClaimsPrincipal user,
+                        Guid greenhouseId,
+                        [AsParameters] QueryParameters parameters
+                    ) =>
                     {
                         var query = new Query(user, greenhouseId, parameters);
                         var result = await mediator.Send(query);
@@ -38,22 +43,18 @@ public static class GetEditorPlantsByGreenHouseId
         }
     }
 
-    public record Query(ClaimsPrincipal User, string GreenHouseId, QueryParameters Parameters) : IRequest<List<Response>>;
+    public record Query(ClaimsPrincipal User, Guid GreenHouseId, QueryParameters Parameters) : IRequest<List<Response>>;
 
     public sealed class Handler(AppDbContext context) : IRequestHandler<Query, List<Response>>
     {
         public async Task<List<Response>> Handle(Query message, CancellationToken cancellationToken)
         {
-            var greenhouseGuid = Guid.Parse(message.GreenHouseId);
-            var query = context.EditorPlants
-                .AsNoTracking()
-                .Where(p => p.GreenHouseId == greenhouseGuid);
+            var query = context.EditorPlants.AsNoTracking().Where(p => p.GreenHouseId == message.GreenHouseId);
             // Apply search term if provided
             if (!string.IsNullOrEmpty(message.Parameters.SearchTerm))
             {
                 query = query.Where(plant =>
-                    plant.Name.Contains(message.Parameters.SearchTerm) ||
-                    plant.Type.Contains(message.Parameters.SearchTerm)
+                    plant.Name.Contains(message.Parameters.SearchTerm) || plant.Type.Contains(message.Parameters.SearchTerm)
                 );
             }
 
@@ -64,26 +65,28 @@ public static class GetEditorPlantsByGreenHouseId
                 return new List<Response>(); // Vráti prázdny zoznam, ak nie sú žiadne rastliny
             }
 
-            return plants.Select(p => new Response(
-                p.PlantID,
-                p.Name,
-                p.Type,
-                p.Width,
-                p.Height,
-                p.PosX,
-                p.PosY,
-                p.DateCreated,
-                p.CurrentDay,
-                p.Stage,
-                p.CurrentState,
-                p.PlantDetails,
-                p.GreenHouseId
-            )).ToList();
+            return plants
+                .Select(p => new Response(
+                    p.PlantID,
+                    p.Name,
+                    p.Type,
+                    p.Width,
+                    p.Height,
+                    p.PosX,
+                    p.PosY,
+                    p.DateCreated,
+                    p.CurrentDay,
+                    p.Stage,
+                    p.CurrentState,
+                    p.PlantDetails,
+                    p.GreenHouseId
+                ))
+                .ToList();
         }
     }
 
     public record Response(
-        string PlantID,
+        Guid PlantID,
         string Name,
         string Type,
         int Width,

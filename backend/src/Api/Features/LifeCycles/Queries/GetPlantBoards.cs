@@ -51,19 +51,13 @@ public static class GetPlantBoards
 
             // Apply sorting
             var pagedQuery = query
-                //.Sort(message.Parameters.SortBy ?? nameof(Plant.Name), message.Parameters.Descending)
-                .Select(board => new Response(
-                    board.Id,
-                    board.PlantBoardId,
-                    board.Rows,
-                    board.Cols,
-                    board.CreatedAt
-                ));
+            //.Sort(message.Parameters.SortBy ?? nameof(Plant.Name), message.Parameters.Descending)
+            .Select(board => new Response(board.Id, board.PlantBoardId, board.Rows, board.Cols, board.CreatedAt));
 
             // Paginate the results
             return pagedQuery.Paginate(message.Parameters).ToPagedList(totalCount, message.Parameters.PageNumber, message.Parameters.PageSize);
         }
     }
 
-    public record Response(Guid Id, String plantBoardId, int rows, int cols, DateTime createdAt);
+    public record Response(Guid Id, Guid plantBoardId, int rows, int cols, DateTime createdAt);
 }

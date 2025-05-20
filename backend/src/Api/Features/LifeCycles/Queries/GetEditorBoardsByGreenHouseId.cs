@@ -11,19 +11,20 @@ namespace Fei.Is.Api.Features.GreenHouses.Queries;
 
 public static class GetEditorBoardsByGreenHouseId
 {
-    public class QueryParameters : SearchParameters {}
+    public class QueryParameters : SearchParameters { }
 
     public sealed class Endpoint : ICarterModule
     {
         public void AddRoutes(IEndpointRouteBuilder app)
         {
             app.MapGet(
-                    "greenhouses/{greenhouseId}/boards",
+                    "greenhouses/{greenhouseId:guid}/boards",
                     async Task<Ok<List<Response>>> (
                         IMediator mediator,
                         ClaimsPrincipal user,
-                        string greenhouseId,
-                        [AsParameters] QueryParameters parameters) =>
+                        Guid greenhouseId,
+                        [AsParameters] QueryParameters parameters
+                    ) =>
                     {
                         var query = new Query(user, greenhouseId, parameters);
                         var result = await mediator.Send(query);
@@ -40,45 +41,44 @@ public static class GetEditorBoardsByGreenHouseId
         }
     }
 
-    public record Query(ClaimsPrincipal User, string GreenHouseId, QueryParameters Parameters) : IRequest<List<Response>>;
+    public record Query(ClaimsPrincipal User, Guid GreenHouseId, QueryParameters Parameters) : IRequest<List<Response>>;
 
     public sealed class Handler(AppDbContext context) : IRequestHandler<Query, List<Response>>
     {
         public async Task<List<Response>> Handle(Query message, CancellationToken cancellationToken)
         {
-            var greenhouseGuid = Guid.Parse(message.GreenHouseId);
-            var query = context.EditorPots
-                .AsNoTracking()
-                .Where(b => b.GreenHouseId == greenhouseGuid);
+            var query = context.EditorPots.AsNoTracking().Where(b => b.GreenHouseId == message.GreenHouseId);
 
             if (!string.IsNullOrEmpty(message.Parameters.SearchTerm))
             {
                 query = query.Where(board =>
-                    board.Name.Contains(message.Parameters.SearchTerm) ||
-                    board.Shape.Contains(message.Parameters.SearchTerm)
+                    board.Name.Contains(message.Parameters.SearchTerm) || board.Shape.Contains(message.Parameters.SearchTerm)
                 );
             }
 
             var boards = await query.ToListAsync(cancellationToken);
 
-            return boards.Select(b => new Response(
-                b.EditorBoardID,
-                b.Name,
-                b.Columns,
-                b.Rows,
-                b.Width,
-                b.Height,
-                b.PosX,
-                b.PosY,
-                b.Shape,
-                b.DateCreated,
-                b.GreenHouseId
-            )).ToList();
+            return
+            [
+                .. boards.Select(b => new Response(
+                    b.EditorBoardID,
+                    b.Name,
+                    b.Columns,
+                    b.Rows,
+                    b.Width,
+                    b.Height,
+                    b.PosX,
+                    b.PosY,
+                    b.Shape,
+                    b.DateCreated,
+                    b.GreenHouseId
+                ))
+            ];
         }
     }
 
     public record Response(
-        string EditorBoardID,
+        Guid EditorBoardID,
         string Name,
         int Columns,
         int Rows,

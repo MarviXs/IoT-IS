@@ -21,10 +21,10 @@ public static class CreateRecord
         double Width,
         int LeafCount,
         double Area,
-        string Disease, 
+        string Disease,
         string Health,
         string ImageName
-        );
+    );
 
     public sealed class Endpoint : ICarterModule
     {
@@ -58,8 +58,7 @@ public static class CreateRecord
 
     public record Command(Request Request, ClaimsPrincipal User) : IRequest<Result<Guid>>;
 
-    public sealed class Handler(AppDbContext context, IValidator<Command> validator)
-        : IRequestHandler<Command, Result<Guid>>
+    public sealed class Handler(AppDbContext context, IValidator<Command> validator) : IRequestHandler<Command, Result<Guid>>
     {
         public async Task<Result<Guid>> Handle(Command message, CancellationToken cancellationToken)
         {

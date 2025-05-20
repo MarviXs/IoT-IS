@@ -16,27 +16,27 @@ public static class UpdateLifeCycleById
         public void AddRoutes(IEndpointRouteBuilder app)
         {
             app.MapPut(
-                "lifecycles/plant/{plantId:Guid}",
-                async Task<Results<NoContent, NotFound>> (IMediator mediator, Guid plantId, Request request) =>
-                {
-                    var command = new Command(plantId, request);
-                    var result = await mediator.Send(command);
-
-                    if (result.HasError<NotFoundError>())
+                    "lifecycles/plant/{plantId:guid}",
+                    async Task<Results<NoContent, NotFound>> (IMediator mediator, Guid plantId, Request request) =>
                     {
-                        return TypedResults.NotFound();
-                    }
+                        var command = new Command(plantId, request);
+                        var result = await mediator.Send(command);
 
-                    return TypedResults.NoContent();
-                }
-            )
-            .WithName("UpdateLifeCycleByPlantId")
-            .WithTags(nameof(PlantAnalysis))
-            .WithOpenApi(o =>
-            {
-                o.Summary = "Update plant analysis by PlantId";
-                return o;
-            });
+                        if (result.HasError<NotFoundError>())
+                        {
+                            return TypedResults.NotFound();
+                        }
+
+                        return TypedResults.NoContent();
+                    }
+                )
+                .WithName("UpdateLifeCycleByPlantId")
+                .WithTags(nameof(PlantAnalysis))
+                .WithOpenApi(o =>
+                {
+                    o.Summary = "Update plant analysis by PlantId";
+                    return o;
+                });
         }
     }
 
@@ -46,8 +46,7 @@ public static class UpdateLifeCycleById
     {
         public async Task<Result> Handle(Command request, CancellationToken cancellationToken)
         {
-            var plantAnalysis = await context.PlantAnalyses.FirstOrDefaultAsync(
-                pa => pa.Id == request.PlantId, cancellationToken);
+            var plantAnalysis = await context.PlantAnalyses.FirstOrDefaultAsync(pa => pa.Id == request.PlantId, cancellationToken);
 
             if (plantAnalysis == null)
             {
@@ -69,13 +68,5 @@ public static class UpdateLifeCycleById
         }
     }
 
-    public record Request(
-        int? LeafCount,
-        double? Width,
-        double? Height,
-        double? Area,
-        string? Disease,
-        string? Health,
-        DateTime? AnalysisDate
-    );
+    public record Request(int? LeafCount, double? Width, double? Height, double? Area, string? Disease, string? Health, DateTime? AnalysisDate);
 }

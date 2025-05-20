@@ -46,28 +46,11 @@ public static class GetGreenHouses
 
             var totalCount = await query.CountAsync(cancellationToken);
 
-            var pagedQuery = query
-                .Select(g => new Response(
-                    g.Id,
-                    g.GreenHouseID,
-                    g.Name,
-                    g.Width,
-                    g.Depth,
-                    g.DateCreated
-                ));
+            var pagedQuery = query.Select(g => new Response(g.Id, g.GreenHouseID, g.Name, g.Width, g.Depth, g.DateCreated));
 
-            return pagedQuery
-                .Paginate(message.Parameters)
-                .ToPagedList(totalCount, message.Parameters.PageNumber, message.Parameters.PageSize);
+            return pagedQuery.Paginate(message.Parameters).ToPagedList(totalCount, message.Parameters.PageNumber, message.Parameters.PageSize);
         }
     }
 
-    public record Response(
-        Guid Id,
-        string GreenHouseID,
-        string Name,
-        int Width,
-        int Depth,
-        DateTime DateCreated
-    );
+    public record Response(Guid Id, Guid GreenHouseID, string Name, int Width, int Depth, DateTime DateCreated);
 }
