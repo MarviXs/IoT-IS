@@ -1,4 +1,6 @@
-﻿namespace Fei.Is.Api.Services.EANCode
+﻿using NetBarcode;
+
+namespace Fei.Is.Api.Services.EANCode
 {
     public class EANCodeService
     {
@@ -20,5 +22,15 @@
 
             return baseCode + checkDigit;
         }
+        public string GenerateBarcodeImage(string eanCode)
+        {
+            var barcode = new Barcode(eanCode);
+            string path = Path.Combine(Path.GetTempPath(), Path.GetTempFileName() +".png");
+
+            barcode.SaveImageFile(path, ImageFormat.Png);
+
+            return path;
+        }
     }
+    
 }

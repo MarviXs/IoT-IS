@@ -49,6 +49,10 @@ class ProductService {
   async deleteProduct(productId: string) {
     return await client.DELETE('/products/{id}', { params: { path: { id: productId } } });
   }
+
+  async downloadProductSticker(productId: string) {
+    return await client.GET('/products/{id}/sticker', { params: { path: { id: productId } }, parseAs: 'stream' });
+  }
 }
 
 export default new ProductService();

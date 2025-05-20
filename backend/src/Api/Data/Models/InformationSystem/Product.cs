@@ -5,7 +5,6 @@ namespace Fei.Is.Api.Data.Models.InformationSystem
     public class Product : BaseModel
     {
         public string PLUCode { get; set; }
-        public string EANCode { get; set; }
         public string? Code { get; set; }
         public string LatinName { get; set; }
         public string? CzechName { get; set; }
@@ -46,8 +45,5 @@ namespace Fei.Is.Api.Data.Models.InformationSystem
         public bool? FlowersInFirstYear { get; set; }
         public bool? GrowthInhibitorsUsed { get; set; }
         public string? PlantingDensity { get; set; }
-        
-
-        // ...ďalšie polia podľa nepreškrtnutých názvov z vašej tabuľky...
     }
 }

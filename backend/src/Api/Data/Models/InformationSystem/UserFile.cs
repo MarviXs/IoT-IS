@@ -11,6 +11,8 @@
     {
         QuotationSheet,
         Invoice,
-        Order
+        Order,
+        PlantPassport,
+        ProductSticker,
     }
 }

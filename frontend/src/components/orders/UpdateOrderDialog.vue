@@ -7,6 +7,7 @@
         :order="orderData"
         :loading="updatingOrder"
         @on-submit="updateOrder"
+        @cancel="isDialogOpen = false"
       />
       <div v-else>{{ t('global.loading') }}...</div>
     </template>
@@ -14,7 +15,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch,onMounted } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import DialogCommon from '@/components/core/DialogCommon.vue';
 import UpdateOrderForm from './UpdateOrderForm.vue'; // Nový formulár pre update
@@ -23,13 +24,15 @@ import { toast } from 'vue3-toastify';
 import { handleError } from '@/utils/error-handler';
 import { useRoute } from 'vue-router'; // Import the route object to get orderId from the URL
 
-
 const props = defineProps<{ orderId: number; modelValue: boolean }>();
 const emit = defineEmits(['update:modelValue', 'onUpdate']);
 const { t } = useI18n();
 
 const isDialogOpen = ref(props.modelValue);
-watch(() => props.modelValue, (val) => isDialogOpen.value = val);
+watch(
+  () => props.modelValue,
+  (val) => (isDialogOpen.value = val),
+);
 watch(isDialogOpen, (val) => emit('update:modelValue', val));
 
 const orderData = ref<any>(null);

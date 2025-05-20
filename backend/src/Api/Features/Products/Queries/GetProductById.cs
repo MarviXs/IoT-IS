@@ -18,27 +18,25 @@ namespace Fei.Is.Api.Features.Products.Queries
             public void AddRoutes(IEndpointRouteBuilder app)
             {
                 app.MapGet(
-                    "products/{id:Guid}",
-                    async Task<Results<Ok<Response>, NotFound, ForbidHttpResult>>(
-                        IMediator mediator,
-                        Guid id) =>
-                    {
-                        var query = new Query(id);
-                        var result = await mediator.Send(query);
-                        if (result.HasError<NotFoundError>())
+                        "products/{id:Guid}",
+                        async Task<Results<Ok<Response>, NotFound, ForbidHttpResult>> (IMediator mediator, Guid id) =>
                         {
-                            return TypedResults.NotFound();
+                            var query = new Query(id);
+                            var result = await mediator.Send(query);
+                            if (result.HasError<NotFoundError>())
+                            {
+                                return TypedResults.NotFound();
+                            }
+                            return TypedResults.Ok(result.Value);
                         }
-                        return TypedResults.Ok(result.Value);
-                    }
-                )
-                .WithName(nameof(GetProductById))
-                .WithTags(nameof(Product))
-                .WithOpenApi(o =>
-                {
-                    o.Summary = "Get a product by id";
-                    return o;
-                });
+                    )
+                    .WithName(nameof(GetProductById))
+                    .WithTags(nameof(Product))
+                    .WithOpenApi(o =>
+                    {
+                        o.Summary = "Get a product by id";
+                        return o;
+                    });
             }
         }
 
@@ -55,8 +53,8 @@ namespace Fei.Is.Api.Features.Products.Queries
 
             public async Task<Result<Response>> Handle(Query request, CancellationToken cancellationToken)
             {
-                var product = await _context.Products
-                    .AsNoTracking()
+                var product = await _context
+                    .Products.AsNoTracking()
                     .Include(p => p.Category)
                     .Include(p => p.Supplier)
                     .Include(p => p.VATCategory)
@@ -69,7 +67,6 @@ namespace Fei.Is.Api.Features.Products.Queries
 
                 var response = new Response(
                     PLUCode: product.PLUCode,
-                    EANCode: product.EANCode,
                     Code: product.Code,
                     LatinName: product.LatinName,
                     CzechName: product.CzechName,
@@ -118,7 +115,6 @@ namespace Fei.Is.Api.Features.Products.Queries
 
         public record Response(
             string PLUCode,
-            string? EANCode,
             string? Code,
             string LatinName,
             string? CzechName,
@@ -135,7 +131,6 @@ namespace Fei.Is.Api.Features.Products.Queries
             string? Country,
             string? City,
             int? GreenhouseNumber,
-        
             // Nové vlastnosti:
             string? HeightCm,
             string? SeedsPerThousandPlants,
@@ -162,20 +157,10 @@ namespace Fei.Is.Api.Features.Products.Queries
             string? PlantingDensity
         );
 
-        public record CategoryModel(
-            Guid Id,
-            string Name
-        );
+        public record CategoryModel(Guid Id, string Name);
 
-        public record SupplierModel(
-            Guid Id,
-            string Name
-        );
+        public record SupplierModel(Guid Id, string Name);
 
-        public record VatCategoryModel(
-            Guid Id,
-            string Name,
-            decimal Rate
-        );
+        public record VatCategoryModel(Guid Id, string Name, decimal Rate);
     }
 }

@@ -17,7 +17,6 @@ namespace Fei.Is.Api.Features.Products.Commands
 {
     public static class CreateProduct
     {
-
         public record Request(
             string? Code,
             string? PLUCode,
@@ -81,7 +80,11 @@ namespace Fei.Is.Api.Features.Products.Commands
                     )
                     .WithName(nameof(CreateProduct))
                     .WithTags(nameof(Product))
-                    .WithOpenApi(o => { o.Summary = "Create a product"; return o; });
+                    .WithOpenApi(o =>
+                    {
+                        o.Summary = "Create a product";
+                        return o;
+                    });
             }
         }
 
@@ -130,7 +133,6 @@ namespace Fei.Is.Api.Features.Products.Commands
                 {
                     PLUCode = pluCode,
                     Code = message.Request.Code,
-                    EANCode = eanCode,
                     LatinName = message.Request.LatinName,
                     CzechName = message.Request.CzechName,
                     FlowerLeafDescription = message.Request.FlowerLeafDescription,
