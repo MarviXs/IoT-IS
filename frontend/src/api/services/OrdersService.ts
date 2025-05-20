@@ -19,6 +19,9 @@ class OrdersService {
   async getOrder(orderId: string) {
     return await client.GET('/orders/{id}', { params: { path: { id: orderId } } });
   }
+  async getOrderProducts(orderId: string) {
+    return await client.GET('/orders/{id}/products', { params: { path: { id: orderId } } });
+  }
 
   // Vytvorenie novej objednávky
   async createOrder(body: CreateOrderRequest) {

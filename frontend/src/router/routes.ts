@@ -136,6 +136,46 @@ const routes: RouteRecordRaw[] = [
         path: '/companies',
         component: () => import('pages/companies/AllCompaniesPage.vue'),
       },
+      {
+        path: '/lifecycle',
+        component: () => import('pages/life-cycle/LifeIntro.vue'),
+      },
+      {
+        path: '/lifeboard/:id/',
+        component: () => import('pages/life-cycle/LifeFilterPlants.vue'),
+      },
+      {
+        path: '/lifecycle/analyze_more/:id',
+        component: () => import('pages/life-cycle/LifeMoreAnalyze.vue'),
+      },
+      {
+        path: '/lifecycle/analyze',
+        component: () => import('pages/life-cycle/LifeAnalyze.vue'),
+      },
+      {
+        path: '/lifecycle/analyze/:id',
+        component: () => import('pages/life-cycle/LifeAnalyze.vue'),
+      },
+      {
+        path: '/lifecycle/:id/',
+        component: () => import('pages/life-cycle/LifePlant.vue'),
+      },
+      {
+        path: '/lifecycle/analyze_more/',
+        component: () => import('pages/life-cycle/LifeMoreAnalyze.vue'),
+      },
+      {
+        path: '/greenhouse/',
+        component: () => import('pages/editor/EditorIntro.vue'),
+      },
+      {
+        path: '/editor/',
+        component: () => import('pages/editor/FlowerpotEditor.vue'),
+      },
+      {
+        path: '/editor/:id',
+        component: () => import('pages/editor/FlowerpotEditor.vue'),
+      },
     ],
   },
   {

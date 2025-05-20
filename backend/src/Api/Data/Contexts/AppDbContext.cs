@@ -1,7 +1,9 @@
 ﻿using Fei.Is.Api.Data.Configuration;
 using Fei.Is.Api.Data.Configuration.InformationSystem;
+using Fei.Is.Api.Data.Configuration.LifeCycleSystem;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Data.Models.InformationSystem;
+using Fei.Is.Api.Data.Models.LifeCycleSystem;
 using Fei.Is.Api.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
@@ -65,6 +67,11 @@ public class AppDbContext
         modelBuilder.ApplyConfiguration(new VATCategoryConfiguration());
         modelBuilder.ApplyConfiguration(new SystemSettingConfiguration());
         modelBuilder.ApplyConfiguration(new UserFileConfiguration());
+
+        //Life-cycle configurations
+        modelBuilder.ApplyConfiguration(new PlantConfiguration());
+        modelBuilder.ApplyConfiguration(new PlantAnalysisConfiguration());
+        modelBuilder.ApplyConfiguration(new PlantBoardConfiguration());
     }
 
     //IoT tables
@@ -104,6 +111,14 @@ public class AppDbContext
     public DbSet<WorkReport> WorkReports { get; set; }
     public DbSet<OrderItemContainer> OrderItemContainers { get; set; }
     public DbSet<UserFile> UserFiles { get; set; }
+
+    //Life-cycle tables
+    public DbSet<Plant> Plants { get; set; }
+    public DbSet<PlantAnalysis> PlantAnalyses { get; set; }
+    public DbSet<PlantBoard> PlantBoards { get; set; }
+    public DbSet<GreenHouse> Greenhouses { get; set; }
+    public DbSet<EditorBoard> EditorPots { get; set; }
+    public DbSet<EditorPlant> EditorPlants { get; set; }
 
     public override int SaveChanges()
     {
