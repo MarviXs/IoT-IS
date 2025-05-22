@@ -6,7 +6,7 @@
       {
         "tag": "dp1",
         "name": "DP1",
-        "unit": "µSv/h",
+        "unit": "µSv/h [60s]",
         "accuracyDecimals": 3,
         "group": "Operator"
       },
@@ -34,7 +34,7 @@
       {
         "tag": "dp2",
         "name": "DP2",
-        "unit": "µSv/h",
+        "unit": "µSv/h [60s]",
         "accuracyDecimals": 3,
         "group": "B klub"
       },
@@ -62,7 +62,7 @@
       {
         "tag": "dp3",
         "name": "DP3",
-        "unit": "µSv/h",
+        "unit": "µSv/h [60s]",
         "accuracyDecimals": 3,
         "group": "Radon"
       },
@@ -90,7 +90,7 @@
       {
         "tag": "dp4",
         "name": "DP4",
-        "unit": "µSv/h",
+        "unit": "µSv/h [60s]",
         "accuracyDecimals": 3,
         "group": "Brana"
       },
@@ -118,7 +118,7 @@
       {
         "tag": "dp5",
         "name": "DP5",
-        "unit": "µSv/h",
+        "unit": "µSv/h [60s]",
         "accuracyDecimals": 3,
         "group": "Kocka"
       },
