@@ -42,7 +42,7 @@ The frontend is built using Quasar Framework (Vue 3). Follow these steps to set 
    ```
 2. Install the required npm packages:
    ```bash
-   npm install
+   npm install --legacy-peer-deps
    ```
 3. Start the frontend development server:
    ```bash
