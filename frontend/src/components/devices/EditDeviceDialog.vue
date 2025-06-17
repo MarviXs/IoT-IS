@@ -59,6 +59,7 @@ async function updateDevice() {
     name: device.value.name,
     templateId: device.value.deviceTemplate?.id,
     accessToken: device.value.accessToken,
+    protocol: device.value.protocol,
   };
 
   updatingDevice.value = true;
