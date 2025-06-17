@@ -1975,14 +1975,14 @@ export interface components {
     'Fei.Is.Api.Data.Enums.DeviceType': 'Generic' | 'NuviaMSU';
     /** @enum {string} */
     'Fei.Is.Api.Data.Enums.JobStatusEnum':
-      | 'JOB_QUEUED'
-      | 'JOB_IN_PROGRESS'
-      | 'JOB_PAUSED'
-      | 'JOB_SUCCEEDED'
-      | 'JOB_REJECTED'
-      | 'JOB_FAILED'
-      | 'JOB_TIMED_OUT'
-      | 'JOB_CANCELED';
+    | 'JOB_QUEUED'
+    | 'JOB_IN_PROGRESS'
+    | 'JOB_PAUSED'
+    | 'JOB_SUCCEEDED'
+    | 'JOB_REJECTED'
+    | 'JOB_FAILED'
+    | 'JOB_TIMED_OUT'
+    | 'JOB_CANCELED';
     /** @enum {string} */
     'Fei.Is.Api.Data.Enums.NotificationSeverity': 'Info' | 'Warning' | 'Serious' | 'Critical';
     /** @enum {string} */
@@ -2128,11 +2128,11 @@ export interface components {
     };
     /** @enum {string} */
     'Fei.Is.Api.Features.DataPoints.Queries.GetSensorDataPoints.TimeBucketMethod':
-      | 'Average'
-      | 'Max'
-      | 'Min'
-      | 'StdDev'
-      | 'Sum';
+    | 'Average'
+    | 'Max'
+    | 'Min'
+    | 'StdDev'
+    | 'Sum';
     'Fei.Is.Api.Features.DeviceCollections.Commands.CreateDeviceCollection.Request': {
       name: string;
       /** Format: uuid */
@@ -2185,9 +2185,9 @@ export interface components {
     };
     /** @enum {string} */
     'Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollectionWithSensors.SubItemTypes':
-      | 'Device'
-      | 'SubCollection'
-      | 'Sensor';
+    | 'Device'
+    | 'SubCollection'
+    | 'Sensor';
     'Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollections.Response': {
       /** Format: uuid */
       id: string;
@@ -2517,9 +2517,9 @@ export interface components {
     };
     /** @enum {string} */
     'Fei.Is.Api.Features.Jobs.Queries.GetJobById.CommandProgress':
-      | 'CommandPending'
-      | 'CommandProcessing'
-      | 'CommandDone';
+    | 'CommandPending'
+    | 'CommandProcessing'
+    | 'CommandDone';
     'Fei.Is.Api.Features.Jobs.Queries.GetJobById.CommandResponse': {
       /** Format: int32 */
       order: number;
@@ -7128,6 +7128,7 @@ export interface operations {
   GetSceneNotifications: {
     parameters: {
       query?: {
+        DeviceId?: string;
         SortBy?: string;
         Descending?: boolean;
         SearchTerm?: string;

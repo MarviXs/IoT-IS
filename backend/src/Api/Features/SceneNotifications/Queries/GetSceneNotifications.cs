@@ -17,7 +17,10 @@ namespace Fei.Is.Api.Features.Notifications.Queries;
 
 public static class GetSceneNotifications
 {
-    public class QueryParameters : SearchParameters { }
+    public class QueryParameters : SearchParameters
+    {
+        public Guid? DeviceId { get; set; }
+    }
 
     public sealed class Endpoint : ICarterModule
     {
@@ -60,23 +63,38 @@ public static class GetSceneNotifications
         {
             var queryParameters = message.Parameters;
 
-            var result = validator.Validate(queryParameters);
-            if (!result.IsValid)
+            var validationResult = validator.Validate(queryParameters);
+            if (!validationResult.IsValid)
             {
-                return Result.Fail(new ValidationError(result));
+                return Result.Fail(new ValidationError(validationResult));
             }
 
-            var query = context
+            var baseQuery = context
                 .SceneNotifications.AsNoTracking()
-                .Include(s => s.Scene)
-                .Where(s => s.Scene!.OwnerId == message.User.GetUserId())
-                .Sort(queryParameters.SortBy ?? nameof(SceneNotification.CreatedAt), queryParameters.Descending);
+                .Include(sn => sn.Scene)
+                .ThenInclude(s => s.SensorTriggers)
+                .Where(sn => sn.Scene!.OwnerId == message.User.GetUserId());
 
-            var totalCount = await query.CountAsync(cancellationToken);
+            if (queryParameters.DeviceId.HasValue)
+            {
+                var deviceId = queryParameters.DeviceId.Value;
+                baseQuery = baseQuery.Where(sn => sn.Scene!.SensorTriggers.Any(st => st.DeviceId == deviceId));
+            }
 
-            var notifications = await query
+            baseQuery = baseQuery.Sort(queryParameters.SortBy ?? nameof(SceneNotification.CreatedAt), queryParameters.Descending);
+
+            var totalCount = await baseQuery.CountAsync(cancellationToken);
+
+            var notifications = await baseQuery
                 .Paginate(queryParameters)
-                .Select(notification => new Response(notification.Id, notification.SceneId, notification.Scene != null ? notification.Scene.Name : null, notification.Message, notification.Severity, notification.CreatedAt))
+                .Select(notification => new Response(
+                    notification.Id,
+                    notification.SceneId,
+                    notification.Scene != null ? notification.Scene.Name : null,
+                    notification.Message,
+                    notification.Severity,
+                    notification.CreatedAt
+                ))
                 .ToListAsync(cancellationToken);
 
             return Result.Ok(notifications.ToPagedList(totalCount, queryParameters.PageNumber, queryParameters.PageSize));
@@ -87,11 +105,17 @@ public static class GetSceneNotifications
 
     public sealed class ParametersValidator : AbstractValidator<QueryParameters>
     {
-        private static readonly string[] ValidSortByFields = [nameof(SceneNotification.CreatedAt), nameof(SceneNotification.Severity), nameof(SceneNotification.Message)];
+        private static readonly string[] ValidSortByFields =
+        [
+            nameof(SceneNotification.CreatedAt),
+            nameof(SceneNotification.Severity),
+            nameof(SceneNotification.Message)
+        ];
 
         public ParametersValidator()
         {
             RuleFor(x => x.SortBy).ValidSortBy(ValidSortByFields);
+            // Optionally, you can validate DeviceId (but usually Guid? is fine without)
         }
     }
 }

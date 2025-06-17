@@ -36,7 +36,7 @@
           <DeviceInfoCard :device="device" class="shadow container"></DeviceInfoCard>
         </div>
         <div class="col-12 col-lg-6 col-xl-5">
-          <CurrentJobCard ref="currentJobCard" class="shadow bg-white" :device-id="device.id"></CurrentJobCard>
+          <CurrentJobCard ref="currentJobCard" class="shadow container" :device-id="device.id"></CurrentJobCard>
         </div>
         <div class="col-12 col-lg-6 col-xl-3">
           <SensorSelectionTree
@@ -46,6 +46,14 @@
             class="shadow container"
           >
           </SensorSelectionTree>
+        </div>
+        <div class="col-12">
+          <DeviceNotificationTable
+            v-if="device"
+            :device="device"
+            class="shadow container"
+            :device-id="device.id"
+          ></DeviceNotificationTable>
         </div>
         <div class="col-12">
           <DataPointChartJS
@@ -87,6 +95,7 @@ import { useSignalR } from '@/composables/useSignalR';
 import { LastDataPoint } from '@/models/LastDataPoint';
 import DataPointService from '@/api/services/DataPointService';
 import LatestDataPoints from '@/components/datapoints/LatestDataPoints.vue';
+import DeviceNotificationTable from '@/components/devices/DeviceNotificationTable.vue';
 
 const { t } = useI18n();
 const { connection, connect } = useSignalR();

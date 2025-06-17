@@ -1,14 +1,17 @@
 <template>
-  <PageLayout :breadcrumbs="[{ label: 'Notifications', to: '/scenes' }]">
-    <template #actions>
-      <AutoRefreshButton
+  <q-expansion-item switch-toggle-side>
+    <template #header>
+      <div class="text-weight-medium text-subtitle1 flex items-center">Notifications</div>
+      <q-space></q-space>
+      <DeviceNotificationRefreshButton
         v-model="refreshInterval"
         :loading="loadingNotifications"
         class="col-grow col-lg-auto"
         @on-refresh="getNotifications(pagination)"
       />
     </template>
-    <template #default>
+
+    <div class="q-mt-sm">
       <q-table
         v-model:pagination="pagination"
         :rows="notifications"
@@ -55,15 +58,17 @@
           </q-td>
         </template>
       </q-table>
-    </template>
-  </PageLayout>
+    </div>
+  </q-expansion-item>
 </template>
 
 <script setup lang="ts">
+import { ref, computed } from 'vue';
+import { PropType } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { DeviceResponse } from '@/api/services/DeviceService';
+import { mdiEye } from '@quasar/extras/mdi-v7';
 import { mdiBellOutline } from '@quasar/extras/mdi-v7';
-import PageLayout from '@/layouts/PageLayout.vue';
-import { computed, ref } from 'vue';
 import { PaginationClient, PaginationTable } from '@/models/Pagination';
 import { handleError } from '@/utils/error-handler';
 import { QTableProps } from 'quasar';
@@ -73,12 +78,20 @@ import NotificationService, {
 } from '@/api/services/NotificationService';
 import { formatTimeToDistance } from '@/utils/date-utils';
 import { useStorage } from '@vueuse/core';
-import AutoRefreshButton from '@/components/core/AutoRefreshButton.vue';
 import { notificationColors } from '@/utils/colors';
+import DeviceNotificationRefreshButton from './DeviceNotificationRefreshButton.vue';
+
+const props = defineProps({
+  deviceId: {
+    type: String,
+    required: true,
+  },
+});
 
 const { t, locale } = useI18n();
+const refreshInterval = useStorage('auto_device_notifications_refresh', 30);
+
 const filter = ref('');
-const refreshInterval = useStorage('auto_notifications_refresh', 30);
 
 const pagination = ref<PaginationClient>({
   sortBy: 'createdAt',
@@ -93,6 +106,7 @@ const notifications = computed(() => notificationsPaginated.value?.items ?? []);
 const loadingNotifications = ref(false);
 async function getNotifications(paginationTable: PaginationTable) {
   const paginationQuery: NotificationQueryParams = {
+    DeviceId: props.deviceId,
     SortBy: paginationTable.sortBy,
     Descending: paginationTable.descending,
     SearchTerm: filter.value,
@@ -150,12 +164,7 @@ const columns = computed<QTableProps['columns']>(() => [
     },
     align: 'right',
   },
-  // {
-  //   name: 'actions',
-  //   label: '',
-  //   field: '',
-  //   align: 'center',
-  //   sortable: false,
-  // },
 ]);
 </script>
+
+<style lang="scss" scoped></style>
