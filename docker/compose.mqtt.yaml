@@ -11,3 +11,10 @@ services:
       - ./emqx/cluster.hocon:/opt/emqx/data/configs/cluster.hocon
       - ./emqx/acl.conf:/opt/emqx/etc/acl.conf
       - ./emqx/init_user.json:/opt/emqx/init_user.json
+    networks:
+      - int-network
+      - out-network
+
+networks:
+  int-network:
+  out-network:
