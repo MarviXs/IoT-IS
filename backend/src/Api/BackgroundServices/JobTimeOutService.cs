@@ -7,8 +7,8 @@ namespace Fei.Is.Api.BackgroundServices;
 
 public class JobTimeOutService(IServiceProvider serviceProvider, ILogger<JobTimeOutService> logger) : BackgroundService
 {
-    private const int JobTimeout = 60000;
-    private const int ProcessingSpeed = 5000;
+    private const int JobTimeout = 7200000;
+    private const int ProcessingSpeed = 60000;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
