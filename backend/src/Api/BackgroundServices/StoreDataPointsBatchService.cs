@@ -48,13 +48,19 @@ public class StoreDataPointsBatchService(IServiceProvider serviceProvider, ILogg
                         try
                         {
                             var parsed = ParseResult(message);
+
+                            if (!double.TryParse(parsed["value"], out var value) || double.IsNaN(value) || double.IsInfinity(value))
+                            {
+                                continue;
+                            }
+
                             dataPoints.Add(
                                 new DataPoint
                                 {
                                     DeviceId = Guid.Parse(parsed["device_id"]),
                                     SensorTag = parsed["sensor_tag"],
                                     TimeStamp = DateTimeOffset.FromUnixTimeMilliseconds(long.Parse(parsed["timestamp"])),
-                                    Value = double.Parse(parsed["value"])
+                                    Value = value
                                 }
                             );
                         }

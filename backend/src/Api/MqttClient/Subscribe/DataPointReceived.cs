@@ -45,6 +45,11 @@ public class DataPointReceived(AppDbContext appContext, RedisService redis, IHub
         }
 
         var datapoint = DataPointFbs.GetRootAsDataPointFbs(new ByteBuffer(payload.ToArray()));
+
+        if (double.IsNaN(datapoint.Value) || double.IsInfinity(datapoint.Value))
+        {
+            return Result.Fail("Invalid datapoint value");
+        }
         var redisResult = await redis.Db.StreamAddAsync(
             "datapoints",
             [
