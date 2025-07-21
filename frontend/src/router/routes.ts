@@ -49,6 +49,10 @@ const routes: RouteRecordRaw[] = [
         path: '/devices/:id/jobs',
         component: () => import('pages/jobs/JobsOnDevicePage.vue'),
       },
+      {
+        path: '/devices/:id/map',
+        component: () => import('pages/devices/DeviceMapPage.vue'),
+      },
 
       {
         path: '/device-templates',

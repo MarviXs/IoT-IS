@@ -3,52 +3,13 @@
     :breadcrumbs="[
       { label: t('device.label', 2), to: '/devices' },
       { label: device?.name, to: `/devices/${deviceId}` },
+      { label: 'Map', to: `/devices/${deviceId}/map` },
     ]"
   >
-    <template #after-title>
-      <StatusDot v-if="device" :connected="device.connected" />
-    </template>
-    <template v-if="device" #actions>
-      <q-btn
-        class="shadow bg-white col-grow col-lg-auto"
-        :to="`/devices/${device.id}/jobs`"
-        text-color="grey-color"
-        unelevated
-        no-caps
-        size="15px"
-        :label="t('job.label', 2)"
-        :icon="mdiListStatus"
-      />
-      <q-btn
-        class="shadow bg-white col-grow col-lg-auto"
-        :to="`/devices/${device.id}/map`"
-        text-color="grey-color"
-        unelevated
-        no-caps
-        size="15px"
-        label="Map"
-        :icon="mdiMapMarker"
-      />
-      <q-btn
-        class="shadow col-grow col-lg-auto"
-        color="primary"
-        unelevated
-        no-caps
-        size="15px"
-        :label="t('global.edit')"
-        :icon="mdiPencil"
-        @click="isUpdateDialogOpen = true"
-      />
-    </template>
+    <template v-if="device" #actions> </template>
     <template v-if="device" #default>
       <div class="row q-col-gutter-x-lg q-col-gutter-y-lg justify-starrt">
-        <div class="col-12 col-xl-4">
-          <DeviceInfoCard :device="device" class="shadow container"></DeviceInfoCard>
-        </div>
-        <div class="col-12 col-lg-6 col-xl-5">
-          <CurrentJobCard ref="currentJobCard" class="shadow container" :device-id="device.id"></CurrentJobCard>
-        </div>
-        <div class="col-12 col-lg-6 col-xl-3">
+        <div class="col-12">
           <SensorSelectionTree
             v-if="sensorTree"
             v-model:tickedNodes="tickedNodes"
@@ -57,55 +18,28 @@
           >
           </SensorSelectionTree>
         </div>
-        <div class="col-12">
-          <DeviceNotificationTable
-            v-if="device"
-            :device="device"
-            class="shadow container"
-            :device-id="device.id"
-          ></DeviceNotificationTable>
-        </div>
-        <div class="col-12">
-          <DataPointChartJS
-            v-if="device && sensorTree"
-            ref="dataPointChart"
-            v-model:tickedNodes="tickedNodes"
-            class="bg-white shadow q-pa-lg"
-            :sensors="sensors"
-            @refresh="getDevice"
-          ></DataPointChartJS>
-        </div>
         <LatestDataPoints v-model:sensors="sensors" />
       </div>
     </template>
   </PageLayout>
-  <EditDeviceDialog v-model="isUpdateDialogOpen" :device-id="deviceId" @on-update="getDevice" />
 </template>
 
 <script setup lang="ts">
 import { useRoute } from 'vue-router';
-import DeviceInfoCard from '@/components/devices/DeviceInfoCard.vue';
-import DataPointChartJS, { SensorData } from '@/components/datapoints/DataPointChartJS.vue';
+import { SensorData } from '@/components/datapoints/DataPointChartJS.vue';
 import { computed, onUnmounted, ref } from 'vue';
 import DeviceService from '@/api/services/DeviceService';
 import { deviceToTreeNode, extractNodeKeys } from '@/utils/sensor-nodes';
 import SensorSelectionTree from '@/components/datapoints/SensorSelectionTree.vue';
-import CurrentJobCard from '@/components/jobs/CurrentJobCard.vue';
 import { useI18n } from 'vue-i18n';
-import { mdiListStatus, mdiMapMarker, mdiPencil } from '@quasar/extras/mdi-v7';
 import PageLayout from '@/layouts/PageLayout.vue';
 import { handleError } from '@/utils/error-handler';
 import { DeviceResponse } from '@/api/services/DeviceService';
-import EditDeviceDialog from '@/components/devices/EditDeviceDialog.vue';
 import { SensorNode } from '@/models/SensorNode';
-import StatusDot from '@/components/devices/StatusDot.vue';
-import LatestDataPointCard from '@/components/datapoints/LatestDataPointCard.vue';
-import { getGraphColor } from '@/utils/colors';
 import { useSignalR } from '@/composables/useSignalR';
 import { LastDataPoint } from '@/models/LastDataPoint';
 import DataPointService from '@/api/services/DataPointService';
 import LatestDataPoints from '@/components/datapoints/LatestDataPoints.vue';
-import DeviceNotificationTable from '@/components/devices/DeviceNotificationTable.vue';
 
 const { t } = useI18n();
 const { connection, connect } = useSignalR();
@@ -114,9 +48,6 @@ const route = useRoute();
 const deviceId = route.params.id.toString();
 const device = ref<DeviceResponse>();
 const isLoadingDevice = ref(false);
-
-const dataPointChart = ref();
-const currentJobCard = ref();
 
 const sensorTree = ref<SensorNode>();
 const tickedNodes = ref<string[]>();
@@ -201,7 +132,6 @@ async function subscribeToLastDataPointUpdates() {
 }
 subscribeToLastDataPointUpdates();
 
-const isUpdateDialogOpen = ref(false);
 onUnmounted(() => {
   connection.send('UnsubscribeFromDevice', deviceId);
   connection.off('ReceiveSensorLastDataPoint');

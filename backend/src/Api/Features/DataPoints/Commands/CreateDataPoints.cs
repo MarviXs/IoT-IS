@@ -20,7 +20,7 @@ namespace Fei.Is.Api.Features.DataPoints.Commands;
 
 public static class CreateDataPoints
 {
-    public record Request(string Tag, double Value, long? TimeStamp);
+    public record Request(string Tag, double Value, long? TimeStamp, double? Latitude = null, double? Longitude = null);
 
     public sealed class Endpoint : ICarterModule
     {
@@ -84,7 +84,9 @@ public static class CreateDataPoints
                 DeviceId = device.Id,
                 SensorTag = dataPoint.Tag,
                 TimeStamp = GetDataPointTimeStampOrCurrentTime(dataPoint.TimeStamp),
-                Value = dataPoint.Value
+                Value = dataPoint.Value,
+                Latitude = dataPoint.Latitude,
+                Longitude = dataPoint.Longitude
             });
 
             var deviceId = device.Id.ToString();

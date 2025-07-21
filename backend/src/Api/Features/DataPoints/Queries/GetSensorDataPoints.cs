@@ -35,6 +35,9 @@ public static class GetSensorDataPoints
 
     public class QueryParameters
     {
+        [FromQuery]
+        public bool? OnlyWithLocation { get; set; }
+
         public DateTimeOffset? From { get; set; }
         public DateTimeOffset? To { get; set; }
         public int? Downsample { get; set; }
@@ -122,11 +125,16 @@ public static class GetSensorDataPoints
             }
             else
             {
-                query = timescaleContext
+                var baseQuery = timescaleContext
                     .DataPoints.Where(d => d.SensorTag == message.SensorTag && d.DeviceId == message.DeviceId)
-                    .Where(d => d.TimeStamp >= from && d.TimeStamp <= to)
-                    .OrderByDescending(d => d.TimeStamp)
-                    .Select(d => new Response(d.TimeStamp, d.Value));
+                    .Where(d => d.TimeStamp >= from && d.TimeStamp <= to);
+
+                if (parameters.OnlyWithLocation == true)
+                {
+                    baseQuery = baseQuery.Where(d => d.Latitude != null && d.Longitude != null);
+                }
+
+                query = baseQuery.OrderByDescending(d => d.TimeStamp).Select(d => new Response(d.TimeStamp, d.Value));
             }
 
             var response = await query.ToListAsync(cancellationToken);
@@ -198,13 +206,10 @@ public static class GetSensorDataPoints
                 TimeBucketMethod.Max => baseQuery.Select(g => new Response(g.Key, g.Max(d => d.Value))),
                 TimeBucketMethod.Min => baseQuery.Select(g => new Response(g.Key, g.Min(d => d.Value))),
                 TimeBucketMethod.StdDev
-                    => baseQuery.Select(
-                        g =>
-                            new Response(
-                                g.Key,
-                                NpgsqlAggregateDbFunctionsExtensions.StandardDeviationSample(EF.Functions, g.Select(d => (double)d.Value!))
-                            )
-                    ),
+                    => baseQuery.Select(g => new Response(
+                        g.Key,
+                        NpgsqlAggregateDbFunctionsExtensions.StandardDeviationSample(EF.Functions, g.Select(d => (double)d.Value!))
+                    )),
                 _ => baseQuery.Select(g => new Response(g.Key, g.Average(d => d.Value))),
             };
 
