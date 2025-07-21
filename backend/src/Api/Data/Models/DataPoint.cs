@@ -6,4 +6,6 @@ public class DataPoint
     public required string SensorTag { get; set; }
     public DateTimeOffset TimeStamp { get; set; }
     public double? Value { get; set; }
+    public double? Latitude { get; set; }
+    public double? Longitude { get; set; }
 }
