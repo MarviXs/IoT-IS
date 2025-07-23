@@ -10,13 +10,20 @@
     <template v-if="device" #default>
       <div class="row q-col-gutter-x-lg q-col-gutter-y-lg justify-starrt">
         <div class="col-12">
-          <SensorSelectionTree
+          <MapSensorSelectionTree
             v-if="sensorTree"
-            v-model:tickedNodes="tickedNodes"
+            v-model:selectedSensor="selectedSensor"
             :sensors-tree="sensorTree"
             class="shadow container"
-          >
-          </SensorSelectionTree>
+          />
+        </div>
+        <div class="col-12">
+          <DataPointMap
+            v-if="device && sensorTree"
+            v-model:selected-sensor-id="selectedSensor"
+            class="bg-white shadow q-pa-lg"
+            :sensors="sensors"
+          ></DataPointMap>
         </div>
         <LatestDataPoints v-model:sensors="sensors" />
       </div>
@@ -26,11 +33,9 @@
 
 <script setup lang="ts">
 import { useRoute } from 'vue-router';
-import { SensorData } from '@/components/datapoints/DataPointChartJS.vue';
 import { computed, onUnmounted, ref } from 'vue';
 import DeviceService from '@/api/services/DeviceService';
-import { deviceToTreeNode, extractNodeKeys } from '@/utils/sensor-nodes';
-import SensorSelectionTree from '@/components/datapoints/SensorSelectionTree.vue';
+import { deviceToTreeNode } from '@/utils/sensor-nodes';
 import { useI18n } from 'vue-i18n';
 import PageLayout from '@/layouts/PageLayout.vue';
 import { handleError } from '@/utils/error-handler';
@@ -40,6 +45,8 @@ import { useSignalR } from '@/composables/useSignalR';
 import { LastDataPoint } from '@/models/LastDataPoint';
 import DataPointService from '@/api/services/DataPointService';
 import LatestDataPoints from '@/components/datapoints/LatestDataPoints.vue';
+import MapSensorSelectionTree from '@/components/datapoints/MapSensorSelectionTree.vue';
+import DataPointMap, { SensorData } from '@/components/datapoints/DataPointMap.vue';
 
 const { t } = useI18n();
 const { connection, connect } = useSignalR();
@@ -50,7 +57,7 @@ const device = ref<DeviceResponse>();
 const isLoadingDevice = ref(false);
 
 const sensorTree = ref<SensorNode>();
-const tickedNodes = ref<string[]>();
+const selectedSensor = ref<string | null>(null);
 
 const sensors = computed<SensorData[]>(() => {
   return (
@@ -81,9 +88,12 @@ async function getDevice() {
 
   device.value = data;
 
-  if (!tickedNodes.value || !sensorTree.value) {
+  if (!sensorTree.value) {
     sensorTree.value = deviceToTreeNode(device.value);
-    tickedNodes.value = extractNodeKeys(sensorTree.value);
+  }
+  // Set first sensor as default selected
+  if (!selectedSensor.value && sensorTree.value?.items.length > 0) {
+    selectedSensor.value = sensorTree.value?.items[0]?.id ?? null;
   }
   getLastDataPoints();
 }

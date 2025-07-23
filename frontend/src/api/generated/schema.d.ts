@@ -2088,6 +2088,10 @@ export interface components {
             value: number;
             /** Format: int64 */
             timeStamp?: number | null;
+            /** Format: double */
+            latitude?: number | null;
+            /** Format: double */
+            longitude?: number | null;
         };
         "Fei.Is.Api.Features.DataPoints.Queries.GetLatestDataPoints.Response": {
             /** Format: double */
@@ -2100,6 +2104,10 @@ export interface components {
             ts: string;
             /** Format: double */
             value?: number | null;
+            /** Format: double */
+            latitude?: number | null;
+            /** Format: double */
+            longitude?: number | null;
         };
         /** @enum {string} */
         "Fei.Is.Api.Features.DataPoints.Queries.GetSensorDataPoints.TimeBucketMethod": "Average" | "Max" | "Min" | "StdDev" | "Sum";
@@ -4079,6 +4087,7 @@ export interface operations {
     GetSensorDataPoints: {
         parameters: {
             query?: {
+                OnlyWithLocation?: boolean;
                 From?: string;
                 To?: string;
                 Downsample?: number;
@@ -7074,6 +7083,7 @@ export interface operations {
     GetSceneNotifications: {
         parameters: {
             query?: {
+                DeviceId?: string;
                 SortBy?: string;
                 Descending?: boolean;
                 SearchTerm?: string;
