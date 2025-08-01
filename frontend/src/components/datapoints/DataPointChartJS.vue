@@ -6,7 +6,10 @@
       <chart-time-range-select
         class="col-grow col-lg-auto"
         ref="timeRangeSelectRef"
+        :initial-time-range="storedTimeRange === 'custom' ? undefined : storedTimeRange"
+        :initial-custom-time-range="storedTimeRange === 'custom' ? storedCustomTimeRange : undefined"
         @update:model-value="updateTimeRange"
+        @time-range-changed="onTimeRangeChanged"
       ></chart-time-range-select>
       <q-btn
         padding="0.5rem 1rem"
@@ -128,21 +131,29 @@ const tickedNodes = defineModel('tickedNodes', {
 });
 
 const isGraphOptionsDialogOpen = ref(false);
-const graphOptions = useStorage<GraphOptions>('graphOptions', {
+
+// Use first sensor's deviceId for per-device settings (assumes all sensors are from the same device)
+const deviceId = computed(() => props.sensors[0]?.deviceId ?? 'unknown');
+
+// Store ticked sensor state per device
+const storedTickedNodes = useStorage<string[]>('tickedSensors_unknown', []);
+
+const graphOptions = useStorage<GraphOptions>(`graphOptions_${deviceId.value}`, {
   refreshInterval: 30,
   timeFormat: '24h',
-
   interpolationMethod: 'straight',
   lineStyle: 'lines',
   lineWidth: 3,
   markerSize: 3,
-
   samplingOption: 'BUCKETS',
   downsampleResolution: 100,
   downsampleMethod: 'Lttb',
   timeBucketSizeSeconds: 60,
   timeBucketMethod: 'Average',
 });
+
+const storedTimeRange = useStorage(`chartTimeRange_${deviceId.value}`, '6h');
+const storedCustomTimeRange = useStorage(`chartCustomTimeRange_${deviceId.value}`, { from: '', to: '' });
 
 const { t } = useI18n();
 
@@ -158,6 +169,16 @@ function getSensorUniqueId(sensor: SensorData) {
 
 const currentXMin = ref<string>();
 const currentXMax = ref<string>();
+
+function onTimeRangeChanged(timeRangeName: string, customRangeData?: { from: string; to: string } | null) {
+  storedTimeRange.value = timeRangeName;
+
+  // If it's a custom time range, save the custom range data
+  if (timeRangeName === 'custom' && customRangeData) {
+    storedCustomTimeRange.value = customRangeData;
+  }
+}
+
 async function updateTimeRange(timeRange: TimeRange) {
   selectedTimeRange.value = timeRange;
 
@@ -357,6 +378,62 @@ function updateDatasetVisibility(tickedNodes: string[]) {
   chart.value.update();
 }
 
+// Update storage when deviceId changes and synchronize with model
+watch(
+  () => deviceId.value,
+  (newDeviceId) => {
+    // Update the storage key when device changes
+    const storageKey = `tickedSensors_${newDeviceId}`;
+    const storedValue = localStorage.getItem(storageKey);
+
+    if (storedValue) {
+      try {
+        const parsedValue = JSON.parse(storedValue);
+        if (Array.isArray(parsedValue)) {
+          storedTickedNodes.value = parsedValue;
+        }
+      } catch (e) {
+        console.error('Failed to parse stored ticked nodes:', e);
+      }
+    }
+  },
+  { immediate: true },
+);
+
+// Synchronize stored ticked nodes with model value
+watch(
+  () => tickedNodes.value,
+  (newTickedNodes) => {
+    const storageKey = `tickedSensors_${deviceId.value}`;
+    localStorage.setItem(storageKey, JSON.stringify(newTickedNodes));
+    storedTickedNodes.value = [...newTickedNodes];
+  },
+  { deep: true },
+);
+
+// Initialize tickedNodes from storage when sensors change
+watch(
+  () => props.sensors,
+  () => {
+    if (props.sensors.length > 0 && storedTickedNodes.value.length > 0) {
+      // Only restore ticked nodes that still exist in current sensors
+      const currentSensorKeys = props.sensors.map((sensor) => getSensorUniqueId(sensor));
+      const validStoredNodes = storedTickedNodes.value.filter((key) => currentSensorKeys.includes(key));
+
+      if (validStoredNodes.length > 0) {
+        tickedNodes.value = validStoredNodes;
+      } else {
+        // If no stored nodes are valid, default to all sensors visible
+        tickedNodes.value = currentSensorKeys;
+      }
+    } else if (props.sensors.length > 0 && tickedNodes.value.length === 0) {
+      // If no stored state and no current ticked nodes, default to all sensors visible
+      tickedNodes.value = props.sensors.map((sensor) => getSensorUniqueId(sensor));
+    }
+  },
+  { immediate: true },
+);
+
 watchEffect(() => {
   updateDatasetVisibility(tickedNodes.value);
 });
@@ -449,6 +526,11 @@ onMounted(() => {
       },
     },
   });
+
+  // If there is a stored time range, trigger update
+  if (selectedTimeRange.value) {
+    updateTimeRange(selectedTimeRange.value);
+  }
 });
 
 const csvConfig = mkConfig({

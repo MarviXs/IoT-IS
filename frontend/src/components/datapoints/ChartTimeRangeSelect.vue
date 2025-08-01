@@ -53,15 +53,29 @@
 
 <script setup lang="ts">
 import { format, subSeconds } from 'date-fns';
-import { computed, ref } from 'vue';
+import { computed, ref, watch, onMounted } from 'vue';
 import { PredefinedTimeRange } from '@/models/TimeRange';
 import { useI18n } from 'vue-i18n';
 import { mdiClockOutline } from '@quasar/extras/mdi-v7';
 import DateTimeInput from './DateTimeInput.vue';
 
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits(['update:modelValue', 'timeRangeChanged']);
 defineExpose({
   updateTimeRange,
+});
+
+const props = defineProps({
+  modelValue: {
+    type: Object,
+    default: undefined,
+  },
+  initialTimeRange: {
+    type: String, // '5m', '15m', etc.
+  },
+  initialCustomTimeRange: {
+    type: Object,
+    default: () => ({ from: '', to: '' }),
+  },
 });
 
 const { t } = useI18n();
@@ -118,6 +132,21 @@ const timeRanges = computed(() => [
 ]);
 
 const selectedTimeRangeIndex = ref(4);
+
+onMounted(() => {
+  if (props.initialCustomTimeRange && props.initialCustomTimeRange.from && props.initialCustomTimeRange.to) {
+    customTimeRangeSelected.value = { ...props.initialCustomTimeRange };
+    isCustomTimeRangeSelected.value = true;
+  } else if (props.initialTimeRange) {
+    const idx = timeRanges.value.findIndex((r) => r.name === props.initialTimeRange);
+    if (idx !== -1) {
+      selectedTimeRangeIndex.value = idx;
+      isCustomTimeRangeSelected.value = false;
+    }
+  }
+  updateTimeRange();
+});
+
 const customTimeRangeSelected = ref<{
   from: string;
   to: string;
@@ -144,6 +173,9 @@ const formatDate = (date: Date) => format(date, 'yyyy-MM-dd HH:mm:ss');
 
 function updateTimeRange() {
   let newVal;
+  let timeRangeName;
+  let customRangeData = null;
+
   if (isCustomTimeRangeSelected.value) {
     if (customTimeRangeSelected.value.from === null) {
       return;
@@ -153,16 +185,22 @@ function updateTimeRange() {
       from: formatDate(new Date(customTimeRangeSelected.value.from)),
       to: formatDate(new Date(customTimeRangeSelected.value.to ?? new Date())),
     };
+    timeRangeName = 'custom';
+    customRangeData = {
+      from: customTimeRangeSelected.value.from,
+      to: customTimeRangeSelected.value.to,
+    };
   } else {
     const now = new Date();
     newVal = {
       from: formatDate(subSeconds(now, timeRanges.value[selectedTimeRangeIndex.value].time)),
       to: formatDate(now),
     };
+    timeRangeName = timeRanges.value[selectedTimeRangeIndex.value].name;
   }
   emit('update:modelValue', newVal);
+  emit('timeRangeChanged', timeRangeName, customRangeData);
 }
-updateTimeRange();
 </script>
 
 <style lang="scss" scoped></style>
