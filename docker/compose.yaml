@@ -54,7 +54,7 @@ services:
     networks:
       - int-network
   timescaledb:
-    image: timescale/timescaledb-ha:pg16.8-ts2.19.0
+    image: timescale/timescaledb-ha:pg16.10-ts2.22.0
     restart: unless-stopped
     shm_size: 256mb
     environment:
