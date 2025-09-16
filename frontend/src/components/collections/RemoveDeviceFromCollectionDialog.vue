@@ -8,7 +8,6 @@
 <script setup lang="ts">
 import { handleError } from '@/utils/error-handler';
 import { ref } from 'vue';
-import { useI18n } from 'vue-i18n';
 import { toast } from 'vue3-toastify';
 import DeleteConfirmationDialog from '@/components/core/DeleteConfirmationDialog.vue';
 import DeviceCollectionService from '@/api/services/DeviceCollectionService';
@@ -26,12 +25,10 @@ const props = defineProps({
 });
 const emit = defineEmits(['onDeleted']);
 
-const { t } = useI18n();
-
 const isDeleteInProgress = ref(false);
 async function handleDelete() {
   isDeleteInProgress.value = true;
-  const { data, error } = await DeviceCollectionService.removeDeviceFromCollection(props.collectionId, props.deviceId);
+  const { error } = await DeviceCollectionService.removeDeviceFromCollection(props.collectionId, props.deviceId);
   isDeleteInProgress.value = false;
   isDialogOpen.value = false;
 

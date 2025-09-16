@@ -102,15 +102,7 @@ import type { QTableProps } from 'quasar';
 import { computed, ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import {
-  mdiHubspot,
-  mdiPlus,
-  mdiChartLine,
-  mdiPencil,
-  mdiTrashCan,
-  mdiDotsVertical,
-  mdiSeedPlusOutline
-} from '@quasar/extras/mdi-v7';
+import { mdiHubspot, mdiPlus, mdiPencil, mdiTrashCan, mdiDotsVertical, mdiSeedPlusOutline } from '@quasar/extras/mdi-v7';
 import PageLayout from '@/layouts/PageLayout.vue';
 import LifeCycleService from '@/api/services/LifeCycleService';
 
@@ -164,8 +156,7 @@ const columns = computed<QTableProps['columns']>(() => [
 async function loadCollections() {
   try {
     isLoadingCollections.value = true;
-    const queryParams = {}; // Parametre
-    const response = await LifeCycleService.getPlantBoards(queryParams);
+    const response = await LifeCycleService.getPlantBoards({});
 
     collections.value = response.data?.items.map(item => ({
       id: item.id,
@@ -180,14 +171,6 @@ async function loadCollections() {
   } finally {
     isLoadingCollections.value = false;
   }
-}
-
-function navigateToLifecycle(id: string) {
-  router.push(`/lifeboard/${id}`);
-}
-
-function onRowClick(row: CollectionNode) {
-  router.push(`/lifeboard/${row.id}`);
 }
 
 function onPlantBoardClick(row: CollectionNode) {

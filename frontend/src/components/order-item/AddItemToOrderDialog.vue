@@ -35,7 +35,6 @@ const { t } = useI18n();
 const route = useRoute();
 
 const isOpen = ref(false);
-const loading = ref(false);
 const addingItem = ref(false);
 
 // Extract orderId from the URL
@@ -67,27 +66,6 @@ watch(isOpen, (val) => {
 function closeDialog() {
   isOpen.value = false; // Zavrie dialóg
   emit('update:modelValue', false); // Synchronizácia s rodičovským modelom
-}
-
-// Aktualizácia objednávkového objektu
-function updateOrderItem(updatedItem) {
-  orderItem.value = updatedItem;
-}
-
-// Odoslanie formulára
-function handleFormSubmit() {
-  if (!orderItem.value.productId || !orderItem.value.quantity || orderItem.value.quantity <= 0) {
-    console.warn('Invalid order item:', orderItem.value);
-    return;
-  }
-
-  emit('onCreate', {
-    productId: orderItem.value.productId,
-    name: orderItem.value.name,
-    quantity: orderItem.value.quantity,
-  });
-
-  closeDialog();
 }
 
 async function onSubmit() {

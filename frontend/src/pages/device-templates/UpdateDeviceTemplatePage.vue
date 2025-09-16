@@ -11,7 +11,6 @@
 <script setup lang="ts">
 import type { DeviceTemplateFormData } from '@/components/device-templates/DeviceTemplateForm.vue';
 import DeviceTemplateForm from '@/components/device-templates/DeviceTemplateForm.vue';
-import { useI18n } from 'vue-i18n';
 import { ref } from 'vue';
 import DeviceTemplateService from '@/api/services/DeviceTemplateService';
 import SensorService from '@/api/services/SensorService';
@@ -20,7 +19,6 @@ import { useRoute, useRouter } from 'vue-router';
 import { handleError } from '@/utils/error-handler';
 import type { SensorFormData } from '@/components/device-templates/SensorForm.vue';
 
-const { t } = useI18n();
 const router = useRouter();
 const route = useRoute();
 

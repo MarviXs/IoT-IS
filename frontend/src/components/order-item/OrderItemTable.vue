@@ -226,7 +226,7 @@ export default {
       this.refreshTable();
       this.$emit('refresh-summary');
     },
-    openUpdateDialog(containerId) {
+    openUpdateDialog() {
       alert(this.$t('global.edit'));
     },
     openDeleteDialog(containerId) {

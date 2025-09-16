@@ -93,7 +93,6 @@
 </template>
 
 <script setup lang="ts">
-import { QTableProps } from 'quasar';
 import { computed, ref, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -173,11 +172,8 @@ async function loadCollections(paginationTable: PaginationTable) {
     PageNumber: paginationTable.page,
     PageSize: paginationTable.rowsPerPage,
   };
-  let tmpResponse;
-
   try {
     isLoadingCollections.value = true;
-    const queryParams = {}; // Parametre
     const response = await LifeCycleService.getPlantsByBoard(plantId.toString(), paginationQuery);
 
     collections.value = response.data?.items.map(item => ({

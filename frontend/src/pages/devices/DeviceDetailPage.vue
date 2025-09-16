@@ -99,7 +99,6 @@ import type { DeviceResponse } from '@/api/services/DeviceService';
 import EditDeviceDialog from '@/components/devices/EditDeviceDialog.vue';
 import type { SensorNode } from '@/models/SensorNode';
 import StatusDot from '@/components/devices/StatusDot.vue';
-import { getGraphColor } from '@/utils/colors';
 import { useSignalR } from '@/composables/useSignalR';
 import type { LastDataPoint } from '@/models/LastDataPoint';
 import DataPointService from '@/api/services/DataPointService';

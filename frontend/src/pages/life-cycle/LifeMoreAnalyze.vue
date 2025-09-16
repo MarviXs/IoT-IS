@@ -167,7 +167,7 @@
 
 
 <script setup lang="ts">
-import { h, ref } from 'vue';
+import { ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { mdiCheck, mdiUpload } from '@quasar/extras/mdi-v7';
 import { Cropper as VueAdvancedCropper } from 'vue-advanced-cropper';
@@ -335,7 +335,6 @@ const savePlant = async () => {
     }
 
     if (responseID && responseID.data && tmpResponse !== undefined) {
-      const plantBoardId = responseID.data;
 
       if (tmpResponse.nums && typeof tmpResponse.nums === 'object') {
         // Preveď objekt na pole hodnôt

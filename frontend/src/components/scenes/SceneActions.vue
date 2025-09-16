@@ -16,7 +16,7 @@ import { mdiPlus } from '@quasar/extras/mdi-v7';
 
 const actions = defineModel<SceneActionModel[]>({ required: true });
 
-const props = defineProps({
+defineProps({
   devices: { type: Array as PropType<SceneDevice>, required: true },
 });
 

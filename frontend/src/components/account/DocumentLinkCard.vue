@@ -51,7 +51,6 @@
 <script setup lang="ts">
 import type { PropType } from 'vue';
 import { ref, watch } from 'vue';
-import type { QForm } from 'quasar';
 import { QInput } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import TemplatesService from '@/api/services/TemplatesService';
@@ -106,10 +105,7 @@ function handleFileSelection(event: Event) {
   const target = event.target as HTMLInputElement;
   if (target.files && target.files.length > 0) {
     const file = target.files[0];
-    const fileName = file.name;
-    const fileUrl = URL.createObjectURL(file);
-
-    link.value = fileName;
+    link.value = file.name;
   }
 }
 

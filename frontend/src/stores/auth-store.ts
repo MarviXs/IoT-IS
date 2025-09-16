@@ -64,7 +64,7 @@ export const useAuthStore = defineStore('authStore', () => {
     try {
       const decodedToken = jwtDecode<JwtPayload>(accessToken.value);
       return decodedToken;
-    } catch (e) {
+    } catch {
       logout();
       console.error('Invalid JWT');
       return null;

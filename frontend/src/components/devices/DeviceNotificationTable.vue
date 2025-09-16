@@ -64,10 +64,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { PropType } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { DeviceResponse } from '@/api/services/DeviceService';
-import { mdiEye } from '@quasar/extras/mdi-v7';
 import { mdiBellOutline } from '@quasar/extras/mdi-v7';
 import type { PaginationClient, PaginationTable } from '@/models/Pagination';
 import { handleError } from '@/utils/error-handler';
@@ -160,7 +157,7 @@ const columns = computed<QTableProps['columns']>(() => [
     label: 'Created At',
     field: 'createdAt',
     sortable: true,
-    format(val, row) {
+    format(val) {
       return new Date(val).toLocaleString(locale.value);
     },
     align: 'right',

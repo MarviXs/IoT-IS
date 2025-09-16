@@ -98,7 +98,7 @@ async function login() {
   if (!isFormValid(form)) return;
 
   isSubmitting.value = true;
-  const { data, error } = await authStore.login(userLogin.value);
+  const { error } = await authStore.login(userLogin.value);
   isSubmitting.value = false;
 
   if (error) {

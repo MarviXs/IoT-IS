@@ -81,7 +81,7 @@ const { t } = useI18n();
 const stoppingJob = ref(false);
 async function stopJob() {
   stoppingJob.value = true;
-  const { data, error } = await JobService.cancelJob(props.jobId);
+  const { error } = await JobService.cancelJob(props.jobId);
   stoppingJob.value = false;
 
   if (error) {
@@ -96,7 +96,7 @@ async function stopJob() {
 const pausingJob = ref(false);
 async function pauseJob() {
   pausingJob.value = true;
-  const { data, error } = await JobService.pauseJob(props.jobId);
+  const { error } = await JobService.pauseJob(props.jobId);
   pausingJob.value = false;
 
   if (error) {
@@ -111,7 +111,7 @@ async function pauseJob() {
 const resumingJob = ref(false);
 async function resumeJob() {
   resumingJob.value = true;
-  const { data, error } = await JobService.resumeJob(props.jobId);
+  const { error } = await JobService.resumeJob(props.jobId);
   resumingJob.value = false;
 
   if (error) {
@@ -126,7 +126,7 @@ async function resumeJob() {
 const skippingStep = ref(false);
 async function skipStep() {
   skippingStep.value = true;
-  const { data, error } = await JobService.skipStep(props.jobId);
+  const { error } = await JobService.skipStep(props.jobId);
   skippingStep.value = false;
 
   if (error) {
@@ -141,7 +141,7 @@ async function skipStep() {
 const skippingCycle = ref(false);
 async function skipCycle() {
   skippingCycle.value = true;
-  const { data, error } = await JobService.skipCycle(props.jobId);
+  const { error } = await JobService.skipCycle(props.jobId);
   skippingCycle.value = false;
 
   if (error) {

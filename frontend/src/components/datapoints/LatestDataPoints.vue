@@ -19,11 +19,7 @@
     </div>
   </div>
   <!-- Ungrouped Sensors -->
-  <div
-    class="col-12 col-md-4 col-lg-3 col-xl-2"
-    v-for="(sensor, index) in ungroupedSensors"
-    :key="'ungrouped-' + sensor.tag"
-  >
+  <div class="col-12 col-md-4 col-lg-3 col-xl-2" v-for="sensor in ungroupedSensors" :key="'ungrouped-' + sensor.tag">
     <LatestDataPointCard
       :device-id="sensor.deviceId"
       :sensor-tag="sensor.tag"
@@ -37,13 +33,11 @@
 </template>
 
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n';
 import { getGraphColor } from '@/utils/colors';
 import { computed } from 'vue';
 import LatestDataPointCard from '../datapoints/LatestDataPointCard.vue';
 import type { SensorData } from '@/models/SensorData';
 
-const { t } = useI18n();
 const sensors = defineModel<SensorData[]>('sensors');
 
 // Group sensors by their group field

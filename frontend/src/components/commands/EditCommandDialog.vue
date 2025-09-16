@@ -55,7 +55,7 @@ async function updateCommand() {
   }
 
   updatingCommand.value = true;
-  const { data, error } = await CommandService.updateCommand(props.commandId, command.value);
+  const { error } = await CommandService.updateCommand(props.commandId, command.value);
   updatingCommand.value = false;
 
   if (error) {

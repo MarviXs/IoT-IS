@@ -101,7 +101,7 @@ async function register() {
   if (!isFormValid(form)) return;
 
   isSubmitting.value = true;
-  const { data, error } = await AuthService.register(userRegister.value);
+  const { error } = await AuthService.register(userRegister.value);
   isSubmitting.value = false;
 
   if (error) {

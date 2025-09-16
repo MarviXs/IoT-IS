@@ -78,7 +78,6 @@ import EditCommandDialog from '@/components/commands/EditCommandDialog.vue';
 import DeleteCommandDialog from '@/components/commands/DeleteCommandDialog.vue';
 import CommandService from '@/api/services/CommandService';
 import SearchBar from '@/components/core/SearchBar.vue';
-import { useAuthStore } from '@/stores/auth-store';
 import type { PaginationClient, PaginationTable } from '@/models/Pagination';
 import type { CommandsQueryParams, CommandsResponse } from '@/api/services/CommandService';
 import { handleError } from '@/utils/error-handler';
@@ -86,7 +85,6 @@ import { useRoute } from 'vue-router';
 import { watchDebounced } from '@vueuse/core';
 
 const { t } = useI18n();
-const authStore = useAuthStore();
 const route = useRoute();
 const deviceTemplateId = route.params.id as string;
 
@@ -166,7 +164,7 @@ const columns = computed<QTableProps['columns']>(() => [
     label: t('command.parameters'),
     field: 'params',
     sortable: true,
-    format(val, row) {
+    format(val) {
       if (val.length === 0) {
         return '-';
       }

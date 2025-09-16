@@ -232,7 +232,6 @@ function handleRefreshSummary() {
   summaryRefreshKey.value++;
 }
 
-const currentOrderId = orderId;
 </script>
 
 <style scoped>

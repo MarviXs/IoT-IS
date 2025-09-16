@@ -80,7 +80,6 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { defineProps } from 'vue'
 import { useI18n } from 'vue-i18n'
 import {
   mdiPlusBox,
@@ -104,7 +103,7 @@ interface Order {
   note: string
 }
 
-const props = defineProps<{ order: Order }>()
+defineProps<{ order: Order }>()
 const { t } = useI18n()
 
 const isAddContainerDialogOpen = ref(false)
@@ -134,16 +133,16 @@ function formatDate(dateString: string): string {
 function openAddContainerDialog() {
   isAddContainerDialogOpen.value = true
 }
-function openUpdateDialog(orderId: number) {
+function openUpdateDialog() {
   isUpdateDialogOpen.value = true
 }
-function openDeleteDialog(orderId: number) {
+function openDeleteDialog() {
   isDeleteDialogOpen.value = true
 }
 
 // Callbacky dialógov
-function handleContainerCreated(newContainerId: number) {}
-function handleOrderUpdated(updatedOrder: any) {}
+function handleContainerCreated() {}
+function handleOrderUpdated() {}
 function handleOrderDeleted() {}
 </script>
 

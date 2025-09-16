@@ -237,12 +237,10 @@ getCollections(pagination.value);
 
 async function lazyLoadCollection({
   node,
-  key,
   done,
   fail,
 }: {
   node: CollectionNode;
-  key: string | number;
   done: (children: CollectionNode[]) => void;
   fail: (error: unknown) => void;
 }) {
@@ -335,6 +333,10 @@ function openAddDeviceDialog(collectionId: string) {
 async function handleDeviceAdded(collectionId: string, deviceId: string) {
   const parent = findItem(collectionId, collections.value, false);
   const { data, error } = await DeviceCollectionService.getCollection(collectionId, 1);
+  if (error) {
+    handleError(error, 'Failed to load collection details');
+    return;
+  }
   if (parent) {
     const device = data?.items.find((item) => item.id === deviceId);
     if (device) {

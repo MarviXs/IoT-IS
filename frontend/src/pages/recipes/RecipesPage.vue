@@ -81,7 +81,6 @@ import { mdiBookOutline, mdiPencil, mdiTrashCanOutline } from '@quasar/extras/md
 import { mdiPlus } from '@quasar/extras/mdi-v7';
 import DeleteRecipeDialog from '@/components/recipes/DeleteRecipeDialog.vue';
 import SearchBar from '@/components/core/SearchBar.vue';
-import { useAuthStore } from '@/stores/auth-store';
 import type { PaginationClient, PaginationTable } from '@/models/Pagination';
 import type { RecipesQueryParams, RecipesResponse } from '@/api/services/RecipeService';
 import { useRoute } from 'vue-router';
@@ -90,7 +89,6 @@ import { handleError } from '@/utils/error-handler';
 import { watchDebounced } from '@vueuse/core';
 
 const { t } = useI18n();
-const authStore = useAuthStore();
 const route = useRoute();
 const deviceTemplateId = route.params.id as string;
 

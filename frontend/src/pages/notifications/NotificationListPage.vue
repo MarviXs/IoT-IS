@@ -146,7 +146,7 @@ const columns = computed<QTableProps['columns']>(() => [
     label: 'Created At',
     field: 'createdAt',
     sortable: true,
-    format(val, row) {
+    format(val) {
       return new Date(val).toLocaleString(locale.value);
     },
     align: 'right',

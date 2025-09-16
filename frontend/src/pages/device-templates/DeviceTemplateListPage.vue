@@ -78,7 +78,6 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import { useAuthStore } from '@/stores/auth-store';
 import { mdiPlus, mdiCodeTags, mdiPencil, mdiTrashCanOutline } from '@quasar/extras/mdi-v7';
 import PageLayout from '@/layouts/PageLayout.vue';
 import { computed, ref } from 'vue';
@@ -93,7 +92,6 @@ import ImportDeviceTemplateDialog from '@/components/device-templates/ImportDevi
 import { watchDebounced } from '@vueuse/core';
 
 const { t, locale } = useI18n();
-const authStore = useAuthStore();
 const filter = ref('');
 
 const pagination = ref<PaginationClient>({
@@ -158,7 +156,7 @@ const columns = computed<QTableProps['columns']>(() => [
     label: 'Updated At',
     field: 'updatedAt',
     sortable: true,
-    format(val, row) {
+    format(val) {
       return new Date(val).toLocaleString(locale.value);
     },
     align: 'right',

@@ -10,7 +10,6 @@
 import type { JobStatus } from '@/api/services/JobService';
 import { jobStatusColors } from '@/utils/job-status-look';
 import type { PropType } from 'vue';
-import { useI18n } from 'vue-i18n';
 
 const props = defineProps({
   jobStatus: {
@@ -22,6 +21,4 @@ const props = defineProps({
     default: false,
   },
 });
-
-const { t } = useI18n();
 </script>

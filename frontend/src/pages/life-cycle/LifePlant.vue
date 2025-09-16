@@ -88,12 +88,6 @@ const { t } = useI18n();
 const showImageDialog = ref(false);
 const plantImage = ref<string | null>(null);
 
-// Breadcrumbs for navigation
-const breadcrumbs = ref([
-  { label: 'Home', to: '/' },
-  { label: 'Plants', to: '/plants' },
-]);
-
 const plants = ref<{
   plantId: string;
   leafCount?: number | null;

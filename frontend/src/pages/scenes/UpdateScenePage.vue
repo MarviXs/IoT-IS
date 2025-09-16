@@ -51,7 +51,7 @@ async function getScene() {
   let parsedCondition;
   try {
     parsedCondition = JSON.parse(data.condition || '{ "and": [] }');
-  } catch (error) {
+  } catch {
     parsedCondition = { and: [] };
   }
 

@@ -106,20 +106,16 @@
 <script setup lang="ts">
 import type { QTableProps } from 'quasar';
 import ShareDeviceDialog from './ShareDeviceDialog.vue';
-import type { PropType} from 'vue';
+import type { PropType } from 'vue';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useAuthStore } from '@/stores/auth-store';
 import {
   mdiCellphoneLink,
   mdiChartLine,
   mdiDotsVertical,
-  mdiEye,
-  mdiOpenInNew,
   mdiPencil,
   mdiShare,
   mdiTrashCan,
-  mdiTrashCanOutline,
 } from '@quasar/extras/mdi-v7';
 import DeleteDeviceDialog from '@/components/devices/DeleteDeviceDialog.vue';
 import { formatTimeToDistance } from '@/utils/date-utils';
@@ -147,7 +143,6 @@ const devicesFiltered = computed(() => props.devices?.items ?? []);
 const emit = defineEmits(['onChange', 'onRequest']);
 
 const { t } = useI18n();
-const authStore = useAuthStore();
 
 const isDeleteDialogOpen = ref(false);
 const deviceToDelete = ref<string>();

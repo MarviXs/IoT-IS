@@ -23,7 +23,7 @@
 <script setup lang="ts">
 import PageLayout from '@/layouts/PageLayout.vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute, useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
 import SceneForm from '@/components/scenes/SceneForm.vue';
 import type { Scene } from '@/models/Scene';
 import { ref } from 'vue';
@@ -34,7 +34,6 @@ import { toast } from 'vue3-toastify';
 
 const { t } = useI18n();
 const router = useRouter();
-const route = useRoute();
 
 const scene = ref<Scene>({
   name: '',

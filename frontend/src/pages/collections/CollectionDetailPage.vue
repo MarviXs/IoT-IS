@@ -30,13 +30,11 @@ import SensorSelectionTree from '@/components/datapoints/SensorSelectionTree.vue
 import CollectionService from '@/api/services/DeviceCollectionService';
 import { computed, ref } from 'vue';
 import { collectionToTreeNode, extractNodeKeys, treeNodeToSensors } from '@/utils/sensor-nodes';
-import { useI18n } from 'vue-i18n';
 import PageLayout from '@/layouts/PageLayout.vue';
 import type { SensorNode } from '@/models/SensorNode';
 import type { DeviceCollectionWithSensorsResponse } from '@/api/services/DeviceCollectionService';
 import DataPointChart from '@/components/datapoints/DataPointChartJS.vue';
 
-const { t } = useI18n();
 const route = useRoute();
 
 const tickedNodes = ref<string[]>();

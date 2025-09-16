@@ -55,13 +55,10 @@ import { mdiPlus } from '@quasar/extras/mdi-v7';
 import type { RecipeResponse, RecipesQueryParams, RecipesResponse } from '@/api/services/RecipeService';
 import { subrecipeToNodes, lazyLoadSubrecipe } from '@/utils/subrecipe-nodes';
 import type { PaginationClient, PaginationTable } from '@/models/Pagination';
-import { useRoute } from 'vue-router';
 import RecipeService from '@/api/services/RecipeService';
 import { handleError } from '@/utils/error-handler';
 
 const { t } = useI18n();
-const route = useRoute();
-
 const props = defineProps({
   deviceTemplateId: {
     type: String,

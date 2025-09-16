@@ -27,12 +27,10 @@ function subrecipeToNodes(recipeStep: RecipeStep, root = false): SubRecipeNode {
 
 async function lazyLoadSubrecipe({
   node,
-  key,
   done,
   fail,
 }: {
   node: SubRecipeNode;
-  key: string | number;
   done: (children: SubRecipeNode[]) => void;
   fail: (error: unknown) => void;
 }) {
