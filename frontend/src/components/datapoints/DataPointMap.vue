@@ -50,7 +50,7 @@ import { computed, PropType, ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useI18n } from 'vue-i18n';
 import { mdiRefresh } from '@quasar/extras/mdi-v7';
 
-import L from 'leaflet';
+import L, { LayerGroup } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
 export type SensorData = {
@@ -105,11 +105,7 @@ async function getDataPoints() {
     To: to.toISOString(),
   };
 
-  const { data, error } = await DataPointService.getDataPoints(
-    sensor.deviceId,
-    sensor.tag,
-    query,
-  );
+  const { data, error } = await DataPointService.getDataPoints(sensor.deviceId, sensor.tag, query);
 
   if (error) {
     console.error(error);
@@ -121,16 +117,18 @@ async function getDataPoints() {
 
 // --- Leaflet Map Integration ---
 const map = ref<L.Map | null>(null);
-const markers: L.LayerGroup = L.layerGroup();
+const markers: LayerGroup = L.layerGroup();
 
 function createMap() {
   if (map.value) return;
-  map.value = L.map('map').setView([51.505, -0.09], 13); // Default center
+  const mapInstance = L.map('map').setView([51.505, -0.09], 13);
+  map.value = mapInstance;
+
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap contributors',
     maxZoom: 19,
-  }).addTo(map.value);
-  markers.addTo(map.value);
+  }).addTo(mapInstance);
+  markers.addTo(mapInstance);
 }
 
 function updateMarkers() {
@@ -164,6 +162,7 @@ function updateMarkers() {
 onMounted(() => {
   createMap();
   updateMarkers();
+  void getDataPoints();
 });
 
 watch(dataPoints, () => {
@@ -177,14 +176,13 @@ onBeforeUnmount(() => {
   }
 });
 
-watch(selectedSensorId, async (newValue) => {
+watch(selectedSensorId, (newValue) => {
   if (newValue) {
-    await getDataPoints();
+    void getDataPoints();
   } else {
     dataPoints.value = [];
   }
 });
-getDataPoints();
 </script>
 
 <style lang="scss"></style>
