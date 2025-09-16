@@ -19,10 +19,11 @@ import { computed, nextTick, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { handleError } from '@/utils/error-handler';
 import { QSelect } from 'quasar';
-import ProductCategoryService, {
+import type {
   ProductCategoryParams,
   ProductCategoryResponse,
 } from '@/api/services/ProductCategoryService';
+import ProductCategoryService from '@/api/services/ProductCategoryService';
 
 export interface ProductCategorySelectData {
   id: string;
@@ -84,7 +85,7 @@ onScroll({ to: -1, ref: null });
 
 async function filterFn(
   val: string,
-  doneFn: (callbackFn: () => void, afterFn?: ((ref: QSelect) => void) | undefined) => void,
+  doneFn: (callbackFn: () => void, afterFn?: ((ref: QSelect) => void)  ) => void,
 ) {
   if (val === filter.value) {
     doneFn(() => {});

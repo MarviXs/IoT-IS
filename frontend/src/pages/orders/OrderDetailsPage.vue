@@ -63,9 +63,10 @@ import OrderItemTable from '@/components/order-item/OrderItemTable.vue';
 import OrderSummaryCard from '@/components/orders/OrderSummaryCard.vue';
 import DeleteContainerDialog from '@/components/order-item/DeleteContainerDialog.vue';
 import PageLayout from '@/layouts/PageLayout.vue';
-import OrderItemsService, { OrderItemContainersQueryParams } from '@/api/services/OrderItemsService';
+import type { OrderItemContainersQueryParams } from '@/api/services/OrderItemsService';
+import OrderItemsService from '@/api/services/OrderItemsService';
 import OrderService from '@/api/services/OrdersService';
-import { PaginationClient, PaginationTable } from '@/models/Pagination';
+import type { PaginationClient, PaginationTable } from '@/models/Pagination';
 import { mdiDownload } from '@quasar/extras/mdi-v7';
 
 const { t } = useI18n();
@@ -120,7 +121,7 @@ const orderSummary = ref<OrderSummary>({
   total: 354,
 });
 
-var orderId = String(Array.isArray(route.params.id) ? route.params.id[0] : route.params.id);
+let orderId = String(Array.isArray(route.params.id) ? route.params.id[0] : route.params.id);
 
 onMounted(() => {
   orderId = String(Array.isArray(route.params.id) ? route.params.id[0] : route.params.id);
@@ -129,9 +130,9 @@ onMounted(() => {
 
 function downloadQuotationSheet() {
   OrderService.downloadOrderTemplate(orderId).then((retVal) => {
-    var contentDisposition = retVal.response.headers.get('Content-Disposition');
-    var parts = contentDisposition?.split('filename=');
-    var filename = parts?.length === 2 ? parts[1] : 'order_template.xlsx';
+    const contentDisposition = retVal.response.headers.get('Content-Disposition');
+    const parts = contentDisposition?.split('filename=');
+    const filename = parts?.length === 2 ? parts[1] : 'order_template.xlsx';
 
     retVal.response.blob().then((blob) => {
       const url = window.URL.createObjectURL(blob);
@@ -147,9 +148,9 @@ function downloadQuotationSheet() {
 
 function downloadPlantsPassports() {
   OrderService.downloadPlantsPassports(orderId).then((retVal) => {
-    var contentDisposition = retVal.response.headers.get('Content-Disposition');
-    var parts = contentDisposition?.split('filename=');
-    var filename = parts?.length === 2 ? parts[1] : 'plants_passports.xlsx';
+    const contentDisposition = retVal.response.headers.get('Content-Disposition');
+    const parts = contentDisposition?.split('filename=');
+    const filename = parts?.length === 2 ? parts[1] : 'plants_passports.xlsx';
 
     retVal.response.blob().then((blob) => {
       const url = window.URL.createObjectURL(blob);

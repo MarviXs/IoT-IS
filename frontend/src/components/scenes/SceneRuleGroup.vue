@@ -33,12 +33,13 @@
 </template>
 
 <script setup lang="ts">
-import { ReservedOperations, RulesLogic } from 'json-logic-js';
-import { computed, PropType, ref } from 'vue';
+import type { ReservedOperations, RulesLogic } from 'json-logic-js';
+import type { PropType} from 'vue';
+import { computed, ref } from 'vue';
 import SceneRule from './SceneRule.vue';
 import { mdiCloseCircleOutline, mdiPlus } from '@quasar/extras/mdi-v7';
 import { getRuleColor } from '@/utils/rule-colors';
-import { SceneDevice } from '@/api/services/DeviceService';
+import type { SceneDevice } from '@/api/services/DeviceService';
 
 const props = defineProps({
   isRoot: { type: Boolean, required: true },

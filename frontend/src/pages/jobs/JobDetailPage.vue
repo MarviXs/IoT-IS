@@ -68,7 +68,7 @@
 </template>
 
 <script setup lang="ts">
-import { QTableProps } from 'quasar';
+import type { QTableProps } from 'quasar';
 import { computed, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import JobService from '@/api/services/JobService';
@@ -79,11 +79,11 @@ import { mdiCheck, mdiListStatus } from '@quasar/extras/mdi-v7';
 import PageLayout from '@/layouts/PageLayout.vue';
 import { useStorage } from '@vueuse/core';
 import AutoRefreshButton from '@/components/core/AutoRefreshButton.vue';
-import { JobResponse } from '@/api/services/JobService';
+import type { JobResponse } from '@/api/services/JobService';
 import { handleError } from '@/utils/error-handler';
 import DeviceService from '@/api/services/DeviceService';
-import { DeviceResponse } from '@/api/services/DeviceService';
-import { JobStatusEnum } from '@/models/JobStatusEnum';
+import type { DeviceResponse } from '@/api/services/DeviceService';
+import type { JobStatusEnum } from '@/models/JobStatusEnum';
 
 const { t } = useI18n();
 

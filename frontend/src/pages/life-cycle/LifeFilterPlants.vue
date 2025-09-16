@@ -107,8 +107,9 @@ import {
   mdiSeedPlusOutline 
 } from '@quasar/extras/mdi-v7';
 import PageLayout from '@/layouts/PageLayout.vue';
-import LifeCycleService, { PlantsCollectionQueryParams } from '@/api/services/LifeCycleService';
-import { PaginationClient, PaginationTable } from '@/models/Pagination';
+import type { PlantsCollectionQueryParams } from '@/api/services/LifeCycleService';
+import LifeCycleService from '@/api/services/LifeCycleService';
+import type { PaginationClient, PaginationTable } from '@/models/Pagination';
 import { watch } from 'vue';
 
 const { t } = useI18n();

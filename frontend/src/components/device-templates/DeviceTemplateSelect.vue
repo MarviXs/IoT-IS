@@ -16,7 +16,7 @@
 <script setup lang="ts">
 import { computed, nextTick, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { DeviceTemplatesQueryParams, DeviceTemplatesResponse } from '@/api/services/DeviceTemplateService';
+import type { DeviceTemplatesQueryParams, DeviceTemplatesResponse } from '@/api/services/DeviceTemplateService';
 import DeviceTemplateService from '@/api/services/DeviceTemplateService';
 import { handleError } from '@/utils/error-handler';
 import { QSelect } from 'quasar';
@@ -81,7 +81,7 @@ onScroll({ to: -1, ref: null });
 
 async function filterFn(
   val: string,
-  doneFn: (callbackFn: () => void, afterFn?: ((ref: QSelect) => void) | undefined) => void,
+  doneFn: (callbackFn: () => void, afterFn?: ((ref: QSelect) => void)  ) => void,
 ) {
   if (val === filter.value) {
     doneFn(() => {});

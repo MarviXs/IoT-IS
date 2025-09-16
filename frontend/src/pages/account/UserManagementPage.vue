@@ -35,14 +35,14 @@
 </template>
 
 <script setup lang="ts">
-import { QTableProps } from 'quasar';
+import type { QTableProps } from 'quasar';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { mdiAccountGroup, mdiPencil } from '@quasar/extras/mdi-v7';
 import PageLayout from '@/layouts/PageLayout.vue';
 import SearchBar from '@/components/core/SearchBar.vue';
-import { PaginationClient, PaginationTable } from '@/models/Pagination';
-import { UsersQueryParams, UsersResponse } from '@/api/services/UserManagementService';
+import type { PaginationClient, PaginationTable } from '@/models/Pagination';
+import type { UsersQueryParams, UsersResponse } from '@/api/services/UserManagementService';
 import UserManagementService from '@/api/services/UserManagementService';
 import { handleError } from '@/utils/error-handler';
 import { watchDebounced } from '@vueuse/core';

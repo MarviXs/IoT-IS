@@ -354,9 +354,12 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import CategorySelect, { CategorySelectData } from '../categories/CategorySelect.vue';
-import SuppliersSelect, { SupplierSelectData } from '../suppliers/SuppliersSelect.vue';
-import VATCategoriesSelect, { VATCategorySelectData } from '../vatCategories/VATCategoriesSelect.vue';
+import type { CategorySelectData } from '../categories/CategorySelect.vue';
+import CategorySelect from '../categories/CategorySelect.vue';
+import type { SupplierSelectData } from '../suppliers/SuppliersSelect.vue';
+import SuppliersSelect from '../suppliers/SuppliersSelect.vue';
+import type { VATCategorySelectData } from '../vatCategories/VATCategoriesSelect.vue';
+import VATCategoriesSelect from '../vatCategories/VATCategoriesSelect.vue';
 import { mdiChevronDown } from '@quasar/extras/mdi-v7';
 
 export interface ProductFormData {

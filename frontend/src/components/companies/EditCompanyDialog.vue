@@ -13,8 +13,10 @@ import { handleError } from '@/utils/error-handler';
 import { toast } from 'vue3-toastify';
 import { useI18n } from 'vue-i18n';
 import DialogCommon from '@/components/core/DialogCommon.vue';
-import CompanyForm, { CompanyFormData } from './CompanyForm.vue';
-import CompanyService, { UpdateCompanyRequest } from '@/api/services/CompanyService';
+import type { CompanyFormData } from './CompanyForm.vue';
+import CompanyForm from './CompanyForm.vue';
+import type { UpdateCompanyRequest } from '@/api/services/CompanyService';
+import CompanyService from '@/api/services/CompanyService';
 
 const isDialogOpen = defineModel<boolean>();
 const props = defineProps({

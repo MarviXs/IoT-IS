@@ -1,6 +1,6 @@
 import RecipeService from '@/api/services/RecipeService';
-import { RecipeStep } from '@/api/services/RecipeService';
-import { SubRecipeNode } from '@/models/SubrecipeNode';
+import type { RecipeStep } from '@/api/services/RecipeService';
+import type { SubRecipeNode } from '@/models/SubrecipeNode';
 
 function subrecipeToNodes(recipeStep: RecipeStep, root = false): SubRecipeNode {
   if (recipeStep.subrecipe) {

@@ -1,4 +1,4 @@
-import { ProblemDetails } from '@/api/types/ProblemDetails';
+import type { ProblemDetails } from '@/api/types/ProblemDetails';
 import { toast } from 'vue3-toastify';
 
 function handleError(error: ProblemDetails, defaultErrorMessage: string): unknown {

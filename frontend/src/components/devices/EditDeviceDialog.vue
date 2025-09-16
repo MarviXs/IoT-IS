@@ -14,9 +14,9 @@ import { toast } from 'vue3-toastify';
 import { useI18n } from 'vue-i18n';
 import DialogCommon from '@/components/core/DialogCommon.vue';
 import DeviceForm from '@/components/devices/DeviceForm.vue';
-import { DeviceFormData } from '@/components/devices/DeviceForm.vue';
+import type { DeviceFormData } from '@/components/devices/DeviceForm.vue';
 import DeviceService from '@/api/services/DeviceService';
-import { UpdateDeviceRequest } from '@/api/services/DeviceService';
+import type { UpdateDeviceRequest } from '@/api/services/DeviceService';
 
 const isDialogOpen = defineModel<boolean>();
 const props = defineProps({

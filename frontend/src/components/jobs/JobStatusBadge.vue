@@ -5,7 +5,7 @@
 </template>
 
 <script setup lang="ts">
-import { JobStatusEnum } from '@/models/JobStatusEnum';
+import type { JobStatusEnum } from '@/models/JobStatusEnum';
 import { jobStatusColors } from '@/utils/job-status-look';
 
 defineProps({

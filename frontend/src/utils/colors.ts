@@ -1,4 +1,5 @@
-import colorLib, { Color, RGBA } from '@kurkle/color';
+import type { Color, RGBA } from '@kurkle/color';
+import colorLib from '@kurkle/color';
 
 export const graphColors = [
   '#3366cc',

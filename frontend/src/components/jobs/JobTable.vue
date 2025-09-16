@@ -52,14 +52,14 @@
 </template>
 
 <script setup lang="ts">
-import { QTableProps } from 'quasar';
+import type { QTableProps } from 'quasar';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { mdiListStatus, mdiOpenInNew } from '@quasar/extras/mdi-v7';
 import { RouterLink } from 'vue-router';
 import JobStatusIcon from '@/components/jobs/JobStatusIcon.vue';
-import { JobsQueryParams, JobsResponse } from '@/api/services/JobService';
-import { PaginationClient, PaginationTable } from '@/models/Pagination';
+import type { JobsQueryParams, JobsResponse } from '@/api/services/JobService';
+import type { PaginationClient, PaginationTable } from '@/models/Pagination';
 import JobService from '@/api/services/JobService';
 import { handleError } from '@/utils/error-handler';
 

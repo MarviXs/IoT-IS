@@ -36,10 +36,10 @@ import { handleError } from '@/utils/error-handler';
 import { toast } from 'vue3-toastify';
 import { useRoute, useRouter } from 'vue-router';
 import DeviceTemplateService from '@/api/services/DeviceTemplateService';
-import { DeviceTemplateResponse } from '@/api/services/DeviceTemplateService';
-import { RecipeResponse } from '@/api/services/RecipeService';
-import { UpdateRecipeStepsRequest } from '@/api/services/RecipeService';
-import { CreateRecipeRequest } from '@/api/services/RecipeService';
+import type { DeviceTemplateResponse } from '@/api/services/DeviceTemplateService';
+import type { RecipeResponse } from '@/api/services/RecipeService';
+import type { UpdateRecipeStepsRequest } from '@/api/services/RecipeService';
+import type { CreateRecipeRequest } from '@/api/services/RecipeService';
 
 const { t } = useI18n();
 const router = useRouter();

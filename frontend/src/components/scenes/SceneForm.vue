@@ -33,10 +33,11 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import { Scene } from '@/models/Scene';
+import type { Scene } from '@/models/Scene';
 import SceneRuleGroup from './SceneRuleGroup.vue';
 import { ref } from 'vue';
-import DeviceService, { SceneDevice } from '@/api/services/DeviceService';
+import type { SceneDevice } from '@/api/services/DeviceService';
+import DeviceService from '@/api/services/DeviceService';
 import { handleError } from '@/utils/error-handler';
 import SceneActions from './SceneActions.vue';
 

@@ -37,11 +37,12 @@
 </template>
 
 <script setup lang="ts">
-import { RulesLogic } from 'json-logic-js';
+import type { RulesLogic } from 'json-logic-js';
 import SceneRuleGroup from './SceneRuleGroup.vue';
 import { mdiCloseCircleOutline } from '@quasar/extras/mdi-v7';
-import { SceneDevice } from '@/api/services/DeviceService';
-import { computed, PropType } from 'vue';
+import type { SceneDevice } from '@/api/services/DeviceService';
+import type { PropType } from 'vue';
+import { computed } from 'vue';
 import SceneDeviceOperand from './SceneDeviceOperand.vue';
 import SceneConstantOperand from './SceneConstantOperand.vue';
 import { useI18n } from 'vue-i18n';

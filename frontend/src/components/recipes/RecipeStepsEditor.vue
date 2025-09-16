@@ -116,13 +116,13 @@
 </template>
 
 <script setup lang="ts">
-import { QTableProps } from 'quasar';
+import type { QTableProps } from 'quasar';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { mdiClose, mdiDrag, mdiCodeTags, mdiBookMultipleOutline } from '@quasar/extras/mdi-v7';
 import { VueDraggable } from 'vue-draggable-plus';
-import { RecipeStep } from '@/api/services/RecipeService';
-import { RecipeResponse } from '@/api/services/RecipeService';
+import type { RecipeStep } from '@/api/services/RecipeService';
+import type { RecipeResponse } from '@/api/services/RecipeService';
 import CommandStepsTable from '@/components/recipes/CommandStepsTable.vue';
 import SubrecipeStepsTable from '@/components/recipes/SubrecipeStepsTable.vue';
 import { subrecipeToNodes, lazyLoadSubrecipe } from '@/utils/subrecipe-nodes';

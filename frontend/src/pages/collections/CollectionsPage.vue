@@ -151,7 +151,7 @@
 </template>
 
 <script setup lang="ts">
-import { QTableProps } from 'quasar';
+import type { QTableProps } from 'quasar';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import {
@@ -164,8 +164,8 @@ import {
   mdiDotsVertical,
 } from '@quasar/extras/mdi-v7';
 import PageLayout from '@/layouts/PageLayout.vue';
-import { PaginationClient, PaginationTable } from '@/models/Pagination';
-import {
+import type { PaginationClient, PaginationTable } from '@/models/Pagination';
+import type {
   CreateCollectionResponse,
   DeviceCollectionQueryParams,
   UpdateCollectionResponse,

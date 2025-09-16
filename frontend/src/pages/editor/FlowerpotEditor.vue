@@ -366,7 +366,7 @@ import { useI18n } from 'vue-i18n';
 
 const width = 500;
 const height = 800;
-var changed = false
+let changed = false
 
 export default {
   setup() {
@@ -1077,7 +1077,7 @@ export default {
       },
       // Pridá rastlinu na základe vybraného typu
     addRectangle(plantOption, next = true, tmpState = 0, tmpDate = new Date().toLocaleDateString('sk-SK')) {
-      var plantName = '';
+      let plantName = '';
       if (next){
         plantName = plantOption.name + ' ' + this.nextId;
       }else{

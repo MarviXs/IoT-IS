@@ -32,7 +32,8 @@
 
 <script setup lang="ts">
 import { mdiChevronRight } from '@quasar/extras/mdi-v7';
-import { computed, PropType } from 'vue';
+import type { PropType } from 'vue';
+import { computed } from 'vue';
 
 interface BreadCrumb {
   label?: string;

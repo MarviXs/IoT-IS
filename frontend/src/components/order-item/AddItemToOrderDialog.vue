@@ -39,7 +39,7 @@ const loading = ref(false);
 const addingItem = ref(false);
 
 // Extract orderId from the URL
-var orderId = route.params.id;
+let orderId = route.params.id;
 onMounted(() => {
   orderId = route.params.id || '';
 });

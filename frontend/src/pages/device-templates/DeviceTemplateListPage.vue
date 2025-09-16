@@ -83,11 +83,11 @@ import { mdiPlus, mdiCodeTags, mdiPencil, mdiTrashCanOutline } from '@quasar/ext
 import PageLayout from '@/layouts/PageLayout.vue';
 import { computed, ref } from 'vue';
 import SearchBar from '@/components/core/SearchBar.vue';
-import { PaginationClient, PaginationTable } from '@/models/Pagination';
+import type { PaginationClient, PaginationTable } from '@/models/Pagination';
 import DeviceTemplateService from '@/api/services/DeviceTemplateService';
 import { handleError } from '@/utils/error-handler';
-import { DeviceTemplatesQueryParams, DeviceTemplatesResponse } from '@/api/services/DeviceTemplateService';
-import { QTableProps } from 'quasar';
+import type { DeviceTemplatesQueryParams, DeviceTemplatesResponse } from '@/api/services/DeviceTemplateService';
+import type { QTableProps } from 'quasar';
 import DeleteDeviceTemplateDialog from '@/components/device-templates/DeleteDeviceTemplateDialog.vue';
 import ImportDeviceTemplateDialog from '@/components/device-templates/ImportDeviceTemplateDialog.vue';
 import { watchDebounced } from '@vueuse/core';

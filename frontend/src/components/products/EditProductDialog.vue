@@ -13,8 +13,10 @@ import { handleError } from '@/utils/error-handler';
 import { toast } from 'vue3-toastify';
 import { useI18n } from 'vue-i18n';
 import DialogCommon from '@/components/core/DialogCommon.vue';
-import ProductForm, { ProductFormData } from './ProductForm.vue';
-import ProductService, { UpdateProductRequest } from '@/api/services/ProductService';
+import type { ProductFormData } from './ProductForm.vue';
+import ProductForm from './ProductForm.vue';
+import type { UpdateProductRequest } from '@/api/services/ProductService';
+import ProductService from '@/api/services/ProductService';
 
 const isDialogOpen = defineModel<boolean>();
 

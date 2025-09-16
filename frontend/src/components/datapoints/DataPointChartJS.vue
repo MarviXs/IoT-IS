@@ -77,18 +77,21 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, PropType, shallowRef, watch, watchEffect, computed } from 'vue';
+import type { PropType} from 'vue';
+import { ref, reactive, onMounted, shallowRef, watch, watchEffect, computed } from 'vue';
 import ChartTimeRangeSelect from '@/components/datapoints/ChartTimeRangeSelect.vue';
-import { TimeRange } from '@/models/TimeRange';
+import type { TimeRange } from '@/models/TimeRange';
 import { getGraphColor, transparentize } from '@/utils/colors';
 import { useStorage } from '@vueuse/core';
 import { useI18n } from 'vue-i18n';
 import DialogCommon from '../core/DialogCommon.vue';
-import GraphOptionsForm, { GraphOptions } from './GraphOptionsForm.vue';
-import { GetDataPointsQuery } from '@/api/services/DataPointService';
-import { DataPoint } from '@/models/DataPoint';
+import type { GraphOptions } from './GraphOptionsForm.vue';
+import GraphOptionsForm from './GraphOptionsForm.vue';
+import type { GetDataPointsQuery } from '@/api/services/DataPointService';
+import type { DataPoint } from '@/models/DataPoint';
 import DataPointService from '@/api/services/DataPointService';
-import { Chart, ChartDataset, ChartEvent, LegendItem, ScaleOptions } from 'chart.js/auto';
+import type { ChartDataset, ChartEvent, LegendItem, ScaleOptions } from 'chart.js/auto';
+import { Chart } from 'chart.js/auto';
 import 'chartjs-adapter-date-fns';
 import zoomPlugin from 'chartjs-plugin-zoom';
 import { mdiRefresh } from '@quasar/extras/mdi-v7';
@@ -462,7 +465,7 @@ const generateCSVData = () => {
           Time: format(new Date(dataPoint.ts), 'dd/MM/yyyy HH:mm:ss'),
         });
       }
-      const record = aggregatedData.get(timeKey)!;
+      const record = aggregatedData.get(timeKey);
       record[sensor.name] = dataPoint.value ?? '';
     });
   });

@@ -31,7 +31,7 @@ import { useI18n } from 'vue-i18n';
 import PageLayout from '@/layouts/PageLayout.vue';
 import { ref } from 'vue';
 import SearchBar from '@/components/core/SearchBar.vue';
-import { PaginationClient, PaginationTable } from '@/models/Pagination';
+import type { PaginationClient, PaginationTable } from '@/models/Pagination';
 import CompanyService from '@/api/services/CompanyService';
 import { handleError } from '@/utils/error-handler';
 import { mdiPlus } from '@quasar/extras/mdi-v7';

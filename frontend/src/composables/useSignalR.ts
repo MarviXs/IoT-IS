@@ -1,4 +1,5 @@
-import { HubConnectionBuilder, HubConnection } from '@microsoft/signalr';
+import type { HubConnection } from '@microsoft/signalr';
+import { HubConnectionBuilder } from '@microsoft/signalr';
 import { ref, onMounted } from 'vue';
 import { useAuthStore } from '@/stores/auth-store.js';
 import { FailedToNegotiateWithServerError } from '@microsoft/signalr/dist/esm/Errors';

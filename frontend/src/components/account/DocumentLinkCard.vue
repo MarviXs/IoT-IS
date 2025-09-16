@@ -49,8 +49,10 @@
 </template>
 
 <script setup lang="ts">
-import { PropType, ref, watch } from 'vue';
-import { QForm, QInput } from 'quasar';
+import type { PropType} from 'vue';
+import { ref, watch } from 'vue';
+import type { QForm} from 'quasar';
+import { QInput } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import TemplatesService from '@/api/services/TemplatesService';
 import { toast } from 'vue3-toastify';
@@ -136,9 +138,9 @@ function onFileSave() {
 function downloadTemplate() {
   TemplatesService.downloadTemplate(props.documentType)
     .then((retVal) => {
-      var contentDisposition = retVal.response.headers.get('Content-Disposition');
-      var parts = contentDisposition?.split('filename=');
-      var filename = parts?.length === 2 ? parts[1] : 'order_template.xlsx';
+      const contentDisposition = retVal.response.headers.get('Content-Disposition');
+      const parts = contentDisposition?.split('filename=');
+      const filename = parts?.length === 2 ? parts[1] : 'order_template.xlsx';
 
       retVal.response.blob().then((blob) => {
         const url = window.URL.createObjectURL(blob);

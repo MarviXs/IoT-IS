@@ -16,7 +16,7 @@ import OrderService from '@/api/services/OrdersService';
 const route = useRoute();
 const isDialogOpen = ref<boolean>(false);
 
-var orderId = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id;
+let orderId = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id;
 onMounted(() => {
   orderId = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id || '';
 });

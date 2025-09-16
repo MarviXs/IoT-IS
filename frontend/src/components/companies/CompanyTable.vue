@@ -48,14 +48,14 @@
 </template>
 
 <script setup lang="ts">
-import { QTableProps } from 'quasar';
+import type { QTableProps } from 'quasar';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { mdiFileSearchOutline, mdiPencil, mdiTrashCan } from '@quasar/extras/mdi-v7';
-import { PaginationClient } from '@/models/Pagination';
+import type { PaginationClient } from '@/models/Pagination';
 import EditCompanyDialog from './EditCompanyDialog.vue';
 import DeleteCompanyDialog from './DeleteCompanyDialog.vue';
-import { PropType } from 'vue';
+import type { PropType } from 'vue';
 
 const props = defineProps({
   loading: {

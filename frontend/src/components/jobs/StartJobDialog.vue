@@ -40,8 +40,8 @@ import { handleError } from '@/utils/error-handler';
 import { useI18n } from 'vue-i18n';
 import DialogCommon from '../core/DialogCommon.vue';
 import JobService from '@/api/services/JobService';
-import { RecipeSelectData } from '@/components/recipes/RecipeSelect.vue';
-import { StartJobRequest } from '@/api/services/JobService';
+import type { RecipeSelectData } from '@/components/recipes/RecipeSelect.vue';
+import type { StartJobRequest } from '@/api/services/JobService';
 import RecipeSelect from '@/components/recipes/RecipeSelect.vue';
 
 const isDialogOpen = defineModel<boolean>();

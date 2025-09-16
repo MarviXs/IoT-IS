@@ -68,7 +68,7 @@
 </template>
 
 <script setup lang="ts">
-import { QTableProps } from 'quasar';
+import type { QTableProps } from 'quasar';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { mdiCodeTags, mdiPencil, mdiTrashCanOutline } from '@quasar/extras/mdi-v7';
@@ -79,8 +79,8 @@ import DeleteCommandDialog from '@/components/commands/DeleteCommandDialog.vue';
 import CommandService from '@/api/services/CommandService';
 import SearchBar from '@/components/core/SearchBar.vue';
 import { useAuthStore } from '@/stores/auth-store';
-import { PaginationClient, PaginationTable } from '@/models/Pagination';
-import { CommandsQueryParams, CommandsResponse } from '@/api/services/CommandService';
+import type { PaginationClient, PaginationTable } from '@/models/Pagination';
+import type { CommandsQueryParams, CommandsResponse } from '@/api/services/CommandService';
 import { handleError } from '@/utils/error-handler';
 import { useRoute } from 'vue-router';
 import { watchDebounced } from '@vueuse/core';

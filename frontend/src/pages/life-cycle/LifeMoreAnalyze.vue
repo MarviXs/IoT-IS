@@ -196,13 +196,13 @@ let imageWidth = 0;
 let imageHeight = 0;
 let imageTop = 0;
 let imageLeft = 0;  
-let threshold = ref(130);
+const threshold = ref(130);
 let tmpResponse: { nums: Array<string> } | undefined;
-let choroby: string[] = [];
-let index = ref<number | null>(null);
-let positionDisX: number[] = [];
-let positionDisY: number[] = [];
-let selectedIndex = ref<number | null>(null); 
+const choroby: string[] = [];
+const index = ref<number | null>(null);
+const positionDisX: number[] = [];
+const positionDisY: number[] = [];
+const selectedIndex = ref<number | null>(null); 
 const fileInput = ref<HTMLInputElement | null>(null);
 const router = useRouter();
 const route = useRoute();
@@ -461,9 +461,9 @@ const getClickPosition = (event: MouseEvent) => {
 };
 
 const saveDisease = () => {
-  console.log(`Disease for plant ${index}: ${diseaseInput.value}`);
+  console.log(`Disease for plant ${index.value}: ${diseaseInput.value}`);
   if ((index.value ?? -1) >= 0 && diseaseInput.value) {
-    choroby[index.value!] = diseaseInput.value;
+    choroby[index.value] = diseaseInput.value;
     dialogOpen.value = false;
     diseaseInput.value = '';
   }

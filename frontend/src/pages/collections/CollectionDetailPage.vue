@@ -32,8 +32,8 @@ import { computed, ref } from 'vue';
 import { collectionToTreeNode, extractNodeKeys, treeNodeToSensors } from '@/utils/sensor-nodes';
 import { useI18n } from 'vue-i18n';
 import PageLayout from '@/layouts/PageLayout.vue';
-import { SensorNode } from '@/models/SensorNode';
-import { DeviceCollectionWithSensorsResponse } from '@/api/services/DeviceCollectionService';
+import type { SensorNode } from '@/models/SensorNode';
+import type { DeviceCollectionWithSensorsResponse } from '@/api/services/DeviceCollectionService';
 import DataPointChart from '@/components/datapoints/DataPointChartJS.vue';
 
 const { t } = useI18n();

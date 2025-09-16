@@ -14,10 +14,12 @@ import { handleError } from '@/utils/error-handler';
 import { toast } from 'vue3-toastify';
 import { useI18n } from 'vue-i18n';
 import DialogCommon from '@/components/core/DialogCommon.vue';
-import CompanyForm, { CompanyFormData } from './CompanyForm.vue';
-import CompanyService, { CreateCompanyParams } from '@/api/services/CompanyService';
+import type { CompanyFormData } from './CompanyForm.vue';
+import CompanyForm from './CompanyForm.vue';
+import type { CreateCompanyParams } from '@/api/services/CompanyService';
+import CompanyService from '@/api/services/CompanyService';
 import CompanySearch from './CompanySearch.vue';
-import { EkonomickySubjekt } from '@/api/services/ARESService';
+import type { EkonomickySubjekt } from '@/api/services/ARESService';
 
 const isDialogOpen = defineModel<boolean>();
 const emit = defineEmits(['onCreate']);

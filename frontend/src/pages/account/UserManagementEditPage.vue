@@ -58,7 +58,7 @@ import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import UserManagementService from '@/api/services/UserManagementService';
 import { ref } from 'vue';
-import { GetUserByIdResponse } from '@/api/services/UserManagementService';
+import type { GetUserByIdResponse } from '@/api/services/UserManagementService';
 import { handleError } from '@/utils/error-handler';
 import { Role } from '@/models/Role';
 import { toast } from 'vue3-toastify';
@@ -112,7 +112,7 @@ async function updateEmail(email: string) {
     return;
   }
 
-  user.value!.email = email;
+  user.value.email = email;
   toast.success(t('account.toasts.email_update_success'));
 }
 

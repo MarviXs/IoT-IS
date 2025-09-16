@@ -8,10 +8,10 @@
 </template>
 
 <script setup lang="ts">
-import { PropType } from 'vue';
-import { SceneAction as SceneActionModel } from '@/models/Scene';
+import type { PropType } from 'vue';
+import type { SceneAction as SceneActionModel } from '@/models/Scene';
 import SceneAction from './SceneAction.vue';
-import { SceneDevice } from '@/api/services/DeviceService';
+import type { SceneDevice } from '@/api/services/DeviceService';
 import { mdiPlus } from '@quasar/extras/mdi-v7';
 
 const actions = defineModel<SceneActionModel[]>({ required: true });

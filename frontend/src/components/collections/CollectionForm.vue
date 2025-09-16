@@ -19,7 +19,7 @@
 </template>
 
 <script setup lang="ts">
-import { UpdateCollectionRequest } from '@/api/services/DeviceCollectionService';
+import type { UpdateCollectionRequest } from '@/api/services/DeviceCollectionService';
 import { useI18n } from 'vue-i18n';
 
 const props = defineProps({

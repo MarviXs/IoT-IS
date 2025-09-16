@@ -159,7 +159,7 @@ const plantProperties = ref({
   imageName: '',
 });
 
-let threshold = ref(130);
+const threshold = ref(130);
 const fileInput = ref<HTMLInputElement | null>(null);
 const router = useRouter();
 

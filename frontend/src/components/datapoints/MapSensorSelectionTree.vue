@@ -37,10 +37,10 @@
 </template>
 
 <script setup lang="ts">
-import { SensorNode } from '@/models/SensorNode';
+import type { SensorNode } from '@/models/SensorNode';
 import { extractNodeKeys } from '@/utils/sensor-nodes';
 import { computed, ref, watch } from 'vue';
-import { PropType } from 'vue';
+import type { PropType } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { mdiMemory } from '@quasar/extras/mdi-v7';
 

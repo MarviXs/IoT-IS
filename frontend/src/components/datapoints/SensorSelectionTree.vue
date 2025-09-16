@@ -42,10 +42,11 @@
 </template>
 
 <script setup lang="ts">
-import { SensorNode } from '@/models/SensorNode';
+import type { SensorNode } from '@/models/SensorNode';
 import { extractNodeKeys } from '@/utils/sensor-nodes';
 import { computed } from 'vue';
-import { PropType, ref } from 'vue';
+import type { PropType} from 'vue';
+import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { mdiMemory } from '@quasar/extras/mdi-v7';
 

@@ -25,9 +25,10 @@ import PageLayout from '@/layouts/PageLayout.vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import SceneForm from '@/components/scenes/SceneForm.vue';
-import { Scene } from '@/models/Scene';
+import type { Scene } from '@/models/Scene';
 import { ref } from 'vue';
-import SceneService, { CreateSceneData } from '@/api/services/SceneService';
+import type { CreateSceneData } from '@/api/services/SceneService';
+import SceneService from '@/api/services/SceneService';
 import { handleError } from '@/utils/error-handler';
 import { toast } from 'vue3-toastify';
 

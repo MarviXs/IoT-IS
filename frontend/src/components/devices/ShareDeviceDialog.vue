@@ -41,7 +41,8 @@ import { computed } from 'vue';
 import { toast } from 'vue3-toastify';
 import { useI18n } from 'vue-i18n';
 import { mdiClose } from '@quasar/extras/mdi-v7';
-import DeviceSharingService, { SharedUsers } from '@/api/services/DeviceSharingService';
+import type { SharedUsers } from '@/api/services/DeviceSharingService';
+import DeviceSharingService from '@/api/services/DeviceSharingService';
 
 const isDialogOpen = defineModel<boolean>();
 const props = defineProps({

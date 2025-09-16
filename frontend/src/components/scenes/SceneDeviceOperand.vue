@@ -26,9 +26,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, PropType } from 'vue';
-import { SceneDevice } from '@/api/services/DeviceService';
-import { JsonLogicVar } from 'json-logic-js';
+import type { PropType } from 'vue';
+import { computed } from 'vue';
+import type { SceneDevice } from '@/api/services/DeviceService';
+import type { JsonLogicVar } from 'json-logic-js';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();

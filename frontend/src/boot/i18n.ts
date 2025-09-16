@@ -1,7 +1,8 @@
 import { boot } from 'quasar/wrappers';
 import { createI18n } from 'vue-i18n';
 import messages from '@intlify/unplugin-vue-i18n/messages';
-import { Quasar, QuasarLanguage } from 'quasar';
+import type { QuasarLanguage } from 'quasar';
+import { Quasar } from 'quasar';
 
 const langList = import.meta.glob('../../node_modules/quasar/lang/(en-US|sk).mjs');
 

@@ -39,8 +39,9 @@ import { mdiCloudUpload, mdiClose } from '@quasar/extras/mdi-v7';
 import type { QTableProps } from 'quasar';
 import Papa, { type ParseResult } from 'papaparse';
 import ProductCategorySelect from './ProductCategorySelect.vue';
-import { CategorySelectData } from '../categories/CategorySelect.vue';
-import ProductService, { ProductRequest } from '@/api/services/ProductService';
+import type { CategorySelectData } from '../categories/CategorySelect.vue';
+import type { ProductRequest } from '@/api/services/ProductService';
+import ProductService from '@/api/services/ProductService';
 
 const isDialogOpen = defineModel<boolean>();
 

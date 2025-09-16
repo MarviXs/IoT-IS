@@ -17,7 +17,8 @@ import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { handleError } from '@/utils/error-handler';
 import { QSelect } from 'quasar';
-import VATCategoryService, { VATCategoryResponse } from '@/api/services/VATCategoryService';
+import type { VATCategoryResponse } from '@/api/services/VATCategoryService';
+import VATCategoryService from '@/api/services/VATCategoryService';
 
 export interface VATCategorySelectData {
   id: string;

@@ -115,7 +115,7 @@ watch(
 watch(
   localParams,
   (newParams) => {
-    command.value.params = newParams.map((p) => p.value) as number[];
+    command.value.params = newParams.map((p) => p.value);
   },
   { deep: true },
 );
