@@ -26,7 +26,6 @@
       <q-btn-toggle
         v-model="mapMode"
         class="col-grow col-lg-auto"
-        rounded
         dense
         unelevated
         color="primary"

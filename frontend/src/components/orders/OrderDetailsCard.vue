@@ -8,8 +8,8 @@
       </div>
       <div>
         <q-btn flat round size="md" :icon="mdiPlusBox" color="grey-color" @click="openAddContainerDialog" />
-        <q-btn flat round size="md" :icon="mdiPencil" color="grey-color" @click.stop="openUpdateDialog(order.id)" />
-        <q-btn flat round size="md" :icon="mdiTrashCan" color="grey-color" @click.stop="openDeleteDialog(order.id)" />
+        <q-btn flat round size="md" :icon="mdiPencil" color="grey-color" @click.stop="openUpdateDialog" />
+        <q-btn flat round size="md" :icon="mdiTrashCan" color="grey-color" @click.stop="openDeleteDialog" />
       </div>
     </q-card-section>
 
@@ -65,79 +65,65 @@
       v-model="isAddContainerDialogOpen"
       @onCreate="handleContainerCreated"
     />
-    <UpdateOrderDialog
-      v-model="isUpdateDialogOpen"
-      :orderId="order.id"
-      @onUpdate="handleOrderUpdated"
-    />
-    <DeleteOrderDialog
-      v-model="isDeleteDialogOpen"
-      :orderId="order.id.toString()"
-      @onDeleted="handleOrderDeleted"
-    />
+    <UpdateOrderDialog v-model="isUpdateDialogOpen" :orderId="order.id" @onUpdate="handleOrderUpdated" />
+    <DeleteOrderDialog v-model="isDeleteDialogOpen" :orderId="order.id.toString()" @onDeleted="handleOrderDeleted" />
   </q-card>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useI18n } from 'vue-i18n'
-import {
-  mdiPlusBox,
-  mdiPencil,
-  mdiTrashCan,
-  mdiChevronUp,
-  mdiChevronDown
-} from '@quasar/extras/mdi-v7'
+import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { mdiPlusBox, mdiPencil, mdiTrashCan, mdiChevronUp, mdiChevronDown } from '@quasar/extras/mdi-v7';
 
-import AddContainerDialog from '../order-item/AddContainerDialog.vue'
-import UpdateOrderDialog from './UpdateOrderDialog.vue'
-import DeleteOrderDialog from './DeleteOrderDialog.vue'
+import AddContainerDialog from '../order-item/AddContainerDialog.vue';
+import UpdateOrderDialog from './UpdateOrderDialog.vue';
+import DeleteOrderDialog from './DeleteOrderDialog.vue';
 
 interface Order {
-  id: number
-  customerName: string
-  orderDate: string
-  deliveryWeek: number
-  paymentMethod: string
-  contactPhone: string
-  note: string
+  id: number;
+  customerName: string;
+  orderDate: string;
+  deliveryWeek: number;
+  paymentMethod: string;
+  contactPhone: string;
+  note: string;
 }
 
-defineProps<{ order: Order }>()
-const { t } = useI18n()
+defineProps<{ order: Order }>();
+const { t } = useI18n();
 
-const isAddContainerDialogOpen = ref(false)
-const isUpdateDialogOpen = ref(false)
-const isDeleteDialogOpen = ref(false)
+const isAddContainerDialogOpen = ref(false);
+const isUpdateDialogOpen = ref(false);
+const isDeleteDialogOpen = ref(false);
 
 // Riadi viditeľnosť detailov
-const isDetailsOpen = ref(true)
+const isDetailsOpen = ref(true);
 
 // Prepína zobrazenie detailov
 function toggleDetails() {
-  isDetailsOpen.value = !isDetailsOpen.value
+  isDetailsOpen.value = !isDetailsOpen.value;
 }
 
 // Formátovanie dátumu
 function formatDate(dateString: string): string {
-  if (!dateString) return ''
-  const date = new Date(dateString)
+  if (!dateString) return '';
+  const date = new Date(dateString);
   return date.toLocaleDateString('en-GB', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
-  })
+  });
 }
 
 // Otváranie dialógov
 function openAddContainerDialog() {
-  isAddContainerDialogOpen.value = true
+  isAddContainerDialogOpen.value = true;
 }
 function openUpdateDialog() {
-  isUpdateDialogOpen.value = true
+  isUpdateDialogOpen.value = true;
 }
 function openDeleteDialog() {
-  isDeleteDialogOpen.value = true
+  isDeleteDialogOpen.value = true;
 }
 
 // Callbacky dialógov
