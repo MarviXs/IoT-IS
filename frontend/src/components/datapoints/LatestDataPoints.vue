@@ -41,7 +41,7 @@ import { useI18n } from 'vue-i18n';
 import { getGraphColor } from '@/utils/colors';
 import { computed } from 'vue';
 import LatestDataPointCard from '../datapoints/LatestDataPointCard.vue';
-import { SensorData } from '../datapoints/DataPointChartJS.vue';
+import type { SensorData } from '@/models/SensorData';
 
 const { t } = useI18n();
 const sensors = defineModel<SensorData[]>('sensors');

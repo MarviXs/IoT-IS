@@ -41,7 +41,7 @@ async function getProduct() {
   product.value = {
     code: data.code,
     pluCode: data.pluCode,
-    eanCode: data.eanCode,
+    eanCode: null,
     latinName: data.latinName,
     czechName: data.czechName,
     flowerLeafDescription: data.flowerLeafDescription,

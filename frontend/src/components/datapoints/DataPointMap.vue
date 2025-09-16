@@ -62,21 +62,21 @@ import type { PropType } from 'vue';
 import { computed, ref, watch, onMounted, onBeforeUnmount } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { mdiRefresh } from '@quasar/extras/mdi-v7';
+import type { SensorData } from '@/models/SensorData';
 
-import L, { type HeatLayer, type HeatLatLngTuple, type LatLngExpression, type LayerGroup } from 'leaflet';
+import L, {
+  type HeatLayer,
+  type HeatLatLngTuple,
+  type HeatMapOptions,
+  type LatLngTuple,
+  type Layer,
+  type LayerGroup,
+} from 'leaflet';
+
+type HeatLayerInstance = HeatLayer & Layer;
+type LeafletMap = ReturnType<typeof L.map>;
 import 'leaflet/dist/leaflet.css';
 import 'leaflet.heat';
-
-export type SensorData = {
-  id: string;
-  deviceId: string;
-  tag: string;
-  name: string;
-  unit?: string | null;
-  accuracyDecimals?: number | null;
-  lastValue?: number | null;
-  group?: string;
-};
 
 const props = defineProps({
   sensors: {
@@ -137,10 +137,10 @@ async function getDataPoints() {
 }
 
 // --- Leaflet Map Integration ---
-const map = ref<L.Map | null>(null);
+const map = ref<LeafletMap | null>(null);
 const markers: LayerGroup = L.layerGroup();
-const heatLayer = ref<HeatLayer | null>(null);
-const heatLayerOptions = {
+const heatLayer = ref<HeatLayerInstance | null>(null);
+const heatLayerOptions: HeatMapOptions = {
   radius: 25,
   blur: 15,
   maxZoom: 17,
@@ -155,26 +155,26 @@ function createMap() {
     attribution: '&copy; OpenStreetMap contributors',
     maxZoom: 19,
   }).addTo(mapInstance);
-  markers.addTo(mapInstance);
+  mapInstance.addLayer(markers as unknown as Layer);
 }
 
-function ensureHeatLayer(mapInstance: L.Map) {
+function ensureHeatLayer(mapInstance: LeafletMap) {
   if (!heatLayer.value) {
-    heatLayer.value = L.heatLayer([], heatLayerOptions);
+    heatLayer.value = L.heatLayer([], heatLayerOptions) as HeatLayerInstance;
   }
 
   const layer = heatLayer.value;
-  if (layer && !mapInstance.hasLayer(layer)) {
+  if (layer && !mapInstance.hasLayer(layer as unknown as Layer)) {
     layer.addTo(mapInstance);
   }
 
   return heatLayer.value;
 }
 
-function detachHeatLayer(mapInstance: L.Map) {
+function detachHeatLayer(mapInstance: LeafletMap) {
   const layer = heatLayer.value;
-  if (layer && mapInstance.hasLayer(layer)) {
-    mapInstance.removeLayer(layer);
+  if (layer && mapInstance.hasLayer(layer as unknown as Layer)) {
+    mapInstance.removeLayer(layer as unknown as Layer);
   }
 }
 
@@ -191,10 +191,10 @@ function updateMapVisualization() {
     : [];
 
   if (mapMode.value === 'markers') {
-    if (!mapInstance.hasLayer(markers)) {
-      markers.addTo(mapInstance);
+    if (!mapInstance.hasLayer(markers as unknown as Layer)) {
+      mapInstance.addLayer(markers as unknown as Layer);
     }
-    detachHeatLayer(mapInstance);
+    detachHeatLayer(mapInstance as unknown as LeafletMap);
     markers.clearLayers();
 
     if (sensor) {
@@ -210,10 +210,10 @@ function updateMapVisualization() {
       });
     }
   } else {
-    if (mapInstance.hasLayer(markers)) {
-      mapInstance.removeLayer(markers);
+    if (mapInstance.hasLayer(markers as unknown as Layer)) {
+      mapInstance.removeLayer(markers as unknown as Layer);
     }
-    const layer = ensureHeatLayer(mapInstance);
+    const layer = ensureHeatLayer(mapInstance as unknown as LeafletMap);
     if (layer) {
       const heatPoints: HeatLatLngTuple[] = sensor
         ? pointsWithCoords.map((dp) => {
@@ -226,8 +226,9 @@ function updateMapVisualization() {
   }
 
   if (pointsWithCoords.length > 0) {
-    const latlngs: LatLngExpression[] = pointsWithCoords.map((dp) => [dp.latitude, dp.longitude] as [number, number]);
-    mapInstance.fitBounds(latlngs, { padding: [30, 30] });
+    const latlngs: LatLngTuple[] = pointsWithCoords.map((dp) => [dp.latitude, dp.longitude] as [number, number]);
+    const bounds = L.latLngBounds(latlngs);
+    mapInstance.fitBounds(bounds, { padding: [30, 30] });
   }
 }
 

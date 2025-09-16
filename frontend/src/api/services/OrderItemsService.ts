@@ -14,7 +14,9 @@ export type AddOrderItemResponse = paths['/orders/{orderId}/container/{container
 class OrderItemsService {
   
   async deleteItemFromOrder(orderId: number, itemId: number) {
-    return await client.DELETE('/orders/{orderId}/items/{itemId}', { params: { path: { orderId, itemId } } });
+    return await client.DELETE('/orders/{orderId}/items/{itemId}', {
+      params: { path: { orderId: orderId.toString(), itemId: itemId.toString() } },
+    });
   }
 
   // Načítanie kontajnerov objednávky pre dané orderId s query parametrami

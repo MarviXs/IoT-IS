@@ -454,16 +454,16 @@ const getClickPosition = (event: MouseEvent) => {
 
   if (closestPlantIndex !== null) {
     dialogOpen.value = true;
-    index = closestPlantIndex;
-    positionDisX[Number(index)] = clickX;
-    positionDisY[Number(index)] = clickY;
+    index.value = closestPlantIndex;
+    positionDisX[index.value] = clickX;
+    positionDisY[index.value] = clickY;
   }
 };
 
 const saveDisease = () => {
   console.log(`Disease for plant ${index}: ${diseaseInput.value}`);
-  if (Number(index) >= 0 && diseaseInput.value) {
-    choroby[Number(index)] = diseaseInput.value;
+  if ((index.value ?? -1) >= 0 && diseaseInput.value) {
+    choroby[index.value!] = diseaseInput.value;
     dialogOpen.value = false;
     diseaseInput.value = '';
   }

@@ -75,6 +75,7 @@ async function createProduct() {
   const createRequest: CreateProductParams = {
     code: product.value.code!,
     pluCode: product.value.pluCode,
+    eanCode: product.value.eanCode,
     latinName: product.value.latinName,
     czechName: product.value.czechName,
     flowerLeafDescription: product.value.flowerLeafDescription,
@@ -86,7 +87,6 @@ async function createProduct() {
     categoryId: product.value.category?.id!,
     vatCategoryId: product.value.vatCategory?.id!,
     supplierId: product.value.supplier?.id!,
-    cCode: product.value.cCode,
     country: product.value.country,
     city: product.value.city,
     greenhouseNumber: product.value.greenhouseNumber,

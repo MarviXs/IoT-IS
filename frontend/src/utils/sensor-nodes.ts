@@ -1,6 +1,6 @@
 import { DeviceResponse } from '@/api/services/DeviceService';
 import { DeviceCollectionWithSensorsResponse } from '@/api/services/DeviceCollectionService';
-import { SensorData } from '@/components/datapoints/DataPointChartJS.vue';
+import type { SensorData } from '@/models/SensorData';
 import { SensorNode } from '@/models/SensorNode';
 
 function getSensorUniqueId(deviceId: string, tag: string) {

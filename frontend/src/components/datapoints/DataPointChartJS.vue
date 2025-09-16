@@ -96,23 +96,13 @@ import { useInterval } from '@/composables/useInterval';
 import { mkConfig, generateCsv, download } from 'export-to-csv';
 import { format } from 'date-fns/format';
 import { toast } from 'vue3-toastify';
+import type { SensorData } from '@/models/SensorData';
 
 Chart.register(zoomPlugin);
 
 // Hack to allow grouping of datasets by unit
 type DataSetCustom = ChartDataset<'line', { x: string; y?: number | null }[]> & {
   sensorKey: string;
-};
-
-export type SensorData = {
-  id: string;
-  deviceId: string;
-  tag: string;
-  name: string;
-  unit?: string | null;
-  accuracyDecimals?: number | null;
-  lastValue?: number | null;
-  group?: string;
 };
 
 const props = defineProps({

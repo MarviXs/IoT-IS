@@ -85,7 +85,7 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router';
 import DeviceInfoCard from '@/components/devices/DeviceInfoCard.vue';
-import DataPointChartJS, { SensorData } from '@/components/datapoints/DataPointChartJS.vue';
+import DataPointChartJS from '@/components/datapoints/DataPointChartJS.vue';
 import { computed, onUnmounted, ref } from 'vue';
 import DeviceService from '@/api/services/DeviceService';
 import { deviceToTreeNode, extractNodeKeys } from '@/utils/sensor-nodes';
@@ -99,13 +99,13 @@ import { DeviceResponse } from '@/api/services/DeviceService';
 import EditDeviceDialog from '@/components/devices/EditDeviceDialog.vue';
 import { SensorNode } from '@/models/SensorNode';
 import StatusDot from '@/components/devices/StatusDot.vue';
-import LatestDataPointCard from '@/components/datapoints/LatestDataPointCard.vue';
 import { getGraphColor } from '@/utils/colors';
 import { useSignalR } from '@/composables/useSignalR';
 import { LastDataPoint } from '@/models/LastDataPoint';
 import DataPointService from '@/api/services/DataPointService';
 import LatestDataPoints from '@/components/datapoints/LatestDataPoints.vue';
 import DeviceNotificationTable from '@/components/devices/DeviceNotificationTable.vue';
+import type { SensorData } from '@/models/SensorData';
 
 const { t } = useI18n();
 const { connection, connect } = useSignalR();

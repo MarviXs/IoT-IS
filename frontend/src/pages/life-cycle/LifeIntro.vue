@@ -122,39 +122,42 @@ const expandedNodes = ref<string[]>([]);
 const isLoadingCollections = ref(false);
 const collections = ref<CollectionNode[]>([]);
 
-const columns = computed(() => [  
+const columns = computed<QTableProps['columns']>(() => [
   {
     name: 'plantBoardId',
     label: t('lifecycle.plant_board_id'),
     field: 'plantBoardId',
     required: true,
     style: 'text-align: left;',
-    headerStyle: 'text-align: center;'
-  }, 
+    headerStyle: 'text-align: center;',
+  },
   {
     name: 'name',
     required: true,
     label: '',
     align: 'left',
-    field: '',
-  }, 
+    field: 'name',
+  },
   {
     name: 'rows',
     label: t('lifecycle.rows'),
     field: 'rows',
     required: true,
+    align: 'left',
   },
   {
     name: 'cols',
     label: t('lifecycle.columns'),
     field: 'cols',
-    required: true
+    required: true,
+    align: 'left',
   },
   {
     name: 'createdAt',
     label: t('lifecycle.create_date'),
     field: 'createdAt',
-    required: true
+    required: true,
+    align: 'left',
   },
 ]);
 

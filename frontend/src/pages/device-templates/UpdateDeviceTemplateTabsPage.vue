@@ -62,6 +62,7 @@ async function getDeviceTemplate() {
   }
   deviceRequest.value = {
     name: data.name,
+    deviceType: data.deviceType,
   };
 }
 getDeviceTemplate();

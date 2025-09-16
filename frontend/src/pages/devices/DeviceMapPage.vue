@@ -46,7 +46,8 @@ import { LastDataPoint } from '@/models/LastDataPoint';
 import DataPointService from '@/api/services/DataPointService';
 import LatestDataPoints from '@/components/datapoints/LatestDataPoints.vue';
 import MapSensorSelectionTree from '@/components/datapoints/MapSensorSelectionTree.vue';
-import DataPointMap, { SensorData } from '@/components/datapoints/DataPointMap.vue';
+import DataPointMap from '@/components/datapoints/DataPointMap.vue';
+import type { SensorData } from '@/models/SensorData';
 
 const { t } = useI18n();
 const { connection, connect } = useSignalR();
