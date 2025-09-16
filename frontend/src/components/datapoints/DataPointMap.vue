@@ -48,7 +48,6 @@ import { DataPoint } from '@/models/DataPoint';
 import { TimeRange } from '@/models/TimeRange';
 import { computed, PropType, ref, watch, onMounted, onBeforeUnmount } from 'vue';
 import { useI18n } from 'vue-i18n';
-import ChartTimeRangeSelect from './ChartTimeRangeSelect.vue';
 import { mdiRefresh } from '@quasar/extras/mdi-v7';
 
 import L from 'leaflet';
@@ -78,7 +77,7 @@ const selectedSensorId = defineModel('selectedSensorId', {
 });
 
 const { t } = useI18n();
-const selectedTimeRange = ref<TimeRange>();
+const selectedTimeRange = ref<TimeRange | null>(null);
 
 function getSensorUniqueId(sensor: SensorData) {
   return `${sensor.deviceId}-${sensor.tag}`;
@@ -98,7 +97,8 @@ async function getDataPoints() {
   const from = new Date(selectedTimeRange.value?.from ?? 0);
   const to = new Date(selectedTimeRange.value?.to ?? Date.now());
 
-  if (!selectedSensor) return;
+  const sensor = selectedSensor.value;
+  if (!sensor) return;
 
   const query: GetDataPointsQuery = {
     From: from.toISOString(),
@@ -106,8 +106,8 @@ async function getDataPoints() {
   };
 
   const { data, error } = await DataPointService.getDataPoints(
-    selectedSensor.value.deviceId,
-    selectedSensor.value.tag,
+    sensor.deviceId,
+    sensor.tag,
     query,
   );
 
@@ -136,20 +136,27 @@ function createMap() {
 function updateMarkers() {
   markers.clearLayers();
   if (!map.value) return;
-  const pointsWithCoords = dataPoints.value.filter((dp: any) => dp.latitude && dp.longitude);
-  pointsWithCoords.forEach((dp: any) => {
+  const sensor = selectedSensor.value;
+  if (!sensor) return;
+
+  const pointsWithCoords = dataPoints.value.filter(
+    (dp): dp is DataPoint & { latitude: number; longitude: number } =>
+      dp.latitude !== null && dp.latitude !== undefined && dp.longitude !== null && dp.longitude !== undefined,
+  );
+
+  pointsWithCoords.forEach((dp) => {
     const marker = L.circleMarker([dp.latitude, dp.longitude], {
       radius: 8,
       color: '#1976d2',
       fillColor: '#2196f3',
       fillOpacity: 0.7,
       weight: 2,
-    }).bindPopup(`<b>${selectedSensor.value.name}</b><br/>${dp.value ?? ''} ${selectedSensor.value.unit}`);
+    }).bindPopup(`<b>${sensor.name}</b><br/>${dp.value ?? ''}${sensor.unit ? ` ${sensor.unit}` : ''}`);
     markers.addLayer(marker);
   });
   // Fit bounds if there are points
   if (pointsWithCoords.length > 0) {
-    const latlngs = pointsWithCoords.map((dp: any) => [dp.latitude, dp.longitude]);
+    const latlngs = pointsWithCoords.map((dp) => [dp.latitude, dp.longitude] as [number, number]);
     map.value.fitBounds(latlngs, { padding: [30, 30] });
   }
 }
