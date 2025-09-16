@@ -54,10 +54,12 @@
 </template>
 
 <script setup lang="ts">
-import DataPointService, { GetDataPointsQuery } from '@/api/services/DataPointService';
+import type { GetDataPointsQuery } from '@/api/services/DataPointService';
+import DataPointService from '@/api/services/DataPointService';
 import type { DataPoint } from '@/models/DataPoint';
-import { TimeRange } from '@/models/TimeRange';
-import { computed, PropType, ref, watch, onMounted, onBeforeUnmount } from 'vue';
+import type { TimeRange } from '@/models/TimeRange';
+import type { PropType } from 'vue';
+import { computed, ref, watch, onMounted, onBeforeUnmount } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { mdiRefresh } from '@quasar/extras/mdi-v7';
 

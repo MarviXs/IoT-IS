@@ -1,79 +1,84 @@
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { FlatCompat } from '@eslint/eslintrc';
+import js from '@eslint/js';
+import globals from 'globals';
+import pluginVue from 'eslint-plugin-vue';
+import pluginQuasar from '@quasar/app-vite/eslint';
+import { defineConfigWithVueTs, vueTsConfigs } from '@vue/eslint-config-typescript';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// the following is optional, if you want prettier too:
+import prettierSkipFormatting from '@vue/eslint-config-prettier/skip-formatting';
 
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
-
-export default [
+export default defineConfigWithVueTs(
   {
-    ignores: ['dist', 'src-capacitor', 'src-cordova', '.quasar', 'node_modules', 'src-ssr'],
+    /**
+     * Ignore the following files.
+     * Please note that pluginQuasar.configs.recommended() already ignores
+     * the "node_modules" folder for you (and all other Quasar project
+     * relevant folders and files).
+     *
+     * ESLint requires "ignores" key to be the only one in this object
+     */
+    // ignores: []
   },
-  ...compat.config({
-    parserOptions: {
-      parser: '@typescript-eslint/parser',
-      extraFileExtensions: ['.vue'],
+
+  pluginQuasar.configs.recommended(),
+  js.configs.recommended,
+
+  /**
+   * https://eslint.vuejs.org
+   *
+   * pluginVue.configs.base
+   *   -> Settings and rules to enable correct ESLint parsing.
+   * pluginVue.configs[ 'flat/essential']
+   *   -> base, plus rules to prevent errors or unintended behavior.
+   * pluginVue.configs["flat/strongly-recommended"]
+   *   -> Above, plus rules to considerably improve code readability and/or dev experience.
+   * pluginVue.configs["flat/recommended"]
+   *   -> Above, plus rules to enforce subjective community defaults to ensure consistency.
+   */
+  pluginVue.configs['flat/essential'],
+
+  {
+    files: ['**/*.ts', '**/*.vue'],
+    rules: {
+      '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
     },
-    env: {
-      browser: true,
-      es2021: true,
-      node: true,
-      'vue/setup-compiler-macros': true,
+  },
+  vueTsConfigs.recommendedTypeChecked,
+
+  {
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+
+      globals: {
+        ...globals.browser,
+        ...globals.node, // SSR, Electron, config files
+        process: 'readonly', // process.env.*
+        ga: 'readonly', // Google Analytics
+        cordova: 'readonly',
+        Capacitor: 'readonly',
+        chrome: 'readonly', // BEX related
+        browser: 'readonly', // BEX related
+      },
     },
-    extends: [
-      'plugin:@typescript-eslint/recommended',
-      'plugin:vue/vue3-recommended',
-      'prettier',
-      'plugin:@intlify/vue-i18n/recommended',
-    ],
-    plugins: ['@typescript-eslint', 'vue'],
-    globals: {
-      ga: 'readonly',
-      cordova: 'readonly',
-      __statics: 'readonly',
-      __QUASAR_SSR__: 'readonly',
-      __QUASAR_SSR_SERVER__: 'readonly',
-      __QUASAR_SSR_CLIENT__: 'readonly',
-      __QUASAR_SSR_PWA__: 'readonly',
-      process: 'readonly',
-      Capacitor: 'readonly',
-      chrome: 'readonly',
-    },
+
+    // add your custom rules here
     rules: {
       'prefer-promise-reject-errors': 'off',
-      quotes: ['warn', 'single', { avoidEscape: true }],
-      '@typescript-eslint/explicit-function-return-type': 'off',
-      '@typescript-eslint/no-var-requires': 'off',
-      'no-unused-vars': 'off',
-      '@typescript-eslint/no-unused-vars': 'warn',
+
+      // allow debugger during development only
       'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
-      '@intlify/vue-i18n/no-dynamic-keys': 'error',
-      '@intlify/vue-i18n/no-unused-keys': [
-        'warn',
-        {
-          extensions: ['.js', '.ts', '.vue'],
-        },
-      ],
-      '@intlify/vue-i18n/no-missing-keys-in-other-locales': ['warn'],
     },
-    settings: {
-      'vue-i18n': {
-        localeDir: 'src/i18n/*.json',
-        messageSyntaxVersion: '^9.8.0',
+  },
+
+  {
+    files: ['src-pwa/custom-service-worker.ts'],
+    languageOptions: {
+      globals: {
+        ...globals.serviceworker,
       },
     },
-    overrides: [
-      {
-        files: ['*.json'],
-        parser: 'jsonc-eslint-parser',
-        rules: {
-          quotes: ['warn', 'double'],
-        },
-      },
-    ],
-  }),
-];
+  },
+
+  prettierSkipFormatting, // optional, if you want prettier
+);
