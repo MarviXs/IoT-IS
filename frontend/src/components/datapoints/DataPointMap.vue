@@ -8,6 +8,16 @@
         ref="timeRangeSelectRef"
         @update:model-value="updateTimeRange"
       ></chart-time-range-select> -->
+      <q-btn-toggle
+        v-model="mapMode"
+        class="col-grow col-lg-auto custom-toggle"
+        unelevated
+        toggle-color="primary"
+        color="white"
+        no-caps
+        text-color="primary"
+        :options="mapModeOptions"
+      />
       <q-btn
         padding="0.5rem 1rem"
         outline
@@ -23,16 +33,7 @@
           </div>
         </template>
       </q-btn>
-      <q-btn-toggle
-        v-model="mapMode"
-        class="col-grow col-lg-auto"
-        dense
-        unelevated
-        color="primary"
-        toggle-color="primary"
-        text-color="white"
-        :options="mapModeOptions"
-      />
+
       <q-btn
         padding="0.5rem 1rem"
         outline
@@ -265,4 +266,8 @@ watch(selectedSensorId, (newValue) => {
 });
 </script>
 
-<style lang="scss"></style>
+<style lang="scss">
+.custom-toggle {
+  border: 1px solid #027be3;
+}
+</style>
