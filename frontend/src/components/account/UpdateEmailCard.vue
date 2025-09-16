@@ -51,7 +51,7 @@ const qform = ref<QForm>();
 const mailRules = [
   (val: string) => (val && val.length > 0) || t('global.rules.required'),
   (val: string) => {
-    const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
     return emailRegex.test(val) || t('account.rules.email_invalid');
   },
 ];

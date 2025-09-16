@@ -64,15 +64,17 @@ async function loadDefaultProducts() {
 // 🟡 **2. Dynamické filtrovanie produktov podľa textu**
 async function filterProducts(val, update) {
     if (!val) {
+        const existingOptions = [...productOptions.value];
         update(() => {
-            productOptions.value = productOptions.value;
+            productOptions.value = existingOptions;
         });
         return;
     }
 
     await fetchProducts(val);
+    const nextOptions = [...productOptions.value];
     update(() => {
-        productOptions.value = productOptions.value;
+        productOptions.value = nextOptions;
     });
 }
 
