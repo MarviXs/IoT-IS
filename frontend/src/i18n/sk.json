@@ -548,5 +548,12 @@
     "price_excl_vat_label": "Cena bez DPH",
     "vat_label": "DPH",
     "price_incl_vat_label": "Cena s DPH"
+  },
+  "datapoints": {
+    "map": {
+      "title": "Mapa",
+      "markers": "Značky",
+      "heatmap": "Mapy tepla"
+    }
   }
 }

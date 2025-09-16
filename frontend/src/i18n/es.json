@@ -445,5 +445,12 @@
       "card": "Tarjeta",
       "transfer": "Transferencia"
     }
+  },
+  "datapoints": {
+    "map": {
+      "title": "Mapa",
+      "markers": "Marcadores",
+      "heatmap": "Mapa de calor"
+    }
   }
 }

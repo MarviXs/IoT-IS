@@ -446,5 +446,12 @@
       "card": "Carte",
       "transfer": "Virement"
     }
+  },
+  "datapoints": {
+    "map": {
+      "title": "Carte",
+      "markers": "Marqueurs",
+      "heatmap": "Carte de chaleur"
+    }
   }
 }

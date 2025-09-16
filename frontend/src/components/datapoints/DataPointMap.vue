@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="row items-center justify-start q-mb-md q-gutter-x-md q-gutter-y-sm">
-      <p class="text-weight-medium text-h6 chart-title">Map</p>
+      <p class="text-weight-medium text-h6 chart-title">{{ mapStrings.title }}</p>
       <q-space></q-space>
       <!-- <chart-time-range-select
         class="col-grow col-lg-auto"
@@ -15,7 +15,7 @@
         color="grey-7"
         text-color="grey-5"
         class="options-btn col-grow col-lg-auto"
-        :icon="mdiRefresh"
+        :icon="refreshIcon"
       >
         <template #default>
           <div class="text-grey-10 text-weight-regular q-ml-sm">
@@ -23,6 +23,17 @@
           </div>
         </template>
       </q-btn>
+      <q-btn-toggle
+        v-model="mapMode"
+        class="col-grow col-lg-auto"
+        rounded
+        dense
+        unelevated
+        color="primary"
+        toggle-color="primary"
+        text-color="white"
+        :options="mapModeOptions"
+      />
       <q-btn
         padding="0.5rem 1rem"
         outline
@@ -44,14 +55,15 @@
 
 <script setup lang="ts">
 import DataPointService, { GetDataPointsQuery } from '@/api/services/DataPointService';
-import { DataPoint } from '@/models/DataPoint';
+import type { DataPoint } from '@/models/DataPoint';
 import { TimeRange } from '@/models/TimeRange';
 import { computed, PropType, ref, watch, onMounted, onBeforeUnmount } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { mdiRefresh } from '@quasar/extras/mdi-v7';
 
-import L, { LayerGroup } from 'leaflet';
+import L, { type HeatLayer, type HeatLatLngTuple, type LatLngExpression, type LayerGroup } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import 'leaflet.heat';
 
 export type SensorData = {
   id: string;
@@ -77,15 +89,22 @@ const selectedSensorId = defineModel('selectedSensorId', {
 });
 
 const { t } = useI18n();
+type MapMode = 'markers' | 'heat';
 const selectedTimeRange = ref<TimeRange | null>(null);
+const mapMode = ref<MapMode>('markers');
+const mapStrings = computed(() => ({
+  title: t('datapoints.map.title'),
+  markers: t('datapoints.map.markers'),
+  heatmap: t('datapoints.map.heatmap'),
+}));
+const mapModeOptions = computed(() => [
+  { label: mapStrings.value.markers, value: 'markers' as MapMode },
+  { label: mapStrings.value.heatmap, value: 'heat' as MapMode },
+]);
+const refreshIcon = mdiRefresh;
 
 function getSensorUniqueId(sensor: SensorData) {
   return `${sensor.deviceId}-${sensor.tag}`;
-}
-
-async function updateTimeRange(timeRange: TimeRange) {
-  selectedTimeRange.value = timeRange;
-  await getDataPoints();
 }
 
 const selectedSensor = computed(() => {
@@ -118,6 +137,12 @@ async function getDataPoints() {
 // --- Leaflet Map Integration ---
 const map = ref<L.Map | null>(null);
 const markers: LayerGroup = L.layerGroup();
+const heatLayer = ref<HeatLayer | null>(null);
+const heatLayerOptions = {
+  radius: 25,
+  blur: 15,
+  maxZoom: 17,
+};
 
 function createMap() {
   if (map.value) return;
@@ -131,42 +156,94 @@ function createMap() {
   markers.addTo(mapInstance);
 }
 
-function updateMarkers() {
-  markers.clearLayers();
+function ensureHeatLayer(mapInstance: L.Map) {
+  if (!heatLayer.value) {
+    heatLayer.value = L.heatLayer([], heatLayerOptions);
+  }
+
+  const layer = heatLayer.value;
+  if (layer && !mapInstance.hasLayer(layer)) {
+    layer.addTo(mapInstance);
+  }
+
+  return heatLayer.value;
+}
+
+function detachHeatLayer(mapInstance: L.Map) {
+  const layer = heatLayer.value;
+  if (layer && mapInstance.hasLayer(layer)) {
+    mapInstance.removeLayer(layer);
+  }
+}
+
+function updateMapVisualization() {
   if (!map.value) return;
+
+  const mapInstance = map.value;
   const sensor = selectedSensor.value;
-  if (!sensor) return;
+  const pointsWithCoords = sensor
+    ? dataPoints.value.filter(
+        (dp): dp is DataPoint & { latitude: number; longitude: number } =>
+          dp.latitude !== null && dp.latitude !== undefined && dp.longitude !== null && dp.longitude !== undefined,
+      )
+    : [];
 
-  const pointsWithCoords = dataPoints.value.filter(
-    (dp): dp is DataPoint & { latitude: number; longitude: number } =>
-      dp.latitude !== null && dp.latitude !== undefined && dp.longitude !== null && dp.longitude !== undefined,
-  );
+  if (mapMode.value === 'markers') {
+    if (!mapInstance.hasLayer(markers)) {
+      markers.addTo(mapInstance);
+    }
+    detachHeatLayer(mapInstance);
+    markers.clearLayers();
 
-  pointsWithCoords.forEach((dp) => {
-    const marker = L.circleMarker([dp.latitude, dp.longitude], {
-      radius: 8,
-      color: '#1976d2',
-      fillColor: '#2196f3',
-      fillOpacity: 0.7,
-      weight: 2,
-    }).bindPopup(`<b>${sensor.name}</b><br/>${dp.value ?? ''}${sensor.unit ? ` ${sensor.unit}` : ''}`);
-    markers.addLayer(marker);
-  });
-  // Fit bounds if there are points
+    if (sensor) {
+      pointsWithCoords.forEach((dp) => {
+        const marker = L.circleMarker([dp.latitude, dp.longitude], {
+          radius: 8,
+          color: '#1976d2',
+          fillColor: '#2196f3',
+          fillOpacity: 0.7,
+          weight: 2,
+        }).bindPopup(`<b>${sensor.name}</b><br/>${dp.value ?? ''}${sensor.unit ? ` ${sensor.unit}` : ''}`);
+        markers.addLayer(marker);
+      });
+    }
+  } else {
+    if (mapInstance.hasLayer(markers)) {
+      mapInstance.removeLayer(markers);
+    }
+    const layer = ensureHeatLayer(mapInstance);
+    if (layer) {
+      const heatPoints: HeatLatLngTuple[] = sensor
+        ? pointsWithCoords.map((dp) => {
+            const intensity = typeof dp.value === 'number' ? Math.max(0.1, Math.abs(dp.value)) : 0.5;
+            return [dp.latitude, dp.longitude, intensity];
+          })
+        : [];
+      layer.setLatLngs(heatPoints);
+    }
+  }
+
   if (pointsWithCoords.length > 0) {
-    const latlngs = pointsWithCoords.map((dp) => [dp.latitude, dp.longitude] as [number, number]);
-    map.value.fitBounds(latlngs, { padding: [30, 30] });
+    const latlngs: LatLngExpression[] = pointsWithCoords.map((dp) => [dp.latitude, dp.longitude] as [number, number]);
+    mapInstance.fitBounds(latlngs, { padding: [30, 30] });
   }
 }
 
 onMounted(() => {
+  void refreshIcon;
   createMap();
-  updateMarkers();
+  updateMapVisualization();
   void getDataPoints();
 });
 
 watch(dataPoints, () => {
-  updateMarkers();
+  updateMapVisualization();
+});
+
+watch(mapMode, () => {
+  void mapModeOptions.value;
+  void mapStrings.value;
+  updateMapVisualization();
 });
 
 onBeforeUnmount(() => {
@@ -181,6 +258,7 @@ watch(selectedSensorId, (newValue) => {
     void getDataPoints();
   } else {
     dataPoints.value = [];
+    updateMapVisualization();
   }
 });
 </script>

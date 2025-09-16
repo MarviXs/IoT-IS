@@ -616,5 +616,12 @@
     "price_excl_vat_label": "Price excl. VAT",
     "vat_label": "VAT",
     "price_incl_vat_label": "Price incl. VAT"
+  },
+  "datapoints": {
+    "map": {
+      "title": "Map",
+      "markers": "Markers",
+      "heatmap": "Heatmap"
+    }
   }
 }
