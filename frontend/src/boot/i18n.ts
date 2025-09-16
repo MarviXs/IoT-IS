@@ -20,7 +20,7 @@ export default boot(({ app }) => {
       const typedLang = lang as { default: QuasarLanguage };
       Quasar.lang.set(typedLang.default);
     });
-  } catch (err) {
+  } catch {
     console.error(`Language file for "${langIso}" not found`);
   }
 

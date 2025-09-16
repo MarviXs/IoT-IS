@@ -54,10 +54,7 @@ async function addDeviceToCollection() {
   }
 
   isLoading.value = true;
-  const { data, error } = await CollectionService.addDeviceToCollection(
-    props.collectionParentId,
-    selectedDevice.value.id,
-  );
+  const { error } = await CollectionService.addDeviceToCollection(props.collectionParentId, selectedDevice.value.id);
   isLoading.value = false;
   isDialogOpen.value = false;
 

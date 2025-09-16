@@ -1,6 +1,5 @@
 import { client } from '@/api/client';
 import { EDocumentIdentifier } from '../types/EDocumentIdentifier';
-import type { paths } from '@/api/generated/schema.d.ts';
 
 //export type SuppliersListQueryParams = paths['/templates']['get']['parameters']['query'];
 

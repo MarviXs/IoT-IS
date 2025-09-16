@@ -27,7 +27,7 @@ const { t } = useI18n();
 const isDeleteInProgress = ref(false);
 async function handleDelete() {
   isDeleteInProgress.value = true;
-  const { data, error } = await DeviceCollectionService.deleteCollection(props.collectionId);
+  const { error } = await DeviceCollectionService.deleteCollection(props.collectionId);
   isDeleteInProgress.value = false;
   isDialogOpen.value = false;
 

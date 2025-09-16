@@ -49,9 +49,9 @@
 </template>
 
 <script setup lang="ts">
-import type { PropType} from 'vue';
+import type { PropType } from 'vue';
 import { ref, watch } from 'vue';
-import type { QForm} from 'quasar';
+import type { QForm } from 'quasar';
 import { QInput } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import TemplatesService from '@/api/services/TemplatesService';
@@ -77,12 +77,11 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(['onSubmit']);
+defineEmits(['onSubmit']);
 const link = defineModel({ type: String, default: '' });
 
 const { t } = useI18n();
 
-const qform = ref<QForm>();
 const fileInput = ref<HTMLInputElement | null>(null);
 
 const linkRules = [
