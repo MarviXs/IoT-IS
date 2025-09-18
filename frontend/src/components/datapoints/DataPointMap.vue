@@ -3,11 +3,11 @@
     <div class="row items-center justify-start q-mb-md q-gutter-x-md q-gutter-y-sm">
       <p class="text-weight-medium text-h6 chart-title">{{ mapStrings.title }}</p>
       <q-space></q-space>
-      <!-- <chart-time-range-select
+      <chart-time-range-select
         class="col-grow col-lg-auto"
         ref="timeRangeSelectRef"
         @update:model-value="updateTimeRange"
-      ></chart-time-range-select> -->
+      ></chart-time-range-select>
       <q-btn-toggle
         v-model="mapMode"
         class="col-grow col-lg-auto custom-toggle"
@@ -26,6 +26,7 @@
         text-color="grey-5"
         class="options-btn col-grow col-lg-auto"
         :icon="refreshIcon"
+        @click="refreshDataPoints"
       >
         <template #default>
           <div class="text-grey-10 text-weight-regular q-ml-sm">
@@ -64,6 +65,7 @@
 import type { GetDataPointsQuery } from '@/api/services/DataPointService';
 import DataPointService from '@/api/services/DataPointService';
 import type { DataPoint } from '@/models/DataPoint';
+import ChartTimeRangeSelect from '@/components/datapoints/ChartTimeRangeSelect.vue';
 import type { TimeRange } from '@/models/TimeRange';
 import type { PropType } from 'vue';
 import { computed, ref, watch, onMounted, onBeforeUnmount } from 'vue';
@@ -96,6 +98,7 @@ const selectedSensorId = defineModel('selectedSensorId', {
 
 const { t } = useI18n();
 type MapMode = 'markers' | 'heat';
+const timeRangeSelectRef = ref<InstanceType<typeof ChartTimeRangeSelect> | null>(null);
 const selectedTimeRange = ref<TimeRange | null>(null);
 const mapMode = ref<MapMode>('markers');
 const isMapOptionsDialogOpen = ref(false);
@@ -148,6 +151,15 @@ async function getDataPoints() {
   }
 
   dataPoints.value = data ?? [];
+}
+
+async function updateTimeRange(timeRange: TimeRange) {
+  selectedTimeRange.value = timeRange;
+  await getDataPoints();
+}
+
+function refreshDataPoints() {
+  void getDataPoints();
 }
 
 // --- Leaflet Map Integration ---
