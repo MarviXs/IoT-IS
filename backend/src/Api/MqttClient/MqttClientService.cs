@@ -17,6 +17,9 @@ public class MqttClientService : IHostedService
 
     private readonly bool _isMqttEnabled = true;
 
+    private CancellationTokenSource? _reconnectCancellationTokenSource;
+    private Task? _reconnectTask;
+
     public MqttClientService(IServiceScopeFactory serviceScopeFactory, IConfiguration configuration, ILogger<MqttClientService> logger)
     {
         _serviceScopeFactory = serviceScopeFactory;
@@ -53,34 +56,59 @@ public class MqttClientService : IHostedService
     private void ConfigureMqttClient()
     {
         _mqttClient.ApplicationMessageReceivedAsync += ProcessMessageAsync;
+        _mqttClient.DisconnectedAsync += args =>
+        {
+            if (args.Exception != null)
+            {
+                _logger.LogWarning(args.Exception, "MQTT client disconnected from broker. Attempting to reconnect...");
+            }
+            else
+            {
+                _logger.LogWarning("MQTT client disconnected from broker. Attempting to reconnect...");
+            }
+
+            return Task.CompletedTask;
+        };
     }
 
     public void Reconnect_Using_Timer(CancellationToken cancellationToken)
     {
-        _ = Task.Run(
+        _reconnectCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        var token = _reconnectCancellationTokenSource.Token;
+
+        _reconnectTask = Task.Run(
             async () =>
             {
-                while (true)
+                while (!token.IsCancellationRequested)
                 {
                     try
                     {
-                        if (!await _mqttClient.TryPingAsync())
+                        if (!_mqttClient.IsConnected)
                         {
-                            await _mqttClient.ConnectAsync(_mqttOptions, cancellationToken);
+                            await _mqttClient.ConnectAsync(_mqttOptions, token);
                             await SubscribeToTopics();
                         }
                     }
-                    catch
+                    catch (OperationCanceledException) when (token.IsCancellationRequested)
                     {
-                        _logger.LogError("Failed to connect to MQTT broker. Retrying in 5 seconds...");
+                        break;
                     }
-                    finally
+                    catch (Exception ex)
                     {
-                        await Task.Delay(TimeSpan.FromSeconds(5));
+                        _logger.LogError(ex, "Failed to connect to MQTT broker. Retrying in 5 seconds...");
+                    }
+
+                    try
+                    {
+                        await Task.Delay(TimeSpan.FromSeconds(5), token);
+                    }
+                    catch (TaskCanceledException)
+                    {
+                        break;
                     }
                 }
             },
-            cancellationToken
+            token
         );
     }
 
@@ -125,19 +153,36 @@ public class MqttClientService : IHostedService
         return Task.CompletedTask;
     }
 
-    public async Task StartAsync(CancellationToken cancellationToken)
+    public Task StartAsync(CancellationToken cancellationToken)
     {
         if (!_isMqttEnabled)
         {
             _logger.LogWarning("MQTT is disabled. Skipping MQTT client startup.");
-            return;
+            return Task.CompletedTask;
         }
         Reconnect_Using_Timer(cancellationToken);
+        return Task.CompletedTask;
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
+        if (!_isMqttEnabled)
+        {
+            return;
+        }
+
+        if (_reconnectCancellationTokenSource != null)
+        {
+            _reconnectCancellationTokenSource.Cancel();
+        }
+
+        if (_reconnectTask != null)
+        {
+            await _reconnectTask;
+        }
+
         await _mqttClient.DisconnectAsync();
+        _reconnectCancellationTokenSource?.Dispose();
     }
 
     private async Task SubscribeToTopics()
