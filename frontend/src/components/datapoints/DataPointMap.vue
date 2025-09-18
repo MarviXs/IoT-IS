@@ -41,6 +41,7 @@
         color="grey-7"
         text-color="grey-5"
         class="options-btn col-grow col-lg-auto"
+        @click="isMapOptionsDialogOpen = true"
       >
         <template #default>
           <div class="text-grey-10 text-weight-regular">
@@ -50,6 +51,12 @@
       </q-btn>
     </div>
     <div id="map" style="height: 550px; width: 100%"></div>
+    <dialog-common v-model="isMapOptionsDialogOpen">
+      <template #title>{{ t('global.options') }}</template>
+      <template #default>
+        <MapOptionsForm v-model="mapOptions" @on-submit="isMapOptionsDialogOpen = false" />
+      </template>
+    </dialog-common>
   </div>
 </template>
 
@@ -63,15 +70,12 @@ import { computed, ref, watch, onMounted, onBeforeUnmount } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { mdiRefresh } from '@quasar/extras/mdi-v7';
 import type { SensorData } from '@/models/SensorData';
+import { useStorage } from '@vueuse/core';
+import DialogCommon from '../core/DialogCommon.vue';
+import MapOptionsForm, { type MapOptions } from './MapOptionsForm.vue';
 
-import L, {
-  type HeatLayer,
-  type HeatLatLngTuple,
-  type HeatMapOptions,
-  type LatLngTuple,
-  type Layer,
-  type LayerGroup,
-} from 'leaflet';
+import * as L from 'leaflet';
+import type { HeatLayer, HeatLatLngTuple, HeatMapOptions, LatLngTuple, Layer, LayerGroup } from 'leaflet';
 
 type HeatLayerInstance = HeatLayer & Layer;
 type LeafletMap = ReturnType<typeof L.map>;
@@ -94,6 +98,7 @@ const { t } = useI18n();
 type MapMode = 'markers' | 'heat';
 const selectedTimeRange = ref<TimeRange | null>(null);
 const mapMode = ref<MapMode>('markers');
+const isMapOptionsDialogOpen = ref(false);
 const mapStrings = computed(() => ({
   title: t('datapoints.map.title'),
   markers: t('datapoints.map.markers'),
@@ -104,6 +109,15 @@ const mapModeOptions = computed(() => [
   { label: mapStrings.value.heatmap, value: 'heat' as MapMode },
 ]);
 const refreshIcon = mdiRefresh;
+const mapOptions = useStorage<MapOptions>('mapOptions', {
+  markerRadius: 8,
+  markerBorderColor: '#1976d2',
+  markerBorderWeight: 2,
+  markerFillColor: '#2196f3',
+  markerFillOpacity: 0.7,
+  heatRadius: 25,
+  heatBlur: 15,
+});
 
 function getSensorUniqueId(sensor: SensorData) {
   return `${sensor.deviceId}-${sensor.tag}`;
@@ -140,11 +154,10 @@ async function getDataPoints() {
 const map = ref<LeafletMap | null>(null);
 const markers: LayerGroup = L.layerGroup();
 const heatLayer = ref<HeatLayerInstance | null>(null);
-const heatLayerOptions: HeatMapOptions = {
-  radius: 25,
-  blur: 15,
-  maxZoom: 17,
-};
+const heatLayerOptions = computed<HeatMapOptions>(() => ({
+  radius: mapOptions.value.heatRadius,
+  blur: mapOptions.value.heatBlur,
+}));
 
 function createMap() {
   if (map.value) return;
@@ -160,10 +173,11 @@ function createMap() {
 
 function ensureHeatLayer(mapInstance: LeafletMap) {
   if (!heatLayer.value) {
-    heatLayer.value = L.heatLayer([], heatLayerOptions) as HeatLayerInstance;
+    heatLayer.value = L.heatLayer([], heatLayerOptions.value) as HeatLayerInstance;
   }
 
   const layer = heatLayer.value;
+  layer.setOptions(heatLayerOptions.value);
   if (layer && !mapInstance.hasLayer(layer as unknown as Layer)) {
     layer.addTo(mapInstance);
   }
@@ -200,11 +214,11 @@ function updateMapVisualization() {
     if (sensor) {
       pointsWithCoords.forEach((dp) => {
         const marker = L.circleMarker([dp.latitude, dp.longitude], {
-          radius: 8,
-          color: '#1976d2',
-          fillColor: '#2196f3',
-          fillOpacity: 0.7,
-          weight: 2,
+          radius: mapOptions.value.markerRadius,
+          color: mapOptions.value.markerBorderColor,
+          fillColor: mapOptions.value.markerFillColor,
+          fillOpacity: mapOptions.value.markerFillOpacity,
+          weight: mapOptions.value.markerBorderWeight,
         }).bindPopup(`<b>${sensor.name}</b><br/>${dp.value ?? ''}${sensor.unit ? ` ${sensor.unit}` : ''}`);
         markers.addLayer(marker);
       });
@@ -248,6 +262,18 @@ watch(mapMode, () => {
   void mapStrings.value;
   updateMapVisualization();
 });
+
+watch(
+  mapOptions,
+  () => {
+    if (heatLayer.value) {
+      heatLayer.value.setOptions(heatLayerOptions.value);
+      heatLayer.value.redraw();
+    }
+    updateMapVisualization();
+  },
+  { deep: true },
+);
 
 onBeforeUnmount(() => {
   if (map.value) {

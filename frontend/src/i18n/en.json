@@ -621,7 +621,20 @@
     "map": {
       "title": "Map",
       "markers": "Markers",
-      "heatmap": "Heatmap"
+      "heatmap": "Heatmap",
+      "options": {
+        "marker_section": "Marker Style",
+        "marker_radius": "Marker radius",
+        "marker_border_weight": "Marker border width",
+        "marker_fill_opacity": "Marker fill opacity",
+        "marker_border_color": "Marker border color",
+        "marker_fill_color": "Marker fill color",
+        "color_hint": "Use hex color values (e.g. #1976d2)",
+        "heatmap_section": "Heatmap Style",
+        "heat_radius": "Heat radius",
+        "heat_blur": "Heat blur",
+        "heat_max_zoom": "Heat max zoom"
+      }
     }
   }
 }

@@ -451,7 +451,20 @@
     "map": {
       "title": "Carte",
       "markers": "Marqueurs",
-      "heatmap": "Carte de chaleur"
+      "heatmap": "Carte de chaleur",
+      "options": {
+        "marker_section": "Style des marqueurs",
+        "marker_radius": "Rayon du marqueur",
+        "marker_border_weight": "Épaisseur du bord du marqueur",
+        "marker_fill_opacity": "Opacité de remplissage du marqueur",
+        "marker_border_color": "Couleur du bord du marqueur",
+        "marker_fill_color": "Couleur de remplissage du marqueur",
+        "color_hint": "Utilisez des valeurs hexadécimales (ex. #1976d2)",
+        "heatmap_section": "Style de la carte de chaleur",
+        "heat_radius": "Rayon de la carte de chaleur",
+        "heat_blur": "Flou de la carte de chaleur",
+        "heat_max_zoom": "Zoom maximal de la carte de chaleur"
+      }
     }
   }
 }
