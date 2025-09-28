@@ -12,4 +12,6 @@ public class DeviceTemplate : BaseModel
     public ICollection<Command> Commands { get; set; } = [];
     public ICollection<Recipe> Recipes { get; set; } = [];
     public ICollection<Device> Devices { get; set; } = [];
+    public int? GridRowSpan { get; set; }
+    public int? GridColumnSpan { get; set; }
 }

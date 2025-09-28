@@ -8,4 +8,6 @@ public class DataPoint
     public double? Value { get; set; }
     public double? Latitude { get; set; }
     public double? Longitude { get; set; }
+    public int? GridX { get; set; }
+    public int? GridY { get; set; }
 }
