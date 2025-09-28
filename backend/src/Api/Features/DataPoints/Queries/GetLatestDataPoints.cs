@@ -18,6 +18,13 @@ namespace Fei.Is.Api.Features.DataPoints.Queries;
 
 public static class GetLatestDataPoints
 {
+    public class QueryParameters
+    {
+        public DateTimeOffset? From { get; set; }
+
+        public DateTimeOffset? To { get; set; }
+    }
+
     public class Endpoint : ICarterModule
     {
         public void AddRoutes(IEndpointRouteBuilder app)
@@ -28,10 +35,11 @@ public static class GetLatestDataPoints
                         IMediator mediator,
                         ClaimsPrincipal user,
                         Guid deviceId,
-                        string sensorTag
+                        string sensorTag,
+                        [AsParameters] QueryParameters parameters
                     ) =>
                     {
-                        var query = new Query(deviceId, sensorTag, user);
+                        var query = new Query(deviceId, sensorTag, user, parameters);
                         var result = await mediator.Send(query);
 
                         if (result.HasError<NotFoundError>())
@@ -58,13 +66,15 @@ public static class GetLatestDataPoints
         }
     }
 
-    public record Query(Guid DeviceId, string SensorTag, ClaimsPrincipal User) : IRequest<Result<Response>>;
+    public record Query(Guid DeviceId, string SensorTag, ClaimsPrincipal User, QueryParameters Parameters)
+        : IRequest<Result<Response>>;
 
     public sealed class Handler(AppDbContext appContext, TimeScaleDbContext timescaleContext, RedisService redis) : IRequestHandler<Query, Result<Response>>
     {
         public async Task<Result<Response>> Handle(Query message, CancellationToken cancellationToken)
         {
             var user = message.User;
+            var parameters = message.Parameters ?? new QueryParameters();
 
             var device = appContext.Devices.Where(d => d.Id == message.DeviceId).Include(d => d.SharedWithUsers).FirstOrDefault();
             if (device == null)
@@ -76,29 +86,51 @@ public static class GetLatestDataPoints
                 return Result.Fail(new ForbiddenError());
             }
 
+            var from = parameters.From;
+            var to = parameters.To;
+            var useCache = from == null && to == null;
+
             var redisKey = $"device:{message.DeviceId}:{message.SensorTag}:last";
-            var cachedLatestDataPoint = await redis.Db.StringGetAsync(redisKey);
-            if (cachedLatestDataPoint.HasValue)
+
+            if (useCache)
             {
-                try
+                var cachedLatestDataPoint = await redis.Db.StringGetAsync(redisKey);
+                if (cachedLatestDataPoint.HasValue)
                 {
-                    var cachedResponse = JsonSerializer.Deserialize<Response>(cachedLatestDataPoint!);
-                    if (cachedResponse != null)
+                    try
                     {
-                        return Result.Ok(cachedResponse);
+                        var cachedResponse = JsonSerializer.Deserialize<Response>(cachedLatestDataPoint!);
+                        if (cachedResponse != null)
+                        {
+                            return Result.Ok(cachedResponse);
+                        }
                     }
-                }
-                catch (JsonException)
-                {
-                    if (double.TryParse(cachedLatestDataPoint.ToString(), out double value))
+                    catch (JsonException)
                     {
-                        return Result.Ok(new Response(value, null, null));
+                        if (double.TryParse(cachedLatestDataPoint.ToString(), out double value))
+                        {
+                            return Result.Ok(new Response(null, value, null, null, null, null));
+                        }
                     }
                 }
             }
 
-            var latestDataPoint = await timescaleContext
-                .DataPoints.Where(dp => dp.DeviceId == message.DeviceId && dp.SensorTag == message.SensorTag)
+            var query = timescaleContext
+                .DataPoints.Where(dp => dp.DeviceId == message.DeviceId && dp.SensorTag == message.SensorTag);
+
+            if (from.HasValue)
+            {
+                var fromValue = from.Value;
+                query = query.Where(dp => dp.TimeStamp >= fromValue);
+            }
+
+            if (to.HasValue)
+            {
+                var toValue = to.Value;
+                query = query.Where(dp => dp.TimeStamp <= toValue);
+            }
+
+            var latestDataPoint = await query
                 .OrderByDescending(dp => dp.TimeStamp)
                 .FirstOrDefaultAsync(cancellationToken);
             if (latestDataPoint == null)
@@ -106,15 +138,27 @@ public static class GetLatestDataPoints
                 return Result.Fail(new NotFoundError());
             }
 
-            var response = new Response(latestDataPoint.Value, latestDataPoint.GridX, latestDataPoint.GridY);
-            await redis.Db.StringSetAsync(
-                redisKey,
-                JsonSerializer.Serialize(response),
-                TimeSpan.FromHours(1)
+            var response = new Response(
+                latestDataPoint.TimeStamp,
+                latestDataPoint.Value,
+                latestDataPoint.Latitude,
+                latestDataPoint.Longitude,
+                latestDataPoint.GridX,
+                latestDataPoint.GridY
             );
+
+            if (useCache)
+            {
+                await redis.Db.StringSetAsync(
+                    redisKey,
+                    JsonSerializer.Serialize(response),
+                    TimeSpan.FromHours(1)
+                );
+            }
+
             return Result.Ok(response);
         }
     }
 
-    public record Response(double? Value, int? GridX, int? GridY);
+    public record Response(DateTimeOffset? Ts, double? Value, double? Latitude, double? Longitude, int? GridX, int? GridY);
 }

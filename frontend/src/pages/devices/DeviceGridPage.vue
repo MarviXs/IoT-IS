@@ -70,7 +70,7 @@ import LatestDataPointCard from '@/components/datapoints/LatestDataPointCard.vue
 import DeviceService from '@/api/services/DeviceService';
 import DataPointService from '@/api/services/DataPointService';
 import type { DeviceResponse } from '@/api/services/DeviceService';
-import type { GetDataPointsQuery, GetDataPointsResponse } from '@/api/services/DataPointService';
+import type { GetLatestDataPointsQuery, GetLatestDataPointsResponse } from '@/api/services/DataPointService';
 import type { ProblemDetails } from '@/api/types/ProblemDetails';
 import { handleError } from '@/utils/error-handler';
 import { getGraphColor } from '@/utils/colors';
@@ -87,6 +87,7 @@ const selectedTimeRange = ref<TimeRange | null>(null);
 const timeRangeSelectRef = ref<{ updateTimeRange: () => void }>();
 
 const cellData = reactive<Record<string, GridCellData>>({});
+const fallbackTimestamp = new Date(0).toISOString();
 let activeRequestId = 0;
 
 interface GridCellData {
@@ -100,7 +101,7 @@ interface GridCellData {
 }
 
 type DeviceSensor = NonNullable<DeviceResponse['deviceTemplate']>['sensors'][number];
-type DataPointItem = GetDataPointsResponse extends Array<infer U> ? U : never;
+type LatestDataPoint = GetLatestDataPointsResponse;
 
 const gridRows = computed(() => device.value?.deviceTemplate?.gridRowSpan ?? 0);
 const gridColumns = computed(() => device.value?.deviceTemplate?.gridColumnSpan ?? 0);
@@ -174,7 +175,7 @@ async function loadGridData(range: TimeRange) {
     const from = new Date(range.from);
     const to = new Date(range.to);
 
-    const query: GetDataPointsQuery = {
+    const query: GetLatestDataPointsQuery = {
       From: from.toISOString(),
       To: to.toISOString(),
     };
@@ -183,13 +184,13 @@ async function loadGridData(range: TimeRange) {
 
     const results = await Promise.all(
       device.value.deviceTemplate.sensors.map(async (sensor, index) => {
-        const { data, error } = await DataPointService.getDataPoints(deviceId, sensor.tag, query);
+        const { data, error } = await DataPointService.getLatestDataPoints(deviceId, sensor.tag, query);
         if (error) {
           errors.push(error);
           return null;
         }
 
-        const latest = data?.[0];
+        const latest = data;
         if (!latest) {
           return null;
         }
@@ -206,7 +207,7 @@ async function loadGridData(range: TimeRange) {
       return;
     }
 
-    if (errors.length > 0) {
+    if (errors.length > 0 && errors[0].status != 404) {
       handleError(errors[0], t('device.toasts.loading_failed'));
     }
 
@@ -247,7 +248,7 @@ async function loadGridData(range: TimeRange) {
       const key = `${rowIndex}-${columnIndex}`;
       const current = nextCells[key];
       const currentTimestamp = current ? new Date(current.timestamp).getTime() : Number.NEGATIVE_INFINITY;
-      const latestTimestamp = new Date(latest.ts).getTime();
+      const latestTimestamp = latest.ts ? new Date(latest.ts).getTime() : Number.NEGATIVE_INFINITY;
 
       if (!current || latestTimestamp >= currentTimestamp) {
         nextCells[key] = {
@@ -257,7 +258,7 @@ async function loadGridData(range: TimeRange) {
           accuracyDecimals: sensor.accuracyDecimals ?? 2,
           value: latest.value ?? null,
           color,
-          timestamp: latest.ts,
+          timestamp: latest.ts ?? fallbackTimestamp,
         };
       }
     });
@@ -281,7 +282,7 @@ function refreshGrid() {
 
 interface SensorGridEntry {
   sensor: DeviceSensor;
-  latest: DataPointItem;
+  latest: LatestDataPoint;
   color: string;
 }
 </script>

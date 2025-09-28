@@ -1,9 +1,12 @@
 import { client } from '@/api/client';
-import type { paths } from '@/api/generated/schema.d.ts';
+import type { operations, paths } from '@/api/generated/schema.d.ts';
 
-export type GetDataPointsQuery = paths['/devices/{deviceId}/sensors/{sensorTag}/data']['get']['parameters']['query'];
+export type GetDataPointsQuery =
+  operations['GetSensorDataPoints']['parameters']['query'];
 export type GetDataPointsResponse =
-  paths['/devices/{deviceId}/sensors/{sensorTag}/data']['get']['responses']['200']['content']['application/json'];
+  operations['GetSensorDataPoints']['responses']['200']['content']['application/json'];
+export type GetLatestDataPointsQuery =
+  operations['GetLatestDataPoints']['parameters']['query'];
 export type GetLatestDataPointsResponse =
   paths['/devices/{deviceId}/sensors/{sensorTag}/data/latest']['get']['responses']['200']['content']['application/json'];
 
@@ -14,9 +17,9 @@ class DataPointService {
     });
   }
 
-  async getLatestDataPoints(deviceId: string, sensorTag: string) {
+  async getLatestDataPoints(deviceId: string, sensorTag: string, query?: GetLatestDataPointsQuery) {
     return await client.GET('/devices/{deviceId}/sensors/{sensorTag}/data/latest', {
-      params: { path: { deviceId, sensorTag } },
+      params: { path: { deviceId, sensorTag }, query },
     });
   }
 }

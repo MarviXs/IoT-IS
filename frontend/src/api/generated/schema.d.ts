@@ -2094,12 +2094,18 @@ export interface components {
             longitude?: number | null;
         };
         "Fei.Is.Api.Features.DataPoints.Queries.GetLatestDataPoints.Response": {
+            /** Format: date-time */
+            ts: string | null;
             /** Format: double */
             value: number | null;
+            /** Format: double */
+            latitude: number | null;
+            /** Format: double */
+            longitude: number | null;
             /** Format: int32 */
-            gridX?: number | null;
+            gridX: number | null;
             /** Format: int32 */
-            gridY?: number | null;
+            gridY: number | null;
         };
         /** @enum {string} */
         "Fei.Is.Api.Features.DataPoints.Queries.GetSensorDataPoints.DownsampleMethod": "Asap" | "Lttb";
@@ -2217,7 +2223,9 @@ export interface components {
         "Fei.Is.Api.Features.DeviceTemplates.Commands.UpdateDeviceTemplate.Request": {
             name: string;
             deviceType: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceType"];
+            /** Format: int32 */
             gridRowSpan?: number | null;
+            /** Format: int32 */
             gridColumnSpan?: number | null;
         };
         "Fei.Is.Api.Features.DeviceTemplates.Queries.GetDeviceTemplateById.Response": {
@@ -2225,7 +2233,9 @@ export interface components {
             id: string;
             name: string;
             deviceType: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceType"];
+            /** Format: int32 */
             gridRowSpan?: number | null;
+            /** Format: int32 */
             gridColumnSpan?: number | null;
         };
         "Fei.Is.Api.Features.DeviceTemplates.Queries.GetDeviceTemplates.Response": {
@@ -2234,7 +2244,9 @@ export interface components {
             name: string;
             /** Format: date-time */
             updatedAt: string;
+            /** Format: int32 */
             gridRowSpan?: number | null;
+            /** Format: int32 */
             gridColumnSpan?: number | null;
         };
         "Fei.Is.Api.Features.Devices.Commands.CreateDevice.Request": {
@@ -4074,7 +4086,10 @@ export interface operations {
     };
     GetLatestDataPoints: {
         parameters: {
-            query?: never;
+            query?: {
+                From?: string;
+                To?: string;
+            };
             header?: never;
             path: {
                 deviceId: string;
