@@ -15,7 +15,12 @@ namespace Fei.Is.Api.Features.DeviceTemplates.Commands;
 
 public static class UpdateDeviceTemplate
 {
-    public record Request(string Name, DeviceType DeviceType = DeviceType.Generic);
+    public record Request(
+        string Name,
+        DeviceType DeviceType = DeviceType.Generic,
+        int? GridRowSpan = null,
+        int? GridColumnSpan = null
+    );
 
     public sealed class Endpoint : ICarterModule
     {
@@ -84,6 +89,8 @@ public static class UpdateDeviceTemplate
 
             deviceTemplate.Name = message.Request.Name;
             deviceTemplate.DeviceType = message.Request.DeviceType;
+            deviceTemplate.GridRowSpan = message.Request.GridRowSpan;
+            deviceTemplate.GridColumnSpan = message.Request.GridColumnSpan;
 
             try
             {
@@ -105,6 +112,14 @@ public static class UpdateDeviceTemplate
         public Validator()
         {
             RuleFor(x => x.Request.Name).NotEmpty().WithMessage("Name is required");
+            RuleFor(x => x.Request.GridRowSpan)
+                .GreaterThan(0)
+                .When(x => x.Request.GridRowSpan.HasValue)
+                .WithMessage("Grid row span must be greater than 0");
+            RuleFor(x => x.Request.GridColumnSpan)
+                .GreaterThan(0)
+                .When(x => x.Request.GridColumnSpan.HasValue)
+                .WithMessage("Grid column span must be greater than 0");
         }
     }
 }

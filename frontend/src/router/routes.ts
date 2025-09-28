@@ -78,6 +78,10 @@ const routes: RouteRecordRaw[] = [
             path: 'recipes',
             component: () => import('pages/recipes/RecipesPage.vue'),
           },
+          {
+            path: 'grid',
+            component: () => import('pages/device-templates/UpdateDeviceTemplateGridPage.vue'),
+          },
         ],
       },
 

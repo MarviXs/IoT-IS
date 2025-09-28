@@ -2209,12 +2209,16 @@ export interface components {
         "Fei.Is.Api.Features.DeviceTemplates.Commands.UpdateDeviceTemplate.Request": {
             name: string;
             deviceType: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceType"];
+            gridRowSpan?: number | null;
+            gridColumnSpan?: number | null;
         };
         "Fei.Is.Api.Features.DeviceTemplates.Queries.GetDeviceTemplateById.Response": {
             /** Format: uuid */
             id: string;
             name: string;
             deviceType: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceType"];
+            gridRowSpan?: number | null;
+            gridColumnSpan?: number | null;
         };
         "Fei.Is.Api.Features.DeviceTemplates.Queries.GetDeviceTemplates.Response": {
             /** Format: uuid */
@@ -2222,6 +2226,8 @@ export interface components {
             name: string;
             /** Format: date-time */
             updatedAt: string;
+            gridRowSpan?: number | null;
+            gridColumnSpan?: number | null;
         };
         "Fei.Is.Api.Features.Devices.Commands.CreateDevice.Request": {
             name: string;

@@ -75,14 +75,22 @@ public static class GetDeviceTemplates
 
             var templates = await query
                 .Paginate(templateParameters)
-                .Select(template => new Response(template.Id, template.Name, template.UpdatedAt))
+                .Select(
+                    template => new Response(
+                        template.Id,
+                        template.Name,
+                        template.UpdatedAt,
+                        template.GridRowSpan,
+                        template.GridColumnSpan
+                    )
+                )
                 .ToListAsync(cancellationToken);
 
             return Result.Ok(templates.ToPagedList(totalCount, templateParameters.PageNumber, templateParameters.PageSize));
         }
     }
 
-    public record Response(Guid Id, string Name, DateTime UpdatedAt);
+    public record Response(Guid Id, string Name, DateTime UpdatedAt, int? GridRowSpan, int? GridColumnSpan);
 
     public sealed class ParametersValidator : AbstractValidator<QueryParameters>
     {

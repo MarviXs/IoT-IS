@@ -18,6 +18,7 @@ import { toast } from 'vue3-toastify';
 import { useRoute, useRouter } from 'vue-router';
 import { handleError } from '@/utils/error-handler';
 import type { SensorFormData } from '@/components/device-templates/SensorForm.vue';
+import type { UpdateDeviceTemplateRequest } from '@/api/services/DeviceTemplateService';
 
 const router = useRouter();
 const route = useRoute();
@@ -25,6 +26,8 @@ const route = useRoute();
 const templateData = ref<DeviceTemplateFormData>();
 const sensorsData = ref<SensorFormData[]>([]);
 const submitting = ref(false);
+const gridRowSpan = ref<number | null>(null);
+const gridColumnSpan = ref<number | null>(null);
 
 const templateId = route.params.id as string;
 
@@ -39,6 +42,8 @@ async function getDeviceTemplate() {
     name: data.name,
     deviceType: data.deviceType,
   };
+  gridRowSpan.value = data.gridRowSpan ?? null;
+  gridColumnSpan.value = data.gridColumnSpan ?? null;
 }
 getDeviceTemplate();
 
@@ -67,8 +72,16 @@ async function submitForm() {
 
   submitting.value = true;
 
-  const templateRes = await DeviceTemplateService.updateDeviceTemplate(templateId, templateData.value);
+  const payload: UpdateDeviceTemplateRequest = {
+    name: templateData.value.name,
+    deviceType: templateData.value.deviceType,
+    gridRowSpan: gridRowSpan.value,
+    gridColumnSpan: gridColumnSpan.value,
+  };
+
+  const templateRes = await DeviceTemplateService.updateDeviceTemplate(templateId, payload);
   if (templateRes.error) {
+    submitting.value = false;
     handleError(templateRes.error, 'Error updating device template');
     return;
   }

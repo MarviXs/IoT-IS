@@ -55,7 +55,13 @@ public static class GetDeviceTemplateById
         {
             var template = await context
                 .DeviceTemplates.AsNoTracking()
-                .FirstOrDefaultAsync(template => template.Id == message.TemplateId, cancellationToken);
+                .Where(template => template.Id == message.TemplateId)
+                .Select(template => new
+                {
+                    template.OwnerId,
+                    Response = new Response(template.Id, template.Name, template.DeviceType, template.GridRowSpan, template.GridColumnSpan)
+                })
+                .FirstOrDefaultAsync(cancellationToken);
 
             if (template == null)
             {
@@ -66,11 +72,9 @@ public static class GetDeviceTemplateById
                 return Result.Fail(new ForbiddenError());
             }
 
-            var response = new Response(template.Id, template.Name, template.DeviceType);
-
-            return Result.Ok(response);
+            return Result.Ok(template.Response);
         }
     }
 
-    public record Response(Guid Id, string Name, DeviceType DeviceType);
+    public record Response(Guid Id, string Name, DeviceType DeviceType, int? GridRowSpan, int? GridColumnSpan);
 }
