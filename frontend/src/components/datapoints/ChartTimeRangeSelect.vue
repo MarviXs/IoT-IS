@@ -54,7 +54,7 @@
 <script setup lang="ts">
 import { format, subSeconds } from 'date-fns';
 import { computed, ref, watch, onMounted } from 'vue';
-import { PredefinedTimeRange } from '@/models/TimeRange';
+import type { PredefinedTimeRange } from '@/models/TimeRange';
 import { useI18n } from 'vue-i18n';
 import { mdiClockOutline } from '@quasar/extras/mdi-v7';
 import DateTimeInput from './DateTimeInput.vue';

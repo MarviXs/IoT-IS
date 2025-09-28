@@ -548,5 +548,25 @@
     "price_excl_vat_label": "Cena bez DPH",
     "vat_label": "DPH",
     "price_incl_vat_label": "Cena s DPH"
+  },
+  "datapoints": {
+    "map": {
+      "title": "Mapa",
+      "markers": "Značky",
+      "heatmap": "Mapy tepla",
+      "options": {
+        "marker_section": "Štýl značiek",
+        "marker_radius": "Polomer značky",
+        "marker_border_weight": "Hrúbka okraja značky",
+        "marker_fill_opacity": "Priehľadnosť výplne značky",
+        "marker_border_color": "Farba okraja značky",
+        "marker_fill_color": "Farba výplne značky",
+        "color_hint": "Použite hexadecimálne farby (napr. #1976d2)",
+        "heatmap_section": "Štýl mapy tepla",
+        "heat_radius": "Polomer mapy tepla",
+        "heat_blur": "Rozmazanie mapy tepla",
+        "heat_max_zoom": "Maximálne priblíženie mapy tepla"
+      }
+    }
   }
 }

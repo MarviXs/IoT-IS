@@ -167,7 +167,7 @@
 
 
 <script setup lang="ts">
-import { h, ref } from 'vue';
+import { ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { mdiCheck, mdiUpload } from '@quasar/extras/mdi-v7';
 import { Cropper as VueAdvancedCropper } from 'vue-advanced-cropper';
@@ -196,13 +196,13 @@ let imageWidth = 0;
 let imageHeight = 0;
 let imageTop = 0;
 let imageLeft = 0;  
-let threshold = ref(130);
+const threshold = ref(130);
 let tmpResponse: { nums: Array<string> } | undefined;
-let choroby: string[] = [];
-let index = ref<number | null>(null);
-let positionDisX: number[] = [];
-let positionDisY: number[] = [];
-let selectedIndex = ref<number | null>(null); 
+const choroby: string[] = [];
+const index = ref<number | null>(null);
+const positionDisX: number[] = [];
+const positionDisY: number[] = [];
+const selectedIndex = ref<number | null>(null); 
 const fileInput = ref<HTMLInputElement | null>(null);
 const router = useRouter();
 const route = useRoute();
@@ -335,7 +335,6 @@ const savePlant = async () => {
     }
 
     if (responseID && responseID.data && tmpResponse !== undefined) {
-      const plantBoardId = responseID.data;
 
       if (tmpResponse.nums && typeof tmpResponse.nums === 'object') {
         // Preveď objekt na pole hodnôt
@@ -454,16 +453,16 @@ const getClickPosition = (event: MouseEvent) => {
 
   if (closestPlantIndex !== null) {
     dialogOpen.value = true;
-    index = closestPlantIndex;
-    positionDisX[Number(index)] = clickX;
-    positionDisY[Number(index)] = clickY;
+    index.value = closestPlantIndex;
+    positionDisX[index.value] = clickX;
+    positionDisY[index.value] = clickY;
   }
 };
 
 const saveDisease = () => {
-  console.log(`Disease for plant ${index}: ${diseaseInput.value}`);
-  if (Number(index) >= 0 && diseaseInput.value) {
-    choroby[Number(index)] = diseaseInput.value;
+  console.log(`Disease for plant ${index.value}: ${diseaseInput.value}`);
+  if ((index.value ?? -1) >= 0 && diseaseInput.value) {
+    choroby[index.value] = diseaseInput.value;
     dialogOpen.value = false;
     diseaseInput.value = '';
   }

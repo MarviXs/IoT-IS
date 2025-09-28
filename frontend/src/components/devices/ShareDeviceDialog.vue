@@ -37,11 +37,11 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { handleError } from '@/utils/error-handler';
-import { computed } from 'vue';
 import { toast } from 'vue3-toastify';
 import { useI18n } from 'vue-i18n';
 import { mdiClose } from '@quasar/extras/mdi-v7';
-import DeviceSharingService, { SharedUsers } from '@/api/services/DeviceSharingService';
+import type { SharedUsers } from '@/api/services/DeviceSharingService';
+import DeviceSharingService from '@/api/services/DeviceSharingService';
 
 const isDialogOpen = defineModel<boolean>();
 const props = defineProps({
@@ -58,7 +58,7 @@ const emailToShare = ref('');
 const shareInProgress = ref(false);
 async function shareDevice() {
   shareInProgress.value = true;
-  const { data, error } = await DeviceSharingService.shareDevice(
+  const { error } = await DeviceSharingService.shareDevice(
     { email: emailToShare.value, permission: 'Editor' },
     props.deviceId,
   );

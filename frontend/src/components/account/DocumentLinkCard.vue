@@ -49,8 +49,9 @@
 </template>
 
 <script setup lang="ts">
-import { PropType, ref, watch } from 'vue';
-import { QForm, QInput } from 'quasar';
+import type { PropType } from 'vue';
+import { ref, watch } from 'vue';
+import { QInput } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import TemplatesService from '@/api/services/TemplatesService';
 import { toast } from 'vue3-toastify';
@@ -75,12 +76,11 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(['onSubmit']);
+defineEmits(['onSubmit']);
 const link = defineModel({ type: String, default: '' });
 
 const { t } = useI18n();
 
-const qform = ref<QForm>();
 const fileInput = ref<HTMLInputElement | null>(null);
 
 const linkRules = [
@@ -105,10 +105,7 @@ function handleFileSelection(event: Event) {
   const target = event.target as HTMLInputElement;
   if (target.files && target.files.length > 0) {
     const file = target.files[0];
-    const fileName = file.name;
-    const fileUrl = URL.createObjectURL(file);
-
-    link.value = fileName;
+    link.value = file.name;
   }
 }
 
@@ -136,9 +133,9 @@ function onFileSave() {
 function downloadTemplate() {
   TemplatesService.downloadTemplate(props.documentType)
     .then((retVal) => {
-      var contentDisposition = retVal.response.headers.get('Content-Disposition');
-      var parts = contentDisposition?.split('filename=');
-      var filename = parts?.length === 2 ? parts[1] : 'order_template.xlsx';
+      const contentDisposition = retVal.response.headers.get('Content-Disposition');
+      const parts = contentDisposition?.split('filename=');
+      const filename = parts?.length === 2 ? parts[1] : 'order_template.xlsx';
 
       retVal.response.blob().then((blob) => {
         const url = window.URL.createObjectURL(blob);

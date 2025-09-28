@@ -27,7 +27,7 @@ const { t } = useI18n();
 const isDeleteInProgress = ref(false);
 async function handleDelete() {
   isDeleteInProgress.value = true;
-  const { data, error } = await CommandService.deleteCommand(props.commandId);
+  const { error } = await CommandService.deleteCommand(props.commandId);
   isDeleteInProgress.value = false;
   isDialogOpen.value = false;
 

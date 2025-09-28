@@ -1,6 +1,6 @@
 import RecipeService from '@/api/services/RecipeService';
-import { RecipeStep } from '@/api/services/RecipeService';
-import { SubRecipeNode } from '@/models/SubrecipeNode';
+import type { RecipeStep } from '@/api/services/RecipeService';
+import type { SubRecipeNode } from '@/models/SubrecipeNode';
 
 function subrecipeToNodes(recipeStep: RecipeStep, root = false): SubRecipeNode {
   if (recipeStep.subrecipe) {
@@ -27,12 +27,10 @@ function subrecipeToNodes(recipeStep: RecipeStep, root = false): SubRecipeNode {
 
 async function lazyLoadSubrecipe({
   node,
-  key,
   done,
   fail,
 }: {
   node: SubRecipeNode;
-  key: string | number;
   done: (children: SubRecipeNode[]) => void;
   fail: (error: unknown) => void;
 }) {

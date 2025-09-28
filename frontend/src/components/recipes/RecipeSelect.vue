@@ -19,7 +19,7 @@ import { useI18n } from 'vue-i18n';
 import RecipeService from '@/api/services/RecipeService';
 import { handleError } from '@/utils/error-handler';
 import { QSelect } from 'quasar';
-import { RecipesQueryParams, RecipesResponse } from '@/api/services/RecipeService';
+import type { RecipesQueryParams, RecipesResponse } from '@/api/services/RecipeService';
 
 export interface RecipeSelectData {
   id?: string;
@@ -82,7 +82,7 @@ getOnScroll({ to: -1, ref: null });
 
 async function filterFn(
   val: string,
-  doneFn: (callbackFn: () => void, afterFn?: ((ref: QSelect) => void) | undefined) => void,
+  doneFn: (callbackFn: () => void, afterFn?: ((ref: QSelect) => void)  ) => void,
 ) {
   if (val === filter.value) {
     doneFn(() => {});

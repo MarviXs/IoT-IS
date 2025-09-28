@@ -4,7 +4,8 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import ARESService, { ARESQueryParams, EkonomickySubjekt } from '@/api/services/ARESService';
+import type { ARESQueryParams, EkonomickySubjekt } from '@/api/services/ARESService';
+import ARESService from '@/api/services/ARESService';
 
 const selected = ref<string | null>(null);
 
@@ -26,7 +27,7 @@ function filterFn(val: string, update: any, abort: () => void) {
     abort();
     return;
   }
-  var query: ARESQueryParams = {
+  const query: ARESQueryParams = {
     start: 0,
     pocet: 5,
     obchodniJmeno: undefined,

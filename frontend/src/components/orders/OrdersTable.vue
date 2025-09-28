@@ -32,12 +32,14 @@
 </template>
 
 <script setup lang="ts">
-import { QTableProps, date } from 'quasar';
-import { PropType, computed } from 'vue';
+import type { QTableProps} from 'quasar';
+import { date } from 'quasar';
+import type { PropType} from 'vue';
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { mdiFileSearchOutline } from '@quasar/extras/mdi-v7';
-import { PaginationClient } from '@/models/Pagination';
-import { OrdersResponse } from '@/api/services/OrdersService';
+import type { PaginationClient } from '@/models/Pagination';
+import type { OrdersResponse } from '@/api/services/OrdersService';
 import { useRouter } from 'vue-router';
 
 const props = defineProps({

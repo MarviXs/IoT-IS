@@ -7,10 +7,9 @@
 </template>
 
 <script setup lang="ts">
-import { JobStatus } from '@/api/services/JobService';
+import type { JobStatus } from '@/api/services/JobService';
 import { jobStatusColors } from '@/utils/job-status-look';
-import { PropType } from 'vue';
-import { useI18n } from 'vue-i18n';
+import type { PropType } from 'vue';
 
 const props = defineProps({
   jobStatus: {
@@ -22,6 +21,4 @@ const props = defineProps({
     default: false,
   },
 });
-
-const { t } = useI18n();
 </script>

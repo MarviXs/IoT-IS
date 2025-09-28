@@ -34,14 +34,13 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { QInput } from 'quasar';
 import { toast } from 'vue3-toastify';
 import { handleError } from '@/utils/error-handler';
 import { useI18n } from 'vue-i18n';
 import DialogCommon from '../core/DialogCommon.vue';
 import JobService from '@/api/services/JobService';
-import { RecipeSelectData } from '@/components/recipes/RecipeSelect.vue';
-import { StartJobRequest } from '@/api/services/JobService';
+import type { RecipeSelectData } from '@/components/recipes/RecipeSelect.vue';
+import type { StartJobRequest } from '@/api/services/JobService';
 import RecipeSelect from '@/components/recipes/RecipeSelect.vue';
 
 const isDialogOpen = defineModel<boolean>();
@@ -70,7 +69,7 @@ async function runJob() {
 
   jobIsStarting.value = true;
   jobToRun.value.recipeId = selectedRecipe.value?.id ?? '';
-  const { data, error } = await JobService.startJob(props.deviceId, jobToRun.value);
+  const { error } = await JobService.startJob(props.deviceId, jobToRun.value);
   jobIsStarting.value = false;
 
   if (error) {

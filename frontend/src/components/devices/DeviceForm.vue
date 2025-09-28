@@ -41,11 +41,10 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { isFormValid } from '@/utils/form-validation';
 import DeviceTemplateSelect from '@/components/device-templates/DeviceTemplateSelect.vue';
 import { mdiAutorenew, mdiContentCopy } from '@quasar/extras/mdi-v7';
 import { copyToClipboard } from 'quasar';
-import { DeviceTemplateSelectData } from '@/components/device-templates/DeviceTemplateSelect.vue';
+import type { DeviceTemplateSelectData } from '@/components/device-templates/DeviceTemplateSelect.vue';
 
 export interface DeviceFormData {
   name: string;

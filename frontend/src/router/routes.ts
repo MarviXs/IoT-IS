@@ -1,4 +1,4 @@
-import { RouteRecordRaw } from 'vue-router';
+import type { RouteRecordRaw } from 'vue-router';
 
 const routes: RouteRecordRaw[] = [
   {
@@ -48,6 +48,10 @@ const routes: RouteRecordRaw[] = [
       {
         path: '/devices/:id/jobs',
         component: () => import('pages/jobs/JobsOnDevicePage.vue'),
+      },
+      {
+        path: '/devices/:id/map',
+        component: () => import('pages/devices/DeviceMapPage.vue'),
       },
 
       {

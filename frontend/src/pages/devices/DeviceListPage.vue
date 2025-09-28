@@ -43,10 +43,10 @@ import { ref } from 'vue';
 import SearchBar from '@/components/core/SearchBar.vue';
 import { useStorage, watchDebounced } from '@vueuse/core';
 import AutoRefreshButton from '@/components/core/AutoRefreshButton.vue';
-import { PaginationClient, PaginationTable } from '@/models/Pagination';
+import type { PaginationClient, PaginationTable } from '@/models/Pagination';
 import DeviceService from '@/api/services/DeviceService';
 import { handleError } from '@/utils/error-handler';
-import { DevicesQueryParams, DevicesResponse } from '@/api/services/DeviceService';
+import type { DevicesQueryParams, DevicesResponse } from '@/api/services/DeviceService';
 import CreateDeviceDialog from '@/components/devices/CreateDeviceDialog.vue';
 
 const { t } = useI18n();

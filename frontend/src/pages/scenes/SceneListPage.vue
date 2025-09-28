@@ -93,16 +93,16 @@ import { useI18n } from 'vue-i18n';
 import { mdiPlus, mdiCodeTags, mdiPencil, mdiTrashCanOutline } from '@quasar/extras/mdi-v7';
 import PageLayout from '@/layouts/PageLayout.vue';
 import { computed, ref } from 'vue';
-import { PaginationClient, PaginationTable } from '@/models/Pagination';
+import type { PaginationClient, PaginationTable } from '@/models/Pagination';
 import { handleError } from '@/utils/error-handler';
-import { DeviceTemplatesQueryParams, DeviceTemplatesResponse } from '@/api/services/DeviceTemplateService';
-import { QTableProps } from 'quasar';
+import type { QTableProps } from 'quasar';
 import { watchDebounced } from '@vueuse/core';
-import SceneService, { ScenesPaginatedResponse, ScenesQueryParams } from '@/api/services/SceneService';
+import type { ScenesPaginatedResponse, ScenesQueryParams } from '@/api/services/SceneService';
+import SceneService from '@/api/services/SceneService';
 import DeleteSceneDialog from '@/components/scenes/DeleteSceneDialog.vue';
 import { formatTimeToDistance } from '@/utils/date-utils';
 
-const { t, locale } = useI18n();
+const { t } = useI18n();
 const filter = ref('');
 
 const pagination = ref<PaginationClient>({

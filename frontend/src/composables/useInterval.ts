@@ -1,6 +1,7 @@
 // useInterval.ts
 
-import { onMounted, onUnmounted, ref, watch, Ref } from 'vue';
+import type { Ref } from 'vue';
+import { onMounted, onUnmounted, ref, watch } from 'vue';
 
 /**
  * A Vue composable to handle dynamic intervals.

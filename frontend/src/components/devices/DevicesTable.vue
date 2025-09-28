@@ -104,26 +104,23 @@
 </template>
 
 <script setup lang="ts">
-import { QTableProps } from 'quasar';
+import type { QTableProps } from 'quasar';
 import ShareDeviceDialog from './ShareDeviceDialog.vue';
-import { PropType, computed, ref } from 'vue';
+import type { PropType } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useAuthStore } from '@/stores/auth-store';
 import {
   mdiCellphoneLink,
   mdiChartLine,
   mdiDotsVertical,
-  mdiEye,
-  mdiOpenInNew,
   mdiPencil,
   mdiShare,
   mdiTrashCan,
-  mdiTrashCanOutline,
 } from '@quasar/extras/mdi-v7';
 import DeleteDeviceDialog from '@/components/devices/DeleteDeviceDialog.vue';
 import { formatTimeToDistance } from '@/utils/date-utils';
-import { PaginationClient } from '@/models/Pagination';
-import { DevicesResponse } from '@/api/services/DeviceService';
+import type { PaginationClient } from '@/models/Pagination';
+import type { DevicesResponse } from '@/api/services/DeviceService';
 import EditDeviceDialog from '@/components/devices/EditDeviceDialog.vue';
 import StatusDot from './StatusDot.vue';
 
@@ -146,7 +143,6 @@ const devicesFiltered = computed(() => props.devices?.items ?? []);
 const emit = defineEmits(['onChange', 'onRequest']);
 
 const { t } = useI18n();
-const authStore = useAuthStore();
 
 const isDeleteDialogOpen = ref(false);
 const deviceToDelete = ref<string>();

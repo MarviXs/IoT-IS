@@ -30,7 +30,8 @@ import { handleError } from '@/utils/error-handler';
 import { toast } from 'vue3-toastify';
 import { useI18n } from 'vue-i18n';
 import DialogCommon from '@/components/core/DialogCommon.vue';
-import DeviceSelect, { DeviceSelectData } from '../devices/DeviceSelect.vue';
+import type { DeviceSelectData } from '../devices/DeviceSelect.vue';
+import DeviceSelect from '../devices/DeviceSelect.vue';
 
 const isDialogOpen = defineModel<boolean>();
 const emit = defineEmits(['onAdd']);
@@ -53,10 +54,7 @@ async function addDeviceToCollection() {
   }
 
   isLoading.value = true;
-  const { data, error } = await CollectionService.addDeviceToCollection(
-    props.collectionParentId,
-    selectedDevice.value.id,
-  );
+  const { error } = await CollectionService.addDeviceToCollection(props.collectionParentId, selectedDevice.value.id);
   isLoading.value = false;
   isDialogOpen.value = false;
 

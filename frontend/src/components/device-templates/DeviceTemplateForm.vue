@@ -75,7 +75,8 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { QForm, QInput } from 'quasar';
 import { isFormValid } from '@/utils/form-validation';
-import SensorForm, { SensorFormData } from './SensorForm.vue';
+import type { SensorFormData } from './SensorForm.vue';
+import SensorForm from './SensorForm.vue';
 import { mdiPencil, mdiPlusCircle } from '@quasar/extras/mdi-v7';
 import { matSensors } from '@quasar/extras/material-icons';
 

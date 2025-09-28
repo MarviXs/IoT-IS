@@ -36,13 +36,12 @@ import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import DialogCommon from '@/components/core/DialogCommon.vue';
 import { mdiCloudUpload, mdiClose } from '@quasar/extras/mdi-v7';
-import { QTableProps } from 'quasar';
-//@ts-ignore
-import Papa from 'papaparse';
-import type { ParseResult } from 'node_modules/@types/papaparse';
+import type { QTableProps } from 'quasar';
+import Papa, { type ParseResult } from 'papaparse';
 import ProductCategorySelect from './ProductCategorySelect.vue';
-import { CategorySelectData } from '../categories/CategorySelect.vue';
-import ProductService, { ProductRequest } from '@/api/services/ProductService';
+import type { CategorySelectData } from '../categories/CategorySelect.vue';
+import type { ProductRequest } from '@/api/services/ProductService';
+import ProductService from '@/api/services/ProductService';
 
 const isDialogOpen = defineModel<boolean>();
 
@@ -69,10 +68,9 @@ watch(file, () => {
 
   previewLoading.value = true;
 
-  //@ts-ignore
   Papa.parse(file.value, {
     preview: 5,
-    complete: (result: ParseResult<String>) => {
+    complete: (result: ParseResult<string[]>) => {
       productsPreview.value = result.data;
       previewLoading.value = false;
     },
@@ -81,36 +79,68 @@ watch(file, () => {
 
 const previewLoading = ref(false);
 
-const productsPreview = ref<Array<String>>([]);
+const productsPreview = ref<string[][]>([]);
 
 function processFile() {
   if (!file.value) {
     return;
   }
 
-  //@ts-ignore
   Papa.parse(file.value, {
-    complete: (result: ParseResult<String>) => {
-      ProductService.createProductsFromList({
-        products: result.data.map((product) => ({
-          pluCode: product[0],
-          code: product[1],
-          latinName: product[2],
-          czechName: product[3],
-          flowerLeafDescription: product[4],
-          potDiameterPack: product[5],
-          pricePerPiecePack: parseNumber(product[6]),
-          pricePerPiecePackVAT: parseNumber(product[7]),
-          discountedPriceWithoutVAT: parseNumber(product[8]),
-          retailPrice: parseNumber(product[9]),
-        })) as Array<ProductRequest>,
-        categoryId: category.value!.id,
+    complete: (result: ParseResult<string[]>) => {
+      const products = result.data
+        .map((productRow) => toProductRequest(productRow))
+        .filter((product): product is ProductRequest => product !== null);
+
+      void ProductService.createProductsFromList({
+        products,
       });
     },
   });
 }
 
-function parseNumber(value: String) {
+function toProductRequest(row: string[]): ProductRequest | null {
+  const [
+    _pluCode,
+    code,
+    latinName,
+    czechName,
+    flowerLeafDescription,
+    potDiameterPack,
+    pricePerPiecePackRaw,
+    pricePerPiecePackVATRaw,
+    discountedPriceWithoutVATRaw,
+    retailPriceRaw,
+    categoryNameRaw,
+    supplierId,
+    variety,
+    vatCategoryId,
+  ] = row;
+
+  const categoryName = categoryNameRaw || category.value?.name;
+
+  if (!latinName || !categoryName || !supplierId || !variety || !vatCategoryId) {
+    return null;
+  }
+
+  return {
+    code: code || null,
+    latinName,
+    czechName: czechName || null,
+    flowerLeafDescription: flowerLeafDescription || null,
+    potDiameterPack: potDiameterPack || null,
+    pricePerPiecePack: parseNumber(pricePerPiecePackRaw),
+    pricePerPiecePackVAT: parseNumber(pricePerPiecePackVATRaw),
+    discountedPriceWithoutVAT: parseNumber(discountedPriceWithoutVATRaw),
+    retailPrice: parseNumber(retailPriceRaw),
+    categoryName,
+    supplierId,
+    variety,
+    vatCategoryId,
+  } satisfies ProductRequest;
+}
+
+function parseNumber(value: string | undefined) {
   if (!value) {
     return null;
   }
@@ -122,61 +152,61 @@ const columns = computed<QTableProps['columns']>(() => [
   {
     name: 'pluCode',
     label: t('product.plu_code'),
-    field: (row: Array<string>) => row[0],
+    field: (row: string[]) => row[0],
     align: 'left',
   },
   {
     name: 'code',
     label: t('product.code'),
-    field: (row: Array<string>) => row[1],
+    field: (row: string[]) => row[1],
     align: 'left',
   },
   {
     name: 'latinName',
     label: t('product.latin_name'),
-    field: (row: Array<string>) => row[2],
+    field: (row: string[]) => row[2],
     align: 'left',
   },
   {
     name: 'czechName',
     label: t('product.czech_name'),
-    field: (row: Array<string>) => row[3],
+    field: (row: string[]) => row[3],
     align: 'left',
   },
   {
     name: 'flowerLeafDescription',
     label: t('product.flower_leaf_description'),
-    field: (row: Array<string>) => row[4],
+    field: (row: string[]) => row[4],
     align: 'left',
   },
   {
     name: 'potDiameterPack',
     label: t('product.pot_diameter_pack'),
-    field: (row: Array<string>) => row[5],
+    field: (row: string[]) => row[5],
     align: 'left',
   },
   {
     name: 'pricePerPiecePack',
     label: t('product.price_per_piece_pack'),
-    field: (row: Array<string>) => row[6],
+    field: (row: string[]) => row[6],
     align: 'left',
   },
   {
     name: 'pricePerPiecePackVAT',
     label: t('product.price_per_piece_pack_vat'),
-    field: (row: Array<string>) => row[7],
+    field: (row: string[]) => row[7],
     align: 'left',
   },
   {
     name: 'discountedPriceWithoutVAT',
     label: t('product.discounted_price_without_vat'),
-    field: (row: Array<string>) => row[8],
+    field: (row: string[]) => row[8],
     align: 'left',
   },
   {
     name: 'retailPrice',
     label: t('product.retail_price'),
-    field: (row: Array<string>) => row[9],
+    field: (row: string[]) => row[9],
     align: 'left',
   },
 ]);

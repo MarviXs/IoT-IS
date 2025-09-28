@@ -59,10 +59,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, PropType, ref, watch } from 'vue';
-import { SceneAction } from '@/models/Scene';
+import type { PropType} from 'vue';
+import { computed, ref, watch } from 'vue';
+import type { SceneAction } from '@/models/Scene';
 import { mdiCloseCircleOutline } from '@quasar/extras/mdi-v7';
-import { SceneDevice } from '@/api/services/DeviceService';
+import type { SceneDevice } from '@/api/services/DeviceService';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();

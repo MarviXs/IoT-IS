@@ -22,20 +22,17 @@
 </template>
 
 <script setup lang="ts">
-import { QTableProps } from 'quasar';
+import type { QTableProps } from 'quasar';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { mdiPlus } from '@quasar/extras/mdi-v7';
 import CommandService from '@/api/services/CommandService';
-import { RecipeResponse } from '@/api/services/RecipeService';
-import { PaginationClient, PaginationTable } from '@/models/Pagination';
-import { useRoute } from 'vue-router';
-import { CommandResponse, CommandsQueryParams, CommandsResponse } from '@/api/services/CommandService';
+import type { RecipeResponse } from '@/api/services/RecipeService';
+import type { PaginationClient, PaginationTable } from '@/models/Pagination';
+import type { CommandResponse, CommandsQueryParams, CommandsResponse } from '@/api/services/CommandService';
 import { handleError } from '@/utils/error-handler';
 
 const { t } = useI18n();
-const route = useRoute();
-
 const props = defineProps({
   deviceTemplateId: {
     type: String,

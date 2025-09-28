@@ -27,7 +27,7 @@ const { t } = useI18n();
 const isDeleteInProgress = ref(false);
 async function handleDelete() {
   isDeleteInProgress.value = true;
-  const { data, error } = await RecipeService.deleteRecipe(props.recipeId);
+  const { error } = await RecipeService.deleteRecipe(props.recipeId);
   isDeleteInProgress.value = false;
   isDialogOpen.value = false;
 

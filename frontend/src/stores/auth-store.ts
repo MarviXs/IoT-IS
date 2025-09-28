@@ -1,13 +1,13 @@
 import { defineStore } from 'pinia';
 import { useStorage } from '@vueuse/core';
-import { User } from '@/models/User';
+import type { User } from '@/models/User';
 import AuthService from '@/api/services/AuthService';
 import { computed } from 'vue';
 import { jwtDecode } from 'jwt-decode';
 import { Role } from '@/models/Role';
 import { useStoreRouter } from '@/composables/useStoreRouter';
-import { JwtPayload } from '@/models/Tokens';
-import { LoginRequest } from '@/api/services/AuthService';
+import type { JwtPayload } from '@/models/Tokens';
+import type { LoginRequest } from '@/api/services/AuthService';
 
 export const useAuthStore = defineStore('authStore', () => {
   const router = useStoreRouter();
@@ -64,7 +64,7 @@ export const useAuthStore = defineStore('authStore', () => {
     try {
       const decodedToken = jwtDecode<JwtPayload>(accessToken.value);
       return decodedToken;
-    } catch (e) {
+    } catch {
       logout();
       console.error('Invalid JWT');
       return null;

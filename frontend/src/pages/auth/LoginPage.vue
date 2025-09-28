@@ -70,7 +70,7 @@ import { useI18n } from 'vue-i18n';
 import { mdiAccount, mdiEye, mdiEyeOff, mdiLock } from '@quasar/extras/mdi-v7';
 import GoogleLoginBtn from '@/components/account/GoogleLoginBtn.vue';
 import { handleError } from '@/utils/error-handler';
-import { LoginRequest } from '@/api/services/AuthService';
+import type { LoginRequest } from '@/api/services/AuthService';
 
 const { t } = useI18n();
 
@@ -98,7 +98,7 @@ async function login() {
   if (!isFormValid(form)) return;
 
   isSubmitting.value = true;
-  const { data, error } = await authStore.login(userLogin.value);
+  const { error } = await authStore.login(userLogin.value);
   isSubmitting.value = false;
 
   if (error) {

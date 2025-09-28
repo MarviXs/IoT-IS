@@ -43,7 +43,7 @@
         <template v-slot:body="props">
           <q-tr :props="props" @click="logImageName(props.row)">
             <q-td v-for="col in columns" :key="col.name">
-              {{ props.row[col.field] }}
+              {{ typeof col.field === 'function' ? col.field(props.row) : props.row[col.field] }}
             </q-td>
           </q-tr>
         </template>
@@ -82,16 +82,11 @@ import { mdiPlus } from '@quasar/extras/mdi-v7';
 import { useI18n } from 'vue-i18n';
 import axios from 'axios';
 import { CONFIG } from '@/config';
+import type { QTableProps } from 'quasar';
 
 const { t } = useI18n();
 const showImageDialog = ref(false);
 const plantImage = ref<string | null>(null);
-
-// Breadcrumbs for navigation
-const breadcrumbs = ref([
-  { label: 'Home', to: '/' },
-  { label: 'Plants', to: '/plants' },
-]);
 
 const plants = ref<{
   plantId: string;
@@ -106,7 +101,7 @@ const plants = ref<{
 }[]>([]);
 
 // Table columns
-const columns = ref([
+const columns = ref<QTableProps['columns']>([
   { name: 'id', required: true, label: t('lifecycle.plant_id'), align: 'left', field: 'plantId', sortable: true },
   { name: 'disease', required: true, label: t('lifecycle.disease'), align: 'left', field: 'disease', sortable: true },
   { name: 'area', required: true, label: t('lifecycle.size'), align: 'left', field: 'area', sortable: true },

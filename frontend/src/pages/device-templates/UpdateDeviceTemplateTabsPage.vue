@@ -41,7 +41,7 @@
 import PageLayout from '@/layouts/PageLayout.vue';
 import { useI18n } from 'vue-i18n';
 import { ref } from 'vue';
-import { UpdateDeviceTemplateRequest } from '@/api/services/DeviceTemplateService';
+import type { UpdateDeviceTemplateRequest } from '@/api/services/DeviceTemplateService';
 import DeviceTemplateService from '@/api/services/DeviceTemplateService';
 import { useRoute } from 'vue-router';
 import { handleError } from '@/utils/error-handler';
@@ -62,6 +62,7 @@ async function getDeviceTemplate() {
   }
   deviceRequest.value = {
     name: data.name,
+    deviceType: data.deviceType,
   };
 }
 getDeviceTemplate();

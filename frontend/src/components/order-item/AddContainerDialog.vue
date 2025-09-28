@@ -49,7 +49,7 @@ watch(
 watch(isDialogOpen, (val) => emit('update:modelValue', val));
 
 // Extract orderId from the URL
-var orderId = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id;
+let orderId = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id;
 onMounted(() => {
   orderId = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id || '';
 });
@@ -85,7 +85,7 @@ async function addContainerToOrder() {
       pricePerContainer: 0,
     };
   } catch (error) {
-    handleError(error as any, t('order_item.toasts.add_failed'));
+    handleError(error, t('order_item.toasts.add_failed'));
   } finally {
     addingContainer.value = false;
     isDialogOpen.value = false;

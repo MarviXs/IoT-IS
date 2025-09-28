@@ -14,9 +14,9 @@ import { handleError } from '@/utils/error-handler';
 import { toast } from 'vue3-toastify';
 import { useI18n } from 'vue-i18n';
 import DialogCommon from '@/components/core/DialogCommon.vue';
-import { CreateDeviceRequest } from '@/api/services/DeviceService';
+import type { CreateDeviceRequest } from '@/api/services/DeviceService';
 import DeviceForm from '@/components/devices/DeviceForm.vue';
-import { DeviceFormData } from '@/components/devices/DeviceForm.vue';
+import type { DeviceFormData } from '@/components/devices/DeviceForm.vue';
 import DeviceService from '@/api/services/DeviceService';
 
 const isDialogOpen = defineModel<boolean>();

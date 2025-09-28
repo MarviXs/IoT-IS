@@ -27,7 +27,7 @@ const { t } = useI18n();
 const isDeleteInProgress = ref(false);
 async function handleDelete() {
   isDeleteInProgress.value = true;
-  const { data, error } = await SceneService.deleteScene(props.sceneId);
+  const { error } = await SceneService.deleteScene(props.sceneId);
   isDeleteInProgress.value = false;
   isDialogOpen.value = false;
 

@@ -87,7 +87,6 @@
   </template>
   
   <script setup lang="ts">
-import { QTableProps } from 'quasar';
 import { computed, ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -97,8 +96,7 @@ import {
   mdiChartLine,
   mdiPencil,
   mdiTrashCan,
-  mdiDotsVertical,
-  mdiSeedPlusOutline
+  mdiDotsVertical
 } from '@quasar/extras/mdi-v7';
 import PageLayout from '@/layouts/PageLayout.vue';
 import GreenHouseService from '@/api/services/GreenHouseService';
@@ -163,11 +161,7 @@ function navigateToGreenhouse(id: string) {
 }
 
 function onRowClick(row: GreenhouseNode) {
-  //navigateToGreenhouse(row.id);
-}
-
-function addRecord(id: string) {
-  router.push(`/greenhouses/${id}/add-record`);
+  navigateToGreenhouse(row.id);
 }
 
 async function deleteGreenhouse(id: string) {

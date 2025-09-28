@@ -37,11 +37,12 @@
 </template>
 
 <script setup lang="ts">
-import { RulesLogic } from 'json-logic-js';
+import type { RulesLogic } from 'json-logic-js';
 import SceneRuleGroup from './SceneRuleGroup.vue';
 import { mdiCloseCircleOutline } from '@quasar/extras/mdi-v7';
-import { SceneDevice } from '@/api/services/DeviceService';
-import { computed, PropType } from 'vue';
+import type { SceneDevice } from '@/api/services/DeviceService';
+import type { PropType } from 'vue';
+import { computed } from 'vue';
 import SceneDeviceOperand from './SceneDeviceOperand.vue';
 import SceneConstantOperand from './SceneConstantOperand.vue';
 import { useI18n } from 'vue-i18n';
@@ -79,7 +80,7 @@ function getUnit(compare: any) {
 
 const leftCompare = computed({
   get: () => {
-    const [operator, [left]] = Object.entries(rule.value)[0];
+    const [, [left]] = Object.entries(rule.value)[0];
     return left;
   },
   set: (value: string) => {
@@ -90,7 +91,7 @@ const leftCompare = computed({
 
 const rightCompare = computed({
   get: () => {
-    const [operator, [, right]] = Object.entries(rule.value)[0];
+    const [, [, right]] = Object.entries(rule.value)[0];
     return right;
   },
   set: (value: string) => {

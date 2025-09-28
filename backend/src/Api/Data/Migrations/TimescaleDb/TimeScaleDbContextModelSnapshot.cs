@@ -27,6 +27,12 @@ namespace Fei.Is.Api.Data.Migrations.TimescaleDb
                     b.Property<Guid>("DeviceId")
                         .HasColumnType("uuid");
 
+                    b.Property<double?>("Latitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<double?>("Longitude")
+                        .HasColumnType("double precision");
+
                     b.Property<string>("SensorTag")
                         .IsRequired()
                         .HasColumnType("text");

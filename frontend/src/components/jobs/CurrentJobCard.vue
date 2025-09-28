@@ -115,7 +115,7 @@ import JobStatusBadges from './JobStatusBadges.vue';
 import { useI18n } from 'vue-i18n';
 import { mdiChevronLeft, mdiChevronRight, mdiEye, mdiPlayCircleOutline } from '@quasar/extras/mdi-v7';
 import JobService from '@/api/services/JobService';
-import { ActiveJobsResponse } from '@/api/services/JobService';
+import type { ActiveJobsResponse } from '@/api/services/JobService';
 import { handleError } from '@/utils/error-handler';
 import { computed, onUnmounted, ref } from 'vue';
 import { useSignalR } from '@/composables/useSignalR';

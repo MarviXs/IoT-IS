@@ -27,7 +27,7 @@
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import RecipeStepsEditor from '@/components/recipes/RecipeStepsEditor.vue';
-import { RecipeResponse } from '@/api/services/RecipeService';
+import type { RecipeResponse } from '@/api/services/RecipeService';
 
 const recipe = defineModel<RecipeResponse>({ required: true });
 const props = defineProps({

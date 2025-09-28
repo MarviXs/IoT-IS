@@ -59,11 +59,12 @@
 </template>
 
 <script setup lang="ts">
-import { QTableProps } from 'quasar';
-import { PropType, computed, ref } from 'vue';
+import type { QTableProps } from 'quasar';
+import type { PropType} from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { mdiFileSearchOutline, mdiPencil, mdiTrashCan } from '@quasar/extras/mdi-v7';
-import { PaginationClient } from '@/models/Pagination';
+import type { PaginationClient } from '@/models/Pagination';
 import EditProductDialog from './EditProductDialog.vue';
 import DeleteProductDialog from './DeleteProductDialog.vue';
 import ProductService from '@/api/services/ProductService';
@@ -140,9 +141,9 @@ function openDeleteDialog(productId: string) {
 
 function downloadProductAsDocx(product: any) {
   ProductService.downloadProductSticker(product.id).then((retVal) => {
-    var contentDisposition = retVal.response.headers.get('Content-Disposition');
-    var parts = contentDisposition?.split('filename=');
-    var filename = parts?.length === 2 ? parts[1] : 'order_template.xlsx';
+    const contentDisposition = retVal.response.headers.get('Content-Disposition');
+    const parts = contentDisposition?.split('filename=');
+    const filename = parts?.length === 2 ? parts[1] : 'order_template.xlsx';
 
     retVal.response.blob().then((blob) => {
       const url = window.URL.createObjectURL(blob);

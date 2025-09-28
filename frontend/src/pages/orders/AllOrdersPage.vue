@@ -35,16 +35,14 @@ import { mdiPlus } from '@quasar/extras/mdi-v7';
 import PageLayout from '@/layouts/PageLayout.vue';
 import { ref } from 'vue';
 import SearchBar from '@/components/core/SearchBar.vue';
-import { useStorage } from '@vueuse/core';
-import { PaginationClient, PaginationTable } from '@/models/Pagination';
-import { DevicesResponse } from '@/api/services/DeviceService';
-import OrdersService, { OrdersQueryParams } from '@/api/services/OrdersService';
+import type { PaginationClient, PaginationTable } from '@/models/Pagination';
+import type { OrdersQueryParams } from '@/api/services/OrdersService';
+import OrdersService from '@/api/services/OrdersService';
 import { handleError } from '@/utils/error-handler';
 import CreateOrderDialog from '@/components/orders/CreateOrderDialog.vue';
 
 const { t } = useI18n();
 const filter = ref('');
-const refreshInterval = useStorage('auto_device_refresh', 30);
 const isCreateDialogOpen = ref(false);
 const pagination = ref<PaginationClient>({
   sortBy: 'name',

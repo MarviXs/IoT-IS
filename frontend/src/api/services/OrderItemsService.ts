@@ -12,13 +12,15 @@ export type AddOrderItemResponse = paths['/orders/{orderId}/container/{container
 //export type DeleteOrderItemResponse = paths['/orders/{orderId}/container/{containerId}/item/{itemId}']['delete']['responses']['200']['content']['application/json'];
 
 class OrderItemsService {
-  
+
   async deleteItemFromOrder(orderId: number, itemId: number) {
-    return await client.DELETE('/orders/{orderId}/items/{itemId}', { params: { path: { orderId, itemId } } });
+    return await client.DELETE('/orders/{orderId}/items/{itemId}', {
+      params: { path: { orderId: orderId.toString(), itemId: itemId.toString() } },
+    });
   }
 
   // Načítanie kontajnerov objednávky pre dané orderId s query parametrami
-  async getOrderItemContainers(orderId: string, queryParams?: OrderItemContainersQueryParams) {
+  async getOrderItemContainers(orderId: string, _queryParams?: OrderItemContainersQueryParams) {
     return await client.GET('/orders/{orderId}/container', { params: { path: { orderId } } });
   }
 
@@ -40,7 +42,7 @@ class OrderItemsService {
       params: { path: { orderId, containerId } },
     });
   }
-  
+
   async increaseContainerQuantity(orderId: string, containerId: string) {
     return await client.POST('/orders/{orderId}/container/{containerId}/increase', {
       params: { path: { orderId, containerId } },
@@ -55,9 +57,9 @@ class OrderItemsService {
   }
 
   // Zvýšenie množstva produktu (OrderItem) o 1
-  async increaseProductQuantity(orderId: string,containerId: string, productId: string) {
+  async increaseProductQuantity(orderId: string, containerId: string, productId: string) {
     return await client.POST('/orders/{orderId}/container/{containerId}/product/{productId}/increase', {
-      params: { path: { orderId,containerId, productId } },
+      params: { path: { orderId, containerId, productId } },
     });
   }
 

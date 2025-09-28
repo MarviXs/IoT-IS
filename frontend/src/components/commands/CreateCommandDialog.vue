@@ -14,9 +14,10 @@ import { handleError } from '@/utils/error-handler';
 import { toast } from 'vue3-toastify';
 import { useI18n } from 'vue-i18n';
 import DialogCommon from '@/components/core/DialogCommon.vue';
-import CommandForm, { CommandFormData } from '@/components/commands/CommandForm.vue';
+import type { CommandFormData } from '@/components/commands/CommandForm.vue';
+import CommandForm from '@/components/commands/CommandForm.vue';
 import { useRoute } from 'vue-router';
-import { CreateCommandRequest } from '@/api/services/CommandService';
+import type { CreateCommandRequest } from '@/api/services/CommandService';
 
 const isDialogOpen = defineModel<boolean>();
 const emit = defineEmits(['onCreate']);

@@ -103,15 +103,13 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import { ref, onMounted, computed } from 'vue';
-import { mdiPlus } from '@quasar/extras/mdi-v7';
-import SearchBar from '@/components/core/SearchBar.vue';
-import { mdiAccount, mdiFileDocument } from '@quasar/extras/mdi-v7';
+import { ref, onMounted } from 'vue';
 import PageLayout from '@/layouts/PageLayout.vue';
 import DocumentLinkCard from '@/components/account/DocumentLinkCard.vue';
 import TemplatesService from '@/api/services/TemplatesService';
 import { toast } from 'vue3-toastify';
 import { EDocumentIdentifier } from '@/api/types/EDocumentIdentifier';
+import { mdiAccount, mdiFileDocument } from '@quasar/extras/mdi-v7';
 
 const loading = ref(false);
 const { t } = useI18n();

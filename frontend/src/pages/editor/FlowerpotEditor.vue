@@ -358,15 +358,12 @@
 import GreenHouseService from '@/api/services/GreenHouseService';
 import OrdersService from '@/api/services/OrdersService'; 
 import ProductService from '@/api/services/ProductService';
-import { timestamp } from '@vueuse/core';
-import { parse } from 'date-fns';
-import { ro, th } from 'date-fns/locale';
 import { useI18n } from 'vue-i18n';
 
 
 const width = 500;
 const height = 800;
-var changed = false
+let changed = false
 
 export default {
   setup() {
@@ -1077,7 +1074,7 @@ export default {
       },
       // Pridá rastlinu na základe vybraného typu
     addRectangle(plantOption, next = true, tmpState = 0, tmpDate = new Date().toLocaleDateString('sk-SK')) {
-      var plantName = '';
+      let plantName = '';
       if (next){
         plantName = plantOption.name + ' ' + this.nextId;
       }else{
@@ -1374,7 +1371,7 @@ export default {
       try {
         const [day, month, year] = pot.dateCreated.split('.').map(s => parseInt(s.trim()));
         parsedDate = new Date(year, month - 1, day);
-      } catch (e) {
+      } catch {
         console.error("Neplatný dátum:", pot.dateCreated);
         return;
       }
@@ -1410,7 +1407,7 @@ export default {
       try {
         const [day, month, year] = plant.datePlanted.split('.').map(s => parseInt(s.trim()));
         parsedDate = new Date(year, month - 1, day);
-      } catch (e) {
+      } catch {
         console.error("Neplatný dátum:", plant.datePlanted);
         return;
       }

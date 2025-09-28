@@ -9,17 +9,16 @@
 </template>
 
 <script setup lang="ts">
-import DeviceTemplateForm, { DeviceTemplateFormData } from '@/components/device-templates/DeviceTemplateForm.vue';
-import { useI18n } from 'vue-i18n';
+import type { DeviceTemplateFormData } from '@/components/device-templates/DeviceTemplateForm.vue';
+import DeviceTemplateForm from '@/components/device-templates/DeviceTemplateForm.vue';
 import { ref } from 'vue';
 import DeviceTemplateService from '@/api/services/DeviceTemplateService';
 import SensorService from '@/api/services/SensorService';
 import { toast } from 'vue3-toastify';
 import { useRoute, useRouter } from 'vue-router';
 import { handleError } from '@/utils/error-handler';
-import { SensorFormData } from '@/components/device-templates/SensorForm.vue';
+import type { SensorFormData } from '@/components/device-templates/SensorForm.vue';
 
-const { t } = useI18n();
 const router = useRouter();
 const route = useRoute();
 

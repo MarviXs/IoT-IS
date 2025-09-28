@@ -50,6 +50,13 @@
           <div class="col-6">
             <q-form>
               <q-input
+                v-model="plantProperties.plantBoardId"
+                outlined
+                :label="t('lifecycle.plantboard_id')"
+                dense
+                class="q-mb-md"
+              />
+              <q-input
                 v-model="plantProperties.id"
                 outlined
                 :label="t('lifecycle.pid')"
@@ -124,10 +131,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { mdiCheck, mdiUpload } from '@quasar/extras/mdi-v7';
-import LifeCycleService from '@/api/services/LifeCycleService'; // Importujte svoj service
+import LifeCycleService, {
+  type CreateAnalysisRequest,
+  type CreatePlantRequest,
+} from '@/api/services/LifeCycleService';
 import { useI18n } from 'vue-i18n';
 import { CONFIG } from '@/config';
 
@@ -135,6 +145,7 @@ const { t } = useI18n();
 
 const plantProperties = ref({
   id: '',
+  plantBoardId: '',
   height: '',
   width: '',
   leafCount: '',
@@ -145,9 +156,10 @@ const plantProperties = ref({
   photo: '',
   photoLeaves: '',
   photoSize: '',
+  imageName: '',
 });
 
-let threshold = ref(130);
+const threshold = ref(130);
 const fileInput = ref<HTMLInputElement | null>(null);
 const router = useRouter();
 
@@ -186,6 +198,7 @@ const uploadPhoto = async (file: File) => {
       plantProperties.value.disease = data.disease;
       plantProperties.value.photoLeaves = `data:image/png;base64,${data.render}`;
       plantProperties.value.photoSize = `data:image/png;base64,${data.plantImage}`;
+      plantProperties.value.imageName = file.name;
     } else {
       console.error('Failed to upload photo');
     }
@@ -210,11 +223,17 @@ const handleFileUpload = (event: Event) => {
 
 // Metóda na uloženie rastliny
 const savePlant = async () => {
-  const request = {
+  if (!plantProperties.value.plantBoardId) {
+    console.error('Plant board ID is required');
+    return;
+  }
+
+  const request: CreatePlantRequest = {
     plantId: plantProperties.value.id,
     name: plantProperties.value.type,
-    type: "plant",
+    type: 'plant',
     datePlanted: new Date(plantProperties.value.date).toISOString(),
+    plantBoardId: plantProperties.value.plantBoardId,
   };
 
   try {
@@ -225,15 +244,16 @@ const savePlant = async () => {
     if (responseID && responseID.data) {
       const responsePlantID = responseID.data;
 
-      const requestAnalysis = {
+      const requestAnalysis: CreateAnalysisRequest = {
         height: parseFloat(plantProperties.value.height),
         width: parseFloat(plantProperties.value.width),
         leafCount: parseInt(plantProperties.value.leafCount),
         area: parseInt(plantProperties.value.area),
         disease: plantProperties.value.disease,
-        health: "healthy",
+        health: 'healthy',
         plantId: responseID.response.status === 409 ? responseID.response.statusText : responsePlantID,
         analysisDate: new Date(plantProperties.value.date).toISOString(),
+        imageName: plantProperties.value.imageName || 'plant-analysis.png',
       };
 
       await LifeCycleService.createAnalysis(requestAnalysis);

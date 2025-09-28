@@ -64,13 +64,14 @@ import { useI18n } from 'vue-i18n';
 import { mdiBellOutline } from '@quasar/extras/mdi-v7';
 import PageLayout from '@/layouts/PageLayout.vue';
 import { computed, ref } from 'vue';
-import { PaginationClient, PaginationTable } from '@/models/Pagination';
+import type { PaginationClient, PaginationTable } from '@/models/Pagination';
 import { handleError } from '@/utils/error-handler';
-import { QTableProps } from 'quasar';
-import NotificationService, {
+import type { QTableProps } from 'quasar';
+import type {
   NotificationQueryParams,
   NotificationsPaginated,
 } from '@/api/services/NotificationService';
+import NotificationService from '@/api/services/NotificationService';
 import { formatTimeToDistance } from '@/utils/date-utils';
 import { useStorage } from '@vueuse/core';
 import AutoRefreshButton from '@/components/core/AutoRefreshButton.vue';
@@ -145,7 +146,7 @@ const columns = computed<QTableProps['columns']>(() => [
     label: 'Created At',
     field: 'createdAt',
     sortable: true,
-    format(val, row) {
+    format(val) {
       return new Date(val).toLocaleString(locale.value);
     },
     align: 'right',

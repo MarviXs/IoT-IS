@@ -15,7 +15,7 @@ import { toast } from 'vue3-toastify';
 import { useI18n } from 'vue-i18n';
 import DialogCommon from '@/components/core/DialogCommon.vue';
 import CollectionForm from '@/components/collections/CollectionForm.vue';
-import { UpdateCollectionRequest } from '@/api/services/DeviceCollectionService';
+import type { UpdateCollectionRequest } from '@/api/services/DeviceCollectionService';
 
 const isDialogOpen = defineModel<boolean>();
 const props = defineProps({

@@ -1,4 +1,4 @@
-import { QField } from 'quasar';
+import type { QField } from 'quasar';
 
 function isFormValid(inputRefs: (QField | undefined)[]) {
   if (!inputRefs) return false;

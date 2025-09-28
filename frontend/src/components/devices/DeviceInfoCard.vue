@@ -47,9 +47,9 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { PropType } from 'vue';
+import type { PropType } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { DeviceResponse } from '@/api/services/DeviceService';
+import type { DeviceResponse } from '@/api/services/DeviceService';
 import { mdiEye } from '@quasar/extras/mdi-v7';
 
 const props = defineProps({

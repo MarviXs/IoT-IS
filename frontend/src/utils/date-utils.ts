@@ -1,4 +1,4 @@
-import { format, formatDistanceToNowStrict } from 'date-fns';
+import { formatDistanceToNowStrict } from 'date-fns';
 import { enUS, sk } from 'date-fns/locale';
 import { useI18n } from 'vue-i18n';
 

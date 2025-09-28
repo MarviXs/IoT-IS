@@ -445,5 +445,25 @@
       "card": "Tarjeta",
       "transfer": "Transferencia"
     }
+  },
+  "datapoints": {
+    "map": {
+      "title": "Mapa",
+      "markers": "Marcadores",
+      "heatmap": "Mapa de calor",
+      "options": {
+        "marker_section": "Estilo de marcadores",
+        "marker_radius": "Radio del marcador",
+        "marker_border_weight": "Grosor del borde del marcador",
+        "marker_fill_opacity": "Opacidad de relleno del marcador",
+        "marker_border_color": "Color del borde del marcador",
+        "marker_fill_color": "Color de relleno del marcador",
+        "color_hint": "Usa valores hexadecimales (ej. #1976d2)",
+        "heatmap_section": "Estilo del mapa de calor",
+        "heat_radius": "Radio del mapa de calor",
+        "heat_blur": "Desenfoque del mapa de calor",
+        "heat_max_zoom": "Zoom máximo del mapa de calor"
+      }
+    }
   }
 }

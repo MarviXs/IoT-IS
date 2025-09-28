@@ -30,9 +30,6 @@ class ProductService {
   async getProductPassport(productId: string) {
     return await client.GET('/products/passport/{id}', { params: { path: { id: productId } } });
   }
-  async getProductEan(productId: string) {
-    return await client.GET('/products/ean/{id}', { params: { path: { id: productId } } });
-  }
 
   async createProduct(body: CreateProductParams) {
     return await client.POST('/products', { body });

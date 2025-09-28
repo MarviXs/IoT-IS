@@ -70,7 +70,7 @@ import LanguageSelect from '@/components/core/LanguageSelect.vue';
 import { useI18n } from 'vue-i18n';
 import { mdiEmail, mdiEye, mdiEyeOff, mdiLock } from '@quasar/extras/mdi-v7';
 import GoogleLoginBtn from '@/components/account/GoogleLoginBtn.vue';
-import { RegisterRequest } from '@/api/services/AuthService';
+import type { RegisterRequest } from '@/api/services/AuthService';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -101,7 +101,7 @@ async function register() {
   if (!isFormValid(form)) return;
 
   isSubmitting.value = true;
-  const { data, error } = await AuthService.register(userRegister.value);
+  const { error } = await AuthService.register(userRegister.value);
   isSubmitting.value = false;
 
   if (error) {

@@ -19,7 +19,8 @@ import { computed, nextTick, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { handleError } from '@/utils/error-handler';
 import { QSelect } from 'quasar';
-import SupplierService, { SuppliersListQueryParams, SuppliersListResponse } from '@/api/services/SupplierService';
+import type { SuppliersListQueryParams, SuppliersListResponse } from '@/api/services/SupplierService';
+import SupplierService from '@/api/services/SupplierService';
 
 export interface SupplierSelectData {
   id: string;
@@ -81,7 +82,7 @@ onScroll({ to: -1, ref: null });
 
 async function filterFn(
   val: string,
-  doneFn: (callbackFn: () => void, afterFn?: ((ref: QSelect) => void) | undefined) => void,
+  doneFn: (callbackFn: () => void, afterFn?: ((ref: QSelect) => void)  ) => void,
 ) {
   if (val === filter.value) {
     doneFn(() => {});

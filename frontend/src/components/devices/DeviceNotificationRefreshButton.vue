@@ -36,7 +36,7 @@ import { useInterval } from '@/composables/useInterval';
 
 const { t } = useI18n();
 
-const props = defineProps({
+defineProps({
   loading: {
     type: Boolean,
     default: false,

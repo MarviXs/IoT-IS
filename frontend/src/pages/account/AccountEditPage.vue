@@ -58,7 +58,7 @@ const isUpdatingPassword = ref(false);
 
 async function updatePassword(oldPw: string, newPw: string) {
   isUpdatingPassword.value = true;
-  const { data, error } = await AuthService.updatePassword(oldPw, newPw);
+  const { error } = await AuthService.updatePassword(oldPw, newPw);
   isUpdatingPassword.value = false;
 
   if (error) {
@@ -74,7 +74,7 @@ async function updatePassword(oldPw: string, newPw: string) {
 const updatingEmail = ref(false);
 async function updateEmail(email: string) {
   updatingEmail.value = true;
-  const { data, error } = await AuthService.updateEmail(email);
+  const { error } = await AuthService.updateEmail(email);
   updatingEmail.value = false;
 
   if (error) {

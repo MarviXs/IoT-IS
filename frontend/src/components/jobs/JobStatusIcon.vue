@@ -8,9 +8,9 @@
 </template>
 
 <script setup lang="ts">
-import { JobStatus } from '@/api/services/JobService';
+import type { JobStatus } from '@/api/services/JobService';
 import { jobStatusColors, jobStatusIcon } from '@/utils/job-status-look';
-import { PropType } from 'vue';
+import type { PropType } from 'vue';
 
 const props = defineProps({
   status: {

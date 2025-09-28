@@ -11,7 +11,8 @@
 
 <script setup lang="ts">
 // import { DeviceStatus } from '@/models/Device';
-import { PropType, computed } from 'vue';
+import type { PropType} from 'vue';
+import { computed } from 'vue';
 import { mdiConnection, mdiWifi } from '@quasar/extras/mdi-v7';
 
 const props = defineProps({

@@ -74,23 +74,21 @@
 </template>
 
 <script setup lang="ts">
-import { QTableProps } from 'quasar';
+import type { QTableProps } from 'quasar';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { mdiBookOutline, mdiPencil, mdiTrashCanOutline } from '@quasar/extras/mdi-v7';
 import { mdiPlus } from '@quasar/extras/mdi-v7';
 import DeleteRecipeDialog from '@/components/recipes/DeleteRecipeDialog.vue';
 import SearchBar from '@/components/core/SearchBar.vue';
-import { useAuthStore } from '@/stores/auth-store';
-import { PaginationClient, PaginationTable } from '@/models/Pagination';
-import { RecipesQueryParams, RecipesResponse } from '@/api/services/RecipeService';
+import type { PaginationClient, PaginationTable } from '@/models/Pagination';
+import type { RecipesQueryParams, RecipesResponse } from '@/api/services/RecipeService';
 import { useRoute } from 'vue-router';
 import RecipeService from '@/api/services/RecipeService';
 import { handleError } from '@/utils/error-handler';
 import { watchDebounced } from '@vueuse/core';
 
 const { t } = useI18n();
-const authStore = useAuthStore();
 const route = useRoute();
 const deviceTemplateId = route.params.id as string;
 

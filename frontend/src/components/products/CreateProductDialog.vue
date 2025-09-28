@@ -13,8 +13,10 @@ import { handleError } from '@/utils/error-handler';
 import { toast } from 'vue3-toastify';
 import { useI18n } from 'vue-i18n';
 import DialogCommon from '@/components/core/DialogCommon.vue';
-import ProductForm, { ProductFormData } from './ProductForm.vue';
-import ProductService, { CreateProductParams } from '@/api/services/ProductService';
+import type { ProductFormData } from './ProductForm.vue';
+import ProductForm from './ProductForm.vue';
+import type { CreateProductParams } from '@/api/services/ProductService';
+import ProductService from '@/api/services/ProductService';
 
 const isDialogOpen = defineModel<boolean>();
 const emit = defineEmits(['onCreate']);
@@ -75,6 +77,7 @@ async function createProduct() {
   const createRequest: CreateProductParams = {
     code: product.value.code!,
     pluCode: product.value.pluCode,
+    eanCode: product.value.eanCode,
     latinName: product.value.latinName,
     czechName: product.value.czechName,
     flowerLeafDescription: product.value.flowerLeafDescription,
@@ -86,7 +89,6 @@ async function createProduct() {
     categoryId: product.value.category?.id!,
     vatCategoryId: product.value.vatCategory?.id!,
     supplierId: product.value.supplier?.id!,
-    cCode: product.value.cCode,
     country: product.value.country,
     city: product.value.city,
     greenhouseNumber: product.value.greenhouseNumber,

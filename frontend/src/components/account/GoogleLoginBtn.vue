@@ -21,7 +21,7 @@ const router = useRouter();
 
 async function login(response: { credential: string }) {
   loading.value = true;
-  const { data, error } = await authStore.loginByGoogle(response.credential);
+  const { error } = await authStore.loginByGoogle(response.credential);
   loading.value = false;
 
   if (error) {

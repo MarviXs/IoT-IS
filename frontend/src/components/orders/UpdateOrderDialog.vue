@@ -45,7 +45,7 @@ watch(isDialogOpen, async (val) => {
   }
 });
 
-var orderId = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id;
+let orderId = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id;
 onMounted(() => {
   orderId = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id || '';
 });
