@@ -134,7 +134,9 @@ public static class GetSensorDataPoints
                     baseQuery = baseQuery.Where(d => d.Latitude != null && d.Longitude != null);
                 }
 
-                query = baseQuery.OrderByDescending(d => d.TimeStamp).Select(d => new Response(d.TimeStamp, d.Value, d.Latitude, d.Longitude));
+                query = baseQuery
+                    .OrderByDescending(d => d.TimeStamp)
+                    .Select(d => new Response(d.TimeStamp, d.Value, d.Latitude, d.Longitude, d.GridX, d.GridY));
             }
 
             var response = await query.ToListAsync(cancellationToken);
@@ -184,7 +186,9 @@ public static class GetSensorDataPoints
                     break;
             }
 
-            return timescaleContext.DataPoints.FromSql(queryString).Select(d => new Response(d.TimeStamp, d.Value, d.Latitude, d.Longitude));
+            return timescaleContext
+                .DataPoints.FromSql(queryString)
+                .Select(d => new Response(d.TimeStamp, d.Value, d.Latitude, d.Longitude, d.GridX, d.GridY));
         }
 
         private IQueryable<Response> GetQueryBasedOnTimeBucket(Query message)
@@ -202,22 +206,38 @@ public static class GetSensorDataPoints
 
             IQueryable<Response> responseQuery = message.Parameters.TimeBucketMethod switch
             {
-                TimeBucketMethod.Sum => baseQuery.Select(g => new Response(g.Key, g.Sum(d => d.Value), g.Average(d => d.Latitude), g.Average(d => d.Longitude))),
-                TimeBucketMethod.Max => baseQuery.Select(g => new Response(g.Key, g.Max(d => d.Value), g.Average(d => d.Latitude), g.Average(d => d.Longitude))),
-                TimeBucketMethod.Min => baseQuery.Select(g => new Response(g.Key, g.Min(d => d.Value), g.Average(d => d.Latitude), g.Average(d => d.Longitude))),
+                TimeBucketMethod.Sum
+                    => baseQuery.Select(
+                        g => new Response(g.Key, g.Sum(d => d.Value), g.Average(d => d.Latitude), g.Average(d => d.Longitude), null, null)
+                    ),
+                TimeBucketMethod.Max
+                    => baseQuery.Select(
+                        g => new Response(g.Key, g.Max(d => d.Value), g.Average(d => d.Latitude), g.Average(d => d.Longitude), null, null)
+                    ),
+                TimeBucketMethod.Min
+                    => baseQuery.Select(
+                        g => new Response(g.Key, g.Min(d => d.Value), g.Average(d => d.Latitude), g.Average(d => d.Longitude), null, null)
+                    ),
                 TimeBucketMethod.StdDev
-                    => baseQuery.Select(g => new Response(
-                        g.Key,
-                        NpgsqlAggregateDbFunctionsExtensions.StandardDeviationSample(EF.Functions, g.Select(d => (double)d.Value!)),
-                        NpgsqlAggregateDbFunctionsExtensions.StandardDeviationSample(EF.Functions, g.Select(d => (double)d.Latitude!)),
-                        NpgsqlAggregateDbFunctionsExtensions.StandardDeviationSample(EF.Functions, g.Select(d => (double)d.Longitude!))
-                    )),
-                _ => baseQuery.Select(g => new Response(g.Key, g.Average(d => d.Value), g.Average(d => d.Latitude), g.Average(d => d.Longitude))),
+                    => baseQuery.Select(
+                        g => new Response(
+                            g.Key,
+                            NpgsqlAggregateDbFunctionsExtensions.StandardDeviationSample(EF.Functions, g.Select(d => (double)d.Value!)),
+                            NpgsqlAggregateDbFunctionsExtensions.StandardDeviationSample(EF.Functions, g.Select(d => (double)d.Latitude!)),
+                            NpgsqlAggregateDbFunctionsExtensions.StandardDeviationSample(EF.Functions, g.Select(d => (double)d.Longitude!)),
+                            null,
+                            null
+                        )
+                    ),
+                _
+                    => baseQuery.Select(
+                        g => new Response(g.Key, g.Average(d => d.Value), g.Average(d => d.Latitude), g.Average(d => d.Longitude), null, null)
+                    ),
             };
 
             return responseQuery;
         }
     }
 
-    public record Response(DateTimeOffset Ts, double? Value, double? Latitude, double? Longitude);
+    public record Response(DateTimeOffset Ts, double? Value, double? Latitude, double? Longitude, int? GridX, int? GridY);
 }

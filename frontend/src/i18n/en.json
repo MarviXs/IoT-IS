@@ -139,6 +139,7 @@
     "grid_settings": "Grid",
     "grid_rows": "Grid rows",
     "grid_columns": "Grid columns",
+    "grid_not_configured": "Grid layout is not configured for this device template.",
     "delete_device_template": "Delete device template",
     "delete_device_template_desc": "Are you sure you want to delete this device template?",
     "toasts": {

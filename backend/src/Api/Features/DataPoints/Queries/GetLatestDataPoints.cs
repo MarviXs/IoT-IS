@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using Carter;
 using Fei.Is.Api.Common.Errors;
@@ -79,9 +80,20 @@ public static class GetLatestDataPoints
             var cachedLatestDataPoint = await redis.Db.StringGetAsync(redisKey);
             if (cachedLatestDataPoint.HasValue)
             {
-                if (double.TryParse(cachedLatestDataPoint.ToString(), out double value))
+                try
                 {
-                    return Result.Ok(new Response(value));
+                    var cachedResponse = JsonSerializer.Deserialize<Response>(cachedLatestDataPoint!);
+                    if (cachedResponse != null)
+                    {
+                        return Result.Ok(cachedResponse);
+                    }
+                }
+                catch (JsonException)
+                {
+                    if (double.TryParse(cachedLatestDataPoint.ToString(), out double value))
+                    {
+                        return Result.Ok(new Response(value, null, null));
+                    }
                 }
             }
 
@@ -94,11 +106,15 @@ public static class GetLatestDataPoints
                 return Result.Fail(new NotFoundError());
             }
 
-            await redis.Db.StringSetAsync(redisKey, latestDataPoint.Value.ToString(), TimeSpan.FromHours(1));
-            var response = new Response(latestDataPoint.Value);
+            var response = new Response(latestDataPoint.Value, latestDataPoint.GridX, latestDataPoint.GridY);
+            await redis.Db.StringSetAsync(
+                redisKey,
+                JsonSerializer.Serialize(response),
+                TimeSpan.FromHours(1)
+            );
             return Result.Ok(response);
         }
     }
 
-    public record Response(double? Value);
+    public record Response(double? Value, int? GridX, int? GridY);
 }

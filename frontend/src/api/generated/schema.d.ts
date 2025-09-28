@@ -2096,6 +2096,10 @@ export interface components {
         "Fei.Is.Api.Features.DataPoints.Queries.GetLatestDataPoints.Response": {
             /** Format: double */
             value: number | null;
+            /** Format: int32 */
+            gridX?: number | null;
+            /** Format: int32 */
+            gridY?: number | null;
         };
         /** @enum {string} */
         "Fei.Is.Api.Features.DataPoints.Queries.GetSensorDataPoints.DownsampleMethod": "Asap" | "Lttb";
@@ -2108,6 +2112,10 @@ export interface components {
             latitude?: number | null;
             /** Format: double */
             longitude?: number | null;
+            /** Format: int32 */
+            gridX?: number | null;
+            /** Format: int32 */
+            gridY?: number | null;
         };
         /** @enum {string} */
         "Fei.Is.Api.Features.DataPoints.Queries.GetSensorDataPoints.TimeBucketMethod": "Average" | "Max" | "Min" | "StdDev" | "Sum";
@@ -2277,6 +2285,10 @@ export interface components {
             name: string;
             sensors: components["schemas"]["Fei.Is.Api.Features.Devices.Queries.GetDeviceById.SensorResponse"][];
             deviceType: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceType"];
+            /** Format: int32 */
+            gridRowSpan?: number | null;
+            /** Format: int32 */
+            gridColumnSpan?: number | null;
         };
         "Fei.Is.Api.Features.Devices.Queries.GetDevices.Response": {
             /** Format: uuid */

@@ -43,4 +43,10 @@ const valueRounded = computed(() => {
   width: 100%;
   background-color: v-bind(color);
 }
+
+@media (max-width: 600px) {
+  .sensor-value {
+    font-size: 1rem;
+  }
+}
 </style>

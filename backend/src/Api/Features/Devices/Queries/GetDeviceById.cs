@@ -118,7 +118,14 @@ public static class GetDeviceById
 
     public record SensorResponse(Guid Id, string Tag, string Name, string? Unit, int? AccuracyDecimals, int Order, string? Group);
 
-    public record TemplateResponse(Guid Id, string Name, SensorResponse[] Sensors, DeviceType DeviceType, int? GridRowSpan = null, int? GridColumnSpan = null);
+    public record TemplateResponse(
+        Guid Id,
+        string Name,
+        SensorResponse[] Sensors,
+        DeviceType DeviceType,
+        int? GridRowSpan = null,
+        int? GridColumnSpan = null
+    );
 
     public record Response(
         Guid Id,
