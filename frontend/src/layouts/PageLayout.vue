@@ -59,7 +59,6 @@ const currentItem = computed(() => {
 
 .actions {
   display: flex;
-  align-items: center;
   justify-content: flex-end;
   flex-wrap: wrap;
   gap: 0.75rem 1rem;

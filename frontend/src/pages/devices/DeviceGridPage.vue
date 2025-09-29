@@ -13,7 +13,7 @@
         @update:model-value="onTimeRangeChanged"
       />
       <q-btn
-        class="col-grow col-lg-auto tw-bg-white"
+        class="col-grow col-lg-auto refresh-btn"
         unelevated
         no-caps
         color="white"
@@ -285,11 +285,7 @@ function refreshGrid() {
   }
 }
 
-function resolveGridIndex(
-  rawIndex: number | null | undefined,
-  size: number,
-  axis: 'x' | 'y',
-): number | null {
+function resolveGridIndex(rawIndex: number | null | undefined, size: number, axis: 'x' | 'y'): number | null {
   if (rawIndex === null || rawIndex === undefined) {
     return null;
   }
@@ -442,5 +438,9 @@ interface SensorGridEntry {
   background-color: #ffffff;
   border-radius: 8px;
   border: 1px dashed #e0e0e0;
+}
+
+.refresh-btn {
+  border: 1px solid rgb(187, 187, 187);
 }
 </style>
