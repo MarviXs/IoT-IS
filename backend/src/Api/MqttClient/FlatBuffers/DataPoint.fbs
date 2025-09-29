@@ -4,4 +4,8 @@ table DataPointFbs {
     tag: string;
     value: double;
     ts: long;
+    latitude: double;
+    longitude: double;
+    grid_x: int;
+    grid_y: int;
 }

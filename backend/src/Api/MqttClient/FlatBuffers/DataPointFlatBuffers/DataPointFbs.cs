@@ -13,7 +13,7 @@ public struct DataPointFbs : IFlatbufferObject
 {
   private Table __p;
   public ByteBuffer ByteBuffer { get { return __p.bb; } }
-  public static void ValidateVersion() { FlatBufferConstants.FLATBUFFERS_24_3_25(); }
+  public static void ValidateVersion() { FlatBufferConstants.FLATBUFFERS_25_2_10(); }
   public static DataPointFbs GetRootAsDataPointFbs(ByteBuffer _bb) { return GetRootAsDataPointFbs(_bb, new DataPointFbs()); }
   public static DataPointFbs GetRootAsDataPointFbs(ByteBuffer _bb, DataPointFbs obj) { return (obj.__assign(_bb.GetInt(_bb.Position) + _bb.Position, _bb)); }
   public void __init(int _i, ByteBuffer _bb) { __p = new Table(_i, _bb); }
@@ -28,57 +28,41 @@ public struct DataPointFbs : IFlatbufferObject
   public byte[] GetTagArray() { return __p.__vector_as_array<byte>(4); }
   public double Value { get { int o = __p.__offset(6); return o != 0 ? __p.bb.GetDouble(o + __p.bb_pos) : (double)0.0; } }
   public long Ts { get { int o = __p.__offset(8); return o != 0 ? __p.bb.GetLong(o + __p.bb_pos) : (long)0; } }
+  public double Latitude { get { int o = __p.__offset(10); return o != 0 ? __p.bb.GetDouble(o + __p.bb_pos) : (double)0.0; } }
+  public double Longitude { get { int o = __p.__offset(12); return o != 0 ? __p.bb.GetDouble(o + __p.bb_pos) : (double)0.0; } }
+  public int GridX { get { int o = __p.__offset(14); return o != 0 ? __p.bb.GetInt(o + __p.bb_pos) : (int)0; } }
+  public int GridY { get { int o = __p.__offset(16); return o != 0 ? __p.bb.GetInt(o + __p.bb_pos) : (int)0; } }
 
   public static Offset<DataPointFlatBuffers.DataPointFbs> CreateDataPointFbs(FlatBufferBuilder builder,
       StringOffset tagOffset = default(StringOffset),
       double value = 0.0,
-      long ts = 0) {
-    builder.StartTable(3);
+      long ts = 0,
+      double latitude = 0.0,
+      double longitude = 0.0,
+      int grid_x = 0,
+      int grid_y = 0) {
+    builder.StartTable(7);
+    DataPointFbs.AddLongitude(builder, longitude);
+    DataPointFbs.AddLatitude(builder, latitude);
     DataPointFbs.AddTs(builder, ts);
     DataPointFbs.AddValue(builder, value);
+    DataPointFbs.AddGridY(builder, grid_y);
+    DataPointFbs.AddGridX(builder, grid_x);
     DataPointFbs.AddTag(builder, tagOffset);
     return DataPointFbs.EndDataPointFbs(builder);
   }
 
-  public static void StartDataPointFbs(FlatBufferBuilder builder) { builder.StartTable(3); }
+  public static void StartDataPointFbs(FlatBufferBuilder builder) { builder.StartTable(7); }
   public static void AddTag(FlatBufferBuilder builder, StringOffset tagOffset) { builder.AddOffset(0, tagOffset.Value, 0); }
   public static void AddValue(FlatBufferBuilder builder, double value) { builder.AddDouble(1, value, 0.0); }
   public static void AddTs(FlatBufferBuilder builder, long ts) { builder.AddLong(2, ts, 0); }
+  public static void AddLatitude(FlatBufferBuilder builder, double latitude) { builder.AddDouble(3, latitude, 0.0); }
+  public static void AddLongitude(FlatBufferBuilder builder, double longitude) { builder.AddDouble(4, longitude, 0.0); }
+  public static void AddGridX(FlatBufferBuilder builder, int gridX) { builder.AddInt(5, gridX, 0); }
+  public static void AddGridY(FlatBufferBuilder builder, int gridY) { builder.AddInt(6, gridY, 0); }
   public static Offset<DataPointFlatBuffers.DataPointFbs> EndDataPointFbs(FlatBufferBuilder builder) {
     int o = builder.EndTable();
     return new Offset<DataPointFlatBuffers.DataPointFbs>(o);
-  }
-  public DataPointFbsT UnPack() {
-    var _o = new DataPointFbsT();
-    this.UnPackTo(_o);
-    return _o;
-  }
-  public void UnPackTo(DataPointFbsT _o) {
-    _o.Tag = this.Tag;
-    _o.Value = this.Value;
-    _o.Ts = this.Ts;
-  }
-  public static Offset<DataPointFlatBuffers.DataPointFbs> Pack(FlatBufferBuilder builder, DataPointFbsT _o) {
-    if (_o == null) return default(Offset<DataPointFlatBuffers.DataPointFbs>);
-    var _tag = _o.Tag == null ? default(StringOffset) : builder.CreateString(_o.Tag);
-    return CreateDataPointFbs(
-      builder,
-      _tag,
-      _o.Value,
-      _o.Ts);
-  }
-}
-
-public class DataPointFbsT
-{
-  public string Tag { get; set; }
-  public double Value { get; set; }
-  public long Ts { get; set; }
-
-  public DataPointFbsT() {
-    this.Tag = null;
-    this.Value = 0.0;
-    this.Ts = 0;
   }
 }
 
@@ -91,6 +75,10 @@ static public class DataPointFbsVerify
       && verifier.VerifyString(tablePos, 4 /*Tag*/, false)
       && verifier.VerifyField(tablePos, 6 /*Value*/, 8 /*double*/, 8, false)
       && verifier.VerifyField(tablePos, 8 /*Ts*/, 8 /*long*/, 8, false)
+      && verifier.VerifyField(tablePos, 10 /*Latitude*/, 8 /*double*/, 8, false)
+      && verifier.VerifyField(tablePos, 12 /*Longitude*/, 8 /*double*/, 8, false)
+      && verifier.VerifyField(tablePos, 14 /*GridX*/, 4 /*int*/, 4, false)
+      && verifier.VerifyField(tablePos, 16 /*GridY*/, 4 /*int*/, 4, false)
       && verifier.VerifyTableEnd(tablePos);
   }
 }
