@@ -48,12 +48,30 @@
                   <template #prepend>
                     <div
                       class="color-preview"
+                      role="button"
+                      tabindex="0"
+                      :aria-label="t('device_template.control_color')"
                       :style="{ backgroundColor: getPreviewColor(controls[index].color) }"
+                      @click="openColorPicker(control.localId)"
+                      @keydown.enter.prevent="openColorPicker(control.localId)"
+                      @keydown.space.prevent="openColorPicker(control.localId)"
                     ></div>
                   </template>
                   <template #append>
-                    <q-btn class="color-picker-button" dense flat round :icon="mdiPalette">
-                      <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                    <q-btn
+                      class="color-picker-button"
+                      dense
+                      flat
+                      round
+                      :icon="mdiPalette"
+                      @click.stop="openColorPicker(control.localId)"
+                    >
+                      <q-popup-proxy
+                        cover
+                        transition-show="scale"
+                        transition-hide="scale"
+                        :ref="(el) => setColorPickerRef(control.localId, el)"
+                      >
                         <q-color
                           v-model="controls[index].color"
                           format="hex"
@@ -116,9 +134,10 @@
 import { mdiDrag, mdiPalette, mdiPlus, mdiTrashCanOutline } from '@quasar/extras/mdi-v7';
 import { VueDraggable } from 'vue-draggable-plus';
 import { onMounted, ref } from 'vue';
+import type { ComponentPublicInstance } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
-import type { QForm } from 'quasar';
+import type { QForm, QPopupProxy } from 'quasar';
 import { toast } from 'vue3-toastify';
 import { handleError } from '@/utils/error-handler';
 import RecipeService from '@/api/services/RecipeService';
@@ -148,6 +167,7 @@ const controls = ref<ControlFormData[]>([]);
 const isLoading = ref(false);
 const isSaving = ref(false);
 const formRef = ref<QForm>();
+const colorPickerRefs = ref<Record<string, QPopupProxy | null>>({});
 
 const recipeOptions = ref<Option[]>([]);
 
@@ -186,6 +206,24 @@ async function loadData() {
   } finally {
     isLoading.value = false;
   }
+}
+
+type PopupProxyInstance = QPopupProxy & ComponentPublicInstance;
+
+function setColorPickerRef(
+  localId: string,
+  el: PopupProxyInstance | Element | ComponentPublicInstance | null,
+) {
+  if (el && 'show' in el && typeof (el as QPopupProxy).show === 'function') {
+    colorPickerRefs.value[localId] = el as unknown as QPopupProxy;
+  } else if (el === null) {
+    delete colorPickerRefs.value[localId];
+  }
+}
+
+function openColorPicker(localId: string) {
+  const popup = colorPickerRefs.value[localId];
+  popup?.show();
 }
 
 async function loadRecipes() {
@@ -255,7 +293,10 @@ function addControl() {
 }
 
 function removeControl(index: number) {
-  controls.value.splice(index, 1);
+  const [removed] = controls.value.splice(index, 1);
+  if (removed) {
+    delete colorPickerRefs.value[removed.localId];
+  }
 }
 
 async function submitForm() {
