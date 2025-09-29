@@ -176,6 +176,15 @@
     "init_window": "Iniciar ventana de 1min",
     "share_device": "Compartir dispositivo",
     "shared_with": "Compartido con",
+    "controls": {
+      "title": "Controles",
+      "no_controls": "No hay controles disponibles para este dispositivo.",
+      "toasts": {
+        "load_failed": "¡Error al cargar los controles!",
+        "start_failed": "¡Error al iniciar el control!",
+        "start_success": "¡Control iniciado!"
+      }
+    },
     "delete_device": "Eliminar dispositivo",
     "delete_device_desc": "¿Estás seguro de que quieres eliminar este dispositivo?",
     "toasts": {

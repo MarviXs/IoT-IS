@@ -185,6 +185,15 @@
     "init_window": "Inicializovať 1min okno",
     "share_device": "Zdieľať zariadenie",
     "shared_with": "Zdieľané s",
+    "controls": {
+      "title": "Ovládania",
+      "no_controls": "Pre toto zariadenie nie sú dostupné žiadne ovládania.",
+      "toasts": {
+        "load_failed": "Načítanie ovládaní zlyhalo!",
+        "start_failed": "Spustenie ovládania zlyhalo!",
+        "start_success": "Ovládanie spustené!"
+      }
+    },
     "delete_device": "Vymazať zariadenie",
     "delete_device_desc": "Ste si istý, že chcete vymazať toto zariadenie?",
     "toasts": {

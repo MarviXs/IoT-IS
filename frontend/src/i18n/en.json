@@ -197,6 +197,15 @@
     "share_device": "Share device",
     "shared_with": "Shared with",
     "no_shared_users": "No users shared with",
+    "controls": {
+      "title": "Controls",
+      "no_controls": "No controls available for this device.",
+      "toasts": {
+        "load_failed": "Loading controls failed!",
+        "start_failed": "Starting control failed!",
+        "start_success": "Control started!"
+      }
+    },
     "delete_device": "Delete device",
     "delete_device_desc": "Are you sure you want to delete this device?",
     "toasts": {

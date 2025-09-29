@@ -176,6 +176,15 @@
     "init_window": "Initialiser une fenêtre de 1min",
     "share_device": "Partager l'appareil",
     "shared_with": "Partagé avec",
+    "controls": {
+      "title": "Contrôles",
+      "no_controls": "Aucun contrôle disponible pour cet appareil.",
+      "toasts": {
+        "load_failed": "Échec du chargement des contrôles !",
+        "start_failed": "Échec du démarrage du contrôle !",
+        "start_success": "Contrôle démarré !"
+      }
+    },
     "delete_device": "Supprimer l'appareil",
     "delete_device_desc": "Êtes-vous sûr de vouloir supprimer cet appareil ?",
     "toasts": {

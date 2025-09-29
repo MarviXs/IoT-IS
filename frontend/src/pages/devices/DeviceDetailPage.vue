@@ -31,6 +31,16 @@
       />
       <q-btn
         class="shadow bg-white col-grow col-lg-auto"
+        :to="`/devices/${device.id}/controls`"
+        text-color="grey-color"
+        unelevated
+        no-caps
+        size="15px"
+        :label="t('device_template.controls')"
+        :icon="mdiTuneVariant"
+      />
+      <q-btn
+        class="shadow bg-white col-grow col-lg-auto"
         :to="`/devices/${device.id}/grid`"
         text-color="grey-color"
         unelevated
@@ -102,7 +112,7 @@ import { deviceToTreeNode, extractNodeKeys } from '@/utils/sensor-nodes';
 import SensorSelectionTree from '@/components/datapoints/SensorSelectionTree.vue';
 import CurrentJobCard from '@/components/jobs/CurrentJobCard.vue';
 import { useI18n } from 'vue-i18n';
-import { mdiListStatus, mdiMapMarker, mdiPencil, mdiViewGridOutline } from '@quasar/extras/mdi-v7';
+import { mdiListStatus, mdiMapMarker, mdiPencil, mdiTuneVariant, mdiViewGridOutline } from '@quasar/extras/mdi-v7';
 import PageLayout from '@/layouts/PageLayout.vue';
 import { handleError } from '@/utils/error-handler';
 import type { DeviceResponse } from '@/api/services/DeviceService';
