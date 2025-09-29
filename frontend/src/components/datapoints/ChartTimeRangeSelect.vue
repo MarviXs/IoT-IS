@@ -53,13 +53,27 @@
 
 <script setup lang="ts">
 import { format, subSeconds } from 'date-fns';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
+import type { PropType } from 'vue';
 import type { PredefinedTimeRange } from '@/models/TimeRange';
 import { useI18n } from 'vue-i18n';
 import { mdiClockOutline } from '@quasar/extras/mdi-v7';
 import DateTimeInput from './DateTimeInput.vue';
 
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits(['update:modelValue', 'time-range-changed']);
+
+const props = defineProps({
+  initialTimeRange: {
+    type: String,
+    required: false,
+    default: undefined,
+  },
+  initialCustomTimeRange: {
+    type: Object as PropType<{ from: string; to: string }>,
+    required: false,
+    default: undefined,
+  },
+});
 defineExpose({
   updateTimeRange,
 });
@@ -131,12 +145,16 @@ const isCustomTimeRangeSelected = ref(false);
 function setCustomTimeRange() {
   isCustomTimeRangeSelected.value = true;
   customTimeRangeDialog.value = false;
+  emit('time-range-changed', 'custom', {
+    ...customTimeRangeSelected.value,
+  });
   updateTimeRange();
 }
 
 function setPredefinedTimeRange(val: PredefinedTimeRange) {
   selectedTimeRangeIndex.value = timeRanges.value.findIndex((r) => r.name === val.name);
   isCustomTimeRangeSelected.value = false;
+  emit('time-range-changed', val.name);
   updateTimeRange();
 }
 
@@ -162,7 +180,41 @@ function updateTimeRange() {
   }
   emit('update:modelValue', newVal);
 }
-updateTimeRange();
+
+watch(
+  () => props.initialCustomTimeRange,
+  (range) => {
+    if (range?.from && range?.to) {
+      customTimeRangeSelected.value = { ...range };
+      isCustomTimeRangeSelected.value = true;
+      emit('time-range-changed', 'custom', { ...range });
+      updateTimeRange();
+    }
+  },
+  { immediate: true, deep: true },
+);
+
+watch(
+  () => props.initialTimeRange,
+  (range) => {
+    if (!range || range === 'custom') {
+      return;
+    }
+
+    const index = timeRanges.value.findIndex((r) => r.name === range);
+    if (index !== -1) {
+      selectedTimeRangeIndex.value = index;
+      isCustomTimeRangeSelected.value = false;
+      emit('time-range-changed', range);
+      updateTimeRange();
+    }
+  },
+  { immediate: true },
+);
+
+if (!props.initialCustomTimeRange && !props.initialTimeRange) {
+  updateTimeRange();
+}
 </script>
 
 <style lang="scss" scoped></style>

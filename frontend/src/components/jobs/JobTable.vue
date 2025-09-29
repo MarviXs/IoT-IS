@@ -46,6 +46,20 @@
             {{ t('global.open') }}
           </q-tooltip>
         </q-btn>
+        <q-btn
+          class="q-ml-sm"
+          :disable="!tableProps.row.finishedAt"
+          :icon="mdiChartLine"
+          color="grey-color"
+          flat
+          round
+          :to="getGraphRoute(tableProps.row)"
+        >
+          <q-tooltip content-style="font-size: 11px" :offset="[0, 4]">
+            <span v-if="tableProps.row.finishedAt">{{ t('job.view_graph') }}</span>
+            <span v-else>{{ t('job.graph_unavailable') }}</span>
+          </q-tooltip>
+        </q-btn>
       </q-td>
     </template>
   </q-table>
@@ -55,7 +69,7 @@
 import type { QTableProps } from 'quasar';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { mdiListStatus, mdiOpenInNew } from '@quasar/extras/mdi-v7';
+import { mdiListStatus, mdiOpenInNew, mdiChartLine } from '@quasar/extras/mdi-v7';
 import { RouterLink } from 'vue-router';
 import JobStatusIcon from '@/components/jobs/JobStatusIcon.vue';
 import type { JobsQueryParams, JobsResponse } from '@/api/services/JobService';
@@ -116,6 +130,23 @@ async function getJobs(paginationTable: PaginationTable) {
   pagination.value.rowsPerPage = data.pageSize;
 }
 getJobs(pagination.value);
+
+type JobTableRow = NonNullable<JobsResponse['items']>[number];
+
+function getGraphRoute(job: JobTableRow) {
+  if (!job.finishedAt) {
+    return undefined;
+  }
+
+  return {
+    path: `/jobs/${job.id}/graph`,
+    query: {
+      device: job.device.id,
+      from: job.createdAt,
+      to: job.finishedAt,
+    },
+  };
+}
 
 const columns = computed<QTableProps['columns']>(() => {
   const baseColumns: QTableProps['columns'] = [

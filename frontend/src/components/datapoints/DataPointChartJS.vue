@@ -6,8 +6,8 @@
       <chart-time-range-select
         class="col-grow col-lg-auto"
         ref="timeRangeSelectRef"
-        :initial-time-range="storedTimeRange === 'custom' ? undefined : storedTimeRange"
-        :initial-custom-time-range="storedTimeRange === 'custom' ? storedCustomTimeRange : undefined"
+        :initial-time-range="chartInitialTimeRange"
+        :initial-custom-time-range="chartInitialCustomTimeRange"
         @update:model-value="updateTimeRange"
         @time-range-changed="onTimeRangeChanged"
       ></chart-time-range-select>
@@ -80,7 +80,7 @@
 </template>
 
 <script setup lang="ts">
-import type { PropType} from 'vue';
+import type { PropType } from 'vue';
 import { ref, reactive, onMounted, shallowRef, watch, watchEffect, computed } from 'vue';
 import ChartTimeRangeSelect from '@/components/datapoints/ChartTimeRangeSelect.vue';
 import type { TimeRange } from '@/models/TimeRange';
@@ -116,6 +116,21 @@ const props = defineProps({
     type: Array as PropType<SensorData[]>,
     required: true,
   },
+  initialTimeRange: {
+    type: String,
+    required: false,
+    default: undefined,
+  },
+  initialCustomTimeRange: {
+    type: Object as PropType<{ from: string; to: string }>,
+    required: false,
+    default: undefined,
+  },
+  timeRangeStorageKey: {
+    type: String,
+    required: false,
+    default: undefined,
+  },
 });
 
 const tickedNodes = defineModel('tickedNodes', {
@@ -131,7 +146,9 @@ const deviceId = computed(() => props.sensors[0]?.deviceId ?? 'unknown');
 // Store ticked sensor state per device
 const storedTickedNodes = useStorage<string[]>('tickedSensors_unknown', []);
 
-const graphOptions = useStorage<GraphOptions>(`graphOptions_${deviceId.value}`, {
+const storageKeySuffix = computed(() => props.timeRangeStorageKey ?? deviceId.value);
+
+const graphOptions = useStorage<GraphOptions>(`graphOptions_${storageKeySuffix.value}`, {
   refreshInterval: 30,
   timeFormat: '24h',
   interpolationMethod: 'straight',
@@ -145,8 +162,11 @@ const graphOptions = useStorage<GraphOptions>(`graphOptions_${deviceId.value}`, 
   timeBucketMethod: 'Average',
 });
 
-const storedTimeRange = useStorage(`chartTimeRange_${deviceId.value}`, '6h');
-const storedCustomTimeRange = useStorage(`chartCustomTimeRange_${deviceId.value}`, { from: '', to: '' });
+const storedTimeRange = useStorage(`chartTimeRange_${storageKeySuffix.value}`, '6h');
+const storedCustomTimeRange = useStorage(`chartCustomTimeRange_${storageKeySuffix.value}`, {
+  from: '',
+  to: '',
+});
 
 const { t } = useI18n();
 
@@ -166,7 +186,6 @@ const currentXMax = ref<string>();
 function onTimeRangeChanged(timeRangeName: string, customRangeData?: { from: string; to: string } | null) {
   storedTimeRange.value = timeRangeName;
 
-  // If it's a custom time range, save the custom range data
   if (timeRangeName === 'custom' && customRangeData) {
     storedCustomTimeRange.value = customRangeData;
   }
@@ -430,6 +449,47 @@ watch(
 watchEffect(() => {
   updateDatasetVisibility(tickedNodes.value);
 });
+
+const chartInitialTimeRange = computed(() => {
+  if (props.initialCustomTimeRange) {
+    return undefined;
+  }
+
+  if (props.initialTimeRange && props.initialTimeRange !== 'custom') {
+    return props.initialTimeRange;
+  }
+
+  return storedTimeRange.value === 'custom' ? undefined : storedTimeRange.value;
+});
+
+const chartInitialCustomTimeRange = computed(() => {
+  if (props.initialCustomTimeRange) {
+    return props.initialCustomTimeRange;
+  }
+
+  return storedTimeRange.value === 'custom' ? storedCustomTimeRange.value : undefined;
+});
+
+watch(
+  () => props.initialCustomTimeRange,
+  (range) => {
+    if (range?.from && range?.to) {
+      storedTimeRange.value = 'custom';
+      storedCustomTimeRange.value = range;
+    }
+  },
+  { immediate: true, deep: true },
+);
+
+watch(
+  () => props.initialTimeRange,
+  (range) => {
+    if (range && range !== 'custom') {
+      storedTimeRange.value = range;
+    }
+  },
+  { immediate: true },
+);
 
 watch(
   () => isGraphOptionsDialogOpen.value,

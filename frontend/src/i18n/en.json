@@ -311,6 +311,12 @@
     "finished_at": "Finished at",
     "status": "Status",
     "progress": "Progress",
+    "graph": "Graph",
+    "view_graph": "View graph",
+    "graph_unavailable": "Graph available when the job is finished",
+    "graph_missing_range": "Unable to determine the time range for this job.",
+    "graph_no_sensors": "No sensors available for this device.",
+    "graph_load_failed": "Unable to load the job graph.",
     "infinite": "Infinite",
     "infinite_job": "Infinite job",
     "controls": {
