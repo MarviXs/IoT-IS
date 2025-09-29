@@ -118,6 +118,40 @@
     "nothing_here": "Vaya. No hay nada aquí...",
     "go_home": "Ir al inicio"
   },
+  "device_template": {
+    "label": "Plantilla de dispositivo | Plantillas de dispositivos",
+    "template_details": "Detalles de la plantilla",
+    "grid_settings": "Cuadrícula",
+    "grid_rows": "Filas de la cuadrícula",
+    "grid_columns": "Columnas de la cuadrícula",
+    "grid_not_configured": "El diseño de la cuadrícula no está configurado para esta plantilla de dispositivo.",
+    "controls": "Controles",
+    "add_control": "Agregar control",
+    "control_name": "Nombre del control",
+    "control_color": "Color",
+    "control_recipe": "Receta",
+    "control_cycles": "Ciclos",
+    "control_infinite": "Ejecutar indefinidamente",
+    "control_default_name": "Control {index}",
+    "no_controls": "Aún no hay controles configurados",
+    "delete_device_template": "Eliminar plantilla de dispositivo",
+    "delete_device_template_desc": "¿Está seguro de que desea eliminar esta plantilla de dispositivo?",
+    "toasts": {
+      "loading_failed": "¡Error al cargar la plantilla del dispositivo! | ¡Error al cargar las plantillas de dispositivos!",
+      "create_failed": "¡Error al crear la plantilla del dispositivo!",
+      "update_failed": "¡Error al actualizar la plantilla del dispositivo!",
+      "create_success": "¡Plantilla de dispositivo creada!",
+      "update_success": "¡Plantilla de dispositivo actualizada!",
+      "update_controls_success": "¡Controles actualizados!",
+      "delete_success": "¡Plantilla de dispositivo eliminada!",
+      "delete_failed": "¡Error al eliminar la plantilla del dispositivo!"
+    },
+    "rules": {
+      "decimal_min": "¡Los decimales deben ser mayores que 0!",
+      "grid_positive": "¡Los valores de la cuadrícula deben ser mayores que 0!",
+      "cycle_positive": "¡Los ciclos deben ser mayores que 0!"
+    }
+  },
   "device": {
     "label": "Dispositivo | Dispositivos",
     "device_info": "Información del dispositivo",

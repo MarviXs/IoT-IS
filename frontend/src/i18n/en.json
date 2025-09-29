@@ -140,6 +140,15 @@
     "grid_rows": "Grid rows",
     "grid_columns": "Grid columns",
     "grid_not_configured": "Grid layout is not configured for this device template.",
+    "controls": "Controls",
+    "add_control": "Add control",
+    "control_name": "Control name",
+    "control_color": "Color",
+    "control_recipe": "Recipe",
+    "control_cycles": "Cycles",
+    "control_infinite": "Run infinitely",
+    "control_default_name": "Control {index}",
+    "no_controls": "No controls configured yet",
     "delete_device_template": "Delete device template",
     "delete_device_template_desc": "Are you sure you want to delete this device template?",
     "toasts": {
@@ -148,12 +157,14 @@
       "update_failed": "Updating device template failed!",
       "create_success": "Device template created!",
       "update_success": "Device template updated!",
+      "update_controls_success": "Controls updated!",
       "delete_success": "Device template deleted!",
       "delete_failed": "Deleting device template failed!"
     },
     "rules": {
       "decimal_min": "Decimal places must be greater than 0!",
-      "grid_positive": "Grid values must be greater than 0!"
+      "grid_positive": "Grid values must be greater than 0!",
+      "cycle_positive": "Cycles must be greater than 0!"
     }
   },
   "device": {

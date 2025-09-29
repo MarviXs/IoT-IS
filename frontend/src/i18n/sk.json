@@ -127,6 +127,40 @@
     "nothing_here": "Oops. Tu nie je nič...",
     "go_home": "Ísť domov"
   },
+  "device_template": {
+    "label": "Šablóna zariadenia | Šablóny zariadení",
+    "template_details": "Detaily šablóny",
+    "grid_settings": "Mriežka",
+    "grid_rows": "Riadky mriežky",
+    "grid_columns": "Stĺpce mriežky",
+    "grid_not_configured": "Rozloženie mriežky nie je pre túto šablónu zariadenia nastavené.",
+    "controls": "Ovládania",
+    "add_control": "Pridať ovládanie",
+    "control_name": "Názov ovládania",
+    "control_color": "Farba",
+    "control_recipe": "Recept",
+    "control_cycles": "Počet cyklov",
+    "control_infinite": "Spúšťať neobmedzene",
+    "control_default_name": "Ovládanie {index}",
+    "no_controls": "Zatiaľ nie sú nastavené žiadne ovládania",
+    "delete_device_template": "Vymazať šablónu zariadenia",
+    "delete_device_template_desc": "Naozaj chcete vymazať túto šablónu zariadenia?",
+    "toasts": {
+      "loading_failed": "Načítanie šablóny zariadenia zlyhalo! | Načítanie šablón zariadenia zlyhalo!",
+      "create_failed": "Vytvorenie šablóny zariadenia zlyhalo!",
+      "update_failed": "Aktualizácia šablóny zariadenia zlyhala!",
+      "create_success": "Šablóna zariadenia vytvorená!",
+      "update_success": "Šablóna zariadenia aktualizovaná!",
+      "update_controls_success": "Ovládania aktualizované!",
+      "delete_success": "Šablóna zariadenia vymazaná!",
+      "delete_failed": "Vymazanie šablóny zariadenia zlyhalo!"
+    },
+    "rules": {
+      "decimal_min": "Desatinné miesta musia byť väčšie ako 0!",
+      "grid_positive": "Hodnoty mriežky musia byť väčšie ako 0!",
+      "cycle_positive": "Počet cyklov musí byť väčší ako 0!"
+    }
+  },
   "device": {
     "label": "Zariadenie | Zariadenia",
     "device_info": "Informácie o zariadení",

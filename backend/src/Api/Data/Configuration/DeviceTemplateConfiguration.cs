@@ -27,6 +27,12 @@ public class DeviceTemplateConfiguration : IEntityTypeConfiguration<DeviceTempla
             .OnDelete(DeleteBehavior.Cascade);
 
         builder
+            .HasMany(template => template.Controls)
+            .WithOne(control => control.DeviceTemplate)
+            .HasForeignKey(control => control.DeviceTemplateId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder
             .HasMany(template => template.Devices)
             .WithOne(device => device.DeviceTemplate)
             .HasForeignKey(device => device.DeviceTemplateId)

@@ -82,6 +82,7 @@ public class AppDbContext
     public DbSet<Recipe> Recipes { get; set; }
     public DbSet<RecipeStep> RecipeSteps { get; set; }
     public DbSet<Command> Commands { get; set; }
+    public DbSet<DeviceControl> DeviceControls { get; set; }
     public DbSet<JobCommand> JobCommands { get; set; }
     public DbSet<DeviceCollection> DeviceCollections { get; set; }
     public DbSet<CollectionItem> CollectionItems { get; set; }

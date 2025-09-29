@@ -118,6 +118,40 @@
     "nothing_here": "Oups. Il n'y a rien ici...",
     "go_home": "Aller à l'accueil"
   },
+  "device_template": {
+    "label": "Modèle d'appareil | Modèles d'appareil",
+    "template_details": "Détails du modèle",
+    "grid_settings": "Grille",
+    "grid_rows": "Lignes de la grille",
+    "grid_columns": "Colonnes de la grille",
+    "grid_not_configured": "La disposition de la grille n'est pas configurée pour ce modèle d'appareil.",
+    "controls": "Contrôles",
+    "add_control": "Ajouter un contrôle",
+    "control_name": "Nom du contrôle",
+    "control_color": "Couleur",
+    "control_recipe": "Recette",
+    "control_cycles": "Cycles",
+    "control_infinite": "Exécuter indéfiniment",
+    "control_default_name": "Contrôle {index}",
+    "no_controls": "Aucun contrôle configuré pour le moment",
+    "delete_device_template": "Supprimer le modèle d'appareil",
+    "delete_device_template_desc": "Êtes-vous sûr de vouloir supprimer ce modèle d'appareil ?",
+    "toasts": {
+      "loading_failed": "Échec du chargement du modèle d'appareil ! | Échec du chargement des modèles d'appareil !",
+      "create_failed": "Échec de la création du modèle d'appareil !",
+      "update_failed": "Échec de la mise à jour du modèle d'appareil !",
+      "create_success": "Modèle d'appareil créé !",
+      "update_success": "Modèle d'appareil mis à jour !",
+      "update_controls_success": "Contrôles mis à jour !",
+      "delete_success": "Modèle d'appareil supprimé !",
+      "delete_failed": "Échec de la suppression du modèle d'appareil !"
+    },
+    "rules": {
+      "decimal_min": "Les décimales doivent être supérieures à 0 !",
+      "grid_positive": "Les valeurs de la grille doivent être supérieures à 0 !",
+      "cycle_positive": "Les cycles doivent être supérieurs à 0 !"
+    }
+  },
   "device": {
     "label": "Appareil | Appareils",
     "device_info": "Informations sur l'appareil",
