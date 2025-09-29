@@ -13,7 +13,7 @@ public struct JobControlFbs : IFlatbufferObject
 {
   private Table __p;
   public ByteBuffer ByteBuffer { get { return __p.bb; } }
-  public static void ValidateVersion() { FlatBufferConstants.FLATBUFFERS_24_3_25(); }
+  public static void ValidateVersion() { FlatBufferConstants.FLATBUFFERS_25_2_10(); }
   public static JobControlFbs GetRootAsJobControlFbs(ByteBuffer _bb) { return GetRootAsJobControlFbs(_bb, new JobControlFbs()); }
   public static JobControlFbs GetRootAsJobControlFbs(ByteBuffer _bb, JobControlFbs obj) { return (obj.__assign(_bb.GetInt(_bb.Position) + _bb.Position, _bb)); }
   public void __init(int _i, ByteBuffer _bb) { __p = new Table(_i, _bb); }
@@ -43,34 +43,6 @@ public struct JobControlFbs : IFlatbufferObject
   public static Offset<JobFlatBuffers.JobControlFbs> EndJobControlFbs(FlatBufferBuilder builder) {
     int o = builder.EndTable();
     return new Offset<JobFlatBuffers.JobControlFbs>(o);
-  }
-  public JobControlFbsT UnPack() {
-    var _o = new JobControlFbsT();
-    this.UnPackTo(_o);
-    return _o;
-  }
-  public void UnPackTo(JobControlFbsT _o) {
-    _o.JobId = this.JobId;
-    _o.Control = this.Control;
-  }
-  public static Offset<JobFlatBuffers.JobControlFbs> Pack(FlatBufferBuilder builder, JobControlFbsT _o) {
-    if (_o == null) return default(Offset<JobFlatBuffers.JobControlFbs>);
-    var _job_id = _o.JobId == null ? default(StringOffset) : builder.CreateString(_o.JobId);
-    return CreateJobControlFbs(
-      builder,
-      _job_id,
-      _o.Control);
-  }
-}
-
-public class JobControlFbsT
-{
-  public string JobId { get; set; }
-  public JobFlatBuffers.JobControlEnumFbs Control { get; set; }
-
-  public JobControlFbsT() {
-    this.JobId = null;
-    this.Control = JobFlatBuffers.JobControlEnumFbs.JOB_PAUSE;
   }
 }
 

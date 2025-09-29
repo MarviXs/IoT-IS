@@ -115,10 +115,19 @@ async function getLastDataPoints() {
 
 async function getLastDataPoint(deviceId: string, tag: string) {
   const { data, error } = await DataPointService.getLatestDataPoints(deviceId, tag);
-  if (error || !data || !data.value) {
+  if (error || !data) {
     return;
   }
-  const newDataPoint = { deviceId: device.value?.id ?? '', tag: tag, value: data.value };
+  const newDataPoint: LastDataPoint = {
+    deviceId: device.value?.id ?? '',
+    tag,
+    value: data.value ?? null,
+    ts: data.ts ?? null,
+    latitude: data.latitude ?? null,
+    longitude: data.longitude ?? null,
+    gridX: data.gridX ?? null,
+    gridY: data.gridY ?? null,
+  };
   const index = lastDataPoints.value.findIndex(
     (dp) => dp.deviceId === newDataPoint.deviceId && dp.tag === newDataPoint.tag,
   );

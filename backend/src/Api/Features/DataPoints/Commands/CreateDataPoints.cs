@@ -1,9 +1,11 @@
+using System.Text.Json;
 using Carter;
 using EFCore.BulkExtensions;
 using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
+using Fei.Is.Api.Features.DataPoints.Queries;
 using Fei.Is.Api.Redis;
 using Fei.Is.Api.SignalR.Dtos;
 using Fei.Is.Api.SignalR.Hubs;
@@ -20,7 +22,15 @@ namespace Fei.Is.Api.Features.DataPoints.Commands;
 
 public static class CreateDataPoints
 {
-    public record Request(string Tag, double Value, long? TimeStamp, double? Latitude = null, double? Longitude = null);
+    public record Request(
+        string Tag,
+        double Value,
+        long? TimeStamp,
+        double? Latitude = null,
+        double? Longitude = null,
+        int? GridX = null,
+        int? GridY = null
+    );
 
     public sealed class Endpoint : ICarterModule
     {
@@ -86,7 +96,9 @@ public static class CreateDataPoints
                 TimeStamp = GetDataPointTimeStampOrCurrentTime(dataPoint.TimeStamp),
                 Value = dataPoint.Value,
                 Latitude = dataPoint.Latitude,
-                Longitude = dataPoint.Longitude
+                Longitude = dataPoint.Longitude,
+                GridX = dataPoint.GridX,
+                GridY = dataPoint.GridY
             });
 
             var deviceId = device.Id.ToString();
@@ -98,15 +110,35 @@ public static class CreateDataPoints
                     DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(),
                     flags: CommandFlags.FireAndForget
                 );
+                var latestResponse = new GetLatestDataPoints.Response(
+                    datapoint.TimeStamp,
+                    datapoint.Value,
+                    datapoint.Latitude,
+                    datapoint.Longitude,
+                    datapoint.GridX,
+                    datapoint.GridY
+                );
+
                 await redis.Db.StringSetAsync(
                     $"device:{deviceId}:{datapoint.SensorTag}:last",
-                    datapoint.Value,
+                    JsonSerializer.Serialize(latestResponse),
                     TimeSpan.FromHours(1),
                     flags: CommandFlags.FireAndForget
                 );
                 await hubContext
                     .Clients.Group(deviceId)
-                    .ReceiveSensorLastDataPoint(new SensorLastDataPointDto(deviceId, datapoint.SensorTag.ToString(), datapoint.Value ?? 0));
+                    .ReceiveSensorLastDataPoint(
+                        new SensorLastDataPointDto(
+                            deviceId,
+                            datapoint.SensorTag.ToString(),
+                            datapoint.Value,
+                            datapoint.Latitude,
+                            datapoint.Longitude,
+                            datapoint.GridX,
+                            datapoint.GridY,
+                            datapoint.TimeStamp
+                        )
+                    );
             }
 
             await timescaleContext.BulkInsertAsync(dataPoints, cancellationToken: cancellationToken);

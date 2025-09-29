@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json.Nodes;
 using EFCore.BulkExtensions;
 using Fei.Is.Api.Data.Contexts;
@@ -49,13 +50,66 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
                         try
                         {
                             var parsed = ParseResult(message);
+
+                            if (
+                                !double.TryParse(
+                                    parsed["value"],
+                                    NumberStyles.Float,
+                                    CultureInfo.InvariantCulture,
+                                    out var value
+                                )
+                            )
+                            {
+                                continue;
+                            }
+
+                            double? latitude = null;
+                            if (
+                                parsed.TryGetValue("latitude", out var latitudeRaw)
+                                && double.TryParse(latitudeRaw, NumberStyles.Float, CultureInfo.InvariantCulture, out var latitudeValue)
+                            )
+                            {
+                                latitude = latitudeValue;
+                            }
+
+                            double? longitude = null;
+                            if (
+                                parsed.TryGetValue("longitude", out var longitudeRaw)
+                                && double.TryParse(longitudeRaw, NumberStyles.Float, CultureInfo.InvariantCulture, out var longitudeValue)
+                            )
+                            {
+                                longitude = longitudeValue;
+                            }
+
+                            int? gridX = null;
+                            if (
+                                parsed.TryGetValue("grid_x", out var gridXRaw)
+                                && int.TryParse(gridXRaw, NumberStyles.Integer, CultureInfo.InvariantCulture, out var gridXValue)
+                            )
+                            {
+                                gridX = gridXValue;
+                            }
+
+                            int? gridY = null;
+                            if (
+                                parsed.TryGetValue("grid_y", out var gridYRaw)
+                                && int.TryParse(gridYRaw, NumberStyles.Integer, CultureInfo.InvariantCulture, out var gridYValue)
+                            )
+                            {
+                                gridY = gridYValue;
+                            }
+
                             dataPoints.Add(
                                 new DataPoint
                                 {
                                     DeviceId = Guid.Parse(parsed["device_id"]),
                                     SensorTag = parsed["sensor_tag"],
                                     TimeStamp = DateTimeOffset.FromUnixTimeMilliseconds(long.Parse(parsed["timestamp"])),
-                                    Value = double.Parse(parsed["value"])
+                                    Value = value,
+                                    Latitude = latitude,
+                                    Longitude = longitude,
+                                    GridX = gridX,
+                                    GridY = gridY
                                 }
                             );
                         }

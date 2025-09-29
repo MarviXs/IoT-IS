@@ -13,7 +13,7 @@ public struct JobFbs : IFlatbufferObject
 {
   private Table __p;
   public ByteBuffer ByteBuffer { get { return __p.bb; } }
-  public static void ValidateVersion() { FlatBufferConstants.FLATBUFFERS_24_3_25(); }
+  public static void ValidateVersion() { FlatBufferConstants.FLATBUFFERS_25_2_10(); }
   public static JobFbs GetRootAsJobFbs(ByteBuffer _bb) { return GetRootAsJobFbs(_bb, new JobFbs()); }
   public static JobFbs GetRootAsJobFbs(ByteBuffer _bb, JobFbs obj) { return (obj.__assign(_bb.GetInt(_bb.Position) + _bb.Position, _bb)); }
   public void __init(int _i, ByteBuffer _bb) { __p = new Table(_i, _bb); }
@@ -91,78 +91,6 @@ public struct JobFbs : IFlatbufferObject
   public static Offset<JobFlatBuffers.JobFbs> EndJobFbs(FlatBufferBuilder builder) {
     int o = builder.EndTable();
     return new Offset<JobFlatBuffers.JobFbs>(o);
-  }
-  public JobFbsT UnPack() {
-    var _o = new JobFbsT();
-    this.UnPackTo(_o);
-    return _o;
-  }
-  public void UnPackTo(JobFbsT _o) {
-    _o.JobId = this.JobId;
-    _o.Commands = new List<JobFlatBuffers.CommandFbsT>();
-    for (var _j = 0; _j < this.CommandsLength; ++_j) {_o.Commands.Add(this.Commands(_j).HasValue ? this.Commands(_j).Value.UnPack() : null);}
-    _o.Status = this.Status;
-    _o.Name = this.Name;
-    _o.CurrentStep = this.CurrentStep;
-    _o.TotalSteps = this.TotalSteps;
-    _o.CurrentCycle = this.CurrentCycle;
-    _o.TotalCycles = this.TotalCycles;
-    _o.Paused = this.Paused;
-    _o.StartedAt = this.StartedAt;
-    _o.FinishedAt = this.FinishedAt;
-  }
-  public static Offset<JobFlatBuffers.JobFbs> Pack(FlatBufferBuilder builder, JobFbsT _o) {
-    if (_o == null) return default(Offset<JobFlatBuffers.JobFbs>);
-    var _job_id = _o.JobId == null ? default(StringOffset) : builder.CreateString(_o.JobId);
-    var _commands = default(VectorOffset);
-    if (_o.Commands != null) {
-      var __commands = new Offset<JobFlatBuffers.CommandFbs>[_o.Commands.Count];
-      for (var _j = 0; _j < __commands.Length; ++_j) { __commands[_j] = JobFlatBuffers.CommandFbs.Pack(builder, _o.Commands[_j]); }
-      _commands = CreateCommandsVector(builder, __commands);
-    }
-    var _name = _o.Name == null ? default(StringOffset) : builder.CreateString(_o.Name);
-    return CreateJobFbs(
-      builder,
-      _job_id,
-      _commands,
-      _o.Status,
-      _name,
-      _o.CurrentStep,
-      _o.TotalSteps,
-      _o.CurrentCycle,
-      _o.TotalCycles,
-      _o.Paused,
-      _o.StartedAt,
-      _o.FinishedAt);
-  }
-}
-
-public class JobFbsT
-{
-  public string JobId { get; set; }
-  public List<JobFlatBuffers.CommandFbsT> Commands { get; set; }
-  public JobFlatBuffers.JobStatusFbsEnum Status { get; set; }
-  public string Name { get; set; }
-  public int CurrentStep { get; set; }
-  public int TotalSteps { get; set; }
-  public int CurrentCycle { get; set; }
-  public int TotalCycles { get; set; }
-  public bool Paused { get; set; }
-  public long StartedAt { get; set; }
-  public long FinishedAt { get; set; }
-
-  public JobFbsT() {
-    this.JobId = null;
-    this.Commands = null;
-    this.Status = JobFlatBuffers.JobStatusFbsEnum.JOB_QUEUED;
-    this.Name = null;
-    this.CurrentStep = 0;
-    this.TotalSteps = 0;
-    this.CurrentCycle = 0;
-    this.TotalCycles = 0;
-    this.Paused = false;
-    this.StartedAt = 0;
-    this.FinishedAt = 0;
   }
 }
 

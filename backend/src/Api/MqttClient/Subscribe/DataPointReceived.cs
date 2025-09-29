@@ -1,5 +1,7 @@
+using System.Text.Json;
 using DataPointFlatBuffers;
 using Fei.Is.Api.Data.Contexts;
+using Fei.Is.Api.Features.DataPoints.Queries;
 using Fei.Is.Api.Redis;
 using Fei.Is.Api.SignalR.Dtos;
 using Fei.Is.Api.SignalR.Hubs;
@@ -45,6 +47,7 @@ public class DataPointReceived(AppDbContext appContext, RedisService redis, IHub
         }
 
         var datapoint = DataPointFbs.GetRootAsDataPointFbs(new ByteBuffer(payload.ToArray()));
+        var timestamp = GetDataPointTimeStampOrCurrentTime(datapoint.Ts);
 
         if (double.IsNaN(datapoint.Value) || double.IsInfinity(datapoint.Value))
         {
@@ -56,7 +59,11 @@ public class DataPointReceived(AppDbContext appContext, RedisService redis, IHub
                 new("device_id", deviceId.ToString()),
                 new("sensor_tag", datapoint.Tag),
                 new("value", datapoint.Value),
-                new("timestamp", GetDataPointTimeStampOrCurrentTime(datapoint.Ts).ToUnixTimeMilliseconds())
+                new("timestamp", timestamp.ToUnixTimeMilliseconds()),
+                new("latitude", datapoint.Latitude),
+                new("longitude", datapoint.Longitude),
+                new("grid_x", datapoint.GridX),
+                new("grid_y", datapoint.GridY)
             ],
             maxLength: 500000
         );
@@ -65,9 +72,37 @@ public class DataPointReceived(AppDbContext appContext, RedisService redis, IHub
 
         await redis.Db.StringSetAsync($"device:{deviceId}:connected", "1", TimeSpan.FromMinutes(30), flags: CommandFlags.FireAndForget);
         await redis.Db.StringSetAsync($"device:{deviceId}:lastSeen", DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), flags: CommandFlags.FireAndForget);
-        await redis.Db.StringSetAsync($"device:{deviceId}:{datapoint.Tag}:last", datapoint.Value, TimeSpan.FromHours(1), flags: CommandFlags.FireAndForget);
 
-        await hubContext.Clients.Group(deviceId).ReceiveSensorLastDataPoint(new SensorLastDataPointDto(deviceId, datapoint.Tag.ToString(), datapoint.Value));
+        var latestResponse = new GetLatestDataPoints.Response(
+            timestamp,
+            datapoint.Value,
+            datapoint.Latitude,
+            datapoint.Longitude,
+            datapoint.GridX,
+            datapoint.GridY
+        );
+
+        await redis.Db.StringSetAsync(
+            $"device:{deviceId}:{datapoint.Tag}:last",
+            JsonSerializer.Serialize(latestResponse),
+            TimeSpan.FromHours(1),
+            flags: CommandFlags.FireAndForget
+        );
+
+        await hubContext
+            .Clients.Group(deviceId)
+            .ReceiveSensorLastDataPoint(
+                new SensorLastDataPointDto(
+                    deviceId,
+                    datapoint.Tag.ToString(),
+                    datapoint.Value,
+                    datapoint.Latitude,
+                    datapoint.Longitude,
+                    datapoint.GridX,
+                    datapoint.GridY,
+                    timestamp
+                )
+            );
 
         return Result.Ok();
     }

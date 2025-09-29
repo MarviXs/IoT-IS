@@ -13,7 +13,7 @@ public struct CommandFbs : IFlatbufferObject
 {
   private Table __p;
   public ByteBuffer ByteBuffer { get { return __p.bb; } }
-  public static void ValidateVersion() { FlatBufferConstants.FLATBUFFERS_24_3_25(); }
+  public static void ValidateVersion() { FlatBufferConstants.FLATBUFFERS_25_2_10(); }
   public static CommandFbs GetRootAsCommandFbs(ByteBuffer _bb) { return GetRootAsCommandFbs(_bb, new CommandFbs()); }
   public static CommandFbs GetRootAsCommandFbs(ByteBuffer _bb, CommandFbs obj) { return (obj.__assign(_bb.GetInt(_bb.Position) + _bb.Position, _bb)); }
   public void __init(int _i, ByteBuffer _bb) { __p = new Table(_i, _bb); }
@@ -55,40 +55,6 @@ public struct CommandFbs : IFlatbufferObject
   public static Offset<JobFlatBuffers.CommandFbs> EndCommandFbs(FlatBufferBuilder builder) {
     int o = builder.EndTable();
     return new Offset<JobFlatBuffers.CommandFbs>(o);
-  }
-  public CommandFbsT UnPack() {
-    var _o = new CommandFbsT();
-    this.UnPackTo(_o);
-    return _o;
-  }
-  public void UnPackTo(CommandFbsT _o) {
-    _o.Name = this.Name;
-    _o.Params = new List<double>();
-    for (var _j = 0; _j < this.ParamsLength; ++_j) {_o.Params.Add(this.Params(_j));}
-  }
-  public static Offset<JobFlatBuffers.CommandFbs> Pack(FlatBufferBuilder builder, CommandFbsT _o) {
-    if (_o == null) return default(Offset<JobFlatBuffers.CommandFbs>);
-    var _name = _o.Name == null ? default(StringOffset) : builder.CreateString(_o.Name);
-    var _params = default(VectorOffset);
-    if (_o.Params != null) {
-      var __params = _o.Params.ToArray();
-      _params = CreateParamsVector(builder, __params);
-    }
-    return CreateCommandFbs(
-      builder,
-      _name,
-      _params);
-  }
-}
-
-public class CommandFbsT
-{
-  public string Name { get; set; }
-  public List<double> Params { get; set; }
-
-  public CommandFbsT() {
-    this.Name = null;
-    this.Params = null;
   }
 }
 
