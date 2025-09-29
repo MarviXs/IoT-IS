@@ -51,7 +51,7 @@
                 :color="cellData[cell.key].color"
                 :last-value="cellData[cell.key].value"
               />
-              <div v-else class="empty-grid-cell"></div>
+              <div v-else class="empty-grid-cell shadow"></div>
             </div>
           </div>
         </div>

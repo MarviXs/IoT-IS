@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="shadow card bg-white rounded full-width column items-center justify-center grid-card">
+    <div class="shadow card bg-white full-width column items-center justify-center grid-card">
       <div class="sensor-name">{{ name }}</div>
       <div class="sensor-value">{{ valueRounded }} {{ unit }}</div>
     </div>
@@ -28,9 +28,9 @@ const valueRounded = computed(() => {
 
 <style scoped>
 .grid-card {
-  padding: 1rem;
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
 }
-
 .sensor-name {
   font-weight: 400;
   color: var(--q-grey-color);
@@ -49,19 +49,11 @@ const valueRounded = computed(() => {
   height: 0.2rem;
   width: 100%;
   background-color: v-bind(color);
-}
-
-@media (max-width: 1024px) {
-  .grid-card {
-    padding: 0.75rem;
-  }
+  border-bottom-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
 }
 
 @media (max-width: 600px) {
-  .grid-card {
-    padding: 0.5rem;
-  }
-
   .sensor-name {
     font-size: 0.9rem;
   }
