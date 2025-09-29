@@ -40,7 +40,7 @@
           </div>
           <div v-else class="device-grid" :style="gridStyle">
             <div v-for="cell in gridCells" :key="cell.key" class="grid-cell">
-              <LatestDataPointCard
+              <LatestGridDataPointCard
                 v-if="cellData[cell.key]"
                 class="grid-card"
                 :device-id="deviceId"
@@ -66,7 +66,7 @@ import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import PageLayout from '@/layouts/PageLayout.vue';
 import ChartTimeRangeSelect from '@/components/datapoints/ChartTimeRangeSelect.vue';
-import LatestDataPointCard from '@/components/datapoints/LatestDataPointCard.vue';
+import LatestGridDataPointCard from '@/components/datapoints/LatestGridDataPointCard.vue';
 import DeviceService from '@/api/services/DeviceService';
 import DataPointService from '@/api/services/DataPointService';
 import type { DeviceResponse } from '@/api/services/DeviceService';
@@ -417,8 +417,14 @@ interface SensorGridEntry {
 
 .device-grid {
   display: grid;
-  gap: 1rem;
+  gap: 0.75rem;
   width: 100%;
+}
+
+@media (max-width: 600px) {
+  .device-grid {
+    gap: 0.5rem;
+  }
 }
 
 .grid-cell {
