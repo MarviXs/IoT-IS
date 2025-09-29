@@ -61,7 +61,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue';
+import { computed, reactive, ref, onUnmounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import PageLayout from '@/layouts/PageLayout.vue';
@@ -76,9 +76,13 @@ import { handleError } from '@/utils/error-handler';
 import { getGraphColor } from '@/utils/colors';
 import type { TimeRange } from '@/models/TimeRange';
 import { mdiRefresh } from '@quasar/extras/mdi-v7';
+import { useSignalR } from '@/composables/useSignalR';
+import type { LastDataPoint } from '@/models/LastDataPoint';
 
 const { t } = useI18n();
 const route = useRoute();
+
+const { connection, connect } = useSignalR();
 
 const deviceId = route.params.id.toString();
 const device = ref<DeviceResponse>();
@@ -87,8 +91,11 @@ const selectedTimeRange = ref<TimeRange | null>(null);
 const timeRangeSelectRef = ref<{ updateTimeRange: () => void }>();
 
 const cellData = reactive<Record<string, GridCellData>>({});
+const sensorCellMap = reactive<Record<string, string>>({});
 const fallbackTimestamp = new Date(0).toISOString();
 let activeRequestId = 0;
+const usesOneBasedX = ref<boolean | null>(null);
+const usesOneBasedY = ref<boolean | null>(null);
 
 interface GridCellData {
   sensorTag: string;
@@ -220,8 +227,11 @@ async function loadGridData(range: TimeRange) {
       .map((entry) => entry.latest.gridY)
       .filter((value): value is number => value !== null && value !== undefined);
 
-    const usesOneBasedX = xValues.length > 0 && xValues.every((value) => value >= 1) && !xValues.includes(0);
-    const usesOneBasedY = yValues.length > 0 && yValues.every((value) => value >= 1) && !yValues.includes(0);
+    const nextUsesOneBasedX = xValues.length > 0 && xValues.every((value) => value >= 1) && !xValues.includes(0);
+    const nextUsesOneBasedY = yValues.length > 0 && yValues.every((value) => value >= 1) && !yValues.includes(0);
+
+    usesOneBasedX.value = nextUsesOneBasedX;
+    usesOneBasedY.value = nextUsesOneBasedY;
 
     const nextCells: Record<string, GridCellData> = {};
 
@@ -231,17 +241,10 @@ async function loadGridData(range: TimeRange) {
         return;
       }
 
-      let columnIndex = latest.gridX;
-      let rowIndex = latest.gridY;
+      const columnIndex = resolveGridIndex(latest.gridX, cols, 'x');
+      const rowIndex = resolveGridIndex(latest.gridY, rows, 'y');
 
-      if (usesOneBasedX) {
-        columnIndex -= 1;
-      }
-      if (usesOneBasedY) {
-        rowIndex -= 1;
-      }
-
-      if (columnIndex < 0 || columnIndex >= cols || rowIndex < 0 || rowIndex >= rows) {
+      if (columnIndex === null || rowIndex === null) {
         return;
       }
 
@@ -264,8 +267,10 @@ async function loadGridData(range: TimeRange) {
     });
 
     Object.keys(cellData).forEach((key) => delete cellData[key]);
+    Object.keys(sensorCellMap).forEach((key) => delete sensorCellMap[key]);
     Object.entries(nextCells).forEach(([key, value]) => {
       cellData[key] = value;
+      sensorCellMap[value.sensorTag] = key;
     });
   } finally {
     if (requestId === activeRequestId) {
@@ -279,6 +284,117 @@ function refreshGrid() {
     timeRangeSelectRef.value?.updateTimeRange();
   }
 }
+
+function resolveGridIndex(
+  rawIndex: number | null | undefined,
+  size: number,
+  axis: 'x' | 'y',
+): number | null {
+  if (rawIndex === null || rawIndex === undefined) {
+    return null;
+  }
+
+  const useOneBased = axis === 'x' ? usesOneBasedX : usesOneBasedY;
+  let resolvedIndex: number | null = null;
+
+  if (useOneBased.value === true) {
+    resolvedIndex = rawIndex - 1;
+  } else if (useOneBased.value === false) {
+    resolvedIndex = rawIndex;
+  } else {
+    if (rawIndex >= 0 && rawIndex < size) {
+      useOneBased.value = false;
+      resolvedIndex = rawIndex;
+    } else if (rawIndex - 1 >= 0 && rawIndex - 1 < size) {
+      useOneBased.value = true;
+      resolvedIndex = rawIndex - 1;
+    } else {
+      resolvedIndex = rawIndex;
+    }
+  }
+
+  if (resolvedIndex < 0 || resolvedIndex >= size) {
+    return null;
+  }
+
+  return resolvedIndex;
+}
+
+async function subscribeToDeviceUpdates() {
+  await connect();
+  await connection.send('SubscribeToDevice', deviceId);
+}
+void subscribeToDeviceUpdates();
+
+function handleLastDataPointUpdate(dataPoint: LastDataPoint) {
+  if (dataPoint.deviceId !== deviceId) {
+    return;
+  }
+
+  if (!device.value?.deviceTemplate?.sensors?.length) {
+    return;
+  }
+
+  const rows = gridRows.value;
+  const cols = gridColumns.value;
+
+  if (rows <= 0 || cols <= 0) {
+    return;
+  }
+
+  const sensor = device.value.deviceTemplate.sensors.find((item) => item.tag === dataPoint.tag);
+
+  if (!sensor) {
+    return;
+  }
+
+  const columnIndex = resolveGridIndex(dataPoint.gridX ?? null, cols, 'x');
+  const rowIndex = resolveGridIndex(dataPoint.gridY ?? null, rows, 'y');
+
+  if (columnIndex === null || rowIndex === null) {
+    return;
+  }
+
+  const key = `${rowIndex}-${columnIndex}`;
+  const timestamp = dataPoint.ts ?? fallbackTimestamp;
+  const sensorIndex = device.value.deviceTemplate.sensors.findIndex((item) => item.tag === sensor.tag);
+  const color = getGraphColor(sensorIndex >= 0 ? sensorIndex : 0);
+  const existingKey = sensorCellMap[sensor.tag];
+
+  if (existingKey && existingKey !== key) {
+    const existingCell = cellData[existingKey];
+    if (existingCell && existingCell.sensorTag === sensor.tag) {
+      delete cellData[existingKey];
+    }
+  }
+
+  const currentCell = cellData[key];
+  const currentTimestamp = currentCell ? new Date(currentCell.timestamp).getTime() : Number.NEGATIVE_INFINITY;
+  const newTimestamp = timestamp ? new Date(timestamp).getTime() : Number.NEGATIVE_INFINITY;
+
+  if (!currentCell || newTimestamp >= currentTimestamp) {
+    cellData[key] = {
+      sensorTag: sensor.tag,
+      sensorName: sensor.name,
+      unit: sensor.unit ?? '',
+      accuracyDecimals: sensor.accuracyDecimals ?? 2,
+      value: dataPoint.value ?? null,
+      color,
+      timestamp,
+    };
+    sensorCellMap[sensor.tag] = key;
+  }
+}
+
+function subscribeToLastDataPointUpdates() {
+  connection.on('ReceiveSensorLastDataPoint', handleLastDataPointUpdate);
+}
+subscribeToLastDataPointUpdates();
+
+onUnmounted(() => {
+  void connection.send('UnsubscribeFromDevice', deviceId);
+  connection.off('ReceiveSensorLastDataPoint', handleLastDataPointUpdate);
+});
 
 interface SensorGridEntry {
   sensor: DeviceSensor;
