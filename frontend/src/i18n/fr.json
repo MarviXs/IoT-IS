@@ -149,7 +149,8 @@
     "rules": {
       "decimal_min": "Les décimales doivent être supérieures à 0 !",
       "grid_positive": "Les valeurs de la grille doivent être supérieures à 0 !",
-      "cycle_positive": "Les cycles doivent être supérieurs à 0 !"
+      "cycle_positive": "Les cycles doivent être supérieurs à 0 !",
+      "hex_color": "Veuillez saisir une couleur hexadécimale valide (ex. #1976D2)"
     }
   },
   "device": {

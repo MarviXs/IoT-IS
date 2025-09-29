@@ -149,7 +149,8 @@
     "rules": {
       "decimal_min": "¡Los decimales deben ser mayores que 0!",
       "grid_positive": "¡Los valores de la cuadrícula deben ser mayores que 0!",
-      "cycle_positive": "¡Los ciclos deben ser mayores que 0!"
+      "cycle_positive": "¡Los ciclos deben ser mayores que 0!",
+      "hex_color": "Introduce un color hexadecimal válido (ej. #1976D2)"
     }
   },
   "device": {

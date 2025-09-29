@@ -12,7 +12,9 @@
           <div v-for="control in controls" :key="control.id" class="col-12 col-sm-6 col-md-4 col-lg-3">
             <q-btn
               class="full-width control-button"
-              :color="control.color || 'primary'"
+              :color="getButtonColor(control.color)"
+              :text-color="getButtonTextColor(control.color)"
+              :style="getButtonStyle(control.color)"
               no-caps
               unelevated
               :label="control.name"
@@ -120,6 +122,45 @@ async function startControl(control: DeviceTemplateControlResponse) {
   }
 
   toast.success(t('device.controls.toasts.start_success'));
+}
+
+function getButtonColor(color: string | undefined | null) {
+  if (color && isHexColor(color)) {
+    return void 0;
+  }
+  return color || 'primary';
+}
+
+function getButtonTextColor(color: string | undefined | null) {
+  if (color && isHexColor(color)) {
+    return getContrastingTextColor(color);
+  }
+  return void 0;
+}
+
+function getButtonStyle(color: string | undefined | null) {
+  if (!color || !isHexColor(color)) {
+    return {};
+  }
+  return {
+    backgroundColor: color,
+  };
+}
+
+function isHexColor(value: string) {
+  return /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(value.trim());
+}
+
+function getContrastingTextColor(hexColor: string) {
+  const color = hexColor.replace('#', '');
+  const normalized = color.length === 3
+    ? color.split('').map((char) => char + char).join('')
+    : color;
+  const r = parseInt(normalized.slice(0, 2), 16);
+  const g = parseInt(normalized.slice(2, 4), 16);
+  const b = parseInt(normalized.slice(4, 6), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.6 ? 'black' : 'white';
 }
 </script>
 

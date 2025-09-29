@@ -49,16 +49,35 @@
                   :label="t('device_template.control_name')"
                   :rules="requiredRules"
                 />
-                <q-select
+                <q-input
                   v-model="controls[index].color"
                   class="col-12 col-md-6"
-                  :options="colorOptions"
-                  map-options
-                  emit-value
                   :label="t('device_template.control_color')"
-                  :rules="requiredRules"
-                  @update:model-value="ensureColorOption"
-                />
+                  :rules="colorRules"
+                  @blur="controls[index].color = sanitizeColor(controls[index].color)"
+                >
+                  <template #prepend>
+                    <div class="color-preview" :style="{ backgroundColor: getPreviewColor(controls[index].color) }"></div>
+                  </template>
+                  <template #append>
+                    <q-btn
+                      class="color-picker-button"
+                      dense
+                      flat
+                      round
+                      :icon="mdiPalette"
+                    >
+                      <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                        <q-color
+                          v-model="controls[index].color"
+                          format="hex"
+                          :default-view="'palette'"
+                          @change="(value) => updateColor(index, value)"
+                        />
+                      </q-popup-proxy>
+                    </q-btn>
+                  </template>
+                </q-input>
                 <q-select
                   v-model="controls[index].recipeId"
                   class="col-12 col-md-6"
@@ -108,7 +127,7 @@
 </template>
 
 <script setup lang="ts">
-import { mdiDrag, mdiPlus, mdiTrashCanOutline } from '@quasar/extras/mdi-v7';
+import { mdiDrag, mdiPalette, mdiPlus, mdiTrashCanOutline } from '@quasar/extras/mdi-v7';
 import { VueDraggable } from 'vue-draggable-plus';
 import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -145,18 +164,25 @@ const isSaving = ref(false);
 const formRef = ref<QForm>();
 
 const recipeOptions = ref<Option[]>([]);
-const colorOptions = ref<Option[]>([
-  { label: 'Primary', value: 'primary' },
-  { label: 'Secondary', value: 'secondary' },
-  { label: 'Accent', value: 'accent' },
-  { label: 'Positive', value: 'positive' },
-  { label: 'Negative', value: 'negative' },
-  { label: 'Warning', value: 'warning' },
-  { label: 'Info', value: 'info' },
-  { label: 'Dark', value: 'dark' },
-]);
+
+const brandColorHexMap: Record<string, string> = {
+  primary: '#1976D2',
+  secondary: '#26A69A',
+  accent: '#9C27B0',
+  positive: '#21BA45',
+  negative: '#C10015',
+  warning: '#F2C037',
+  info: '#31CCEC',
+  dark: '#1D1D1D',
+};
+
+const DEFAULT_COLOR = brandColorHexMap.primary;
 
 const requiredRules = [(val: string | null) => (val && `${val}`.length > 0) || t('global.rules.required')];
+const colorRules = [
+  (val: string | null) => (val && `${val}`.length > 0) || t('global.rules.required'),
+  (val: string | null) => (val && isHexColor(val) ? true : t('device_template.rules.hex_color')),
+];
 const cycleRules = [
   (val: number | null) =>
     val === null || Number.isNaN(val) || val < 1 ? t('device_template.rules.cycle_positive') : true,
@@ -210,14 +236,13 @@ async function loadControls() {
 }
 
 function mapControlResponse(control: DeviceTemplateControlResponse): ControlFormData {
-  ensureColorOption(control.color);
   ensureRecipeOption(control.recipeId, control.recipeName);
 
   return {
     id: control.id,
     localId: control.id,
     name: control.name,
-    color: control.color,
+    color: normalizeColor(control.color),
     recipeId: control.recipeId,
     cycles: control.cycles,
     isInfinite: control.isInfinite,
@@ -230,26 +255,13 @@ function ensureRecipeOption(id: string, name: string) {
   }
 }
 
-function ensureColorOption(color: string) {
-  if (!color) {
-    return;
-  }
-  if (!colorOptions.value.some((option) => option.value === color)) {
-    colorOptions.value.push({ label: capitalize(color), value: color });
-  }
-}
-
-function capitalize(value: string) {
-  return value.charAt(0).toUpperCase() + value.slice(1);
-}
-
 function addControl() {
   const id = `${Date.now()}-${Math.random()}`;
   controls.value.push({
     id: null,
     localId: id,
     name: '',
-    color: 'primary',
+    color: DEFAULT_COLOR,
     recipeId: recipeOptions.value[0]?.value ?? '',
     cycles: 1,
     isInfinite: false,
@@ -272,14 +284,17 @@ async function submitForm() {
 
   isSaving.value = true;
 
-  const payload = controls.value.map((control) => ({
-    id: control.id,
-    name: control.name,
-    color: control.color,
-    recipeId: control.recipeId,
-    cycles: control.isInfinite ? Math.max(control.cycles, 1) : control.cycles,
-    isInfinite: control.isInfinite,
-  }));
+  const payload = controls.value.map((control) => {
+    const sanitizedColor = sanitizeColor(control.color) || DEFAULT_COLOR;
+    return {
+      id: control.id,
+      name: control.name,
+      color: sanitizedColor,
+      recipeId: control.recipeId,
+      cycles: control.isInfinite ? Math.max(control.cycles, 1) : control.cycles,
+      isInfinite: control.isInfinite,
+    };
+  });
 
   const { error } = await DeviceTemplateControlService.updateTemplateControls(templateId, payload);
   isSaving.value = false;
@@ -291,6 +306,48 @@ async function submitForm() {
 
   toast.success(t('device_template.toasts.update_controls_success'));
   await loadControls();
+}
+
+function updateColor(index: number, value: string | null) {
+  if (value === null) {
+    return;
+  }
+  controls.value[index].color = sanitizeColor(value);
+}
+
+function getPreviewColor(color: string) {
+  return isHexColor(color) ? color : DEFAULT_COLOR;
+}
+
+function sanitizeColor(value: string) {
+  const trimmed = (value ?? '').trim();
+  if (!trimmed) {
+    return '';
+  }
+  const withHash = trimmed.startsWith('#') ? trimmed : `#${trimmed}`;
+  return withHash.toUpperCase();
+}
+
+function normalizeColor(value: string) {
+  if (!value) {
+    return DEFAULT_COLOR;
+  }
+  const trimmed = value.trim();
+  if (isHexColor(trimmed)) {
+    return trimmed.toUpperCase();
+  }
+  const mapped = brandColorHexMap[trimmed.toLowerCase()];
+  if (mapped) {
+    return mapped;
+  }
+  if (/^#?[0-9a-fA-F]{3,6}$/.test(trimmed)) {
+    return sanitizeColor(trimmed) || DEFAULT_COLOR;
+  }
+  return DEFAULT_COLOR;
+}
+
+function isHexColor(value: string) {
+  return /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(value.trim());
 }
 </script>
 
@@ -334,5 +391,16 @@ async function submitForm() {
 .no-controls {
   text-align: center;
   padding: 2rem 0;
+}
+
+.color-preview {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.color-picker-button {
+  color: $primary;
 }
 </style>

@@ -158,7 +158,8 @@
     "rules": {
       "decimal_min": "Desatinné miesta musia byť väčšie ako 0!",
       "grid_positive": "Hodnoty mriežky musia byť väčšie ako 0!",
-      "cycle_positive": "Počet cyklov musí byť väčší ako 0!"
+      "cycle_positive": "Počet cyklov musí byť väčší ako 0!",
+      "hex_color": "Zadajte platnú hexadecimálnu farbu (napr. #1976D2)"
     }
   },
   "device": {
