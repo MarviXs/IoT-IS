@@ -26,21 +26,10 @@
               <div class="control-card__header">
                 <q-icon class="handle" :name="mdiDrag" size="26px" />
                 <div class="control-card__title">
-                  {{
-                    control.name
-                      ? control.name
-                      : t('device_template.control_default_name', { index: index + 1 })
-                  }}
+                  {{ control.name ? control.name : t('device_template.control_default_name', { index: index + 1 }) }}
                 </div>
                 <q-space />
-                <q-btn
-                  flat
-                  round
-                  dense
-                  color="grey-7"
-                  :icon="mdiTrashCanOutline"
-                  @click="removeControl(index)"
-                />
+                <q-btn flat round dense color="grey-7" :icon="mdiTrashCanOutline" @click="removeControl(index)" />
               </div>
               <div class="row q-col-gutter-md">
                 <q-input
@@ -57,16 +46,13 @@
                   @blur="controls[index].color = sanitizeColor(controls[index].color)"
                 >
                   <template #prepend>
-                    <div class="color-preview" :style="{ backgroundColor: getPreviewColor(controls[index].color) }"></div>
+                    <div
+                      class="color-preview"
+                      :style="{ backgroundColor: getPreviewColor(controls[index].color) }"
+                    ></div>
                   </template>
                   <template #append>
-                    <q-btn
-                      class="color-picker-button"
-                      dense
-                      flat
-                      round
-                      :icon="mdiPalette"
-                    >
+                    <q-btn class="color-picker-button" dense flat round :icon="mdiPalette">
                       <q-popup-proxy cover transition-show="scale" transition-hide="scale">
                         <q-color
                           v-model="controls[index].color"
@@ -398,9 +384,5 @@ function isHexColor(value: string) {
   height: 1.75rem;
   border-radius: 4px;
   border: 1px solid rgba(0, 0, 0, 0.2);
-}
-
-.color-picker-button {
-  color: $primary;
 }
 </style>
