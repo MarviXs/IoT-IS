@@ -1,3 +1,4 @@
+using System;
 using StackExchange.Redis;
 
 namespace Fei.Is.Api.Redis;
@@ -6,18 +7,24 @@ public class RedisService : IDisposable
 {
     public IDatabaseAsync Db { get; }
     private readonly IConnectionMultiplexer Connection;
-    private readonly string _connectionString;
 
-    public RedisService(IConfiguration Configuration)
+    public RedisService(IConfiguration configuration)
     {
-        _connectionString = Configuration.GetConnectionString("RedisConnection")!;
+        var host = configuration.GetSection("RedisSettings:Host").Value;
+        var port = configuration.GetValue<int?>("RedisSettings:Port") ?? 6379;
+
+        if (string.IsNullOrWhiteSpace(host))
+        {
+            throw new InvalidOperationException("Redis host is not configured. Set RedisSettings:Host in configuration or REDIS_HOST in the environment.");
+        }
 
         var config = new ConfigurationOptions
         {
             AbortOnConnectFail = false,
-            EndPoints = { _connectionString },
-            Password = Configuration.GetSection("RedisSettings:Password").Value
+            Password = configuration.GetSection("RedisSettings:Password").Value
         };
+
+        config.EndPoints.Add(host, port);
 
         var conn = new Lazy<IConnectionMultiplexer>(() => ConnectionMultiplexer.Connect(config));
         Connection = conn.Value;
