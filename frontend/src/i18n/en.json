@@ -356,6 +356,72 @@
       "repetitions_min": "Repetitions must be greater than 0!"
     }
   },
+  "job_schedule": {
+    "label": "Schedule | Schedules",
+    "create": "Create schedule",
+    "create_title": "Create schedule",
+    "edit_title": "Edit schedule",
+    "name": "Schedule name",
+    "recipe": "Recipe",
+    "unknown_recipe": "Unknown recipe",
+    "type_label": "Schedule type",
+    "types": {
+      "once": "Once",
+      "repeat": "Repeat"
+    },
+    "interval": "Interval",
+    "interval_value": "Repeat every",
+    "interval_once": "Once",
+    "interval_every": "Every {value} {unit}",
+    "interval_week_with_days": "Weekly on {days}",
+    "interval_weeks_with_days": "Every {value} weeks on {days}",
+    "interval_units": {
+      "minute": "minute | minutes",
+      "hour": "hour | hours",
+      "day": "day | days"
+    },
+    "interval_options": {
+      "minute": "Minute",
+      "hour": "Hour",
+      "day": "Day",
+      "week": "Week"
+    },
+    "week_days": "Days of the week",
+    "days": {
+      "sunday": "Sunday",
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday",
+      "none": "no days selected"
+    },
+    "start_time": "Start time",
+    "end_time": "End time",
+    "cycles": "Cycles",
+    "active": "Active",
+    "delete_title": "Delete schedule",
+    "delete_description": "Are you sure you want to delete this schedule?",
+    "toasts": {
+      "save_success": "Schedule saved!",
+      "save_failed": "Saving schedule failed.",
+      "delete_success": "Schedule deleted.",
+      "delete_failed": "Deleting schedule failed.",
+      "load_failed": "Loading schedules failed.",
+      "update_success": "Schedule updated.",
+      "update_failed": "Updating schedule failed.",
+      "recipes_failed": "Loading recipes failed."
+    },
+    "rules": {
+      "name_required": "Name is required.",
+      "recipe_required": "Recipe is required.",
+      "start_time_required": "Start time is required.",
+      "cycles_min": "Cycles must be greater than 0.",
+      "interval_value_min": "Interval value must be greater than 0.",
+      "week_day_required": "Select at least one day."
+    }
+  },
   "recipe": {
     "label": "Recipe | Recipes",
     "create_recipe": "Create recipe",

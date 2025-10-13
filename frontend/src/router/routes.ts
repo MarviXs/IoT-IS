@@ -50,6 +50,10 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/jobs/JobsOnDevicePage.vue'),
       },
       {
+        path: '/devices/:id/schedules',
+        component: () => import('pages/jobs/DeviceJobSchedulesPage.vue'),
+      },
+      {
         path: '/devices/:id/map',
         component: () => import('pages/devices/DeviceMapPage.vue'),
       },

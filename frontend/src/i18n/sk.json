@@ -338,6 +338,72 @@
       "repetitions_min": "Počet opakovaní musí byť väčší ako 0!"
     }
   },
+  "job_schedule": {
+    "label": "Harmonogram | Harmonogramy",
+    "create": "Vytvoriť harmonogram",
+    "create_title": "Vytvoriť harmonogram",
+    "edit_title": "Upraviť harmonogram",
+    "name": "Názov harmonogramu",
+    "recipe": "Recept",
+    "unknown_recipe": "Neznámy recept",
+    "type_label": "Typ harmonogramu",
+    "types": {
+      "once": "Jedenkrát",
+      "repeat": "Opakovanie"
+    },
+    "interval": "Interval",
+    "interval_value": "Opakovať každých",
+    "interval_once": "Jedenkrát",
+    "interval_every": "Každých {value} {unit}",
+    "interval_week_with_days": "Týždenne v {days}",
+    "interval_weeks_with_days": "Každé {value} týždne v {days}",
+    "interval_units": {
+      "minute": "minútu | minút",
+      "hour": "hodinu | hodín",
+      "day": "deň | dní"
+    },
+    "interval_options": {
+      "minute": "Minúta",
+      "hour": "Hodina",
+      "day": "Deň",
+      "week": "Týždeň"
+    },
+    "week_days": "Dni v týždni",
+    "days": {
+      "sunday": "nedeľa",
+      "monday": "pondelok",
+      "tuesday": "utorok",
+      "wednesday": "streda",
+      "thursday": "štvrtok",
+      "friday": "piatok",
+      "saturday": "sobota",
+      "none": "žiadne dni"
+    },
+    "start_time": "Čas začiatku",
+    "end_time": "Čas ukončenia",
+    "cycles": "Počet cyklov",
+    "active": "Aktívne",
+    "delete_title": "Vymazať harmonogram",
+    "delete_description": "Naozaj chcete vymazať tento harmonogram?",
+    "toasts": {
+      "save_success": "Harmonogram bol uložený.",
+      "save_failed": "Uloženie harmonogramu zlyhalo.",
+      "delete_success": "Harmonogram bol vymazaný.",
+      "delete_failed": "Vymazanie harmonogramu zlyhalo.",
+      "load_failed": "Načítanie harmonogramov zlyhalo.",
+      "update_success": "Harmonogram bol aktualizovaný.",
+      "update_failed": "Aktualizácia harmonogramu zlyhala.",
+      "recipes_failed": "Načítanie receptov zlyhalo."
+    },
+    "rules": {
+      "name_required": "Názov je povinný.",
+      "recipe_required": "Recept je povinný.",
+      "start_time_required": "Čas začiatku je povinný.",
+      "cycles_min": "Počet cyklov musí byť väčší ako 0.",
+      "interval_value_min": "Hodnota intervalu musí byť väčšia ako 0.",
+      "week_day_required": "Vyberte aspoň jeden deň."
+    }
+  },
   "recipe": {
     "label": "Recept | Recepty",
     "create_recipe": "Vytvoriť recept",

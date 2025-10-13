@@ -21,6 +21,16 @@
       />
       <q-btn
         class="shadow bg-white col-grow col-lg-auto"
+        :to="`/devices/${device.id}/schedules`"
+        text-color="grey-color"
+        unelevated
+        no-caps
+        size="15px"
+        :label="t('job_schedule.label', 2)"
+        :icon="mdiCalendarClock"
+      />
+      <q-btn
+        class="shadow bg-white col-grow col-lg-auto"
         :to="`/devices/${device.id}/map`"
         text-color="grey-color"
         unelevated
@@ -114,7 +124,7 @@ import { deviceToTreeNode, extractNodeKeys } from '@/utils/sensor-nodes';
 import SensorSelectionTree from '@/components/datapoints/SensorSelectionTree.vue';
 import CurrentJobCard from '@/components/jobs/CurrentJobCard.vue';
 import { useI18n } from 'vue-i18n';
-import { mdiListStatus, mdiMapMarker, mdiPencil, mdiTuneVariant, mdiViewGridOutline } from '@quasar/extras/mdi-v7';
+import { mdiCalendarClock, mdiListStatus, mdiMapMarker, mdiPencil, mdiTuneVariant, mdiViewGridOutline } from '@quasar/extras/mdi-v7';
 import PageLayout from '@/layouts/PageLayout.vue';
 import { handleError } from '@/utils/error-handler';
 import type { DeviceResponse } from '@/api/services/DeviceService';
