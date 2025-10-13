@@ -74,14 +74,51 @@
           </div>
         </div>
 
-        <q-input
-          v-model="form.startTime"
-          type="datetime-local"
-          :label="t('job_schedule.start_time')"
-          :rules="startTimeRules"
-          lazy-rules
-        />
-        <q-input v-model="form.endTime" type="datetime-local" :label="t('job_schedule.end_time')" />
+        <q-input v-model="form.startTime" :label="t('job_schedule.start_time')" :rules="startTimeRules" lazy-rules>
+          <template #append>
+            <q-icon :name="mdiCalendar" class="cursor-pointer">
+              <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                <q-date v-model="form.startTime" :mask="DATE_TIME_MASK">
+                  <div class="row items-center justify-end">
+                    <q-btn v-close-popup :label="t('global.close')" color="primary" flat />
+                  </div>
+                </q-date>
+              </q-popup-proxy>
+            </q-icon>
+            <q-icon :name="mdiClockOutline" class="cursor-pointer">
+              <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                <q-time v-model="form.startTime" :mask="DATE_TIME_MASK" format24h>
+                  <div class="row items-center justify-end">
+                    <q-btn v-close-popup :label="t('global.close')" color="primary" flat />
+                  </div>
+                </q-time>
+              </q-popup-proxy>
+            </q-icon>
+          </template>
+        </q-input>
+
+        <q-input v-model="form.endTime" :label="t('job_schedule.end_time')" clearable>
+          <template #append>
+            <q-icon :name="mdiCalendar" class="cursor-pointer">
+              <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                <q-date v-model="form.endTime" :mask="DATE_TIME_MASK">
+                  <div class="row items-center justify-end">
+                    <q-btn v-close-popup :label="t('global.close')" color="primary" flat />
+                  </div>
+                </q-date>
+              </q-popup-proxy>
+            </q-icon>
+            <q-icon :name="mdiClockOutline" class="cursor-pointer">
+              <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                <q-time v-model="form.endTime" :mask="DATE_TIME_MASK" format24h>
+                  <div class="row items-center justify-end">
+                    <q-btn v-close-popup :label="t('global.close')" color="primary" flat />
+                  </div>
+                </q-time>
+              </q-popup-proxy>
+            </q-icon>
+          </template>
+        </q-input>
 
         <q-input
           v-model.number="form.cycles"
@@ -110,8 +147,10 @@
 
 <script setup lang="ts">
 import { computed, ref, watch, type PropType } from 'vue';
+import { date as quasarDate } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue3-toastify';
+import { mdiCalendar, mdiClockOutline } from '@quasar/extras/mdi-v7';
 import DialogCommon from '@/components/core/DialogCommon.vue';
 import RecipeSelect from '@/components/recipes/RecipeSelect.vue';
 import type { RecipeSelectData } from '@/components/recipes/RecipeSelect.vue';
@@ -137,6 +176,8 @@ const { t } = useI18n();
 
 const isDialogOpen = defineModel<boolean>({ default: false });
 const formRef = ref();
+
+const DATE_TIME_MASK = 'YYYY-MM-DD HH:mm';
 
 interface JobScheduleForm {
   name: string;
@@ -377,23 +418,22 @@ function toInputDateTime(value?: string) {
   if (!value) {
     return '';
   }
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
+  const dateValue = new Date(value);
+  if (Number.isNaN(dateValue.getTime())) {
     return '';
   }
-  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-  return local.toISOString().slice(0, 16);
+  return quasarDate.formatDate(dateValue, DATE_TIME_MASK);
 }
 
 function fromInputDateTime(value?: string) {
   if (!value) {
     return null;
   }
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
+  const dateValue = quasarDate.extractDate(value, DATE_TIME_MASK);
+  if (!(dateValue instanceof Date) || Number.isNaN(dateValue.getTime())) {
     return null;
   }
-  return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString();
+  return dateValue.toISOString();
 }
 </script>
 
