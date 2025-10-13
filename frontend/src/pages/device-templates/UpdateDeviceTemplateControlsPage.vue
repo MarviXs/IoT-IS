@@ -34,13 +34,13 @@
               <div class="row q-col-gutter-md">
                 <q-input
                   v-model="controls[index].name"
-                  class="col-12 col-md-6"
+                  class="col-12 col-md-4"
                   :label="t('device_template.control_name')"
                   :rules="requiredRules"
                 />
                 <q-input
                   v-model="controls[index].color"
-                  class="col-12 col-md-6"
+                  class="col-12 col-md-4"
                   :label="t('device_template.control_color')"
                   :rules="colorRules"
                   @blur="controls[index].color = sanitizeColor(controls[index].color)"
@@ -83,30 +83,71 @@
                   </template>
                 </q-input>
                 <q-select
-                  v-model="controls[index].recipeId"
-                  class="col-12 col-md-6"
-                  :options="recipeOptions"
+                  v-model="controls[index].type"
+                  class="col-12 col-md-4"
+                  :options="controlTypeOptions"
                   map-options
                   emit-value
-                  :label="t('device_template.control_recipe')"
+                  :label="t('device_template.control_type')"
                   :rules="requiredRules"
+                  @update:model-value="(value) => handleTypeChange(index, value)"
                 />
-                <q-input
-                  v-model.number="controls[index].cycles"
-                  class="col-12 col-md-3"
-                  type="number"
-                  :disable="controls[index].isInfinite"
-                  :label="t('device_template.control_cycles')"
-                  :rules="cycleRules"
-                  min="1"
-                />
-                <div class="col-12 col-md-3 flex items-center">
-                  <q-toggle
-                    v-model="controls[index].isInfinite"
-                    color="primary"
-                    :label="t('device_template.control_infinite')"
+                <template v-if="controls[index].type === 'Run'">
+                  <q-select
+                    v-model="controls[index].recipeId"
+                    class="col-12 col-md-4"
+                    :options="recipeOptions"
+                    map-options
+                    emit-value
+                    :label="t('device_template.control_recipe')"
+                    :rules="requiredRules"
                   />
-                </div>
+                  <q-input
+                    v-model.number="controls[index].cycles"
+                    class="col-12 col-md-4"
+                    type="number"
+                    :disable="controls[index].isInfinite"
+                    :label="t('device_template.control_cycles')"
+                    :rules="cycleRules"
+                    min="1"
+                  />
+                  <div class="col-12 col-md-4 flex items-center">
+                    <q-toggle
+                      v-model="controls[index].isInfinite"
+                      color="primary"
+                      :label="t('device_template.control_infinite')"
+                    />
+                  </div>
+                </template>
+                <template v-else>
+                  <q-select
+                    v-model="controls[index].recipeOnId"
+                    class="col-12 col-md-4"
+                    :options="recipeOptions"
+                    map-options
+                    emit-value
+                    :label="t('device_template.control_recipe_on')"
+                    :rules="requiredRules"
+                  />
+                  <q-select
+                    v-model="controls[index].recipeOffId"
+                    class="col-12 col-md-4"
+                    :options="recipeOptions"
+                    map-options
+                    emit-value
+                    :label="t('device_template.control_recipe_off')"
+                    :rules="requiredRules"
+                  />
+                  <q-select
+                    v-model="controls[index].sensorId"
+                    class="col-12 col-md-4"
+                    :options="sensorOptions"
+                    map-options
+                    emit-value
+                    :label="t('device_template.control_sensor')"
+                    :rules="requiredRules"
+                  />
+                </template>
               </div>
             </q-card>
           </div>
@@ -133,7 +174,7 @@
 <script setup lang="ts">
 import { mdiDrag, mdiPalette, mdiPlus, mdiTrashCanOutline } from '@quasar/extras/mdi-v7';
 import { VueDraggable } from 'vue-draggable-plus';
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import type { ComponentPublicInstance } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
@@ -142,22 +183,32 @@ import { toast } from 'vue3-toastify';
 import { handleError } from '@/utils/error-handler';
 import RecipeService from '@/api/services/RecipeService';
 import DeviceTemplateControlService from '@/api/services/DeviceTemplateControlService';
-import type { DeviceTemplateControlResponse } from '@/api/services/DeviceTemplateControlService';
+import type {
+  DeviceTemplateControlResponse,
+  UpdateDeviceTemplateControlsRequest,
+} from '@/api/services/DeviceTemplateControlService';
+import SensorService from '@/api/services/SensorService';
+
+type DeviceControlType = 'Run' | 'Toggle';
 
 interface ControlFormData {
   id: string | null;
   localId: string;
   name: string;
   color: string;
-  recipeId: string;
+  type: DeviceControlType;
+  recipeId: string | null;
   cycles: number;
   isInfinite: boolean;
+  recipeOnId: string | null;
+  recipeOffId: string | null;
+  sensorId: string | null;
 }
 
-interface Option {
+type Option<T = string> = {
   label: string;
-  value: string;
-}
+  value: T;
+};
 
 const { t } = useI18n();
 const route = useRoute();
@@ -170,6 +221,11 @@ const formRef = ref<QForm>();
 const colorPickerRefs = ref<Record<string, QPopupProxy | null>>({});
 
 const recipeOptions = ref<Option[]>([]);
+const sensorOptions = ref<Option[]>([]);
+const controlTypeOptions = computed<Option<DeviceControlType>[]>(() => [
+  { label: t('device_template.control_type_run'), value: 'Run' },
+  { label: t('device_template.control_type_toggle'), value: 'Toggle' },
+]);
 
 const brandColorHexMap: Record<string, string> = {
   primary: '#1976D2',
@@ -202,6 +258,7 @@ async function loadData() {
   isLoading.value = true;
   try {
     await loadRecipes();
+    await loadSensors();
     await loadControls();
   } finally {
     isLoading.value = false;
@@ -249,6 +306,17 @@ async function loadRecipes() {
   recipeOptions.value = data.items.map((recipe) => ({ label: recipe.name, value: recipe.id }));
 }
 
+async function loadSensors() {
+  const { data, error } = await SensorService.getTemplateSensors(templateId);
+  if (error) {
+    handleError(error, 'Error fetching sensors');
+    return;
+  }
+
+  const sensors = data ?? [];
+  sensorOptions.value = sensors.map((sensor) => ({ label: sensor.name, value: sensor.id }));
+}
+
 async function loadControls() {
   const { data, error } = await DeviceTemplateControlService.getTemplateControls(templateId);
   if (error) {
@@ -259,23 +327,51 @@ async function loadControls() {
   controls.value = (data ?? []).map(mapControlResponse);
 }
 
+function mapControlType(type: unknown): DeviceControlType {
+  if (type === 'Toggle' || type === 1) {
+    return 'Toggle';
+  }
+  return 'Run';
+}
+
 function mapControlResponse(control: DeviceTemplateControlResponse): ControlFormData {
   ensureRecipeOption(control.recipeId, control.recipeName);
+  ensureRecipeOption(control.recipeOnId, control.recipeOnName ?? undefined);
+  ensureRecipeOption(control.recipeOffId, control.recipeOffName ?? undefined);
+  ensureSensorOption(control.sensorId, control.sensorName ?? undefined);
+
+  const type = mapControlType(control.type);
 
   return {
     id: control.id,
     localId: control.id,
     name: control.name,
     color: normalizeColor(control.color),
-    recipeId: control.recipeId,
-    cycles: control.cycles,
-    isInfinite: control.isInfinite,
+    type,
+    recipeId: control.recipeId ?? null,
+    cycles: control.cycles > 0 ? control.cycles : 1,
+    isInfinite: type === 'Run' ? control.isInfinite : false,
+    recipeOnId: control.recipeOnId ?? null,
+    recipeOffId: control.recipeOffId ?? null,
+    sensorId: control.sensorId ?? null,
   };
 }
 
-function ensureRecipeOption(id: string, name: string) {
+function ensureRecipeOption(id?: string | null, name?: string | null) {
+  if (!id || !name) {
+    return;
+  }
   if (!recipeOptions.value.some((option) => option.value === id)) {
     recipeOptions.value.push({ label: name, value: id });
+  }
+}
+
+function ensureSensorOption(id?: string | null, name?: string | null) {
+  if (!id || !name) {
+    return;
+  }
+  if (!sensorOptions.value.some((option) => option.value === id)) {
+    sensorOptions.value.push({ label: name, value: id });
   }
 }
 
@@ -286,9 +382,13 @@ function addControl() {
     localId: id,
     name: '',
     color: DEFAULT_COLOR,
-    recipeId: recipeOptions.value[0]?.value ?? '',
+    type: 'Run',
+    recipeId: recipeOptions.value[0]?.value ?? null,
     cycles: 1,
     isInfinite: false,
+    recipeOnId: null,
+    recipeOffId: null,
+    sensorId: null,
   });
 }
 
@@ -313,14 +413,26 @@ async function submitForm() {
 
   const payload = controls.value.map((control) => {
     const sanitizedColor = sanitizeColor(control.color) || DEFAULT_COLOR;
+    const isRun = control.type === 'Run';
+    const toNullableId = (value: string | null) => (value && `${value}`.length > 0 ? value : null);
+    const recipeId = isRun ? toNullableId(control.recipeId) : null;
+    const recipeOnId = !isRun ? toNullableId(control.recipeOnId) : null;
+    const recipeOffId = !isRun ? toNullableId(control.recipeOffId) : null;
+    const sensorId = !isRun ? toNullableId(control.sensorId) : null;
+    const cycles = isRun ? (control.isInfinite ? Math.max(control.cycles, 1) : control.cycles) : 1;
+
     return {
       id: control.id,
       name: control.name,
       color: sanitizedColor,
-      recipeId: control.recipeId,
-      cycles: control.isInfinite ? Math.max(control.cycles, 1) : control.cycles,
-      isInfinite: control.isInfinite,
-    };
+      type: control.type as unknown as UpdateDeviceTemplateControlsRequest['type'],
+      recipeId,
+      cycles,
+      isInfinite: isRun ? control.isInfinite : false,
+      recipeOnId,
+      recipeOffId,
+      sensorId,
+    } satisfies UpdateDeviceTemplateControlsRequest;
   });
 
   const { error } = await DeviceTemplateControlService.updateTemplateControls(templateId, payload);
@@ -344,6 +456,29 @@ function updateColor(index: number, value: string | null) {
 
 function getPreviewColor(color: string) {
   return isHexColor(color) ? color : DEFAULT_COLOR;
+}
+
+function handleTypeChange(index: number, value: DeviceControlType | null) {
+  const control = controls.value[index];
+  if (!control) {
+    return;
+  }
+
+  const nextType = value ?? 'Run';
+  control.type = nextType;
+
+  if (nextType === 'Run') {
+    control.recipeOnId = null;
+    control.recipeOffId = null;
+    control.sensorId = null;
+    if (!control.recipeId && recipeOptions.value.length > 0) {
+      control.recipeId = recipeOptions.value[0].value;
+    }
+  } else {
+    control.recipeId = null;
+    control.isInfinite = false;
+    control.cycles = 1;
+  }
 }
 
 function sanitizeColor(value: string) {
