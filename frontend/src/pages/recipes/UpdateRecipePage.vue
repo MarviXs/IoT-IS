@@ -115,6 +115,10 @@ async function getDeviceTemplate() {
     id: data.id,
     name: data.name,
     deviceType: data.deviceType,
+    enableMap: data.enableMap,
+    enableGrid: data.enableGrid,
+    gridRowSpan: data.gridRowSpan,
+    gridColumnSpan: data.gridColumnSpan,
   };
 }
 getDeviceTemplate();

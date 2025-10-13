@@ -101,6 +101,8 @@ public static class GetDeviceById
                                 ))
                         ],
                         device.DeviceTemplate.DeviceType,
+                        device.DeviceTemplate.EnableMap,
+                        device.DeviceTemplate.EnableGrid,
                         device.DeviceTemplate.GridRowSpan,
                         device.DeviceTemplate.GridColumnSpan
                     )
@@ -123,6 +125,8 @@ public static class GetDeviceById
         string Name,
         SensorResponse[] Sensors,
         DeviceType DeviceType,
+        bool EnableMap,
+        bool EnableGrid,
         int? GridRowSpan = null,
         int? GridColumnSpan = null
     );

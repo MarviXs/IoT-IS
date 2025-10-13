@@ -80,6 +80,8 @@ public static class GetDeviceTemplates
                         template.Id,
                         template.Name,
                         template.UpdatedAt,
+                        template.EnableMap,
+                        template.EnableGrid,
                         template.GridRowSpan,
                         template.GridColumnSpan
                     )
@@ -90,7 +92,15 @@ public static class GetDeviceTemplates
         }
     }
 
-    public record Response(Guid Id, string Name, DateTime UpdatedAt, int? GridRowSpan, int? GridColumnSpan);
+    public record Response(
+        Guid Id,
+        string Name,
+        DateTime UpdatedAt,
+        bool EnableMap,
+        bool EnableGrid,
+        int? GridRowSpan,
+        int? GridColumnSpan
+    );
 
     public sealed class ParametersValidator : AbstractValidator<QueryParameters>
     {

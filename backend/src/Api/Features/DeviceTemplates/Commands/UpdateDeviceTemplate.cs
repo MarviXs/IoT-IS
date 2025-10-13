@@ -18,6 +18,8 @@ public static class UpdateDeviceTemplate
     public record Request(
         string Name,
         DeviceType DeviceType = DeviceType.Generic,
+        bool EnableMap = false,
+        bool EnableGrid = false,
         int? GridRowSpan = null,
         int? GridColumnSpan = null
     );
@@ -89,8 +91,10 @@ public static class UpdateDeviceTemplate
 
             deviceTemplate.Name = message.Request.Name;
             deviceTemplate.DeviceType = message.Request.DeviceType;
-            deviceTemplate.GridRowSpan = message.Request.GridRowSpan;
-            deviceTemplate.GridColumnSpan = message.Request.GridColumnSpan;
+            deviceTemplate.EnableMap = message.Request.EnableMap;
+            deviceTemplate.EnableGrid = message.Request.EnableGrid;
+            deviceTemplate.GridRowSpan = message.Request.EnableGrid ? message.Request.GridRowSpan : null;
+            deviceTemplate.GridColumnSpan = message.Request.EnableGrid ? message.Request.GridColumnSpan : null;
 
             try
             {
@@ -112,6 +116,14 @@ public static class UpdateDeviceTemplate
         public Validator()
         {
             RuleFor(x => x.Request.Name).NotEmpty().WithMessage("Name is required");
+            RuleFor(x => x.Request.GridRowSpan)
+                .NotNull()
+                .When(x => x.Request.EnableGrid)
+                .WithMessage("Grid row span is required when grid is enabled");
+            RuleFor(x => x.Request.GridColumnSpan)
+                .NotNull()
+                .When(x => x.Request.EnableGrid)
+                .WithMessage("Grid column span is required when grid is enabled");
             RuleFor(x => x.Request.GridRowSpan)
                 .GreaterThan(0)
                 .When(x => x.Request.GridRowSpan.HasValue)

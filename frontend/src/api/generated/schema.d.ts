@@ -939,6 +939,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/job-schedules/{scheduleId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a job schedule */
+        get: operations["GetJobScheduleById"];
+        /** Update a job schedule */
+        put: operations["UpdateJobSchedule"];
+        post?: never;
+        /** Delete a job schedule */
+        delete: operations["DeleteJobSchedule"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/devices/{deviceId}/job-schedules": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get job schedules for a device */
+        get: operations["GetJobSchedules"];
+        put?: never;
+        /** Create a job schedule */
+        post: operations["CreateJobSchedule"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/orders/{id}/download": {
         parameters: {
             query?: never;
@@ -1983,6 +2020,12 @@ export interface components {
         /** @enum {string} */
         "Fei.Is.Api.Data.Enums.DeviceType": "Generic" | "NuviaMSU";
         /** @enum {string} */
+        "Fei.Is.Api.Data.Enums.JobScheduleIntervalEnum": "Minute" | "Hour" | "Day" | "Week";
+        /** @enum {string} */
+        "Fei.Is.Api.Data.Enums.JobScheduleTypeEnum": "Once" | "Repeat";
+        /** @enum {string} */
+        "Fei.Is.Api.Data.Enums.JobScheduleWeekDayEnum": "Sunday" | "Monday" | "Tuesday" | "Wednesday" | "Thursday" | "Friday" | "Saturday";
+        /** @enum {string} */
         "Fei.Is.Api.Data.Enums.JobStatusEnum": "JOB_QUEUED" | "JOB_IN_PROGRESS" | "JOB_PAUSED" | "JOB_SUCCEEDED" | "JOB_REJECTED" | "JOB_FAILED" | "JOB_TIMED_OUT" | "JOB_CANCELED";
         /** @enum {string} */
         "Fei.Is.Api.Data.Enums.NotificationSeverity": "Info" | "Warning" | "Serious" | "Critical";
@@ -2268,6 +2311,12 @@ export interface components {
         "Fei.Is.Api.Features.DeviceTemplates.Commands.CreateDeviceTemplate.Request": {
             name: string;
             deviceType: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceType"];
+            enableMap: boolean;
+            enableGrid: boolean;
+            /** Format: int32 */
+            gridRowSpan?: number | null;
+            /** Format: int32 */
+            gridColumnSpan?: number | null;
         };
         "Fei.Is.Api.Features.DeviceTemplates.Commands.ImportDeviceTemplate.DeviceCommandRequest": {
             displayName: string;
@@ -2291,10 +2340,18 @@ export interface components {
             commands: components["schemas"]["Fei.Is.Api.Features.DeviceTemplates.Commands.ImportDeviceTemplate.DeviceCommandRequest"][];
             sensors: components["schemas"]["Fei.Is.Api.Features.DeviceTemplates.Commands.ImportDeviceTemplate.SensorRequest"][];
             deviceType: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceType"];
+            enableMap: boolean;
+            enableGrid: boolean;
+            /** Format: int32 */
+            gridRowSpan?: number | null;
+            /** Format: int32 */
+            gridColumnSpan?: number | null;
         };
         "Fei.Is.Api.Features.DeviceTemplates.Commands.UpdateDeviceTemplate.Request": {
             name: string;
             deviceType: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceType"];
+            enableMap: boolean;
+            enableGrid: boolean;
             /** Format: int32 */
             gridRowSpan?: number | null;
             /** Format: int32 */
@@ -2305,6 +2362,8 @@ export interface components {
             id: string;
             name: string;
             deviceType: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceType"];
+            enableMap: boolean;
+            enableGrid: boolean;
             /** Format: int32 */
             gridRowSpan?: number | null;
             /** Format: int32 */
@@ -2316,6 +2375,8 @@ export interface components {
             name: string;
             /** Format: date-time */
             updatedAt: string;
+            enableMap: boolean;
+            enableGrid: boolean;
             /** Format: int32 */
             gridRowSpan?: number | null;
             /** Format: int32 */
@@ -2369,6 +2430,8 @@ export interface components {
             name: string;
             sensors: components["schemas"]["Fei.Is.Api.Features.Devices.Queries.GetDeviceById.SensorResponse"][];
             deviceType: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceType"];
+            enableMap: boolean;
+            enableGrid: boolean;
             /** Format: int32 */
             gridRowSpan?: number | null;
             /** Format: int32 */
@@ -2532,6 +2595,80 @@ export interface components {
             depth: number;
             /** Format: date-time */
             dateCreated: string;
+        };
+        "Fei.Is.Api.Features.JobSchedules.Commands.CreateJobSchedule.Request": {
+            /** Format: uuid */
+            recipeId: string;
+            type: components["schemas"]["Fei.Is.Api.Data.Enums.JobScheduleTypeEnum"];
+            interval: components["schemas"]["Fei.Is.Api.Data.Enums.JobScheduleIntervalEnum"];
+            /** Format: int32 */
+            intervalValue?: number | null;
+            /** Format: date-time */
+            startTime: string;
+            /** Format: date-time */
+            endTime?: string | null;
+            daysOfWeek?: components["schemas"]["Fei.Is.Api.Data.Enums.JobScheduleWeekDayEnum"][] | null;
+            /** Format: int32 */
+            cycles: number;
+            isActive: boolean;
+        };
+        "Fei.Is.Api.Features.JobSchedules.Commands.UpdateJobSchedule.Request": {
+            /** Format: uuid */
+            deviceId: string;
+            /** Format: uuid */
+            recipeId: string;
+            type: components["schemas"]["Fei.Is.Api.Data.Enums.JobScheduleTypeEnum"];
+            interval: components["schemas"]["Fei.Is.Api.Data.Enums.JobScheduleIntervalEnum"];
+            /** Format: int32 */
+            intervalValue?: number | null;
+            /** Format: date-time */
+            startTime: string;
+            /** Format: date-time */
+            endTime?: string | null;
+            daysOfWeek?: components["schemas"]["Fei.Is.Api.Data.Enums.JobScheduleWeekDayEnum"][] | null;
+            /** Format: int32 */
+            cycles: number;
+            isActive: boolean;
+        };
+        "Fei.Is.Api.Features.JobSchedules.Queries.GetJobScheduleById.Response": {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            deviceId: string;
+            /** Format: uuid */
+            recipeId: string;
+            type: components["schemas"]["Fei.Is.Api.Data.Enums.JobScheduleTypeEnum"];
+            interval: components["schemas"]["Fei.Is.Api.Data.Enums.JobScheduleIntervalEnum"];
+            /** Format: int32 */
+            intervalValue?: number | null;
+            /** Format: date-time */
+            startTime: string;
+            /** Format: date-time */
+            endTime?: string | null;
+            daysOfWeek: components["schemas"]["Fei.Is.Api.Data.Enums.JobScheduleWeekDayEnum"][];
+            /** Format: int32 */
+            cycles: number;
+            isActive: boolean;
+        };
+        "Fei.Is.Api.Features.JobSchedules.Queries.GetJobSchedules.Response": {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            deviceId: string;
+            /** Format: uuid */
+            recipeId: string;
+            type: components["schemas"]["Fei.Is.Api.Data.Enums.JobScheduleTypeEnum"];
+            interval: components["schemas"]["Fei.Is.Api.Data.Enums.JobScheduleIntervalEnum"];
+            /** Format: int32 */
+            intervalValue?: number | null;
+            /** Format: date-time */
+            startTime: string;
+            /** Format: date-time */
+            endTime?: string | null;
+            daysOfWeek: components["schemas"]["Fei.Is.Api.Data.Enums.JobScheduleWeekDayEnum"][];
+            /** Format: int32 */
+            cycles: number;
+            isActive: boolean;
         };
         "Fei.Is.Api.Features.Jobs.Commands.CreateJob.Request": {
             /** Format: uuid */
@@ -5750,6 +5887,175 @@ export interface operations {
             };
             /** @description Unprocessable Entity */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GetJobScheduleById: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                scheduleId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.JobSchedules.Queries.GetJobScheduleById.Response"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UpdateJobSchedule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                scheduleId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.JobSchedules.Commands.UpdateJobSchedule.Request"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DeleteJobSchedule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                scheduleId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GetJobSchedules: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                deviceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.JobSchedules.Queries.GetJobSchedules.Response"][];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CreateJobSchedule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                deviceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.JobSchedules.Commands.CreateJobSchedule.Request"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

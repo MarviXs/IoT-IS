@@ -22,7 +22,11 @@ public static class ImportDeviceTemplate
         string Name,
         List<DeviceCommandRequest> Commands,
         List<SensorRequest> Sensors,
-        DeviceType DeviceType = DeviceType.Generic
+        DeviceType DeviceType = DeviceType.Generic,
+        bool EnableMap = false,
+        bool EnableGrid = false,
+        int? GridRowSpan = null,
+        int? GridColumnSpan = null
     );
 
     public record Request(TemplateRequest TemplateData, string Version);
@@ -74,6 +78,10 @@ public static class ImportDeviceTemplate
                 OwnerId = message.User.GetUserId(),
                 Name = message.Request.TemplateData.Name,
                 DeviceType = message.Request.TemplateData.DeviceType,
+                EnableMap = message.Request.TemplateData.EnableMap,
+                EnableGrid = message.Request.TemplateData.EnableGrid,
+                GridRowSpan = message.Request.TemplateData.EnableGrid ? message.Request.TemplateData.GridRowSpan : null,
+                GridColumnSpan = message.Request.TemplateData.EnableGrid ? message.Request.TemplateData.GridColumnSpan : null,
             };
 
             await context.DeviceTemplates.AddAsync(template, cancellationToken);

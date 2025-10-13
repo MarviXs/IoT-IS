@@ -59,7 +59,15 @@ public static class GetDeviceTemplateById
                 .Select(template => new
                 {
                     template.OwnerId,
-                    Response = new Response(template.Id, template.Name, template.DeviceType, template.GridRowSpan, template.GridColumnSpan)
+                    Response = new Response(
+                        template.Id,
+                        template.Name,
+                        template.DeviceType,
+                        template.EnableMap,
+                        template.EnableGrid,
+                        template.GridRowSpan,
+                        template.GridColumnSpan
+                    )
                 })
                 .FirstOrDefaultAsync(cancellationToken);
 
@@ -76,5 +84,13 @@ public static class GetDeviceTemplateById
         }
     }
 
-    public record Response(Guid Id, string Name, DeviceType DeviceType, int? GridRowSpan, int? GridColumnSpan);
+    public record Response(
+        Guid Id,
+        string Name,
+        DeviceType DeviceType,
+        bool EnableMap,
+        bool EnableGrid,
+        int? GridRowSpan,
+        int? GridColumnSpan
+    );
 }

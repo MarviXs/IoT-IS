@@ -26,7 +26,8 @@
         unelevated
         no-caps
         size="15px"
-        label="Map"
+        v-if="device.deviceTemplate?.enableMap"
+        :label="t('device.map')"
         :icon="mdiMapMarker"
       />
       <q-btn
@@ -46,6 +47,7 @@
         unelevated
         no-caps
         size="15px"
+        v-if="device.deviceTemplate?.enableGrid"
         :label="t('device_template.grid_settings')"
         :icon="mdiViewGridOutline"
       />

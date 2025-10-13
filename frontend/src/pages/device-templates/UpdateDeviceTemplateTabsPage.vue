@@ -39,14 +39,6 @@
           :label="t('device_template.controls')"
           no-caps
         />
-        <q-route-tab
-          :to="{ path: `/device-templates/${templateId}/grid` }"
-          style="min-width: 130px"
-          name="grid"
-          :icon="mdiViewGridOutline"
-          :label="t('device_template.grid_settings')"
-          no-caps
-        />
       </q-tabs>
     </q-card>
     <router-view />
@@ -61,13 +53,7 @@ import type { UpdateDeviceTemplateRequest } from '@/api/services/DeviceTemplateS
 import DeviceTemplateService from '@/api/services/DeviceTemplateService';
 import { useRoute } from 'vue-router';
 import { handleError } from '@/utils/error-handler';
-import {
-  mdiCodeTags,
-  mdiContentCopy,
-  mdiBookMultipleOutline,
-  mdiGestureTapButton,
-  mdiViewGridOutline,
-} from '@quasar/extras/mdi-v7';
+import { mdiCodeTags, mdiContentCopy, mdiBookMultipleOutline, mdiGestureTapButton } from '@quasar/extras/mdi-v7';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -85,6 +71,10 @@ async function getDeviceTemplate() {
   deviceRequest.value = {
     name: data.name,
     deviceType: data.deviceType,
+    enableMap: data.enableMap,
+    enableGrid: data.enableGrid,
+    gridRowSpan: data.gridRowSpan,
+    gridColumnSpan: data.gridColumnSpan,
   };
 }
 getDeviceTemplate();

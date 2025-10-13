@@ -8,6 +8,8 @@ public class DeviceTemplate : BaseModel
     public ApplicationUser? Owner { get; set; } = null!;
     public required string Name { get; set; }
     public DeviceType DeviceType { get; set; } = DeviceType.Generic;
+    public bool EnableMap { get; set; }
+    public bool EnableGrid { get; set; }
     public ICollection<Sensor> Sensors { get; set; } = [];
     public ICollection<Command> Commands { get; set; } = [];
     public ICollection<Recipe> Recipes { get; set; } = [];

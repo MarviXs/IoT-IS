@@ -23,6 +23,32 @@
               emit-value
               map-options
             />
+            <div class="col-12">
+              <q-toggle v-model="template.enableMap" :label="t('device_template.enable_map')" />
+            </div>
+            <div class="col-12">
+              <q-toggle v-model="template.enableGrid" :label="t('device_template.enable_grid')" />
+            </div>
+            <q-input
+              v-if="template.enableGrid"
+              v-model.number="template.gridRowSpan"
+              type="number"
+              min="1"
+              step="1"
+              class="col-12 col-sm-6"
+              :rules="gridRowRules"
+              :label="t('device_template.grid_rows')"
+            />
+            <q-input
+              v-if="template.enableGrid"
+              v-model.number="template.gridColumnSpan"
+              type="number"
+              min="1"
+              step="1"
+              class="col-12 col-sm-6"
+              :rules="gridColumnRules"
+              :label="t('device_template.grid_columns')"
+            />
           </div>
           <q-card-actions align="left" class="text-primary q-mt-sm q-px-none">
             <q-btn
@@ -71,7 +97,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { QForm, QInput } from 'quasar';
 import { isFormValid } from '@/utils/form-validation';
@@ -83,6 +109,10 @@ import { matSensors } from '@quasar/extras/material-icons';
 export type DeviceTemplateFormData = {
   name: string;
   deviceType: 'Generic' | 'NuviaMSU';
+  enableMap: boolean;
+  enableGrid: boolean;
+  gridRowSpan: number | null;
+  gridColumnSpan: number | null;
 };
 
 const { t } = useI18n();
@@ -151,4 +181,26 @@ const nameRef = ref<QInput>();
 const sensorFormRef = ref<(typeof SensorForm)[]>([]);
 
 const nameRules = [(val: string) => (val && val.length > 0) || t('global.rules.required')];
+const gridRowRules = [
+  (val: number | null) =>
+    !template.value.enableGrid || (val !== null && val > 0) || t('device_template.rules.grid_positive'),
+];
+const gridColumnRules = [
+  (val: number | null) =>
+    !template.value.enableGrid || (val !== null && val > 0) || t('device_template.rules.grid_positive'),
+];
+
+watch(
+  () => template.value.enableGrid,
+  (enabled) => {
+    if (!enabled) {
+      template.value.gridRowSpan = null;
+      template.value.gridColumnSpan = null;
+    } else {
+      template.value.gridRowSpan = template.value.gridRowSpan ?? 1;
+      template.value.gridColumnSpan = template.value.gridColumnSpan ?? 1;
+    }
+  },
+  { immediate: true },
+);
 </script>

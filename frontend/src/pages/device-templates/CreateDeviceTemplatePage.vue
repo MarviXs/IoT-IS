@@ -33,6 +33,10 @@ const router = useRouter();
 const templateData = ref<DeviceTemplateFormData>({
   name: '',
   deviceType: 'Generic',
+  enableMap: false,
+  enableGrid: false,
+  gridRowSpan: null,
+  gridColumnSpan: null,
 });
 const sensorsData = ref<SensorFormData[]>([]);
 const submitting = ref(false);

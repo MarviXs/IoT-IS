@@ -15,7 +15,14 @@ namespace Fei.Is.Api.Features.DeviceTemplates.Commands;
 
 public static class CreateDeviceTemplate
 {
-    public record Request(string Name, DeviceType DeviceType = DeviceType.Generic);
+    public record Request(
+        string Name,
+        DeviceType DeviceType = DeviceType.Generic,
+        bool EnableMap = false,
+        bool EnableGrid = false,
+        int? GridRowSpan = null,
+        int? GridColumnSpan = null
+    );
 
     public sealed class Endpoint : ICarterModule
     {
@@ -63,7 +70,11 @@ public static class CreateDeviceTemplate
             {
                 OwnerId = message.User.GetUserId(),
                 Name = message.Request.Name,
-                DeviceType = message.Request.DeviceType
+                DeviceType = message.Request.DeviceType,
+                EnableMap = message.Request.EnableMap,
+                EnableGrid = message.Request.EnableGrid,
+                GridRowSpan = message.Request.EnableGrid ? message.Request.GridRowSpan : null,
+                GridColumnSpan = message.Request.EnableGrid ? message.Request.GridColumnSpan : null
             };
 
             await context.DeviceTemplates.AddAsync(template, cancellationToken);
@@ -78,6 +89,22 @@ public static class CreateDeviceTemplate
         public Validator()
         {
             RuleFor(x => x.Request.Name).NotEmpty().WithMessage("Name is required");
+            RuleFor(x => x.Request.GridRowSpan)
+                .NotNull()
+                .When(x => x.Request.EnableGrid)
+                .WithMessage("Grid row span is required when grid is enabled");
+            RuleFor(x => x.Request.GridColumnSpan)
+                .NotNull()
+                .When(x => x.Request.EnableGrid)
+                .WithMessage("Grid column span is required when grid is enabled");
+            RuleFor(x => x.Request.GridRowSpan)
+                .GreaterThan(0)
+                .When(x => x.Request.GridRowSpan.HasValue)
+                .WithMessage("Grid row span must be greater than 0");
+            RuleFor(x => x.Request.GridColumnSpan)
+                .GreaterThan(0)
+                .When(x => x.Request.GridColumnSpan.HasValue)
+                .WithMessage("Grid column span must be greater than 0");
         }
     }
 }

@@ -26,8 +26,6 @@ const route = useRoute();
 const templateData = ref<DeviceTemplateFormData>();
 const sensorsData = ref<SensorFormData[]>([]);
 const submitting = ref(false);
-const gridRowSpan = ref<number | null>(null);
-const gridColumnSpan = ref<number | null>(null);
 
 const templateId = route.params.id as string;
 
@@ -41,9 +39,11 @@ async function getDeviceTemplate() {
   templateData.value = {
     name: data.name,
     deviceType: data.deviceType,
+    enableMap: data.enableMap,
+    enableGrid: data.enableGrid,
+    gridRowSpan: data.enableGrid ? data.gridRowSpan ?? 1 : null,
+    gridColumnSpan: data.enableGrid ? data.gridColumnSpan ?? 1 : null,
   };
-  gridRowSpan.value = data.gridRowSpan ?? null;
-  gridColumnSpan.value = data.gridColumnSpan ?? null;
 }
 getDeviceTemplate();
 
@@ -75,8 +75,10 @@ async function submitForm() {
   const payload: UpdateDeviceTemplateRequest = {
     name: templateData.value.name,
     deviceType: templateData.value.deviceType,
-    gridRowSpan: gridRowSpan.value,
-    gridColumnSpan: gridColumnSpan.value,
+    enableMap: templateData.value.enableMap,
+    enableGrid: templateData.value.enableGrid,
+    gridRowSpan: templateData.value.enableGrid ? templateData.value.gridRowSpan : null,
+    gridColumnSpan: templateData.value.enableGrid ? templateData.value.gridColumnSpan : null,
   };
 
   const templateRes = await DeviceTemplateService.updateDeviceTemplate(templateId, payload);

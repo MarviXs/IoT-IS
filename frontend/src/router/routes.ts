@@ -90,10 +90,6 @@ const routes: RouteRecordRaw[] = [
             path: 'controls',
             component: () => import('pages/device-templates/UpdateDeviceTemplateControlsPage.vue'),
           },
-          {
-            path: 'grid',
-            component: () => import('pages/device-templates/UpdateDeviceTemplateGridPage.vue'),
-          },
         ],
       },
 
