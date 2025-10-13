@@ -188,7 +188,7 @@ async function loadCollections(paginationTable: PaginationTable) {
     pagination.value.sortBy = paginationTable.sortBy;
     pagination.value.descending = paginationTable.descending;
     pagination.value.page = (response.data?.currentPage ?? 1);
-    pagination.value.rowsPerPage = response.data?.pageSize ?? 10;
+    pagination.value.rowsPerPage = response.data?.pageSize ?? 20;
     pagination.value.rowsNumber = response.data?.totalCount ?? 0;
   } catch (error) {
     console.error('Chyba pri načítavaní životných cyklov:', error);

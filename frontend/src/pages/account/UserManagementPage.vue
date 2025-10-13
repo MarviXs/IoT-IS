@@ -55,7 +55,7 @@ const pagination = ref<PaginationClient>({
   sortBy: 'email',
   descending: false,
   page: 1,
-  rowsPerPage: 10,
+  rowsPerPage: 20,
   rowsNumber: 0,
 });
 const usersPaginated = ref<UsersResponse>();

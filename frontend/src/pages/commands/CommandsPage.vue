@@ -93,7 +93,7 @@ const pagination = ref<PaginationClient>({
   sortBy: 'displayName',
   descending: false,
   page: 1,
-  rowsPerPage: 10,
+  rowsPerPage: 20,
   rowsNumber: 0,
 });
 

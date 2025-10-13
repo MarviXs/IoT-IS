@@ -48,7 +48,7 @@ const pagination = ref<PaginationClient>({
   sortBy: 'name',
   descending: false,
   page: 1,
-  rowsPerPage: 10,
+  rowsPerPage: 20,
   rowsNumber: 0,
 });
 const ordersPaginated = ref<any>();

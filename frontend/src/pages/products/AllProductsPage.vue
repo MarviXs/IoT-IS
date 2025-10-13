@@ -60,7 +60,7 @@ const pagination = ref<PaginationClient>({
   sortBy: 'PLUCode',
   descending: false,
   page: 1,
-  rowsPerPage: 10,
+  rowsPerPage: 20,
   rowsNumber: 0,
 });
 const productsPaginated = ref<any>();

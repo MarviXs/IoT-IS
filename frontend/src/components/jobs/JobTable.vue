@@ -91,7 +91,7 @@ const pagination = ref<PaginationClient>({
   sortBy: 'CreatedAt',
   descending: true,
   page: 1,
-  rowsPerPage: 10,
+  rowsPerPage: 20,
   rowsNumber: 0,
 });
 const jobs = ref<JobsResponse>();
