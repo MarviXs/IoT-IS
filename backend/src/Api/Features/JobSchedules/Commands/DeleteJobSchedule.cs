@@ -4,6 +4,7 @@ using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Features.Devices.Extensions;
+using Fei.Is.Api.Features.JobSchedules.Services;
 using FluentResults;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -49,7 +50,7 @@ public static class DeleteJobSchedule
 
     public record Command(Guid ScheduleId, ClaimsPrincipal User) : IRequest<Result>;
 
-    public sealed class Handler(AppDbContext context) : IRequestHandler<Command, Result>
+    public sealed class Handler(AppDbContext context, IJobScheduleScheduler scheduler) : IRequestHandler<Command, Result>
     {
         public async Task<Result> Handle(Command message, CancellationToken cancellationToken)
         {
@@ -66,6 +67,8 @@ public static class DeleteJobSchedule
             {
                 return Result.Fail(new ForbiddenError());
             }
+
+            await scheduler.UnscheduleAsync(schedule.Id, cancellationToken);
 
             context.JobSchedules.Remove(schedule);
             await context.SaveChangesAsync(cancellationToken);

@@ -4,6 +4,8 @@ using Fei.Is.Api.BackgroundServices;
 using Fei.Is.Api.Common.OpenAPI;
 using Fei.Is.Api.Extensions;
 using Fei.Is.Api.Features.Auth;
+using Fei.Is.Api.Features.JobSchedules.Jobs;
+using Fei.Is.Api.Features.JobSchedules.Services;
 using Fei.Is.Api.Features.Jobs.Services;
 using Fei.Is.Api.MqttClient;
 using Fei.Is.Api.MqttClient.Publish;
@@ -16,6 +18,7 @@ using Fei.Is.Api.SignalR.Hubs;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Json;
+using Quartz;
 
 namespace Fei.Is.Api;
 
@@ -35,6 +38,8 @@ public class Startup(IConfiguration configuration)
         services.AddCarter();
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Startup>());
         services.AddSignalR();
+        services.AddQuartz();
+        services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true);
 
         // Auth
         services.AddAuthentication();
@@ -61,6 +66,8 @@ public class Startup(IConfiguration configuration)
 
         // Add services
         services.AddScoped<JobService>();
+        services.AddSingleton<IJobScheduleScheduler, JobScheduleQuartzScheduler>();
+        services.AddTransient<JobScheduleExecutionJob>();
         services.AddScoped<TokenService>();
         services.AddSingleton<RedisService>();
 
@@ -69,6 +76,7 @@ public class Startup(IConfiguration configuration)
 
         services.AddHostedService<StoreDataPointsBatchService>();
         services.AddHostedService<JobTimeOutService>();
+        services.AddHostedService<JobScheduleBootstrapper>();
 
         services.AddScoped<PLUCodeService>();
         services.AddScoped<EANCodeService>();

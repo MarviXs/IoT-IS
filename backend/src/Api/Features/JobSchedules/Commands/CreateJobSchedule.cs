@@ -7,6 +7,7 @@ using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
 using Fei.Is.Api.Features.Devices.Extensions;
+using Fei.Is.Api.Features.JobSchedules.Services;
 using FluentResults;
 using FluentValidation;
 using MediatR;
@@ -76,7 +77,11 @@ public static class CreateJobSchedule
 
     public record Command(Guid DeviceId, ClaimsPrincipal User, Request Request) : IRequest<Result<Guid>>;
 
-    public sealed class Handler(AppDbContext context, IValidator<Command> validator) : IRequestHandler<Command, Result<Guid>>
+    public sealed class Handler(
+        AppDbContext context,
+        IValidator<Command> validator,
+        IJobScheduleScheduler scheduler
+    ) : IRequestHandler<Command, Result<Guid>>
     {
         public async Task<Result<Guid>> Handle(Command message, CancellationToken cancellationToken)
         {
@@ -128,6 +133,8 @@ public static class CreateJobSchedule
 
             await context.JobSchedules.AddAsync(schedule, cancellationToken);
             await context.SaveChangesAsync(cancellationToken);
+
+            await scheduler.ScheduleAsync(schedule, cancellationToken);
 
             return Result.Ok(schedule.Id);
         }
