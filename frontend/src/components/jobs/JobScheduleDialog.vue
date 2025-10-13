@@ -45,6 +45,7 @@
             v-if="form.interval !== 'Week'"
             v-model.number="form.intervalValue"
             type="number"
+            class="q-mt-sm"
             :label="t('job_schedule.interval_value')"
             :rules="intervalValueRules"
             lazy-rules

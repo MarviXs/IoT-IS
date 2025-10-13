@@ -374,6 +374,7 @@
     "interval_once": "Once",
     "interval_every": "Every {value} {unit}",
     "interval_week_with_days": "Weekly on {days}",
+    "interval_week_days_only": "Every {days}",
     "interval_weeks_with_days": "Every {value} weeks on {days}",
     "interval_units": {
       "second": "second | seconds",

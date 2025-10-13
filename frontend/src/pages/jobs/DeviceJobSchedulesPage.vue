@@ -341,9 +341,7 @@ function formatInterval(schedule: JobScheduleWithRecipe) {
   if (interval === 'Week') {
     const days = (schedule.daysOfWeek ?? []).map((day) => t(`job_schedule.days.${day.toLowerCase()}`));
     const daysLabel = days.length > 0 ? days.join(', ') : t('job_schedule.days.none');
-    return value > 1
-      ? t('job_schedule.interval_weeks_with_days', { value, days: daysLabel })
-      : t('job_schedule.interval_week_with_days', { days: daysLabel });
+    return t('job_schedule.interval_week_days_only', { days: daysLabel });
   }
 
   const unitKey = `job_schedule.interval_units.${interval.toLowerCase()}`;

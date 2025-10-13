@@ -356,6 +356,7 @@
     "interval_once": "Jedenkrát",
     "interval_every": "Každých {value} {unit}",
     "interval_week_with_days": "Týždenne v {days}",
+    "interval_week_days_only": "Každý {days}",
     "interval_weeks_with_days": "Každé {value} týždne v {days}",
     "interval_units": {
       "second": "sekundu | sekúnd",

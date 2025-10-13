@@ -69,11 +69,44 @@ public class JobScheduleQuartzScheduler : IJobScheduleScheduler
         }
     }
 
-    private TriggerBuilder ApplyStartTime(TriggerBuilder builder, JobSchedule schedule)
+    private TriggerBuilder ApplyStartTime(TriggerBuilder builder, JobSchedule schedule, TimeSpan? interval = null)
     {
-        return schedule.StartTime <= DateTimeOffset.UtcNow
-            ? builder.StartNow()
-            : builder.StartAt(schedule.StartTime.UtcDateTime);
+        var now = DateTimeOffset.UtcNow;
+
+        if (schedule.StartTime > now)
+        {
+            return builder.StartAt(schedule.StartTime.UtcDateTime);
+        }
+
+        if (interval is null)
+        {
+            return builder.StartNow();
+        }
+
+        var elapsed = now - schedule.StartTime;
+
+        if (elapsed <= TimeSpan.Zero)
+        {
+            return builder.StartNow();
+        }
+
+        var intervalTicks = interval.Value.Ticks;
+
+        if (intervalTicks <= 0)
+        {
+            return builder.StartNow();
+        }
+
+        var remainderTicks = elapsed.Ticks % intervalTicks;
+
+        if (remainderTicks == 0)
+        {
+            return builder.StartNow();
+        }
+
+        var next = now + TimeSpan.FromTicks(intervalTicks - remainderTicks);
+
+        return builder.StartAt(next.UtcDateTime);
     }
 
     private ITrigger? BuildTrigger(JobSchedule schedule, JobKey jobKey)
@@ -89,8 +122,6 @@ public class JobScheduleQuartzScheduler : IJobScheduleScheduler
             return null;
         }
 
-        builder = ApplyStartTime(builder, schedule);
-
         if (schedule.EndTime.HasValue)
         {
             builder = builder.EndAt(schedule.EndTime.Value.UtcDateTime);
@@ -98,6 +129,7 @@ public class JobScheduleQuartzScheduler : IJobScheduleScheduler
 
         if (schedule.Type == JobScheduleTypeEnum.Once)
         {
+            builder = ApplyStartTime(builder, schedule);
             return builder.WithSimpleSchedule(x => x.WithRepeatCount(0)).Build();
         }
 
@@ -112,18 +144,22 @@ public class JobScheduleQuartzScheduler : IJobScheduleScheduler
 
         return schedule.Interval.Value switch
         {
-            JobScheduleIntervalEnum.Second => builder
-                .WithSimpleSchedule(x => x.WithIntervalInSeconds(schedule.IntervalValue.Value).RepeatForever())
-                .Build(),
-            JobScheduleIntervalEnum.Minute => builder
-                .WithSimpleSchedule(x => x.WithIntervalInMinutes(schedule.IntervalValue.Value).RepeatForever())
-                .Build(),
-            JobScheduleIntervalEnum.Hour => builder
-                .WithSimpleSchedule(x => x.WithIntervalInHours(schedule.IntervalValue.Value).RepeatForever())
-                .Build(),
-            JobScheduleIntervalEnum.Day => builder
-                .WithSimpleSchedule(x => x.WithInterval(TimeSpan.FromDays(schedule.IntervalValue.Value)).RepeatForever())
-                .Build(),
+            JobScheduleIntervalEnum.Second =>
+                ApplyStartTime(builder, schedule, TimeSpan.FromSeconds(schedule.IntervalValue.Value))
+                    .WithSimpleSchedule(x => x.WithIntervalInSeconds(schedule.IntervalValue.Value).RepeatForever())
+                    .Build(),
+            JobScheduleIntervalEnum.Minute =>
+                ApplyStartTime(builder, schedule, TimeSpan.FromMinutes(schedule.IntervalValue.Value))
+                    .WithSimpleSchedule(x => x.WithIntervalInMinutes(schedule.IntervalValue.Value).RepeatForever())
+                    .Build(),
+            JobScheduleIntervalEnum.Hour =>
+                ApplyStartTime(builder, schedule, TimeSpan.FromHours(schedule.IntervalValue.Value))
+                    .WithSimpleSchedule(x => x.WithIntervalInHours(schedule.IntervalValue.Value).RepeatForever())
+                    .Build(),
+            JobScheduleIntervalEnum.Day =>
+                ApplyStartTime(builder, schedule, TimeSpan.FromDays(schedule.IntervalValue.Value))
+                    .WithSimpleSchedule(x => x.WithInterval(TimeSpan.FromDays(schedule.IntervalValue.Value)).RepeatForever())
+                    .Build(),
             JobScheduleIntervalEnum.Week => BuildWeeklyTrigger(builder, schedule),
             _ => null
         };
@@ -160,7 +196,7 @@ public class JobScheduleQuartzScheduler : IJobScheduleScheduler
 
         var cronExpression = $"{startTimeUtc.Second} {startTimeUtc.Minute} {startTimeUtc.Hour} ? * {string.Join(',', days)}";
 
-        return builder
+        return ApplyStartTime(builder, schedule)
             .WithCronSchedule(cronExpression, cron => cron.InTimeZone(TimeZoneInfo.Utc))
             .Build();
     }
