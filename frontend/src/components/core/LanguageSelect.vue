@@ -34,8 +34,6 @@ import { useI18n } from 'vue-i18n';
 import { useStorage } from '@vueuse/core';
 import SKFlag from '@/assets/flags/sk.svg';
 import GBFlag from '@/assets/flags/gb.svg';
-import ESFlag from '@/assets/flags/es.svg';
-import FRFlag from '@/assets/flags/fr.svg';
 
 const localeStorage = useStorage('locale', 'en');
 const { locale } = useI18n();
@@ -43,8 +41,6 @@ const { locale } = useI18n();
 const options = [
   { value: 'en', icon: GBFlag, label: 'English' },
   { value: 'sk', icon: SKFlag, label: 'Slovenčina' },
-  { value: 'es', icon: ESFlag, label: 'Español' },
-  { value: 'fr', icon: FRFlag, label: 'Français' },
   // { value: 'cs', icon: 'CZFlag', label: 'Čestina' },
 ];
 </script>
