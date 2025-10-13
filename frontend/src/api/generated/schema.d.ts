@@ -1971,6 +1971,11 @@ export interface components {
         };
         /** @enum {string} */
         "Fei.Is.Api.Data.Enums.DeviceConnectionProtocol": "HTTP" | "MQTT";
+        /**
+         * Format: int32
+         * @enum {integer}
+         */
+        "Fei.Is.Api.Data.Enums.DeviceControlType": 0 | 1;
         /** @enum {string} */
         "Fei.Is.Api.Data.Enums.DevicePermission": "Owner" | "Editor" | "Viewer";
         /** @enum {string} */
@@ -2212,23 +2217,40 @@ export interface components {
             id?: string | null;
             name: string;
             color: string;
+            type: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceControlType"];
             /** Format: uuid */
-            recipeId: string;
+            recipeId?: string | null;
             /** Format: int32 */
             cycles: number;
             isInfinite: boolean;
+            /** Format: uuid */
+            recipeOnId?: string | null;
+            /** Format: uuid */
+            recipeOffId?: string | null;
+            /** Format: uuid */
+            sensorId?: string | null;
         };
         "Fei.Is.Api.Features.DeviceControls.Queries.GetDeviceTemplateControls.Response": {
             /** Format: uuid */
             id: string;
             name: string;
             color: string;
+            type: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceControlType"];
             /** Format: uuid */
-            recipeId: string;
+            recipeId?: string | null;
             recipeName: string;
             /** Format: int32 */
             cycles: number;
             isInfinite: boolean;
+            /** Format: uuid */
+            recipeOnId?: string | null;
+            recipeOnName?: string | null;
+            /** Format: uuid */
+            recipeOffId?: string | null;
+            recipeOffName?: string | null;
+            /** Format: uuid */
+            sensorId?: string | null;
+            sensorName?: string | null;
             /** Format: int32 */
             order: number;
         };
