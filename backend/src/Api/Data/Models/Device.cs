@@ -15,6 +15,7 @@ public class Device : BaseModel
     public required string AccessToken { get; set; }
     public DeviceConnectionProtocol Protocol { get; set; } = DeviceConnectionProtocol.HTTP;
     public ICollection<Job> Jobs { get; set; } = [];
+    public ICollection<JobSchedule> JobSchedules { get; set; } = [];
     public ICollection<CollectionItem> CollectionItems { get; set; } = [];
     public ICollection<DeviceShare> SharedWithUsers { get; set; } = [];
 }

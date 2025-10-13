@@ -46,6 +46,8 @@ public class AppDbContext
         modelBuilder.ApplyConfiguration(new CollectionItemConfiguration());
         modelBuilder.ApplyConfiguration(new SceneConfiguration());
         modelBuilder.ApplyConfiguration(new SceneSensorTriggerConfiguration());
+        modelBuilder.ApplyConfiguration(new JobScheduleConfiguration());
+        modelBuilder.ApplyConfiguration(new JobScheduleWeekDayConfiguration());
 
         //IS configurations
         modelBuilder.ApplyConfiguration(new AdditionalOrderConfiguration());
@@ -79,6 +81,8 @@ public class AppDbContext
     public DbSet<Device> Devices { get; set; }
     public DbSet<Sensor> Sensors { get; set; }
     public DbSet<Job> Jobs { get; set; }
+    public DbSet<JobSchedule> JobSchedules { get; set; }
+    public DbSet<JobScheduleWeekDay> JobScheduleWeekDays { get; set; }
     public DbSet<Recipe> Recipes { get; set; }
     public DbSet<RecipeStep> RecipeSteps { get; set; }
     public DbSet<Command> Commands { get; set; }
