@@ -19,6 +19,7 @@ public static class CreateJobSchedule
 {
     public record Request(
         Guid RecipeId,
+        string Name,
         JobScheduleTypeEnum Type,
         JobScheduleIntervalEnum? Interval,
         int? IntervalValue,
@@ -107,6 +108,7 @@ public static class CreateJobSchedule
             var schedule = new JobSchedule
             {
                 DeviceId = message.DeviceId,
+                Name = message.Request.Name,
                 RecipeId = message.Request.RecipeId,
                 Type = message.Request.Type,
                 Interval = message.Request.Type == JobScheduleTypeEnum.Repeat ? message.Request.Interval : null,
@@ -136,6 +138,7 @@ public static class CreateJobSchedule
         public Validator()
         {
             RuleFor(x => x.DeviceId).NotEmpty();
+            RuleFor(x => x.Request.Name).NotEmpty();
             RuleFor(x => x.Request.RecipeId).NotEmpty();
             RuleFor(x => x.Request.StartTime).NotEmpty();
             RuleFor(x => x.Request.Cycles).GreaterThan(0);

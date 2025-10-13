@@ -73,6 +73,7 @@ public static class GetJobScheduleById
 
             var response = new Response(
                 schedule.Id,
+                schedule.Name,
                 schedule.DeviceId,
                 schedule.RecipeId,
                 schedule.Type,
@@ -91,6 +92,7 @@ public static class GetJobScheduleById
 
     public record Response(
         Guid Id,
+        string Name,
         Guid DeviceId,
         Guid RecipeId,
         JobScheduleTypeEnum Type,

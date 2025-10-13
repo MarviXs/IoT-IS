@@ -2599,6 +2599,7 @@ export interface components {
         "Fei.Is.Api.Features.JobSchedules.Commands.CreateJobSchedule.Request": {
             /** Format: uuid */
             recipeId: string;
+            name: string;
             type: components["schemas"]["Fei.Is.Api.Data.Enums.JobScheduleTypeEnum"];
             interval: components["schemas"]["Fei.Is.Api.Data.Enums.JobScheduleIntervalEnum"];
             /** Format: int32 */
@@ -2617,6 +2618,7 @@ export interface components {
             deviceId: string;
             /** Format: uuid */
             recipeId: string;
+            name: string;
             type: components["schemas"]["Fei.Is.Api.Data.Enums.JobScheduleTypeEnum"];
             interval: components["schemas"]["Fei.Is.Api.Data.Enums.JobScheduleIntervalEnum"];
             /** Format: int32 */
@@ -2633,6 +2635,7 @@ export interface components {
         "Fei.Is.Api.Features.JobSchedules.Queries.GetJobScheduleById.Response": {
             /** Format: uuid */
             id: string;
+            name: string;
             /** Format: uuid */
             deviceId: string;
             /** Format: uuid */
@@ -2653,6 +2656,7 @@ export interface components {
         "Fei.Is.Api.Features.JobSchedules.Queries.GetJobSchedules.Response": {
             /** Format: uuid */
             id: string;
+            name: string;
             /** Format: uuid */
             deviceId: string;
             /** Format: uuid */

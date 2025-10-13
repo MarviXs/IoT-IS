@@ -76,6 +76,7 @@ public static class GetJobSchedules
             var response = schedules
                 .Select(schedule => new Response(
                     schedule.Id,
+                    schedule.Name,
                     schedule.DeviceId,
                     schedule.RecipeId,
                     schedule.Type,
@@ -95,6 +96,7 @@ public static class GetJobSchedules
 
     public record Response(
         Guid Id,
+        string Name,
         Guid DeviceId,
         Guid RecipeId,
         JobScheduleTypeEnum Type,

@@ -20,6 +20,7 @@ public static class UpdateJobSchedule
     public record Request(
         Guid DeviceId,
         Guid RecipeId,
+        string Name,
         JobScheduleTypeEnum Type,
         JobScheduleIntervalEnum? Interval,
         int? IntervalValue,
@@ -128,6 +129,7 @@ public static class UpdateJobSchedule
             }
 
             schedule.RecipeId = message.Request.RecipeId;
+            schedule.Name = message.Request.Name;
             schedule.Type = message.Request.Type;
             schedule.Interval = message.Request.Type == JobScheduleTypeEnum.Repeat ? message.Request.Interval : null;
             schedule.IntervalValue = message.Request.Type == JobScheduleTypeEnum.Repeat ? message.Request.IntervalValue : null;

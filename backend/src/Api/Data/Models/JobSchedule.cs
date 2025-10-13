@@ -6,6 +6,7 @@ public class JobSchedule : BaseModel
 {
     public Guid DeviceId { get; set; }
     public Device? Device { get; set; }
+    public string Name { get; set; } = null!;
     public Guid RecipeId { get; set; }
     public Recipe? Recipe { get; set; }
     public JobScheduleTypeEnum Type { get; set; }
