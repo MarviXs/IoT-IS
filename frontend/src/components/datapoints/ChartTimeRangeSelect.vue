@@ -160,16 +160,34 @@ function setPredefinedTimeRange(val: PredefinedTimeRange) {
 
 const formatDate = (date: Date) => format(date, 'yyyy-MM-dd HH:mm:ss');
 
+const parseDateString = (value?: string | null): Date | null => {
+  if (!value) {
+    return null;
+  }
+
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+
 function updateTimeRange() {
   let newVal;
   if (isCustomTimeRangeSelected.value) {
-    if (customTimeRangeSelected.value.from === null) {
+    const fromDate = parseDateString(customTimeRangeSelected.value.from);
+    if (!fromDate) {
       return;
     }
 
+    const toDate =
+      parseDateString(customTimeRangeSelected.value.to) ?? new Date();
+
+    customTimeRangeSelected.value = {
+      from: formatDate(fromDate),
+      to: formatDate(toDate),
+    };
+
     newVal = {
-      from: formatDate(new Date(customTimeRangeSelected.value.from)),
-      to: formatDate(new Date(customTimeRangeSelected.value.to ?? new Date())),
+      from: customTimeRangeSelected.value.from,
+      to: customTimeRangeSelected.value.to,
     };
   } else {
     const now = new Date();
@@ -187,7 +205,6 @@ watch(
     if (range?.from && range?.to) {
       customTimeRangeSelected.value = { ...range };
       isCustomTimeRangeSelected.value = true;
-      emit('time-range-changed', 'custom', { ...range });
       updateTimeRange();
     }
   },
@@ -205,7 +222,6 @@ watch(
     if (index !== -1) {
       selectedTimeRangeIndex.value = index;
       isCustomTimeRangeSelected.value = false;
-      emit('time-range-changed', range);
       updateTimeRange();
     }
   },

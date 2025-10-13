@@ -56,6 +56,6 @@ defineProps({
 });
 
 function setCurrentDate() {
-  date.value = format(new Date(), 'yyyy-mm-dd HH:mm:ss');
+  date.value = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
 }
 </script>

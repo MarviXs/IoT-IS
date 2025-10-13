@@ -184,10 +184,15 @@ const currentXMin = ref<string>();
 const currentXMax = ref<string>();
 
 function onTimeRangeChanged(timeRangeName: string, customRangeData?: { from: string; to: string } | null) {
-  storedTimeRange.value = timeRangeName;
+  if (storedTimeRange.value !== timeRangeName) {
+    storedTimeRange.value = timeRangeName;
+  }
 
   if (timeRangeName === 'custom' && customRangeData) {
-    storedCustomTimeRange.value = customRangeData;
+    const currentRange = storedCustomTimeRange.value ?? { from: '', to: '' };
+    if (currentRange.from !== customRangeData.from || currentRange.to !== customRangeData.to) {
+      storedCustomTimeRange.value = { ...customRangeData };
+    }
   }
 }
 
