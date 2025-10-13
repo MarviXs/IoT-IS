@@ -210,7 +210,9 @@
       "toasts": {
         "load_failed": "Loading controls failed!",
         "start_failed": "Starting control failed!",
-        "start_success": "Control started!"
+        "start_success": "Control started!",
+        "toggle_failed": "Updating control state failed!",
+        "toggle_success": "Control state updated!"
       }
     },
     "delete_device": "Delete device",

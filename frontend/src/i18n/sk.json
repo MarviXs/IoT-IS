@@ -198,7 +198,9 @@
       "toasts": {
         "load_failed": "Načítanie ovládaní zlyhalo!",
         "start_failed": "Spustenie ovládania zlyhalo!",
-        "start_success": "Ovládanie spustené!"
+        "start_success": "Ovládanie spustené!",
+        "toggle_failed": "Aktualizácia stavu ovládania zlyhala!",
+        "toggle_success": "Stav ovládania bol aktualizovaný!"
       }
     },
     "delete_device": "Vymazať zariadenie",
