@@ -1,5 +1,5 @@
 <template>
-  <q-btn-group unelevated class="col-grow col-md-auto">
+  <q-btn-group v-bind="attrs" unelevated class="col-grow col-md-auto">
     <q-btn unelevated no-caps class="col-grow col-md-auto" :loading="loading" @click.stop="emit('onRefresh')">
       <q-icon :name="mdiRefresh" class="text-btn-grey" />
     </q-btn>
@@ -28,13 +28,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, useAttrs } from 'vue';
 import { mdiCog, mdiRefresh } from '@quasar/extras/mdi-v7';
 import { useI18n } from 'vue-i18n';
 import DialogCommon from '../core/DialogCommon.vue';
 import { useInterval } from '@/composables/useInterval';
 
+defineOptions({ inheritAttrs: false });
+
 const { t } = useI18n();
+
+const attrs = useAttrs();
 
 defineProps({
   loading: {
