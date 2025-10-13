@@ -177,6 +177,7 @@ const typeOptions = computed(() => [
 ]);
 
 const intervalOptions = computed(() => [
+  { label: t('job_schedule.interval_options.second'), value: 'Second' as JobScheduleInterval },
   { label: t('job_schedule.interval_options.minute'), value: 'Minute' as JobScheduleInterval },
   { label: t('job_schedule.interval_options.hour'), value: 'Hour' as JobScheduleInterval },
   { label: t('job_schedule.interval_options.day'), value: 'Day' as JobScheduleInterval },

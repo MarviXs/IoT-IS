@@ -358,11 +358,13 @@
     "interval_week_with_days": "Týždenne v {days}",
     "interval_weeks_with_days": "Každé {value} týždne v {days}",
     "interval_units": {
+      "second": "sekundu | sekúnd",
       "minute": "minútu | minút",
       "hour": "hodinu | hodín",
       "day": "deň | dní"
     },
     "interval_options": {
+      "second": "Sekunda",
       "minute": "Minúta",
       "hour": "Hodina",
       "day": "Deň",

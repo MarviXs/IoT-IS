@@ -376,11 +376,13 @@
     "interval_week_with_days": "Weekly on {days}",
     "interval_weeks_with_days": "Every {value} weeks on {days}",
     "interval_units": {
+      "second": "second | seconds",
       "minute": "minute | minutes",
       "hour": "hour | hours",
       "day": "day | days"
     },
     "interval_options": {
+      "second": "Second",
       "minute": "Minute",
       "hour": "Hour",
       "day": "Day",

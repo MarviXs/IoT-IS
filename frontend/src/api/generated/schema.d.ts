@@ -2020,7 +2020,7 @@ export interface components {
         /** @enum {string} */
         "Fei.Is.Api.Data.Enums.DeviceType": "Generic" | "NuviaMSU";
         /** @enum {string} */
-        "Fei.Is.Api.Data.Enums.JobScheduleIntervalEnum": "Minute" | "Hour" | "Day" | "Week";
+        "Fei.Is.Api.Data.Enums.JobScheduleIntervalEnum": "Second" | "Minute" | "Hour" | "Day" | "Week";
         /** @enum {string} */
         "Fei.Is.Api.Data.Enums.JobScheduleTypeEnum": "Once" | "Repeat";
         /** @enum {string} */
