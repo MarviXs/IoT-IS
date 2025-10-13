@@ -1,5 +1,5 @@
 <template>
-  <DialogCommon v-model="isDialogOpen" min-width="520px">
+  <DialogCommon v-model="isDialogOpen" min-width="620px">
     <template #title>{{ dialogTitle }}</template>
     <q-form ref="formRef" @submit="submitForm">
       <q-card-section class="column q-gutter-md">
@@ -53,17 +53,20 @@
 
           <div v-if="form.interval === 'Week'" class="column q-mt-md">
             <div>{{ t('job_schedule.week_days') }}</div>
-            <q-btn-toggle
-              v-model="form.daysOfWeek"
-              unelevated
-              no-caps
-              multiple
-              text-color="primary"
-              class="toggle-btn"
-              dense
-              toggle-color="primary"
-              :options="weekDayOptions"
-            />
+            <q-btn-group unelevated class="toggle-btn q-mt-sm" spread>
+              <q-btn
+                v-for="option in weekDayOptions"
+                :key="option.value"
+                no-caps
+                dense
+                class="week-day-btn"
+                :label="option.label"
+                :color="isWeekDaySelected(option.value) ? 'primary' : 'white'"
+                :text-color="isWeekDaySelected(option.value) ? 'white' : 'primary'"
+                :flat="!isWeekDaySelected(option.value)"
+                @click="toggleWeekDay(option.value)"
+              />
+            </q-btn-group>
             <div v-if="weekDayError" class="text-negative text-caption q-mt-xs">
               {{ weekDayError }}
             </div>
@@ -188,6 +191,18 @@ const weekDayOptions = computed(() =>
     }),
   ),
 );
+
+function isWeekDaySelected(day: JobScheduleWeekDay) {
+  return form.value.daysOfWeek.includes(day);
+}
+
+function toggleWeekDay(day: JobScheduleWeekDay) {
+  if (isWeekDaySelected(day)) {
+    form.value.daysOfWeek = form.value.daysOfWeek.filter((selectedDay) => selectedDay !== day);
+  } else {
+    form.value.daysOfWeek = [...form.value.daysOfWeek, day];
+  }
+}
 
 const nameRules = [(val: string) => !!val || t('job_schedule.rules.name_required')];
 const startTimeRules = [(val: string) => !!val || t('job_schedule.rules.start_time_required')];
@@ -383,5 +398,9 @@ function fromInputDateTime(value?: string) {
 <style scoped>
 .toggle-btn {
   border: 1px solid #526cff;
+}
+
+.week-day-btn {
+  min-width: 0;
 }
 </style>
