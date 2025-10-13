@@ -4,6 +4,7 @@ using System.Security.Claims;
 using Carter;
 using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
+using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
 using FluentResults;
@@ -63,6 +64,12 @@ public static class GetDeviceTemplateControls
                 .DeviceTemplates.Where(template => template.Id == request.TemplateId)
                 .Include(template => template.Controls)
                 .ThenInclude(control => control.Recipe)
+                .Include(template => template.Controls)
+                .ThenInclude(control => control.RecipeOn)
+                .Include(template => template.Controls)
+                .ThenInclude(control => control.RecipeOff)
+                .Include(template => template.Controls)
+                .ThenInclude(control => control.Sensor)
                 .AsNoTracking()
                 .SingleOrDefaultAsync(cancellationToken);
 
@@ -81,10 +88,17 @@ public static class GetDeviceTemplateControls
                     control.Id,
                     control.Name,
                     control.Color,
+                    control.Type,
                     control.RecipeId,
                     control.Recipe?.Name ?? string.Empty,
                     control.Cycles,
                     control.IsInfinite,
+                    control.RecipeOnId,
+                    control.RecipeOn?.Name,
+                    control.RecipeOffId,
+                    control.RecipeOff?.Name,
+                    control.SensorId,
+                    control.Sensor?.Name,
                     control.Order
                 ))
                 .OrderBy(control => control.Order)
@@ -98,10 +112,17 @@ public static class GetDeviceTemplateControls
         Guid Id,
         string Name,
         string Color,
-        Guid RecipeId,
+        DeviceControlType Type,
+        Guid? RecipeId,
         string RecipeName,
         int Cycles,
         bool IsInfinite,
+        Guid? RecipeOnId,
+        string? RecipeOnName,
+        Guid? RecipeOffId,
+        string? RecipeOffName,
+        Guid? SensorId,
+        string? SensorName,
         int Order
     );
 }

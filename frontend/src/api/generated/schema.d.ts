@@ -549,6 +549,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/device-templates/{templateId}/controls": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get all controls on a device template */
+        get: operations["GetDeviceTemplateControls"];
+        /**
+         * Update controls of a device template
+         * @description Set the controls of a device template, replacing the existing controls. If Id is null, the control will be created.
+         */
+        put: operations["UpdateDeviceTemplateControls"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/devices/{id}/shared-users": {
         parameters: {
             query?: never;
@@ -1553,27 +1574,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/device-templates/{templateId}/controls": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get all controls on a device template */
-        get: operations["GetDeviceTemplateControls"];
-        /**
-         * Update controls of a device template
-         * @description Set the controls of a device template, replacing the existing controls. If Id is null, the control will be created.
-         */
-        put: operations["UpdateDeviceTemplateControls"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/device-templates/{templateId}/sensors": {
         parameters: {
             query?: never;
@@ -2113,6 +2113,10 @@ export interface components {
             latitude?: number | null;
             /** Format: double */
             longitude?: number | null;
+            /** Format: int32 */
+            gridX?: number | null;
+            /** Format: int32 */
+            gridY?: number | null;
         };
         "Fei.Is.Api.Features.DataPoints.Queries.GetLatestDataPoints.Response": {
             /** Format: date-time */
@@ -2202,6 +2206,31 @@ export interface components {
             /** Format: uuid */
             id: string;
             name: string;
+        };
+        "Fei.Is.Api.Features.DeviceControls.Commands.UpdateDeviceTemplateControls.Request": {
+            /** Format: uuid */
+            id?: string | null;
+            name: string;
+            color: string;
+            /** Format: uuid */
+            recipeId: string;
+            /** Format: int32 */
+            cycles: number;
+            isInfinite: boolean;
+        };
+        "Fei.Is.Api.Features.DeviceControls.Queries.GetDeviceTemplateControls.Response": {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            color: string;
+            /** Format: uuid */
+            recipeId: string;
+            recipeName: string;
+            /** Format: int32 */
+            cycles: number;
+            isInfinite: boolean;
+            /** Format: int32 */
+            order: number;
         };
         "Fei.Is.Api.Features.DeviceSharing.Commands.ShareDeviceToUser.Request": {
             email: string;
@@ -3218,17 +3247,6 @@ export interface components {
             accuracyDecimals?: number | null;
             group?: string | null;
         };
-        "Fei.Is.Api.Features.DeviceControls.Commands.UpdateDeviceTemplateControls.Request": {
-            /** Format: uuid */
-            id?: string | null;
-            name: string;
-            color: string;
-            /** Format: uuid */
-            recipeId: string;
-            /** Format: int32 */
-            cycles: number;
-            isInfinite: boolean;
-        };
         "Fei.Is.Api.Features.Sensors.Commands.UpdateSensor.Request": {
             tag: string;
             name: string;
@@ -3248,20 +3266,6 @@ export interface components {
             /** Format: int32 */
             order: number;
             group?: string | null;
-        };
-        "Fei.Is.Api.Features.DeviceControls.Queries.GetDeviceTemplateControls.Response": {
-            /** Format: uuid */
-            id: string;
-            name: string;
-            color: string;
-            /** Format: uuid */
-            recipeId: string;
-            recipeName: string;
-            /** Format: int32 */
-            cycles: number;
-            isInfinite: boolean;
-            /** Format: int32 */
-            order: number;
         };
         "Fei.Is.Api.Features.Sensors.Queries.GetSensorById.Response": {
             /** Format: uuid */
@@ -4763,6 +4767,75 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GetDeviceTemplateControls: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                templateId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.DeviceControls.Queries.GetDeviceTemplateControls.Response"][];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UpdateDeviceTemplateControls: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                templateId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.DeviceControls.Commands.UpdateDeviceTemplateControls.Request"][];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
             };
             /** @description Not Found */
             404: {
@@ -7192,75 +7265,6 @@ export interface operations {
                 content: {
                     "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
                 };
-            };
-        };
-    };
-    GetDeviceTemplateControls: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                templateId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Features.DeviceControls.Queries.GetDeviceTemplateControls.Response"][];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    UpdateDeviceTemplateControls: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                templateId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Fei.Is.Api.Features.DeviceControls.Commands.UpdateDeviceTemplateControls.Request"][];
-            };
-        };
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };

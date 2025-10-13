@@ -4,6 +4,7 @@ using System.Security.Claims;
 using Carter;
 using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
+using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
 using FluentResults;
@@ -17,7 +18,18 @@ namespace Fei.Is.Api.Features.DeviceControls.Commands;
 
 public static class UpdateDeviceTemplateControls
 {
-    public record Request(Guid? Id, string Name, string Color, Guid RecipeId, int Cycles, bool IsInfinite);
+    public record Request(
+        Guid? Id,
+        string Name,
+        string Color,
+        DeviceControlType Type,
+        Guid? RecipeId,
+        int Cycles,
+        bool IsInfinite,
+        Guid? RecipeOnId,
+        Guid? RecipeOffId,
+        Guid? SensorId
+    );
 
     public sealed class Endpoint : ICarterModule
     {
@@ -97,15 +109,56 @@ public static class UpdateDeviceTemplateControls
                 .ToListAsync(cancellationToken);
             var recipeLookup = validRecipeIds.ToHashSet();
 
+            var validSensorIds = await context
+                .Sensors.Where(s => s.DeviceTemplateId == template.Id)
+                .Select(s => s.Id)
+                .ToListAsync(cancellationToken);
+            var sensorLookup = validSensorIds.ToHashSet();
+
             foreach (var control in message.ControlRequest)
             {
-                if (!recipeLookup.Contains(control.RecipeId))
+                switch (control.Type)
                 {
-                    var failure = new ValidationFailure(
-                        nameof(control.RecipeId),
-                        "Recipe must belong to the device template"
-                    );
-                    return Result.Fail(new ValidationError(new ValidationResult([failure])));
+                    case DeviceControlType.Run when !control.RecipeId.HasValue
+                        || !recipeLookup.Contains(control.RecipeId.Value):
+                    {
+                        var failure = new ValidationFailure(
+                            nameof(control.RecipeId),
+                            "Recipe must belong to the device template"
+                        );
+                        return Result.Fail(new ValidationError(new ValidationResult([failure])));
+                    }
+                    case DeviceControlType.Toggle:
+                    {
+                        if (!control.RecipeOnId.HasValue || !recipeLookup.Contains(control.RecipeOnId.Value))
+                        {
+                            var failure = new ValidationFailure(
+                                nameof(control.RecipeOnId),
+                                "On recipe must belong to the device template"
+                            );
+                            return Result.Fail(new ValidationError(new ValidationResult([failure])));
+                        }
+
+                        if (!control.RecipeOffId.HasValue || !recipeLookup.Contains(control.RecipeOffId.Value))
+                        {
+                            var failure = new ValidationFailure(
+                                nameof(control.RecipeOffId),
+                                "Off recipe must belong to the device template"
+                            );
+                            return Result.Fail(new ValidationError(new ValidationResult([failure])));
+                        }
+
+                        if (!control.SensorId.HasValue || !sensorLookup.Contains(control.SensorId.Value))
+                        {
+                            var failure = new ValidationFailure(
+                                nameof(control.SensorId),
+                                "Sensor must belong to the device template"
+                            );
+                            return Result.Fail(new ValidationError(new ValidationResult([failure])));
+                        }
+
+                        break;
+                    }
                 }
             }
 
@@ -119,9 +172,23 @@ public static class UpdateDeviceTemplateControls
                     Id = controlRequest.Id ?? Guid.NewGuid(),
                     Name = controlRequest.Name,
                     Color = controlRequest.Color,
-                    RecipeId = controlRequest.RecipeId,
-                    Cycles = controlRequest.Cycles,
-                    IsInfinite = controlRequest.IsInfinite,
+                    Type = controlRequest.Type,
+                    RecipeId = controlRequest.Type == DeviceControlType.Run
+                        ? controlRequest.RecipeId
+                        : null,
+                    RecipeOnId = controlRequest.Type == DeviceControlType.Toggle
+                        ? controlRequest.RecipeOnId
+                        : null,
+                    RecipeOffId = controlRequest.Type == DeviceControlType.Toggle
+                        ? controlRequest.RecipeOffId
+                        : null,
+                    SensorId = controlRequest.Type == DeviceControlType.Toggle
+                        ? controlRequest.SensorId
+                        : null,
+                    Cycles = controlRequest.Type == DeviceControlType.Run
+                        ? controlRequest.Cycles
+                        : 1,
+                    IsInfinite = controlRequest.Type == DeviceControlType.Run && controlRequest.IsInfinite,
                     Order = index,
                     DeviceTemplateId = template.Id,
                 };
@@ -146,11 +213,37 @@ public static class UpdateDeviceTemplateControls
                 {
                     control.RuleFor(x => x.Name).NotEmpty().WithMessage("Name is required");
                     control.RuleFor(x => x.Color).NotEmpty().WithMessage("Color is required");
-                    control.RuleFor(x => x.RecipeId).NotEmpty().WithMessage("Recipe ID is required");
+                    control.RuleFor(x => x.Type).IsInEnum();
+                    control
+                        .RuleFor(x => x.RecipeId)
+                        .NotEmpty()
+                        .When(x => x.Type == DeviceControlType.Run)
+                        .WithMessage("Recipe ID is required");
                     control
                         .RuleFor(x => x.Cycles)
                         .GreaterThan(0)
+                        .When(x => x.Type == DeviceControlType.Run)
                         .WithMessage("Cycles must be greater than 0");
+                    control
+                        .RuleFor(x => x.IsInfinite)
+                        .Equal(false)
+                        .When(x => x.Type == DeviceControlType.Toggle)
+                        .WithMessage("Toggle controls cannot run infinitely");
+                    control
+                        .RuleFor(x => x.RecipeOnId)
+                        .NotEmpty()
+                        .When(x => x.Type == DeviceControlType.Toggle)
+                        .WithMessage("On recipe is required for toggle controls");
+                    control
+                        .RuleFor(x => x.RecipeOffId)
+                        .NotEmpty()
+                        .When(x => x.Type == DeviceControlType.Toggle)
+                        .WithMessage("Off recipe is required for toggle controls");
+                    control
+                        .RuleFor(x => x.SensorId)
+                        .NotEmpty()
+                        .When(x => x.Type == DeviceControlType.Toggle)
+                        .WithMessage("Sensor is required for toggle controls");
                 });
         }
     }
