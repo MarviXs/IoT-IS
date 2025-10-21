@@ -47,7 +47,7 @@
         color="grey-7"
         text-color="grey-5"
         class="options-btn"
-        @click="download(csvConfig)(generateCSVData())"
+        @click="openExportDialog"
       >
         <div class="text-grey-9">{{ t('chart.export_csv') }}</div>
       </q-btn>
@@ -76,6 +76,51 @@
         <GraphOptionsForm v-model="graphOptions" @on-submit="isGraphOptionsDialogOpen = false" />
       </template>
     </dialog-common>
+    <dialog-common v-model="isExportDialogOpen" min-width="520px">
+      <template #title>{{ t('chart.export_csv') }}</template>
+      <template #default>
+        <q-form @submit.prevent="submitExport">
+          <q-card-section class="q-pt-none column q-gutter-y-lg">
+            <div class="column q-col-gutter-y-sm">
+              <div class="text-subtitle2">{{ t('device.sensors') }}</div>
+              <q-option-group
+                v-model="exportSelectedSensors"
+                type="checkbox"
+                dense
+                :options="sensorOptions"
+                color="primary"
+              />
+            </div>
+            <div class="column q-col-gutter-y-sm">
+              <div class="text-subtitle2">{{ t('time_range.label') }}</div>
+              <q-select
+                v-model="exportSelectedTimeRange"
+                outlined
+                emit-value
+                map-options
+                :options="exportTimeRangeOptions"
+              />
+              <div v-if="exportSelectedTimeRange === 'custom'" class="column q-gutter-sm">
+                <DateTimeInput v-model="exportCustomRange.from" :label="t('time_range.from')" />
+                <DateTimeInput v-model="exportCustomRange.to" :label="t('time_range.to')" :show-now-button="true" />
+              </div>
+            </div>
+          </q-card-section>
+          <q-card-actions align="right" class="text-primary">
+            <q-btn v-close-popup flat :label="t('global.cancel')" no-caps :disable="exportLoading" />
+            <q-btn
+              unelevated
+              color="primary"
+              :label="t('chart.export_csv')"
+              no-caps
+              padding="6px 20px"
+              type="submit"
+              :loading="exportLoading"
+            />
+          </q-card-actions>
+        </q-form>
+      </template>
+    </dialog-common>
   </div>
 </template>
 
@@ -90,6 +135,7 @@ import { useI18n } from 'vue-i18n';
 import DialogCommon from '../core/DialogCommon.vue';
 import type { GraphOptions } from './GraphOptionsForm.vue';
 import GraphOptionsForm from './GraphOptionsForm.vue';
+import DateTimeInput from './DateTimeInput.vue';
 import type { GetDataPointsQuery } from '@/api/services/DataPointService';
 import type { DataPoint } from '@/models/DataPoint';
 import DataPointService from '@/api/services/DataPointService';
@@ -139,6 +185,7 @@ const tickedNodes = defineModel('tickedNodes', {
 });
 
 const isGraphOptionsDialogOpen = ref(false);
+const isExportDialogOpen = ref(false);
 
 // Use first sensor's deviceId for per-device settings (assumes all sensors are from the same device)
 const deviceId = computed(() => props.sensors[0]?.deviceId ?? 'unknown');
@@ -176,8 +223,175 @@ const selectedTimeRange = ref<TimeRange>();
 const chartRef = ref<HTMLCanvasElement>();
 const chart = shallowRef<Chart<'line', { x: string; y?: number | null }[]>>();
 
+const exportSelectedSensors = ref<string[]>([]);
+const exportSelectedTimeRange = ref('');
+const exportCustomRange = reactive({
+  from: '',
+  to: '',
+});
+const exportLoading = ref(false);
+
+type ExportTimeRangeOption = {
+  label: string;
+  value: string;
+  seconds?: number;
+};
+
+const exportTimeRangeOptions = computed<ExportTimeRangeOption[]>(() => [
+  { label: t('time_range.predefined.last_5min'), value: '5m', seconds: 300 },
+  { label: t('time_range.predefined.last_15min'), value: '15m', seconds: 900 },
+  { label: t('time_range.predefined.last_30min'), value: '30m', seconds: 1800 },
+  { label: t('time_range.predefined.last_1h'), value: '1h', seconds: 3600 },
+  { label: t('time_range.predefined.last_6h'), value: '6h', seconds: 21600 },
+  { label: t('time_range.predefined.last_12h'), value: '12h', seconds: 43200 },
+  { label: t('time_range.predefined.last_24h'), value: '24h', seconds: 86400 },
+  { label: t('time_range.predefined.last_week'), value: '1w', seconds: 604800 },
+  { label: t('time_range.predefined.last_month'), value: '1m', seconds: 2592000 },
+  { label: t('time_range.custom'), value: 'custom' },
+]);
+
+const sensorOptions = computed(() =>
+  props.sensors.map((sensor) => ({
+    label: `${sensor.name}${sensor.unit ? ` (${sensor.unit})` : ''}`,
+    value: getSensorUniqueId(sensor),
+  })),
+);
+
 function getSensorUniqueId(sensor: SensorData) {
   return `${sensor.deviceId}-${sensor.tag}`;
+}
+
+function openExportDialog() {
+  initializeExportForm();
+  isExportDialogOpen.value = true;
+}
+
+function initializeExportForm() {
+  const availableKeys = props.sensors.map((sensor) => getSensorUniqueId(sensor));
+  const defaultSelection = tickedNodes.value.filter((key) => availableKeys.includes(key));
+
+  exportSelectedSensors.value = defaultSelection.length > 0 ? [...defaultSelection] : [...availableKeys];
+
+  const storedRange = storedTimeRange.value ?? '';
+  const matchingOption = exportTimeRangeOptions.value.find((option) => option.value === storedRange);
+  const defaultRange = exportTimeRangeOptions.value.find((option) => option.value === '6h');
+
+  exportSelectedTimeRange.value =
+    matchingOption?.value ?? defaultRange?.value ?? exportTimeRangeOptions.value[0]?.value ?? '';
+
+  exportCustomRange.from = storedCustomTimeRange.value?.from ?? '';
+  exportCustomRange.to = storedCustomTimeRange.value?.to ?? '';
+
+  if (exportSelectedTimeRange.value === 'custom' && !exportCustomRange.from) {
+    const now = new Date();
+    const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+    exportCustomRange.from = format(oneHourAgo, 'yyyy-MM-dd HH:mm:ss');
+    exportCustomRange.to = format(now, 'yyyy-MM-dd HH:mm:ss');
+  }
+}
+
+type ExportTimeRange = {
+  from: string;
+  to: string;
+};
+
+function parseDateInput(value?: string | null): Date | null {
+  if (!value) {
+    return null;
+  }
+
+  const parsedDate = new Date(value);
+  return Number.isNaN(parsedDate.getTime()) ? null : parsedDate;
+}
+
+function resolveExportTimeRange(): ExportTimeRange | null {
+  if (exportSelectedTimeRange.value === 'custom') {
+    const fromDate = parseDateInput(exportCustomRange.from);
+    if (!fromDate) {
+      return null;
+    }
+
+    const toDate = parseDateInput(exportCustomRange.to) ?? new Date();
+
+    if (toDate.getTime() < fromDate.getTime()) {
+      return null;
+    }
+
+    return {
+      from: format(fromDate, 'yyyy-MM-dd HH:mm:ss'),
+      to: format(toDate, 'yyyy-MM-dd HH:mm:ss'),
+    };
+  }
+
+  const selectedOption = exportTimeRangeOptions.value.find((option) => option.value === exportSelectedTimeRange.value);
+
+  if (!selectedOption?.seconds) {
+    return null;
+  }
+
+  const now = new Date();
+  const fromDate = new Date(now.getTime() - selectedOption.seconds * 1000);
+
+  return {
+    from: format(fromDate, 'yyyy-MM-dd HH:mm:ss'),
+    to: format(now, 'yyyy-MM-dd HH:mm:ss'),
+  };
+}
+
+async function submitExport() {
+  if (exportSelectedSensors.value.length === 0) {
+    toast.error(t('chart.export_select_sensor_error'));
+    return;
+  }
+
+  const timeRange = resolveExportTimeRange();
+
+  if (!timeRange) {
+    toast.error(t('chart.export_invalid_range'));
+    return;
+  }
+
+  exportLoading.value = true;
+
+  try {
+    const exportData = new Map<string, DataPoint[]>();
+    const sensorKeys = new Set(exportSelectedSensors.value);
+
+    const promises = props.sensors.map(async (sensor) => {
+      const key = getSensorUniqueId(sensor);
+
+      if (!sensorKeys.has(key) || !sensor.id) {
+        return;
+      }
+
+      const query: GetDataPointsQuery = {
+        From: new Date(timeRange.from).toISOString(),
+        To: new Date(timeRange.to).toISOString(),
+      };
+
+      const { data, error } = await DataPointService.getDataPoints(sensor.deviceId, sensor.tag, query);
+
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      exportData.set(key, data ?? []);
+    });
+
+    await Promise.all(promises);
+
+    const csvContent = generateCSVData({ data: exportData, sensorKeys: exportSelectedSensors.value });
+
+    if (!csvContent) {
+      return;
+    }
+
+    download(csvConfig)(csvContent);
+    isExportDialogOpen.value = false;
+  } finally {
+    exportLoading.value = false;
+  }
 }
 
 const currentXMin = ref<string>();
@@ -596,15 +810,26 @@ const csvConfig = mkConfig({
   fieldSeparator: ';',
 });
 
-const generateCSVData = () => {
+type GenerateCsvOptions = {
+  data?: Map<string, DataPoint[]>;
+  sensorKeys?: string[];
+};
+
+const generateCSVData = (options: GenerateCsvOptions = {}) => {
+  const { data = dataPoints, sensorKeys = tickedNodes.value } = options;
   const aggregatedData = new Map<string, Record<string, any>>();
 
-  props.sensors.forEach((sensor) => {
-    const key = getSensorUniqueId(sensor);
-    // Only process sensors that are visible
-    if (!tickedNodes.value.includes(key)) return;
+  const selectedSensorKeySet = new Set(sensorKeys);
+  const orderedSensors = props.sensors.filter((sensor) => selectedSensorKeySet.has(getSensorUniqueId(sensor)));
 
-    const sensorDataPoints = dataPoints.get(key) || [];
+  if (orderedSensors.length === 0) {
+    toast.error(t('chart.export_select_sensor_error'));
+    return null;
+  }
+
+  orderedSensors.forEach((sensor) => {
+    const key = getSensorUniqueId(sensor);
+    const sensorDataPoints = data.get(key) || [];
     sensorDataPoints.forEach((dataPoint) => {
       const timeKey = dataPoint.ts;
       if (!aggregatedData.has(timeKey)) {
@@ -623,26 +848,17 @@ const generateCSVData = () => {
     return dateA - dateB;
   });
 
-  // Include only visible sensor headers
-  const headers = ['Time'];
-  props.sensors.forEach((sensor) => {
-    if (tickedNodes.value.includes(getSensorUniqueId(sensor))) {
-      headers.push(`${sensor.name} (${sensor.unit || ''})`);
-    }
-  });
-
   const formattedCsvData = csvData.map((row) => {
     const formattedRow: Record<string, any> = { Time: row.Time };
-    props.sensors.forEach((sensor) => {
-      if (tickedNodes.value.includes(getSensorUniqueId(sensor))) {
-        formattedRow[`${sensor.name} (${sensor.unit || ''})`] = row[sensor.name] ?? '';
-      }
+    orderedSensors.forEach((sensor) => {
+      formattedRow[`${sensor.name} (${sensor.unit || ''})`] = row[sensor.name] ?? '';
     });
     return formattedRow;
   });
 
   if (formattedCsvData.length === 0) {
     toast.error('No data to export');
+    return null;
   }
 
   return generateCsv(csvConfig)(formattedCsvData);

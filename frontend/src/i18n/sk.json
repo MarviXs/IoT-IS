@@ -242,6 +242,8 @@
   "chart": {
     "label": "Graf",
     "export_csv": "Exportovať CSV",
+    "export_select_sensor_error": "Vyberte aspoň jeden senzor na export.",
+    "export_invalid_range": "Zadajte platný časový rozsah pre export.",
     "maximum_values": "Maximum hodnôt",
     "statistical_method": "Štatistická funkcia",
     "statistical_methods": {
