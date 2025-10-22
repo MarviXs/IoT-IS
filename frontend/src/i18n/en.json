@@ -254,6 +254,11 @@
   "chart": {
     "label": "Chart",
     "export_csv": "Export CSV",
+    "export_options": "Export options",
+    "export_round_numbers": "Round numbers",
+    "export_orientation": "Orientation",
+    "export_orientation_column": "Column export",
+    "export_orientation_row": "Row export",
     "export_select_sensor_error": "Select at least one sensor to export.",
     "export_invalid_range": "Enter a valid time range to export.",
     "maximum_values": "Maximum values",

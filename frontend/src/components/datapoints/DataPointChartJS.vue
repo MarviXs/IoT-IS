@@ -105,6 +105,20 @@
                 <DateTimeInput v-model="exportCustomRange.to" :label="t('time_range.to')" :show-now-button="true" />
               </div>
             </div>
+            <div class="column q-col-gutter-y-sm">
+              <div class="text-subtitle2">{{ t('chart.export_options') }}</div>
+              <q-checkbox v-model="exportRoundNumbers" :label="t('chart.export_round_numbers')" dense />
+              <div class="column q-gutter-y-xs">
+                <div class="text-body2">{{ t('chart.export_orientation') }}</div>
+                <q-option-group
+                  v-model="exportOrientation"
+                  type="radio"
+                  dense
+                  color="primary"
+                  :options="exportOrientationOptions"
+                />
+              </div>
+            </div>
           </q-card-section>
           <q-card-actions align="right" class="text-primary">
             <q-btn v-close-popup flat :label="t('global.cancel')" no-caps :disable="exportLoading" />
@@ -225,6 +239,8 @@ const chart = shallowRef<Chart<'line', { x: string; y?: number | null }[]>>();
 
 const exportSelectedSensors = ref<string[]>([]);
 const exportSelectedTimeRange = ref('');
+const exportRoundNumbers = ref(true);
+const exportOrientation = ref<'column' | 'row'>('column');
 const exportCustomRange = reactive({
   from: '',
   to: '',
@@ -248,6 +264,11 @@ const exportTimeRangeOptions = computed<ExportTimeRangeOption[]>(() => [
   { label: t('time_range.predefined.last_week'), value: '1w', seconds: 604800 },
   { label: t('time_range.predefined.last_month'), value: '1m', seconds: 2592000 },
   { label: t('time_range.custom'), value: 'custom' },
+]);
+
+const exportOrientationOptions = computed(() => [
+  { label: t('chart.export_orientation_column'), value: 'column' },
+  { label: t('chart.export_orientation_row'), value: 'row' },
 ]);
 
 const sensorOptions = computed(() =>
@@ -288,6 +309,9 @@ function initializeExportForm() {
     exportCustomRange.from = format(oneHourAgo, 'yyyy-MM-dd HH:mm:ss');
     exportCustomRange.to = format(now, 'yyyy-MM-dd HH:mm:ss');
   }
+
+  exportRoundNumbers.value = true;
+  exportOrientation.value = 'column';
 }
 
 type ExportTimeRange = {
@@ -381,7 +405,12 @@ async function submitExport() {
 
     await Promise.all(promises);
 
-    const csvContent = generateCSVData({ data: exportData, sensorKeys: exportSelectedSensors.value });
+    const csvContent = generateCSVData({
+      data: exportData,
+      sensorKeys: exportSelectedSensors.value,
+      roundNumbers: exportRoundNumbers.value,
+      orientation: exportOrientation.value,
+    });
 
     if (!csvContent) {
       return;
@@ -810,14 +839,48 @@ const csvConfig = mkConfig({
   fieldSeparator: ';',
 });
 
+type ExportOrientation = 'column' | 'row';
+
 type GenerateCsvOptions = {
   data?: Map<string, DataPoint[]>;
   sensorKeys?: string[];
+  roundNumbers?: boolean;
+  orientation?: ExportOrientation;
+};
+
+type AggregatedExportRecord = {
+  formattedTime: string;
+  values: Record<string, string | number>;
+};
+
+const getSensorExportLabel = (sensor: SensorData) => `${sensor.name}${sensor.unit ? ` (${sensor.unit})` : ''}`;
+
+const formatDataPointValue = (sensor: SensorData, value: number | null | undefined, shouldRound: boolean) => {
+  if (value === undefined || value === null) {
+    return '';
+  }
+
+  if (!shouldRound) {
+    return value;
+  }
+
+  const decimals = sensor.accuracyDecimals;
+  if (decimals === undefined || decimals === null) {
+    return value;
+  }
+
+  return roundNumber(value, decimals);
 };
 
 const generateCSVData = (options: GenerateCsvOptions = {}) => {
-  const { data = dataPoints, sensorKeys = tickedNodes.value } = options;
-  const aggregatedData = new Map<string, Record<string, any>>();
+  const {
+    data = dataPoints,
+    sensorKeys = tickedNodes.value,
+    roundNumbers = exportRoundNumbers.value,
+    orientation = exportOrientation.value,
+  } = options;
+
+  const aggregatedData = new Map<string, AggregatedExportRecord>();
 
   const selectedSensorKeySet = new Set(sensorKeys);
   const orderedSensors = props.sensors.filter((sensor) => selectedSensorKeySet.has(getSensorUniqueId(sensor)));
@@ -828,33 +891,64 @@ const generateCSVData = (options: GenerateCsvOptions = {}) => {
   }
 
   orderedSensors.forEach((sensor) => {
-    const key = getSensorUniqueId(sensor);
-    const sensorDataPoints = data.get(key) || [];
+    const sensorKey = getSensorUniqueId(sensor);
+    const sensorDataPoints = data.get(sensorKey) || [];
     sensorDataPoints.forEach((dataPoint) => {
       const timeKey = dataPoint.ts;
       if (!aggregatedData.has(timeKey)) {
         aggregatedData.set(timeKey, {
-          Time: format(new Date(dataPoint.ts), 'dd/MM/yyyy HH:mm:ss'),
+          formattedTime: format(new Date(dataPoint.ts), 'dd/MM/yyyy HH:mm:ss'),
+          values: {},
         });
       }
       const record = aggregatedData.get(timeKey);
-      record[sensor.name] = dataPoint.value ?? '';
+      if (!record) {
+        return;
+      }
+      record.values[sensorKey] = formatDataPointValue(sensor, dataPoint.value, roundNumbers);
     });
   });
 
-  const csvData = Array.from(aggregatedData.values()).sort((a, b) => {
-    const dateA = new Date(a.Time).getTime();
-    const dateB = new Date(b.Time).getTime();
-    return dateA - dateB;
-  });
+  const sortedTimeKeys = Array.from(aggregatedData.keys()).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
 
-  const formattedCsvData = csvData.map((row) => {
-    const formattedRow: Record<string, any> = { Time: row.Time };
-    orderedSensors.forEach((sensor) => {
-      formattedRow[`${sensor.name} (${sensor.unit || ''})`] = row[sensor.name] ?? '';
+  if (sortedTimeKeys.length === 0) {
+    toast.error('No data to export');
+    return null;
+  }
+
+  let formattedCsvData: Record<string, string | number>[] = [];
+
+  if (orientation === 'row') {
+    const sensorHeader = t('device.sensor');
+    formattedCsvData = orderedSensors.map((sensor) => {
+      const sensorKey = getSensorUniqueId(sensor);
+      const row: Record<string, string | number> = {
+        [sensorHeader]: getSensorExportLabel(sensor),
+      };
+
+      sortedTimeKeys.forEach((timeKey) => {
+        const record = aggregatedData.get(timeKey);
+        const header = record?.formattedTime ?? format(new Date(timeKey), 'dd/MM/yyyy HH:mm:ss');
+        row[header] = record?.values[sensorKey] ?? '';
+      });
+
+      return row;
     });
-    return formattedRow;
-  });
+  } else {
+    formattedCsvData = sortedTimeKeys.map((timeKey) => {
+      const record = aggregatedData.get(timeKey);
+      const row: Record<string, string | number> = {
+        Time: record?.formattedTime ?? format(new Date(timeKey), 'dd/MM/yyyy HH:mm:ss'),
+      };
+
+      orderedSensors.forEach((sensor) => {
+        const sensorKey = getSensorUniqueId(sensor);
+        row[getSensorExportLabel(sensor)] = record?.values[sensorKey] ?? '';
+      });
+
+      return row;
+    });
+  }
 
   if (formattedCsvData.length === 0) {
     toast.error('No data to export');

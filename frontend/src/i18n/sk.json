@@ -242,6 +242,11 @@
   "chart": {
     "label": "Graf",
     "export_csv": "Exportovať CSV",
+    "export_options": "Možnosti exportu",
+    "export_round_numbers": "Zaokrúhliť čísla",
+    "export_orientation": "Orientácia",
+    "export_orientation_column": "Stĺpcový export",
+    "export_orientation_row": "Riadkový export",
     "export_select_sensor_error": "Vyberte aspoň jeden senzor na export.",
     "export_invalid_range": "Zadajte platný časový rozsah pre export.",
     "maximum_values": "Maximum hodnôt",
