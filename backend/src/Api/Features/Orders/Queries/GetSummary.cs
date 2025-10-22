@@ -90,12 +90,20 @@ namespace Fei.Is.Api.Features.Orders.Queries
                 var vatReducedSum = priceExcVatReduced * vatReducedRate / 100;
                 var vatNormalSum = priceExcVatNormal * vatNormalRate / 100;
 
+                vatNormalSum *= (1 - order.Discount / 100);
+                vatReducedRate *= (1 - order.Discount / 100);
+
                 // Cena s DPH pre každú kategóriu
                 var priceInclVatReduced = priceExcVatReduced + vatReducedSum;
                 var priceInclVatNormal = priceExcVatNormal + vatNormalSum;
 
+                priceInclVatReduced *= (1 - order.Discount / 100);
+                priceInclVatNormal *= (1 - order.Discount / 100);
+
                 // Celková suma s DPH
                 var total = priceInclVatReduced + priceInclVatNormal;
+
+                total *= (1 - order.Discount / 100);
 
                 return new SummaryResponse(
                     order.Id,

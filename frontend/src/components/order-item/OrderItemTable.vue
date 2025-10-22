@@ -24,7 +24,7 @@
             {{ props.row.pricePerContainer }}
           </q-td>
           <q-td :props="props" key="totalPrice">
-            {{ props.row.totalPrice }}
+            {{ props.row.totalPrice * props.row.discount }}
           </q-td>
           <q-td>
             <div class="actions-container">

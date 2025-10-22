@@ -40,6 +40,10 @@
             <span class="value">{{ order.contactPhone }}</span>
           </div>
           <div class="order-detail">
+            <span class="label">{{ t('order.discount') }}:</span>
+            <span class="value">{{ order.discount }}</span>
+          </div>
+          <div class="order-detail">
             <span class="label">{{ t('order.note') }}:</span>
             <span class="value">{{ order.note }}</span>
           </div>
@@ -86,6 +90,7 @@ interface Order {
   deliveryWeek: number;
   paymentMethod: string;
   contactPhone: string;
+  discount: number;
   note: string;
 }
 

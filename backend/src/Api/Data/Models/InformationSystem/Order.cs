@@ -16,14 +16,14 @@ public class Order : BaseModel
     [NotMapped]
     public decimal? PriceReduced
     {
-        get { return ReducedTaxContainers.Select(i => i.TotalPrice).DefaultIfEmpty(0).Sum(); }
+        get { return ReducedTaxContainers.Select(i => i.TotalPrice).DefaultIfEmpty(0).Sum() * (1 - Discount / 100); }
         set { }
     }
 
     [NotMapped]
     public decimal? PriceNormal
     {
-        get { return NormalTaxContainers.Select(i => i.TotalPrice).DefaultIfEmpty(0).Sum(); }
+        get { return NormalTaxContainers.Select(i => i.TotalPrice).DefaultIfEmpty(0).Sum() * (1 - Discount / 100); }
         set { }
     }
 
@@ -47,14 +47,14 @@ public class Order : BaseModel
     [NotMapped]
     public decimal? TotalReducedContainersPrice
     {
-        get { return ReducedTaxContainers.Select(i => i.TotalPrice).DefaultIfEmpty(0).Sum(); }
+        get { return ReducedTaxContainers.Select(i => i.TotalPrice).DefaultIfEmpty(0).Sum() * (1 - Discount / 100); }
         set { }
     }
 
     [NotMapped]
     public decimal? TotalNormalContainersPrice
     {
-        get { return NormalTaxContainers.Select(i => i.TotalPrice).DefaultIfEmpty(0).Sum(); }
+        get { return NormalTaxContainers.Select(i => i.TotalPrice).DefaultIfEmpty(0).Sum() * (1 - Discount / 100); }
         set { }
     }
 
@@ -66,7 +66,7 @@ public class Order : BaseModel
             if (ReducedTaxContainers.Count == 0 || ReducedTaxContainers.First().Items.Count == 0)
                 return 0;
             return ReducedTaxContainers.Select(i => i.TotalPrice).DefaultIfEmpty(0).Sum() * (ReducedTaxContainers.First().Items.First()
-                .Product.VATCategory.Rate / 100);
+                .Product.VATCategory.Rate / 100) * (1 - Discount / 100);
         }
         set { }
     }
@@ -79,7 +79,7 @@ public class Order : BaseModel
             if (NormalTaxContainers.Count == 0 || NormalTaxContainers.First().Items.Count == 0)
                 return 0;
             return NormalTaxContainers.Select(i => i.TotalPrice).DefaultIfEmpty(0).Sum() * (NormalTaxContainers.First().Items.First()
-                .Product.VATCategory.Rate / 100);
+                .Product.VATCategory.Rate / 100) * (1 - Discount / 100);
         }
         set { }
     }
