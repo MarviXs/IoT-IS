@@ -2956,6 +2956,8 @@ export interface components {
             deliveryWeek: number;
             paymentMethod: string;
             contactPhone: string;
+            /** Format: double */
+            discount: number;
             note?: string | null;
         };
         "Fei.Is.Api.Features.Orders.Commands.UpdateOrder.Request": {
@@ -2967,6 +2969,8 @@ export interface components {
             deliveryWeek: number;
             paymentMethod: string;
             contactPhone: string;
+            /** Format: double */
+            discount: number;
             note?: string | null;
         };
         "Fei.Is.Api.Features.Orders.Queries.GetOrderById.Response": {
@@ -2981,6 +2985,8 @@ export interface components {
             deliveryWeek: number;
             paymentMethod: string;
             contactPhone: string;
+            /** Format: double */
+            discount: number;
             note?: string | null;
         };
         "Fei.Is.Api.Features.Orders.Queries.GetOrderProducts.Response": {

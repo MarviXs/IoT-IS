@@ -181,7 +181,6 @@
     "firmware": "Firmware",
     "mac_address": "MAC adresa",
     "api_key": "API kľúč",
-    "device_info": "Informácie o zariadení",
     "sensors": "Snímače",
     "tag": "Značka",
     "add_sensors": "Pridať snímače",
@@ -643,7 +642,8 @@
       "card": "Karta",
       "transfer": "Prevod"
     },
-    "details": "Detaily objednávky"
+    "details": "Detaily objednávky",
+    "discount": "Zľava (%)"
   },
   "order_item": {
     "id": "ID",

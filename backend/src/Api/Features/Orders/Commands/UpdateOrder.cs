@@ -14,7 +14,7 @@ namespace Fei.Is.Api.Features.Orders.Commands;
 
 public static class UpdateOrder
 {
-    public record Request(Guid CustomerId, DateTime OrderDate, int DeliveryWeek, string PaymentMethod, string ContactPhone, string? Note);
+    public record Request(Guid CustomerId, DateTime OrderDate, int DeliveryWeek, string PaymentMethod, string ContactPhone, decimal Discount, string? Note);
 
     public sealed class Endpoint : ICarterModule
     {
@@ -80,6 +80,7 @@ public static class UpdateOrder
             order.ContactPhone = message.Request.ContactPhone;
             order.Note = message.Request.Note;
             order.Customer = customer;
+            order.Discount = message.Request.Discount;
 
             await context.SaveChangesAsync(cancellationToken);
 

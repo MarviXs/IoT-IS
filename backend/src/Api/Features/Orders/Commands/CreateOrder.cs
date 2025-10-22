@@ -15,7 +15,7 @@ namespace Fei.Is.Api.Features.Orders.Commands;
 public static class CreateOrder
 {
     // Record to represent the request for creating an order
-    public record Request(Guid CustomerId, DateTime OrderDate, int DeliveryWeek, string PaymentMethod, string ContactPhone, string? Note);
+    public record Request(Guid CustomerId, DateTime OrderDate, int DeliveryWeek, string PaymentMethod, string ContactPhone, decimal Discount, string? Note);
 
     // Endpoint definition for handling the creation of orders
     public sealed class Endpoint : ICarterModule
@@ -86,7 +86,8 @@ public static class CreateOrder
                 PaymentMethod = message.Request.PaymentMethod,
                 ContactPhone = message.Request.ContactPhone,
                 Note = message.Request.Note,
-                Customer = customer // Associate the customer entity
+                Customer = customer, // Associate the customer entity
+                Discount = message.Request.Discount
             };
 
             // Add the new order to the database context

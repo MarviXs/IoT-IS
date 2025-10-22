@@ -11,6 +11,7 @@ public class Order : BaseModel
     public string PaymentMethod { get; set; }
     public string ContactPhone { get; set; }
     public Company Customer { get; set; }
+    public decimal Discount { get; set; }
 
     [NotMapped]
     public decimal? PriceReduced

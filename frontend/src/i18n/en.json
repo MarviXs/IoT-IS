@@ -600,7 +600,8 @@
     "details": "Order details",
     "download_quotation_sheet": "Download quotation sheet",
     "download_plants_passports": "Download plants passports",
-    "update_order": "Update order"
+    "update_order": "Update order",
+    "discount": "Discount (%)"
   },
   "order_item": {
     "id": "ID",
@@ -694,7 +695,6 @@
     "created_at": "Created at",
     "edit": "Edit",
     "delete": "Delete",
-    "enter_details": "Enter greenhouse details",
     "add_plant": "Add plant",
     "add_pot": "Add pot",
     "p_day": "Previous day",

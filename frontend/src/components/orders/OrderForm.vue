@@ -26,6 +26,13 @@
       />
 
       <q-input
+        v-model="order.discount"
+        :rules="discountRules"
+        :label="t('order.discount')"
+        type="number"
+      />
+
+      <q-input
         v-model="order.deliveryWeek"
         :rules="deliveryWeekRules"
         :label="t('order.delivery_week')"
@@ -69,6 +76,7 @@ export interface OrderFormData {
   deliveryWeek: number; // Added deliveryWeek to match backend requirements
   orderDate: string;
   paymentMethod: string | { label: string; value: string };
+  discount: number;
   note: string;
 }
 
@@ -86,6 +94,7 @@ const customerIdRules = [(val: string) => (val && val.length > 0) || t('global.r
 const phoneRules = [(val: string) => (val && val.length > 0) || t('global.rules.required')];
 const paymentMethodRules = [(val: string) => !!val || t('global.rules.required')];
 const deliveryWeekRules = [(val: number) => (val && val > 0) || t('global.rules.required')];
+const discountRules = [(val: number) => (val && val >= 0) || t('global.rules.required')];
 
 // Payment method options (can be customized as needed)
 const paymentMethods = [

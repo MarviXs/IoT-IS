@@ -16,6 +16,12 @@
         :label="t('order.delivery_week')"
         type="number"
       />
+      <q-input
+        v-model="localOrder.discount"
+        :rules="discountRules"
+        :label="t('order.discount')"
+        type="number"
+      />
       <q-select
         v-model="localOrder.paymentMethod"
         :options="paymentMethods"
@@ -54,6 +60,7 @@ const props = defineProps<{
     contactPhone: string;
     note: string;
     customerId: number;
+    discount: number;
   };
   loading?: boolean;
 }>();
@@ -71,6 +78,7 @@ const localOrder = ref({
   deliveryWeek: props.order.deliveryWeek,
   paymentMethod: props.order.paymentMethod,
   note: props.order.note,
+  discount: props.order.discount,
 });
 
 // Keď sa zmení prop order, aktualizuj localOrder
@@ -84,16 +92,18 @@ watch(
       deliveryWeek: newVal.deliveryWeek,
       paymentMethod: newVal.paymentMethod,
       note: newVal.note,
+      discount: newVal.discount,
     };
   },
   { immediate: true },
 );
 
 // Validation rules
-const customerIdRules = [(val: number) => (val && val > 0) || t('global.rules.required')];
+const customerIdRules = [(val: string) => (val && val.length > 0) || t('global.rules.required')];
 const phoneRules = [(val: string) => (val && val.length > 0) || t('global.rules.required')];
 const paymentMethodRules = [(val: string) => !!val || t('global.rules.required')];
 const deliveryWeekRules = [(val: number) => (val && val > 0) || t('global.rules.required')];
+const discountRules = [(val: number) => (val && val >= 0) || t('global.rules.required')];
 
 // Payment method options
 const paymentMethods = [
@@ -114,6 +124,7 @@ function onSubmit() {
     deliveryWeek: localOrder.value.deliveryWeek,
     orderDate: localOrder.value.orderDate,
     note: localOrder.value.note,
+    discount: localOrder.value.discount,
   });
 }
 </script>

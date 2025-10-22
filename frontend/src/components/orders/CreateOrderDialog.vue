@@ -43,7 +43,8 @@ const order = ref<OrderFormData>({
     paymentMethod: '',
     note: '', 
     deliveryWeek: 0,
-    orderDate: isToday(new Date()) ? new Date().toISOString() : ''
+    orderDate: isToday(new Date()) ? new Date().toISOString() : '',
+    discount: 0
 });
 
 const orderForm = ref();
@@ -60,6 +61,7 @@ async function createOrder() {
       paymentMethod: paymentMethodValue,
       deliveryWeek: order.value.deliveryWeek,
       orderDate: new Date(order.value.orderDate).toISOString(),
+      discount: order.value.discount,
   };
 
   // Set loading state to true during API call

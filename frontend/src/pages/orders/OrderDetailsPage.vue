@@ -97,6 +97,7 @@ interface Order {
   paymentMethod: string;
   contactPhone: string;
   note: string;
+  discount: number;
 }
 
 // Typ pre súhrn objednávky
@@ -210,6 +211,7 @@ async function getOrder() {
         paymentMethod: data.paymentMethod,
         contactPhone: data.contactPhone,
         note: data.note ?? '',
+        discount: data.discount ?? 0,
       };
     }
   } catch (e) {

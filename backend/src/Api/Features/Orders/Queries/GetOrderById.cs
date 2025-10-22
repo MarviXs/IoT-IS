@@ -66,6 +66,7 @@ public static class GetOrderById
                     order.DeliveryWeek,
                     order.PaymentMethod,
                     order.ContactPhone,
+                    order.Discount,
                     order.Note
                 ))
                 .FirstAsync(cancellationToken);
@@ -80,6 +81,7 @@ public static class GetOrderById
         int DeliveryWeek,
         string PaymentMethod,
         string ContactPhone,
+        decimal Discount,
         string? Note
     );
 }
