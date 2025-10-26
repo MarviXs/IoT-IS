@@ -4,8 +4,8 @@ ENV VITE_API_URL=IOT_IS_BACKEND_API_URL
 ENV VITE_IOT_ONLY=IOT_IS_IOT_ONLY
 
 WORKDIR /app
-COPY package.json ./
-RUN npm install
+COPY package*.json ./
+RUN npm install --ignore-scripts
 COPY . .
 RUN npm run build
 
