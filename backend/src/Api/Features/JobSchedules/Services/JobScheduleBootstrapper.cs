@@ -1,8 +1,10 @@
 using Fei.Is.Api.Data.Contexts;
+using Fei.Is.Api.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Npgsql;
 
 namespace Fei.Is.Api.Features.JobSchedules.Services;
 
@@ -28,7 +30,28 @@ public class JobScheduleBootstrapper : IHostedService
         using var scope = _serviceScopeFactory.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-        var schedules = await context.JobSchedules.AsNoTracking().Include(s => s.WeekDays).ToListAsync(cancellationToken);
+        List<JobSchedule> schedules;
+
+        try
+        {
+            schedules = await context.JobSchedules
+                .AsNoTracking()
+                .Include(s => s.WeekDays)
+                .ToListAsync(cancellationToken);
+        }
+        catch (PostgresException ex) when (ex.SqlState == PostgresErrorCodes.UndefinedTable)
+        {
+            _logger.LogInformation(
+                ex,
+                "Job schedule bootstrapper skipped because the JobSchedules table does not exist yet. Run the database migrations and restart the service."
+            );
+            return;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to load job schedules during startup.");
+            return;
+        }
 
         foreach (var schedule in schedules)
         {
