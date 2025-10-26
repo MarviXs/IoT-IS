@@ -16,21 +16,18 @@ namespace Fei.Is.Api.Features.Orders.Queries
             {
                 // Používame explicitný constraint :guid pre orderId
                 app.MapGet(
-                    "orders/{orderId:guid}/summary",
-                    async Task<IResult>(
-                        IMediator mediator, 
-                        ClaimsPrincipal user, 
-                        Guid orderId
-                    ) =>
-                    {
-                        var query = new Query(user, orderId);
-                        var result = await mediator.Send(query);
-                        if (result == null)
+                        "orders/{orderId:guid}/summary",
+                        async Task<IResult> (IMediator mediator, ClaimsPrincipal user, Guid orderId) =>
                         {
-                            return TypedResults.NotFound();
+                            var query = new Query(user, orderId);
+                            var result = await mediator.Send(query);
+                            if (result == null)
+                            {
+                                return TypedResults.NotFound();
+                            }
+                            return TypedResults.Ok(result);
                         }
-                        return TypedResults.Ok(result);
-                    })
+                    )
                     .WithName(nameof(GetSummary))
                     .WithTags("Order")
                     .WithOpenApi(o =>
@@ -55,11 +52,11 @@ namespace Fei.Is.Api.Features.Orders.Queries
             public async Task<SummaryResponse?> Handle(Query message, CancellationToken cancellationToken)
             {
                 // Načítame objednávku spolu s kontajnermi, položkami a produktmi (vrátane VAT kategórie)
-                var order = await _context.Orders
-                    .Include(o => o.ItemContainers)
-                        .ThenInclude(ic => ic.Items)
-                            .ThenInclude(i => i.Product)
-                                .ThenInclude(p => p.VATCategory)
+                var order = await _context
+                    .Orders.Include(o => o.ItemContainers)
+                    .ThenInclude(ic => ic.Items)
+                    .ThenInclude(i => i.Product)
+                    .ThenInclude(p => p.VATCategory)
                     .FirstOrDefaultAsync(o => o.Id == message.OrderId, cancellationToken);
 
                 if (order == null)
@@ -72,14 +69,18 @@ namespace Fei.Is.Api.Features.Orders.Queries
 
                 // Vypočítame cenu bez DPH pre položky s VAT kategóriou "Reduced" (bez ohľadu na kapitalizáciu)
                 var priceExcVatReduced = allItems
-                    .Where(i => i.Product?.VATCategory?.Name != null &&
-                                string.Equals(i.Product.VATCategory.Name, "Reduced", System.StringComparison.OrdinalIgnoreCase))
+                    .Where(i =>
+                        i.Product?.VATCategory?.Name != null
+                        && string.Equals(i.Product.VATCategory.Name, "Reduced", StringComparison.OrdinalIgnoreCase)
+                    )
                     .Sum(i => i.Quantity * (i.Product.PricePerPiecePack ?? 0));
 
                 // Vypočítame cenu bez DPH pre položky s VAT kategóriou "Normal"
                 var priceExcVatNormal = allItems
-                    .Where(i => i.Product?.VATCategory?.Name != null &&
-                                string.Equals(i.Product.VATCategory.Name, "Normal", System.StringComparison.OrdinalIgnoreCase))
+                    .Where(i =>
+                        i.Product?.VATCategory?.Name != null
+                        && string.Equals(i.Product.VATCategory.Name, "Normal", StringComparison.OrdinalIgnoreCase)
+                    )
                     .Sum(i => i.Quantity * (i.Product.PricePerPiecePack ?? 0));
 
                 // Sadzby pre daň
@@ -106,17 +107,8 @@ namespace Fei.Is.Api.Features.Orders.Queries
             }
         }
 
-        public record SummaryResponse(
-            Guid OrderId,
-            VatSummary VatReduced,
-            VatSummary VatNormal,
-            decimal Total
-        );
+        public record SummaryResponse(Guid OrderId, VatSummary VatReduced, VatSummary VatNormal, decimal Total);
 
-        public record VatSummary(
-            decimal PriceExcVat,
-            decimal Vat,
-            decimal PriceInclVat
-        );
+        public record VatSummary(decimal PriceExcVat, decimal Vat, decimal PriceInclVat);
     }
 }
