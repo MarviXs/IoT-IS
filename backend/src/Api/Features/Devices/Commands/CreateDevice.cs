@@ -14,7 +14,13 @@ namespace Fei.Is.Api.Features.Devices.Commands;
 
 public static class CreateDevice
 {
-    public record Request(string Name, string AccessToken, Guid? TemplateId, DeviceConnectionProtocol Protocol);
+    public record Request(
+        string Name,
+        string AccessToken,
+        Guid? TemplateId,
+        DeviceConnectionProtocol Protocol,
+        int? DataPointRetentionDays
+    );
 
     public sealed class Endpoint : ICarterModule
     {
@@ -74,6 +80,7 @@ public static class CreateDevice
                 AccessToken = message.Request.AccessToken,
                 DeviceTemplateId = message.Request.TemplateId,
                 Protocol = message.Request.Protocol,
+                DataPointRetentionDays = message.Request.DataPointRetentionDays,
             };
 
             await context.Devices.AddAsync(device, cancellationToken);
@@ -89,6 +96,10 @@ public static class CreateDevice
         {
             RuleFor(r => r.Request.Name).NotEmpty().WithMessage("Name is required");
             RuleFor(r => r.Request.AccessToken).NotEmpty().WithMessage("Access token is required");
+            RuleFor(r => r.Request.DataPointRetentionDays)
+                .GreaterThan(0)
+                .WithMessage("Data point retention must be greater than zero days")
+                .When(r => r.Request.DataPointRetentionDays.HasValue);
         }
     }
 }

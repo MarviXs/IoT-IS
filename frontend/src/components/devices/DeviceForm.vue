@@ -22,6 +22,16 @@
         emit-value
         map-options
       />
+      <q-input
+        v-model.number="retentionDays"
+        type="number"
+        class="q-mt-lg"
+        :label="t('device.auto_delete_datapoints_label')"
+        :hint="t('device.auto_delete_datapoints_hint')"
+        :rules="retentionRules"
+        :min="1"
+        clearable
+      />
     </q-card-section>
     <q-card-actions align="right" class="text-primary">
       <q-btn v-close-popup flat :label="t('global.cancel')" no-caps />
@@ -39,7 +49,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import DeviceTemplateSelect from '@/components/device-templates/DeviceTemplateSelect.vue';
 import { mdiAutorenew, mdiContentCopy } from '@quasar/extras/mdi-v7';
@@ -50,7 +60,8 @@ export interface DeviceFormData {
   name: string;
   accessToken: string;
   deviceTemplate?: DeviceTemplateSelectData;
-  protocol: 'MQTT' | 'HTTP';
+  protocol?: 'MQTT' | 'HTTP';
+  dataPointRetentionDays?: number | null;
 }
 
 const props = defineProps<{
@@ -89,6 +100,21 @@ function copyAccessToken() {
 
 const device = defineModel<DeviceFormData>({ required: true });
 const nameRules = [(val: string) => (val && val.length > 0) || t('global.rules.required')];
+const retentionRules = [
+  (val: number | null | undefined) =>
+    val === null || val === undefined || val >= 1 || t('device.rules.retention_positive'),
+];
+
+const retentionDays = computed<number | null>({
+  get: () => device.value.dataPointRetentionDays ?? null,
+  set: (value) => {
+    if (value === null || value === undefined) {
+      device.value.dataPointRetentionDays = undefined;
+    } else {
+      device.value.dataPointRetentionDays = value;
+    }
+  },
+});
 
 const deviceForm = ref();
 

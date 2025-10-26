@@ -198,6 +198,10 @@
     "access_token_copied": "Access token copied!",
     "copy_access_token": "Copy access token",
     "generate_access_token": "Generate access token",
+    "auto_delete_datapoints_label": "Auto-delete datapoints older than (days)",
+    "auto_delete_datapoints_hint": "Leave empty to keep all datapoints.",
+    "auto_delete_datapoints_disabled": "Disabled",
+    "auto_delete_datapoints_value": "After {days} days",
     "firmware": "Firmware",
     "mac_address": "MAC Address",
     "api_key": "API Key",
@@ -258,6 +262,7 @@
       }
     },
     "rules": {
+      "retention_positive": "Enter at least one day or leave the field empty.",
       "decimal_min": "Decimal places must be greater than 0!"
     }
   },

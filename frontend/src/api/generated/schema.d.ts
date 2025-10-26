@@ -2440,6 +2440,8 @@ export interface components {
             /** Format: uuid */
             templateId?: string | null;
             protocol: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceConnectionProtocol"];
+            /** Format: int32 */
+            dataPointRetentionDays?: number | null;
         };
         "Fei.Is.Api.Features.Devices.Commands.UpdateDevice.Request": {
             name: string;
@@ -2447,6 +2449,8 @@ export interface components {
             /** Format: uuid */
             templateId?: string | null;
             protocol: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceConnectionProtocol"];
+            /** Format: int32 */
+            dataPointRetentionDays?: number | null;
         };
         "Fei.Is.Api.Features.Devices.Queries.GetDeviceById.Response": {
             /** Format: uuid */
@@ -2463,6 +2467,8 @@ export interface components {
             /** Format: date-time */
             lastSeen?: string | null;
             protocol: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceConnectionProtocol"];
+            /** Format: int32 */
+            dataPointRetentionDays?: number | null;
         };
         "Fei.Is.Api.Features.Devices.Queries.GetDeviceById.SensorResponse": {
             /** Format: uuid */

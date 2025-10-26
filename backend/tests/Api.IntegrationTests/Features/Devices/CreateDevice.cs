@@ -33,6 +33,7 @@ public class CreateDeviceTests(IntegrationTestWebAppFactory factory) : BaseInteg
         createdDevice!.Name.Should().Be(deviceRequest.Name);
         createdDevice.AccessToken.Should().Be(deviceRequest.AccessToken);
         createdDevice.DeviceTemplateId.Should().Be(deviceRequest.TemplateId);
+        createdDevice.DataPointRetentionDays.Should().Be(deviceRequest.DataPointRetentionDays);
     }
 }
 
@@ -40,6 +41,14 @@ public class CreateDeviceRequestFake : Faker<CreateDevice.Request>
 {
     public CreateDeviceRequestFake(Guid templateId)
     {
-        CustomInstantiator(f => new CreateDevice.Request(f.Commerce.ProductName(), f.Internet.Mac(), templateId, DeviceConnectionProtocol.HTTP));
+        CustomInstantiator(f =>
+            new CreateDevice.Request(
+                f.Commerce.ProductName(),
+                f.Internet.Mac(),
+                templateId,
+                DeviceConnectionProtocol.HTTP,
+                f.Random.Int(1, 30)
+            )
+        );
     }
 }

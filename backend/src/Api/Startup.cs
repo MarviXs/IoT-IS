@@ -1,9 +1,11 @@
+using System;
 using System.Text.Json.Serialization;
 using Carter;
 using Fei.Is.Api.BackgroundServices;
 using Fei.Is.Api.Common.OpenAPI;
 using Fei.Is.Api.Extensions;
 using Fei.Is.Api.Features.Auth;
+using Fei.Is.Api.Features.DataPoints.Jobs;
 using Fei.Is.Api.Features.JobSchedules.Jobs;
 using Fei.Is.Api.Features.JobSchedules.Services;
 using Fei.Is.Api.Features.Jobs.Services;
@@ -38,7 +40,20 @@ public class Startup(IConfiguration configuration)
         services.AddCarter();
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Startup>());
         services.AddSignalR();
-        services.AddQuartz();
+        services.AddQuartz(q =>
+        {
+            q.UseMicrosoftDependencyInjectionJobFactory();
+
+            var cleanupJobKey = new JobKey(nameof(DeviceDataPointCleanupJob));
+
+            q.AddJob<DeviceDataPointCleanupJob>(options => options.WithIdentity(cleanupJobKey));
+            q.AddTrigger(options =>
+                options
+                    .ForJob(cleanupJobKey)
+                    .WithIdentity($"{nameof(DeviceDataPointCleanupJob)}-trigger")
+                    .WithCronSchedule("0 0 0 * * ?", cron => cron.InTimeZone(TimeZoneInfo.Utc))
+            );
+        });
         services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true);
 
         // Auth

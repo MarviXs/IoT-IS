@@ -192,6 +192,10 @@
     "mac_address": "MAC adresa",
     "api_key": "API kľúč",
     "device_info": "Informácie o zariadení",
+    "auto_delete_datapoints_label": "Automaticky odstrániť dátové body staršie ako (dni)",
+    "auto_delete_datapoints_hint": "Nechajte prázdne pre ponechanie všetkých dátových bodov.",
+    "auto_delete_datapoints_disabled": "Vypnuté",
+    "auto_delete_datapoints_value": "Po {days} dňoch",
     "sensors": "Snímače",
     "tag": "Značka",
     "add_sensors": "Pridať snímače",
@@ -246,6 +250,7 @@
       }
     },
     "rules": {
+      "retention_positive": "Zadajte aspoň jeden deň alebo nechajte pole prázdne.",
       "decimal_min": "Desatinné miesta musia byť väčšie ako 0!"
     }
   },
