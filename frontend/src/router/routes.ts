@@ -27,6 +27,11 @@ const routes: RouteRecordRaw[] = [
       },
 
       {
+        path: '/system',
+        component: () => import('pages/system/SystemStoragePage.vue'),
+      },
+
+      {
         path: 'user-management',
         component: () => import('pages/account/UserManagementPage.vue'),
         meta: { requiresAdmin: true },

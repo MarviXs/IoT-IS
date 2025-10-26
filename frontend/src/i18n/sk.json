@@ -76,6 +76,16 @@
       "email_invalid": "Prosím, zadajte platnú emailovú adresu"
     }
   },
+  "system": {
+    "menu_label": "Systém",
+    "storage": {
+      "title": "Úložisko TimescaleDB",
+      "subtitle": "Využitie úložiska komprimovaných dátových bodov",
+      "loading": "Načítavam využitie úložiska…",
+      "bytes": "Celkom {value} bajtov",
+      "load_error": "Nepodarilo sa načítať využitie úložiska. Skúste to znova."
+    }
+  },
   "account": {
     "label": "Účet",
     "username": "Používateľské meno",

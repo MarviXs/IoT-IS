@@ -80,6 +80,16 @@
       "email_invalid": "Please enter a valid email address"
     }
   },
+  "system": {
+    "menu_label": "System",
+    "storage": {
+      "title": "TimescaleDB storage",
+      "subtitle": "Compressed datapoint storage usage",
+      "loading": "Loading storage usage…",
+      "bytes": "{value} bytes total",
+      "load_error": "Failed to load storage usage. Please try again."
+    }
+  },
   "account": {
     "label": "Account",
     "username": "Username",

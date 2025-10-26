@@ -22,6 +22,12 @@
                   <div>{{ t('global.account') }}</div>
                 </div>
               </q-item>
+              <q-item clickable to="/system">
+                <div class="row items-center q-gutter-sm">
+                  <q-icon size="24px" :name="mdiDatabase" />
+                  <div>{{ t('system.menu_label') }}</div>
+                </div>
+              </q-item>
               <!-- <q-item clickable to="/settings">
                 <div class="row items-center q-gutter-sm">
                   <q-icon size="24px" name="mdi-cog-outline" />
@@ -103,6 +109,7 @@ import {
   mdiOrderBoolAscending,
   mdiSproutOutline,
   mdiPaletteOutline,
+  mdiDatabase,
 } from '@quasar/extras/mdi-v7';
 import { toast } from 'vue3-toastify';
 
