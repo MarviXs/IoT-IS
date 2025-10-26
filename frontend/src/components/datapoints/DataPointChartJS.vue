@@ -57,6 +57,17 @@
         no-caps
         color="grey-7"
         text-color="grey-5"
+        class="options-btn"
+        @click="openDeleteDialog"
+      >
+        <div class="text-grey-9">{{ t('chart.delete_data_points') }}</div>
+      </q-btn>
+      <q-btn
+        padding="0.5rem 1rem"
+        outline
+        no-caps
+        color="grey-7"
+        text-color="grey-5"
         class="options-btn col-grow col-lg-auto"
         @click="isGraphOptionsDialogOpen = true"
       >
@@ -135,6 +146,67 @@
         </q-form>
       </template>
     </dialog-common>
+    <dialog-common v-model="isDeleteDialogOpen" min-width="520px">
+      <template #title>{{ t('chart.delete_data_points') }}</template>
+      <template #default>
+        <q-form @submit.prevent="submitDelete">
+          <q-card-section class="q-pt-none column q-gutter-y-lg">
+            <div class="column q-col-gutter-y-sm">
+              <div class="text-subtitle2">{{ t('device.sensors') }}</div>
+              <q-option-group
+                v-model="deleteSelectedSensors"
+                type="checkbox"
+                dense
+                :options="sensorOptions"
+                color="primary"
+              />
+            </div>
+            <div class="column q-col-gutter-y-sm">
+              <div class="text-subtitle2">{{ t('time_range.label') }}</div>
+              <q-select
+                v-model="deleteSelectedTimeRange"
+                outlined
+                emit-value
+                map-options
+                :options="deleteTimeRangeOptions"
+              />
+              <div v-if="deleteSelectedTimeRange === 'custom'" class="column q-gutter-sm">
+                <DateTimeInput v-model="deleteCustomRange.from" :label="t('time_range.from')" />
+                <DateTimeInput v-model="deleteCustomRange.to" :label="t('time_range.to')" :show-now-button="true" />
+              </div>
+            </div>
+            <div class="column q-col-gutter-y-sm">
+              <div class="text-subtitle2">{{ t('chart.delete_summary') }}</div>
+              <div v-if="deleteCountsLoading" class="column q-gutter-y-xs">
+                <q-skeleton type="text" class="w-100" />
+                <q-skeleton type="text" class="w-100" />
+              </div>
+              <div v-else class="column q-gutter-y-xs">
+                <div class="text-body2">
+                  {{ t('chart.delete_total_points', { count: formatCount(deleteTotalDataPoints) }) }}
+                </div>
+                <div class="text-body2">
+                  {{ t('chart.delete_selected_points', { count: formatCount(deleteSelectedDataPoints) }) }}
+                </div>
+              </div>
+            </div>
+          </q-card-section>
+          <q-card-actions align="right" class="text-primary">
+            <q-btn v-close-popup flat :label="t('global.cancel')" no-caps :disable="deleteLoading" />
+            <q-btn
+              unelevated
+              color="negative"
+              :label="t('chart.delete_action')"
+              no-caps
+              padding="6px 20px"
+              type="submit"
+              :disable="deleteActionDisabled"
+              :loading="deleteLoading"
+            />
+          </q-card-actions>
+        </q-form>
+      </template>
+    </dialog-common>
   </div>
 </template>
 
@@ -150,7 +222,11 @@ import DialogCommon from '../core/DialogCommon.vue';
 import type { GraphOptions } from './GraphOptionsForm.vue';
 import GraphOptionsForm from './GraphOptionsForm.vue';
 import DateTimeInput from './DateTimeInput.vue';
-import type { GetDataPointsQuery } from '@/api/services/DataPointService';
+import type {
+  DeleteDataPointsQuery,
+  GetDataPointCountQuery,
+  GetDataPointsQuery,
+} from '@/api/services/DataPointService';
 import type { DataPoint } from '@/models/DataPoint';
 import DataPointService from '@/api/services/DataPointService';
 import type { ChartDataset, ChartEvent, LegendItem, ScaleOptions } from 'chart.js/auto';
@@ -247,13 +323,25 @@ const exportCustomRange = reactive({
 });
 const exportLoading = ref(false);
 
+const isDeleteDialogOpen = ref(false);
+const deleteSelectedSensors = ref<string[]>([]);
+const deleteSelectedTimeRange = ref('all');
+const deleteCustomRange = reactive({
+  from: '',
+  to: '',
+});
+const deleteLoading = ref(false);
+const deleteCountsLoading = ref(false);
+const deleteTotalDataPoints = ref(0);
+const deleteSelectedDataPoints = ref(0);
+
 type ExportTimeRangeOption = {
   label: string;
   value: string;
   seconds?: number;
 };
 
-const exportTimeRangeOptions = computed<ExportTimeRangeOption[]>(() => [
+const baseTimeRangeOptions = computed<ExportTimeRangeOption[]>(() => [
   { label: t('time_range.predefined.last_5min'), value: '5m', seconds: 300 },
   { label: t('time_range.predefined.last_15min'), value: '15m', seconds: 900 },
   { label: t('time_range.predefined.last_30min'), value: '30m', seconds: 1800 },
@@ -263,6 +351,16 @@ const exportTimeRangeOptions = computed<ExportTimeRangeOption[]>(() => [
   { label: t('time_range.predefined.last_24h'), value: '24h', seconds: 86400 },
   { label: t('time_range.predefined.last_week'), value: '1w', seconds: 604800 },
   { label: t('time_range.predefined.last_month'), value: '1m', seconds: 2592000 },
+]);
+
+const exportTimeRangeOptions = computed<ExportTimeRangeOption[]>(() => [
+  ...baseTimeRangeOptions.value,
+  { label: t('time_range.custom'), value: 'custom' },
+]);
+
+const deleteTimeRangeOptions = computed<ExportTimeRangeOption[]>(() => [
+  { label: t('time_range.predefined.all'), value: 'all' },
+  ...baseTimeRangeOptions.value,
   { label: t('time_range.custom'), value: 'custom' },
 ]);
 
@@ -277,6 +375,12 @@ const sensorOptions = computed(() =>
     value: getSensorUniqueId(sensor),
   })),
 );
+
+const numberFormatter = new Intl.NumberFormat();
+
+function formatCount(value: number | null | undefined) {
+  return numberFormatter.format(value ?? 0);
+}
 
 function getSensorUniqueId(sensor: SensorData) {
   return `${sensor.deviceId}-${sensor.tag}`;
@@ -312,6 +416,26 @@ function initializeExportForm() {
 
   exportRoundNumbers.value = true;
   exportOrientation.value = 'column';
+}
+
+function openDeleteDialog() {
+  initializeDeleteForm();
+  isDeleteDialogOpen.value = true;
+  void loadDeleteTotals();
+}
+
+function initializeDeleteForm() {
+  const availableKeys = props.sensors.map((sensor) => getSensorUniqueId(sensor));
+  const defaultSelection = tickedNodes.value.filter((key) => availableKeys.includes(key));
+
+  deleteSelectedSensors.value = defaultSelection.length > 0 ? [...defaultSelection] : [...availableKeys];
+  deleteSelectedTimeRange.value = 'all';
+
+  deleteCustomRange.from = storedCustomTimeRange.value?.from ?? '';
+  deleteCustomRange.to = storedCustomTimeRange.value?.to ?? '';
+
+  deleteTotalDataPoints.value = 0;
+  deleteSelectedDataPoints.value = 0;
 }
 
 type ExportTimeRange = {
@@ -361,6 +485,128 @@ function resolveExportTimeRange(): ExportTimeRange | null {
     to: format(now, 'yyyy-MM-dd HH:mm:ss'),
   };
 }
+
+type DeleteResolvedTimeRange = ExportTimeRange | 'all';
+
+function resolveDeleteTimeRange(): DeleteResolvedTimeRange | null {
+  if (deleteSelectedTimeRange.value === 'all') {
+    return 'all';
+  }
+
+  if (deleteSelectedTimeRange.value === 'custom') {
+    const fromDate = parseDateInput(deleteCustomRange.from);
+    if (!fromDate) {
+      return null;
+    }
+
+    const toDate = parseDateInput(deleteCustomRange.to) ?? new Date();
+
+    if (toDate.getTime() < fromDate.getTime()) {
+      return null;
+    }
+
+    return {
+      from: format(fromDate, 'yyyy-MM-dd HH:mm:ss'),
+      to: format(toDate, 'yyyy-MM-dd HH:mm:ss'),
+    };
+  }
+
+  const selectedOption = baseTimeRangeOptions.value.find((option) => option.value === deleteSelectedTimeRange.value);
+
+  if (!selectedOption?.seconds) {
+    return null;
+  }
+
+  const now = new Date();
+  const fromDate = new Date(now.getTime() - selectedOption.seconds * 1000);
+
+  return {
+    from: format(fromDate, 'yyyy-MM-dd HH:mm:ss'),
+    to: format(now, 'yyyy-MM-dd HH:mm:ss'),
+  };
+}
+
+async function getDataPointCountForSensors(sensorKeys: string[], range?: ExportTimeRange): Promise<number> {
+  const selectedKeys = new Set(sensorKeys);
+  const sensors = props.sensors.filter((sensor) => selectedKeys.has(getSensorUniqueId(sensor)));
+
+  if (sensors.length === 0) {
+    return 0;
+  }
+
+  const queries = sensors.map(async (sensor) => {
+    const query: GetDataPointCountQuery = {};
+
+    if (range) {
+      query.From = new Date(range.from).toISOString();
+      query.To = new Date(range.to).toISOString();
+    }
+
+    const { data, error } = await DataPointService.getDataPointCount(sensor.deviceId, sensor.tag, query);
+
+    if (error) {
+      return -1;
+    }
+
+    return data?.totalCount ?? 0;
+  });
+
+  const counts = await Promise.all(queries);
+  return counts.reduce((sum, value) => sum + value, 0);
+}
+
+async function loadDeleteTotals() {
+  if (!isDeleteDialogOpen.value) {
+    return;
+  }
+
+  if (deleteSelectedSensors.value.length === 0) {
+    deleteTotalDataPoints.value = 0;
+    deleteSelectedDataPoints.value = 0;
+    return;
+  }
+
+  deleteCountsLoading.value = true;
+
+  try {
+    const total = await getDataPointCountForSensors(deleteSelectedSensors.value);
+    deleteTotalDataPoints.value = total;
+
+    const range = resolveDeleteTimeRange();
+
+    if (range === null) {
+      deleteSelectedDataPoints.value = 0;
+      return;
+    }
+
+    if (range === 'all') {
+      deleteSelectedDataPoints.value = total;
+      return;
+    }
+
+    const selected = await getDataPointCountForSensors(deleteSelectedSensors.value, range);
+    deleteSelectedDataPoints.value = selected;
+  } catch (error) {
+    console.error(error);
+    deleteTotalDataPoints.value = 0;
+    deleteSelectedDataPoints.value = 0;
+    toast.error(t('chart.delete_count_error'));
+  } finally {
+    deleteCountsLoading.value = false;
+  }
+}
+
+const deleteActionDisabled = computed(() => {
+  if (deleteLoading.value) {
+    return true;
+  }
+
+  if (deleteSelectedSensors.value.length === 0) {
+    return true;
+  }
+
+  return resolveDeleteTimeRange() === null;
+});
 
 async function submitExport() {
   if (exportSelectedSensors.value.length === 0) {
@@ -420,6 +666,62 @@ async function submitExport() {
     isExportDialogOpen.value = false;
   } finally {
     exportLoading.value = false;
+  }
+}
+
+async function submitDelete() {
+  if (deleteSelectedSensors.value.length === 0) {
+    toast.error(t('chart.delete_select_sensor_error'));
+    return;
+  }
+
+  const range = resolveDeleteTimeRange();
+
+  if (range === null) {
+    toast.error(t('chart.delete_invalid_range'));
+    return;
+  }
+
+  const selectedKeys = new Set(deleteSelectedSensors.value);
+  const sensors = props.sensors.filter((sensor) => selectedKeys.has(getSensorUniqueId(sensor)));
+
+  if (sensors.length === 0) {
+    toast.error(t('chart.delete_select_sensor_error'));
+    return;
+  }
+
+  deleteLoading.value = true;
+
+  try {
+    const deletions = sensors.map(async (sensor) => {
+      const query: DeleteDataPointsQuery = {};
+
+      if (range !== 'all') {
+        query.From = new Date(range.from).toISOString();
+        query.To = new Date(range.to).toISOString();
+      }
+
+      const { data, error } = await DataPointService.deleteDataPoints(sensor.deviceId, sensor.tag, query);
+
+      if (error) {
+        return -1;
+      }
+
+      return data?.deletedCount ?? 0;
+    });
+
+    const deletedCounts = await Promise.all(deletions);
+    const totalDeleted = deletedCounts.reduce((sum, value) => sum + value, 0);
+
+    toast.success(t('chart.delete_success', { count: formatCount(totalDeleted) }));
+
+    isDeleteDialogOpen.value = false;
+    await getDataPoints();
+  } catch (error) {
+    console.error(error);
+    toast.error(t('chart.delete_error'));
+  } finally {
+    deleteLoading.value = false;
   }
 }
 
@@ -748,6 +1050,33 @@ watch(
   },
 );
 
+watch(
+  () => [
+    deleteSelectedSensors.value.join(','),
+    deleteSelectedTimeRange.value,
+    deleteCustomRange.from,
+    deleteCustomRange.to,
+  ],
+  () => {
+    if (!isDeleteDialogOpen.value) {
+      return;
+    }
+
+    void loadDeleteTotals();
+  },
+);
+
+watch(
+  () => props.sensors.map((sensor) => getSensorUniqueId(sensor)),
+  (currentKeys) => {
+    deleteSelectedSensors.value = deleteSelectedSensors.value.filter((key) => currentKeys.includes(key));
+
+    if (isDeleteDialogOpen.value) {
+      void loadDeleteTotals();
+    }
+  },
+);
+
 onMounted(() => {
   const ctx = chartRef.value?.getContext('2d');
   if (!ctx) return;
@@ -909,7 +1238,9 @@ const generateCSVData = (options: GenerateCsvOptions = {}) => {
     });
   });
 
-  const sortedTimeKeys = Array.from(aggregatedData.keys()).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+  const sortedTimeKeys = Array.from(aggregatedData.keys()).sort(
+    (a, b) => new Date(a).getTime() - new Date(b).getTime(),
+  );
 
   if (sortedTimeKeys.length === 0) {
     toast.error('No data to export');

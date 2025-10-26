@@ -362,6 +362,30 @@ export interface paths {
         get: operations["GetSensorDataPoints"];
         put?: never;
         post?: never;
+        /**
+         * Delete stored data points for a sensor
+         * @description Delete stored data points for a sensor within an optional time range and return the number of removed records.
+         */
+        delete: operations["DeleteSensorDataPoints"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/devices/{deviceId}/sensors/{sensorTag}/data/count": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get the number of stored data points for a sensor
+         * @description Return the total number of stored data points for a sensor within an optional time range.
+         */
+        get: operations["GetSensorDataPointsCount"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1686,6 +1710,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/system/storage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get TimescaleDB columnstore storage usage
+         * @description Retrieve the total size of compressed data stored for datapoints in TimescaleDB.
+         */
+        get: operations["GetTimescaleStorageUsage"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/templates/download": {
         parameters: {
             query?: never;
@@ -2166,6 +2210,10 @@ export interface components {
             /** Format: int32 */
             gridY?: number | null;
         };
+        "Fei.Is.Api.Features.DataPoints.Commands.DeleteSensorDataPoints.Response": {
+            /** Format: int32 */
+            deletedCount: number;
+        };
         "Fei.Is.Api.Features.DataPoints.Queries.GetLatestDataPoints.Response": {
             /** Format: date-time */
             ts: string | null;
@@ -2198,6 +2246,10 @@ export interface components {
         };
         /** @enum {string} */
         "Fei.Is.Api.Features.DataPoints.Queries.GetSensorDataPoints.TimeBucketMethod": "Average" | "Max" | "Min" | "StdDev" | "Sum";
+        "Fei.Is.Api.Features.DataPoints.Queries.GetSensorDataPointsCount.Response": {
+            /** Format: int64 */
+            totalCount: number;
+        };
         "Fei.Is.Api.Features.DeviceCollections.Commands.CreateDeviceCollection.Request": {
             name: string;
             /** Format: uuid */
@@ -3439,6 +3491,10 @@ export interface components {
             /** Format: int32 */
             accuracyDecimals?: number | null;
         };
+        "Fei.Is.Api.Features.System.Queries.GetTimescaleStorageUsage.Response": {
+            /** Format: int64 */
+            totalColumnstoreSizeBytes: number;
+        };
         "Fei.Is.Api.Features.Templates.Commands.UpdateTemplate.Request": {
             /** Format: binary */
             file: string;
@@ -4357,6 +4413,90 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Fei.Is.Api.Features.DataPoints.Queries.GetSensorDataPoints.Response"][];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DeleteSensorDataPoints: {
+        parameters: {
+            query?: {
+                From?: string;
+                To?: string;
+            };
+            header?: never;
+            path: {
+                deviceId: string;
+                sensorTag: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.DataPoints.Commands.DeleteSensorDataPoints.Response"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GetSensorDataPointsCount: {
+        parameters: {
+            query?: {
+                From?: string;
+                To?: string;
+            };
+            header?: never;
+            path: {
+                deviceId: string;
+                sensorTag: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.DataPoints.Queries.GetSensorDataPointsCount.Response"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
                 };
             };
             /** @description Not Found */
@@ -7859,6 +7999,26 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    GetTimescaleStorageUsage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.System.Queries.GetTimescaleStorageUsage.Response"];
+                };
             };
         };
     };
