@@ -326,7 +326,16 @@
       "last_12h": "Last 12 hours",
       "last_24h": "Last 24 hours",
       "last_week": "Last week",
-      "last_month": "Last month"
+      "last_month": "Last month",
+      "older_than_5min": "Older than 5 minutes",
+      "older_than_15min": "Older than 15 minutes",
+      "older_than_30min": "Older than 30 minutes",
+      "older_than_1h": "Older than 1 hour",
+      "older_than_6h": "Older than 6 hours",
+      "older_than_12h": "Older than 12 hours",
+      "older_than_24h": "Older than 24 hours",
+      "older_than_week": "Older than 1 week",
+      "older_than_month": "Older than 1 month"
     }
   },
   "job": {

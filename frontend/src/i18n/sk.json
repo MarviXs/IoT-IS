@@ -308,13 +308,24 @@
     "now": "Teraz",
     "predefined": {
       "all": "Všetko",
+      "last_5min": "Posledných 5 minút",
+      "last_15min": "Posledných 15 minút",
       "last_30min": "Posledných 30 minút",
       "last_1h": "Posledná hodina",
       "last_6h": "Posledných 6 hodín",
       "last_12h": "Posledných 12 hodín",
       "last_24h": "Posledných 24 hodín",
       "last_week": "Posledný týždeň",
-      "last_month": "Posledný mesiac"
+      "last_month": "Posledný mesiac",
+      "older_than_5min": "Staršie ako 5 minút",
+      "older_than_15min": "Staršie ako 15 minút",
+      "older_than_30min": "Staršie ako 30 minút",
+      "older_than_1h": "Staršie ako 1 hodina",
+      "older_than_6h": "Staršie ako 6 hodín",
+      "older_than_12h": "Staršie ako 12 hodín",
+      "older_than_24h": "Staršie ako 24 hodín",
+      "older_than_week": "Staršie ako 1 týždeň",
+      "older_than_month": "Staršie ako 1 mesiac"
     }
   },
   "job": {

@@ -335,34 +335,101 @@ const deleteCountsLoading = ref(false);
 const deleteTotalDataPoints = ref(0);
 const deleteSelectedDataPoints = ref(0);
 
-type ExportTimeRangeOption = {
+type TimeRangeOption = {
   label: string;
   value: string;
   seconds?: number;
 };
 
-const baseTimeRangeOptions = computed<ExportTimeRangeOption[]>(() => [
-  { label: t('time_range.predefined.last_5min'), value: '5m', seconds: 300 },
-  { label: t('time_range.predefined.last_15min'), value: '15m', seconds: 900 },
-  { label: t('time_range.predefined.last_30min'), value: '30m', seconds: 1800 },
-  { label: t('time_range.predefined.last_1h'), value: '1h', seconds: 3600 },
-  { label: t('time_range.predefined.last_6h'), value: '6h', seconds: 21600 },
-  { label: t('time_range.predefined.last_12h'), value: '12h', seconds: 43200 },
-  { label: t('time_range.predefined.last_24h'), value: '24h', seconds: 86400 },
-  { label: t('time_range.predefined.last_week'), value: '1w', seconds: 604800 },
-  { label: t('time_range.predefined.last_month'), value: '1m', seconds: 2592000 },
-]);
+const relativeTimeRangeDefinitions = [
+  {
+    value: '5m',
+    seconds: 300,
+    exportLabelKey: 'time_range.predefined.last_5min',
+    deleteLabelKey: 'time_range.predefined.older_than_5min',
+  },
+  {
+    value: '15m',
+    seconds: 900,
+    exportLabelKey: 'time_range.predefined.last_15min',
+    deleteLabelKey: 'time_range.predefined.older_than_15min',
+  },
+  {
+    value: '30m',
+    seconds: 1800,
+    exportLabelKey: 'time_range.predefined.last_30min',
+    deleteLabelKey: 'time_range.predefined.older_than_30min',
+  },
+  {
+    value: '1h',
+    seconds: 3600,
+    exportLabelKey: 'time_range.predefined.last_1h',
+    deleteLabelKey: 'time_range.predefined.older_than_1h',
+  },
+  {
+    value: '6h',
+    seconds: 21600,
+    exportLabelKey: 'time_range.predefined.last_6h',
+    deleteLabelKey: 'time_range.predefined.older_than_6h',
+  },
+  {
+    value: '12h',
+    seconds: 43200,
+    exportLabelKey: 'time_range.predefined.last_12h',
+    deleteLabelKey: 'time_range.predefined.older_than_12h',
+  },
+  {
+    value: '24h',
+    seconds: 86400,
+    exportLabelKey: 'time_range.predefined.last_24h',
+    deleteLabelKey: 'time_range.predefined.older_than_24h',
+  },
+  {
+    value: '1w',
+    seconds: 604800,
+    exportLabelKey: 'time_range.predefined.last_week',
+    deleteLabelKey: 'time_range.predefined.older_than_week',
+  },
+  {
+    value: '1m',
+    seconds: 2592000,
+    exportLabelKey: 'time_range.predefined.last_month',
+    deleteLabelKey: 'time_range.predefined.older_than_month',
+  },
+] as const;
 
-const exportTimeRangeOptions = computed<ExportTimeRangeOption[]>(() => [
-  ...baseTimeRangeOptions.value,
+type RelativeTimeRangeDefinition = (typeof relativeTimeRangeDefinitions)[number];
+
+const exportRelativeTimeRangeOptions = computed<TimeRangeOption[]>(() =>
+  relativeTimeRangeDefinitions.map((range) => ({
+    label: t(range.exportLabelKey),
+    value: range.value,
+    seconds: range.seconds,
+  })),
+);
+
+const deleteRelativeTimeRangeOptions = computed<TimeRangeOption[]>(() =>
+  relativeTimeRangeDefinitions.map((range) => ({
+    label: t(range.deleteLabelKey),
+    value: range.value,
+    seconds: range.seconds,
+  })),
+);
+
+const exportTimeRangeOptions = computed<TimeRangeOption[]>(() => [
+  ...exportRelativeTimeRangeOptions.value,
   { label: t('time_range.custom'), value: 'custom' },
 ]);
 
-const deleteTimeRangeOptions = computed<ExportTimeRangeOption[]>(() => [
+const deleteTimeRangeOptions = computed<TimeRangeOption[]>(() => [
   { label: t('time_range.predefined.all'), value: 'all' },
-  ...baseTimeRangeOptions.value,
+  ...deleteRelativeTimeRangeOptions.value,
   { label: t('time_range.custom'), value: 'custom' },
 ]);
+
+function findRelativeTimeRange(value: string): RelativeTimeRangeDefinition | undefined {
+  return relativeTimeRangeDefinitions.find((range) => range.value === value);
+}
 
 const exportOrientationOptions = computed(() => [
   { label: t('chart.export_orientation_column'), value: 'column' },
@@ -471,14 +538,14 @@ function resolveExportTimeRange(): ExportTimeRange | null {
     };
   }
 
-  const selectedOption = exportTimeRangeOptions.value.find((option) => option.value === exportSelectedTimeRange.value);
+  const selectedDefinition = findRelativeTimeRange(exportSelectedTimeRange.value);
 
-  if (!selectedOption?.seconds) {
+  if (!selectedDefinition) {
     return null;
   }
 
   const now = new Date();
-  const fromDate = new Date(now.getTime() - selectedOption.seconds * 1000);
+  const fromDate = new Date(now.getTime() - selectedDefinition.seconds * 1000);
 
   return {
     from: format(fromDate, 'yyyy-MM-dd HH:mm:ss'),
@@ -486,7 +553,12 @@ function resolveExportTimeRange(): ExportTimeRange | null {
   };
 }
 
-type DeleteResolvedTimeRange = ExportTimeRange | 'all';
+type DeleteTimeRange = {
+  from?: string;
+  to?: string;
+};
+
+type DeleteResolvedTimeRange = DeleteTimeRange | 'all';
 
 function resolveDeleteTimeRange(): DeleteResolvedTimeRange | null {
   if (deleteSelectedTimeRange.value === 'all') {
@@ -511,22 +583,21 @@ function resolveDeleteTimeRange(): DeleteResolvedTimeRange | null {
     };
   }
 
-  const selectedOption = baseTimeRangeOptions.value.find((option) => option.value === deleteSelectedTimeRange.value);
+  const selectedDefinition = findRelativeTimeRange(deleteSelectedTimeRange.value);
 
-  if (!selectedOption?.seconds) {
+  if (!selectedDefinition) {
     return null;
   }
 
   const now = new Date();
-  const fromDate = new Date(now.getTime() - selectedOption.seconds * 1000);
+  const toDate = new Date(now.getTime() - selectedDefinition.seconds * 1000);
 
   return {
-    from: format(fromDate, 'yyyy-MM-dd HH:mm:ss'),
-    to: format(now, 'yyyy-MM-dd HH:mm:ss'),
+    to: format(toDate, 'yyyy-MM-dd HH:mm:ss'),
   };
 }
 
-async function getDataPointCountForSensors(sensorKeys: string[], range?: ExportTimeRange): Promise<number> {
+async function getDataPointCountForSensors(sensorKeys: string[], range?: DeleteTimeRange): Promise<number> {
   const selectedKeys = new Set(sensorKeys);
   const sensors = props.sensors.filter((sensor) => selectedKeys.has(getSensorUniqueId(sensor)));
 
@@ -537,8 +608,11 @@ async function getDataPointCountForSensors(sensorKeys: string[], range?: ExportT
   const queries = sensors.map(async (sensor) => {
     const query: GetDataPointCountQuery = {};
 
-    if (range) {
+    if (range?.from) {
       query.From = new Date(range.from).toISOString();
+    }
+
+    if (range?.to) {
       query.To = new Date(range.to).toISOString();
     }
 
@@ -697,8 +771,13 @@ async function submitDelete() {
       const query: DeleteDataPointsQuery = {};
 
       if (range !== 'all') {
-        query.From = new Date(range.from).toISOString();
-        query.To = new Date(range.to).toISOString();
+        if (range.from) {
+          query.From = new Date(range.from).toISOString();
+        }
+
+        if (range.to) {
+          query.To = new Date(range.to).toISOString();
+        }
       }
 
       const { data, error } = await DataPointService.deleteDataPoints(sensor.deviceId, sensor.tag, query);
