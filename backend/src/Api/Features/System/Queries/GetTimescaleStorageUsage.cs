@@ -38,11 +38,11 @@ public static class GetTimescaleStorageUsage
         public async Task<Response> Handle(Query request, CancellationToken cancellationToken)
         {
             const string sql = """
-                SELECT
-                    COALESCE(SUM(s.after_compression_total_bytes), 0)::bigint AS "Value"
-                FROM timescaledb_information.hypertable_columnstore_settings AS h
-                CROSS JOIN LATERAL public.hypertable_columnstore_stats(h.hypertable::regclass) AS s
-                WHERE s.number_compressed_chunks > 0
+                SELECT SUM(hypertable_size(t.oid))::bigint AS "Value"
+                FROM (
+                SELECT h.hypertable::regclass AS oid
+                FROM timescaledb_information.hypertable_columnstore_settings h
+                ) t
                 """;
 
             var totalSize = await timescaleContext.Database.SqlQueryRaw<long>(sql).SingleAsync(cancellationToken);
