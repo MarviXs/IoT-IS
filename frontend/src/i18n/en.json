@@ -219,9 +219,11 @@
     "response_time": "Response time",
     "last_activity": "Last activity",
     "status": "Status",
+    "connected": "Connected",
+    "disconnected": "Disconnected",
     "decimal": "Decimal places",
     "init_window": "Initialize 1min window",
-    "share_device": "Share device",
+    "share_device": "Share",
     "shared_with": "Shared with",
     "no_shared_users": "No users shared with",
     "controls": {

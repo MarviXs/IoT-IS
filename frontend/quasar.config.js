@@ -133,7 +133,7 @@ export default configure((/* ctx */) => {
       // you can manually specify Quasar components/directives to be available everywhere:
       //
       // components: [],
-      // directives: [],
+      directives: ['TouchHold'],
 
       // Quasar plugins
       plugins: [],

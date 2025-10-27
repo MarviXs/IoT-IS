@@ -25,7 +25,6 @@
         :devices="devicesPaginated"
         :loading="isLoadingDevices"
         :filter="filter"
-        class="shadow"
         @on-change="getDevices(pagination)"
         @on-request="onRequest"
       />

@@ -208,9 +208,11 @@
     "response_time": "Odozva",
     "last_activity": "Posledná aktivita",
     "status": "Stav",
+    "connected": "Pripojené",
+    "disconnected": "Odpojené",
     "decimal": "Počet desatinných miest",
     "init_window": "Inicializovať 1min okno",
-    "share_device": "Zdieľať zariadenie",
+    "share_device": "Zdieľať",
     "shared_with": "Zdieľané s",
     "controls": {
       "title": "Ovládania",

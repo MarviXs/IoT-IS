@@ -10,7 +10,7 @@
     </template>
     <template v-if="device" #actions>
       <q-btn
-        class="shadow bg-white col-grow col-lg-auto"
+        class="shadow bg-white col-12 col-md-auto"
         :to="`/devices/${device.id}/jobs`"
         text-color="grey-color"
         unelevated
@@ -20,7 +20,7 @@
         :icon="mdiListStatus"
       />
       <q-btn
-        class="shadow bg-white col-grow col-lg-auto"
+        class="shadow bg-white col-12 col-md-auto"
         :to="`/devices/${device.id}/schedules`"
         text-color="grey-color"
         unelevated
@@ -30,7 +30,7 @@
         :icon="mdiCalendarClock"
       />
       <q-btn
-        class="shadow bg-white col-grow col-lg-auto"
+        class="shadow bg-white col-1 col-md-auto"
         :to="`/devices/${device.id}/map`"
         text-color="grey-color"
         unelevated
@@ -41,7 +41,7 @@
         :icon="mdiMapMarker"
       />
       <q-btn
-        class="shadow bg-white col-grow col-lg-auto"
+        class="shadow bg-white col-12 col-md-auto"
         :to="`/devices/${device.id}/controls`"
         text-color="grey-color"
         unelevated
@@ -51,7 +51,7 @@
         :icon="mdiTuneVariant"
       />
       <q-btn
-        class="shadow bg-white col-grow col-lg-auto"
+        class="shadow bg-white col-12 col-lg-auto"
         :to="`/devices/${device.id}/grid`"
         text-color="grey-color"
         unelevated
@@ -124,7 +124,14 @@ import { deviceToTreeNode, extractNodeKeys } from '@/utils/sensor-nodes';
 import SensorSelectionTree from '@/components/datapoints/SensorSelectionTree.vue';
 import CurrentJobCard from '@/components/jobs/CurrentJobCard.vue';
 import { useI18n } from 'vue-i18n';
-import { mdiCalendarClock, mdiListStatus, mdiMapMarker, mdiPencil, mdiTuneVariant, mdiViewGridOutline } from '@quasar/extras/mdi-v7';
+import {
+  mdiCalendarClock,
+  mdiListStatus,
+  mdiMapMarker,
+  mdiPencil,
+  mdiTuneVariant,
+  mdiViewGridOutline,
+} from '@quasar/extras/mdi-v7';
 import PageLayout from '@/layouts/PageLayout.vue';
 import { handleError } from '@/utils/error-handler';
 import type { DeviceResponse } from '@/api/services/DeviceService';

@@ -2,7 +2,7 @@
   <q-page class="main-padding">
     <div>
       <div class="q-mb-md row items-center">
-        <div class="bread-crumb row items-center">
+        <div class="bread-crumb row items-center col-12 col-md-auto">
           <div v-if="breadcrumbs && breadcrumbs.length > 1" class="row items-center">
             <div v-for="(item, index) in breadcrumbs.slice(0, -1)" :key="index" class="row items-center">
               <template v-if="item.label && item.to">
@@ -21,7 +21,7 @@
         </div>
         <slot name="description" />
         <q-space></q-space>
-        <div class="actions">
+        <div class="actions row col-grow">
           <slot name="actions" />
         </div>
       </div>
@@ -59,6 +59,8 @@ const currentItem = computed(() => {
 
 .actions {
   display: flex;
+  align-items: center;
+  flex-direction: row;
   justify-content: flex-end;
   flex-wrap: wrap;
   gap: 0.75rem 1rem;
@@ -86,13 +88,13 @@ const currentItem = computed(() => {
 
 @media (max-width: 800px) {
   .title-text {
-    font-size: 1.3rem;
+    font-size: 1.5rem;
   }
 }
 
 @media (max-width: 600px) {
   .title-text {
-    font-size: 1rem;
+    font-size: 1.3rem;
   }
 }
 </style>
