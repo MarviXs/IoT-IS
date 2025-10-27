@@ -2,6 +2,7 @@
   <PageLayout :breadcrumbs="[{ label: t('collection.label', 2) }]">
     <template #actions>
       <q-btn
+        v-if="!isMobile"
         class="shadow"
         color="primary"
         unelevated
@@ -148,6 +149,9 @@
     :device-id="removeDeviceId"
     @on-deleted="handleCollectionDeleted"
   />
+  <q-page-sticky v-if="isMobile" position="bottom-right" :offset="[18, 18]">
+    <q-btn fab color="primary" :icon="mdiPlus" @click="openCreateCollectionDialog('')" />
+  </q-page-sticky>
 </template>
 
 <script setup lang="ts">
@@ -177,8 +181,12 @@ import DeleteCollectionDialog from '@/components/collections/DeleteCollectionDia
 import UpdateCollectionDialog from '@/components/collections/UpdateCollectionDialog.vue';
 import AddDeviceToCollectionDialog from '@/components/collections/AddDeviceToCollectionDialog.vue';
 import RemoveDeviceFromCollectionDialog from '@/components/collections/RemoveDeviceFromCollectionDialog.vue';
+import { useQuasar } from 'quasar';
 
 const { t } = useI18n();
+
+const $q = useQuasar();
+const isMobile = computed(() => $q.screen.lt.md);
 
 const pagination = ref<PaginationClient>({
   sortBy: 'name',

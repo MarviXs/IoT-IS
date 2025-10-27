@@ -2,6 +2,7 @@
   <PageLayout :breadcrumbs="[{ label: t('scene.label', 2), to: '/scenes' }]">
     <template #actions>
       <q-btn
+        v-if="!isMobile"
         class="shadow col-grow col-lg-auto"
         color="primary"
         unelevated
@@ -86,6 +87,9 @@
     </template>
   </PageLayout>
   <DeleteSceneDialog v-model="deleteDialogOpen" :scene-id="deleteSceneId" @onDeleted="getScenes(pagination)" />
+  <q-page-sticky v-if="isMobile" position="bottom-right" :offset="[18, 18]">
+    <q-btn fab color="primary" :icon="mdiPlus" to="/scenes/create" />
+  </q-page-sticky>
 </template>
 
 <script setup lang="ts">
@@ -101,9 +105,13 @@ import type { ScenesPaginatedResponse, ScenesQueryParams } from '@/api/services/
 import SceneService from '@/api/services/SceneService';
 import DeleteSceneDialog from '@/components/scenes/DeleteSceneDialog.vue';
 import { formatTimeToDistance } from '@/utils/date-utils';
+import { useQuasar } from 'quasar';
 
 const { t } = useI18n();
 const filter = ref('');
+
+const $q = useQuasar();
+const isMobile = computed(() => $q.screen.lt.md);
 
 const pagination = ref<PaginationClient>({
   sortBy: 'updatedAt',
