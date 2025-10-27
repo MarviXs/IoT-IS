@@ -3,12 +3,14 @@
     <template #actions>
       <SearchBar v-model="filter" class="col-grow col-lg-auto" />
       <AutoRefreshButton
+        v-if="!isMobile"
         v-model="refreshInterval"
         :loading="isLoadingDevices"
         class="col-grow col-lg-auto"
         @on-refresh="getDevices(pagination)"
       />
       <q-btn
+        v-if="!isMobile"
         class="shadow col-grow col-lg-auto"
         color="primary"
         unelevated
@@ -20,7 +22,18 @@
       />
     </template>
     <template #default>
+      <q-pull-to-refresh v-if="isMobile" @refresh="onPullToRefresh">
+        <DevicesTable
+          v-model:pagination="pagination"
+          :devices="devicesPaginated"
+          :loading="isLoadingDevices"
+          :filter="filter"
+          @on-change="getDevices(pagination)"
+          @on-request="onRequest"
+        />
+      </q-pull-to-refresh>
       <DevicesTable
+        v-else
         v-model:pagination="pagination"
         :devices="devicesPaginated"
         :loading="isLoadingDevices"
@@ -31,6 +44,14 @@
     </template>
   </PageLayout>
   <CreateDeviceDialog v-model="isCreateDialogOpen" @on-create="getDevices(pagination)" />
+  <q-page-sticky v-if="isMobile" position="bottom-right" :offset="[18, 18]">
+    <q-btn
+      fab
+      color="primary"
+      :icon="mdiPlus"
+      @click="isCreateDialogOpen = true"
+    />
+  </q-page-sticky>
 </template>
 
 <script setup lang="ts">
@@ -38,7 +59,7 @@ import DevicesTable from '@/components/devices/DevicesTable.vue';
 import { useI18n } from 'vue-i18n';
 import { mdiPlus } from '@quasar/extras/mdi-v7';
 import PageLayout from '@/layouts/PageLayout.vue';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import SearchBar from '@/components/core/SearchBar.vue';
 import { useStorage, watchDebounced } from '@vueuse/core';
 import AutoRefreshButton from '@/components/core/AutoRefreshButton.vue';
@@ -47,9 +68,13 @@ import DeviceService from '@/api/services/DeviceService';
 import { handleError } from '@/utils/error-handler';
 import type { DevicesQueryParams, DevicesResponse } from '@/api/services/DeviceService';
 import CreateDeviceDialog from '@/components/devices/CreateDeviceDialog.vue';
+import { useQuasar } from 'quasar';
 
 const { t } = useI18n();
 const filter = ref('');
+
+const $q = useQuasar();
+const isMobile = computed(() => $q.screen.lt.md);
 
 // Setup for automatic refresh
 const refreshInterval = useStorage('auto_device_refresh', 30);
@@ -96,6 +121,14 @@ async function getDevices(paginationTable: PaginationTable) {
 getDevices(pagination.value);
 
 const isCreateDialogOpen = ref(false);
+
+async function onPullToRefresh(done: () => void) {
+  try {
+    await getDevices(pagination.value);
+  } finally {
+    done();
+  }
+}
 
 watchDebounced(filter, () => getDevices(pagination.value), { debounce: 400 });
 </script>
