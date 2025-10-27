@@ -83,7 +83,10 @@
       "subtitle": "Využitie úložiska komprimovaných dátových bodov",
       "loading": "Načítavam využitie úložiska…",
       "bytes": "Celkom {value} bajtov",
-      "load_error": "Nepodarilo sa načítať využitie úložiska. Skúste to znova."
+      "load_error": "Nepodarilo sa načítať využitie úložiska. Skúste to znova.",
+      "force_reclaim": "Vynútiť uvoľnenie miesta",
+      "vacuum_success": "Úložisko TimescaleDB bolo uvoľnené.",
+      "vacuum_error": "Nepodarilo sa uvoľniť úložisko TimescaleDB. Skúste to znova."
     }
   },
   "account": {

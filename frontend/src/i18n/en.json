@@ -87,7 +87,10 @@
       "subtitle": "Compressed datapoint storage usage",
       "loading": "Loading storage usage…",
       "bytes": "{value} bytes total",
-      "load_error": "Failed to load storage usage. Please try again."
+      "load_error": "Failed to load storage usage. Please try again.",
+      "force_reclaim": "Force reclaim space",
+      "vacuum_success": "TimescaleDB storage reclaimed.",
+      "vacuum_error": "Failed to reclaim TimescaleDB storage. Please try again."
     }
   },
   "account": {

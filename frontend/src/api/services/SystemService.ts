@@ -23,6 +23,14 @@ class SystemService {
 
     return (await response.json()) as TimescaleStorageResponse;
   }
+
+  async forceReclaimTimescaleSpace(): Promise<void> {
+    const response = await customFetch(buildUrl('system/storage/vacuum'), { method: 'POST' });
+
+    if (!response.ok) {
+      throw new Error('Failed to run VACUUM on TimescaleDB datapoints table');
+    }
+  }
 }
 
 export default new SystemService();

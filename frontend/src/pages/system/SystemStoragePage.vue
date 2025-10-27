@@ -7,15 +7,25 @@
             <div class="text-h6">{{ t('system.storage.title') }}</div>
             <div class="text-subtitle2 text-secondary">{{ t('system.storage.subtitle') }}</div>
           </div>
-          <q-btn
-            flat
-            round
-            :icon="mdiRefresh"
-            :loading="isLoading"
-            :disable="isLoading"
-            @click="loadStats"
-            :aria-label="t('global.refresh')"
-          />
+          <div class="row items-center q-gutter-sm">
+            <q-btn
+              flat
+              :label="t('system.storage.force_reclaim')"
+              color="primary"
+              :loading="isVacuuming"
+              :disable="isVacuuming || isLoading"
+              @click="forceReclaimSpace"
+            />
+            <q-btn
+              flat
+              round
+              :icon="mdiRefresh"
+              :loading="isLoading"
+              :disable="isLoading || isVacuuming"
+              @click="loadStats"
+              :aria-label="t('global.refresh')"
+            />
+          </div>
         </q-card-section>
         <q-separator inset />
         <q-card-section>
@@ -43,12 +53,15 @@ import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { mdiDatabase, mdiRefresh } from '@quasar/extras/mdi-v7';
 import SystemService from '@/api/services/SystemService';
+import { useQuasar } from 'quasar';
 
 const { t } = useI18n();
+const $q = useQuasar();
 
 const totalSizeBytes = ref<number | null>(null);
 const isLoading = ref(false);
 const errorMessage = ref<string | null>(null);
+const isVacuuming = ref(false);
 
 const formattedBytes = computed(() => {
   if (totalSizeBytes.value == null) {
@@ -92,6 +105,21 @@ async function loadStats() {
     errorMessage.value = t('system.storage.load_error');
   } finally {
     isLoading.value = false;
+  }
+}
+
+async function forceReclaimSpace() {
+  isVacuuming.value = true;
+
+  try {
+    await SystemService.forceReclaimTimescaleSpace();
+    $q.notify({ type: 'positive', message: t('system.storage.vacuum_success') });
+    await loadStats();
+  } catch (error) {
+    console.error('Failed to run VACUUM on TimescaleDB datapoints table', error);
+    $q.notify({ type: 'negative', message: t('system.storage.vacuum_error') });
+  } finally {
+    isVacuuming.value = false;
   }
 }
 
