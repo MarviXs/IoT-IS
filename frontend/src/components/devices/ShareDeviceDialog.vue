@@ -35,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { handleError } from '@/utils/error-handler';
 import { toast } from 'vue3-toastify';
 import { useI18n } from 'vue-i18n';
@@ -94,7 +94,27 @@ async function getSharedUsers() {
   }
   sharedUsers.value = data;
 }
-getSharedUsers();
+
+watch(isDialogOpen, (open) => {
+  if (open) {
+    sharedUsers.value = [];
+    getSharedUsers();
+    return;
+  }
+  sharedUsers.value = [];
+});
+
+watch(
+  () => props.deviceId,
+  () => {
+    if (isDialogOpen.value) {
+      sharedUsers.value = [];
+      getSharedUsers();
+    } else {
+      sharedUsers.value = [];
+    }
+  },
+);
 </script>
 
 <style lang="scss" scoped>
