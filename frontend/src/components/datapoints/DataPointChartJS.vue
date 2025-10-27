@@ -1,82 +1,97 @@
 <template>
   <div id="chart">
-    <div class="row items-center justify-start q-mb-md q-gutter-x-md q-gutter-y-sm">
+    <div class="row items-center justify-start q-mb-md q-col-gutter-x-sm q-col-gutter-y-sm">
       <p class="text-weight-medium text-h6 chart-title">{{ t('chart.label') }}</p>
       <q-space></q-space>
-      <chart-time-range-select
-        class="col-grow col-lg-auto"
-        ref="timeRangeSelectRef"
-        :initial-time-range="chartInitialTimeRange"
-        :initial-custom-time-range="chartInitialCustomTimeRange"
-        @update:model-value="updateTimeRange"
-        @time-range-changed="onTimeRangeChanged"
-      ></chart-time-range-select>
-      <q-btn
-        padding="0.5rem 1rem"
-        outline
-        no-caps
-        color="grey-7"
-        text-color="grey-5"
-        class="options-btn col-grow col-lg-auto"
-        @click="resetZoom"
-      >
-        <template #default>
-          <div class="text-grey-10 text-weight-regular">Reset Zoom</div>
-        </template>
-      </q-btn>
-      <q-btn
-        padding="0.5rem 1rem"
-        outline
-        no-caps
-        color="grey-7"
-        text-color="grey-5"
-        class="options-btn col-grow col-lg-auto"
-        :icon="mdiRefresh"
-        @click="refresh"
-      >
-        <template #default>
-          <div class="text-grey-10 text-weight-regular q-ml-sm">
-            {{ t('global.refresh') }}
-          </div>
-        </template>
-      </q-btn>
-      <q-btn
-        padding="0.5rem 1rem"
-        outline
-        no-caps
-        color="grey-7"
-        text-color="grey-5"
-        class="options-btn"
-        @click="openExportDialog"
-      >
-        <div class="text-grey-9">{{ t('chart.export_csv') }}</div>
-      </q-btn>
-      <q-btn
-        padding="0.5rem 1rem"
-        outline
-        no-caps
-        color="grey-7"
-        text-color="grey-5"
-        class="options-btn"
-        @click="openDeleteDialog"
-      >
-        <div class="text-grey-9">{{ t('chart.delete_data_points') }}</div>
-      </q-btn>
-      <q-btn
-        padding="0.5rem 1rem"
-        outline
-        no-caps
-        color="grey-7"
-        text-color="grey-5"
-        class="options-btn col-grow col-lg-auto"
-        @click="isGraphOptionsDialogOpen = true"
-      >
-        <template #default>
-          <div class="text-grey-10 text-weight-regular">
-            {{ t('global.options') }}
-          </div>
-        </template>
-      </q-btn>
+
+      <div class="col-12 col-md-auto">
+        <q-btn
+          padding="0.5rem 1rem"
+          outline
+          no-caps
+          color="grey-7"
+          text-color="grey-5"
+          class="options-btn full-width"
+          @click="resetZoom"
+        >
+          <template #default>
+            <div class="text-grey-10 text-weight-regular">Reset Zoom</div>
+          </template>
+        </q-btn>
+      </div>
+
+      <div class="col-12 col-md-auto">
+        <q-btn
+          padding="0.5rem 1rem"
+          outline
+          no-caps
+          color="grey-7"
+          text-color="grey-5"
+          class="options-btn full-width"
+          @click="openExportDialog"
+        >
+          <div class="text-grey-9">{{ t('chart.export_csv') }}</div>
+        </q-btn>
+      </div>
+
+      <div class="col-12 col-md-auto">
+        <q-btn
+          padding="0.5rem 1rem"
+          outline
+          no-caps
+          color="grey-7"
+          text-color="grey-5"
+          class="options-btn full-width"
+          @click="openDeleteDialog"
+        >
+          <div class="text-grey-9">{{ t('chart.delete_data_points') }}</div>
+        </q-btn>
+      </div>
+
+      <div class="col-12 col-md-auto">
+        <q-btn
+          padding="0.5rem 1rem"
+          outline
+          no-caps
+          color="grey-7"
+          text-color="grey-5"
+          class="options-btn full-width"
+          @click="isGraphOptionsDialogOpen = true"
+        >
+          <template #default>
+            <div class="text-grey-10 text-weight-regular">
+              {{ t('global.options') }}
+            </div>
+          </template>
+        </q-btn>
+      </div>
+      <div class="col-12 col-md-auto">
+        <q-btn
+          padding="0.5rem 1rem"
+          outline
+          no-caps
+          color="grey-7"
+          text-color="grey-5"
+          class="options-btn full-width"
+          :icon="mdiRefresh"
+          @click="refresh"
+        >
+          <template #default>
+            <div class="text-grey-10 text-weight-regular q-ml-sm">
+              {{ t('global.refresh') }}
+            </div>
+          </template>
+        </q-btn>
+      </div>
+      <div class="col-12 col-lg-auto">
+        <chart-time-range-select
+          ref="timeRangeSelectRef"
+          :initial-time-range="chartInitialTimeRange"
+          :initial-custom-time-range="chartInitialCustomTimeRange"
+          @update:model-value="updateTimeRange"
+          @time-range-changed="onTimeRangeChanged"
+        ></chart-time-range-select>
+      </div>
     </div>
     <div class="chart-wrapper">
       <canvas id="chart" ref="chartRef" class="chart"></canvas>
