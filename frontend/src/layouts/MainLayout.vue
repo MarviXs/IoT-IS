@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="lHh LpR lfr">
+  <q-layout view="lHh LpR lFr">
     <q-header class="bg-white text-secondary shadow">
       <q-toolbar>
         <q-btn flat dense round :icon="mdiMenu" aria-label="Menu" @click="toggleLeftDrawer" />
@@ -83,6 +83,20 @@
     <q-page-container>
       <router-view />
     </q-page-container>
+
+    <q-footer class="bg-white text-secondary lt-md shadow-top">
+      <q-tabs class="text-secondary" align="justify" dense no-caps active-color="primary" indicator-color="primary">
+        <q-route-tab
+          :icon="mdiBellRingOutline"
+          :label="t('notification.label', 2)"
+          to="/notifications"
+          exact
+          class="full-width"
+        />
+        <q-route-tab :icon="mdiMemory" :label="t('device.label', 2)" to="/devices" exact class="full-width" />
+        <q-route-tab :icon="mdiCubeOutline" :label="t('scene.label', 2)" to="/scenes" exact class="full-width" />
+      </q-tabs>
+    </q-footer>
   </q-layout>
 </template>
 
