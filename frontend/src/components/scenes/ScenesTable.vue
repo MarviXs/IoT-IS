@@ -249,13 +249,14 @@ const columns = computed<QTableProps['columns']>(() => [
 
 <style lang="scss" scoped>
 .scenes-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 12px;
 }
 
 .scene-card {
   cursor: pointer;
+  width: 100%;
 
   &__header {
     display: flex;

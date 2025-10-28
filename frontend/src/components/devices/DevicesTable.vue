@@ -331,13 +331,14 @@ const columns = computed<QTableProps['columns']>(() => [
 
 <style lang="scss" scoped>
 .devices-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 12px;
 }
 
 .device-card {
   cursor: pointer;
+  width: 100%;
 
   &__section {
     display: flex;
