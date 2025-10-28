@@ -1,15 +1,17 @@
 using System.Net.Http.Json;
 using System.Text.Json;
+using Fei.Is.Api.Data.Enums;
 using Microsoft.Extensions.Logging;
 
 namespace Fei.Is.Api.Services.Notifications;
 
-public class DiscordNotificationService(HttpClient httpClient, ILogger<DiscordNotificationService> logger)
-    : IDiscordNotificationService
+public class DiscordNotificationService(HttpClient httpClient, ILogger<DiscordNotificationService> logger) : IDiscordNotificationService
 {
     private static readonly JsonSerializerOptions SerializerOptions = new(JsonSerializerDefaults.Web);
 
-    public async Task SendAsync(string webhookUrl, string message, CancellationToken cancellationToken = default)
+    private sealed record DiscordWebhookPayload(string Content, NotificationSeverity Severity);
+
+    public async Task SendAsync(string webhookUrl, string message, NotificationSeverity severity, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(webhookUrl))
         {
@@ -25,19 +27,12 @@ public class DiscordNotificationService(HttpClient httpClient, ILogger<DiscordNo
 
         try
         {
-            var response = await httpClient.PostAsJsonAsync(
-                webhookUrl,
-                new { content = message },
-                SerializerOptions,
-                cancellationToken
-            );
+            var payload = new DiscordWebhookPayload(message, severity);
+            var response = await httpClient.PostAsJsonAsync(webhookUrl, payload, SerializerOptions, cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {
-                logger.LogWarning(
-                    "Discord webhook responded with a non-success status code: {StatusCode}",
-                    response.StatusCode
-                );
+                logger.LogWarning("Discord webhook responded with a non-success status code: {StatusCode}", response.StatusCode);
             }
         }
         catch (Exception exception)

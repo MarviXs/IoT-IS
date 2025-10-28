@@ -56,6 +56,16 @@
       />
     </div>
     <div v-else-if="action.type == 'DISCORD_NOTIFICATION'" class="row">
+      <q-select
+        v-model="action.notificationSeverity"
+        label="Severity"
+        outlined
+        :options="notificationSeverityOptions"
+        emit-value
+        map-options
+        style="min-width: 150px"
+        class="q-mr-sm"
+      />
       <q-input
         v-model="action.notificationMessage"
         label="Message"
@@ -158,17 +168,22 @@ watch(
       if (!action.value.notificationSeverity) {
         action.value.notificationSeverity = 'Info';
       }
+      if (!action.value.notificationMessage) {
+        action.value.notificationMessage = '';
+      }
       action.value.discordWebhookUrl = null;
       action.value.deviceId = null;
       action.value.recipeId = null;
       action.value.includeSensorValues = false;
     } else if (type === 'DISCORD_NOTIFICATION') {
-      action.value.notificationSeverity = null;
-      action.value.deviceId = null;
-      action.value.recipeId = null;
+      if (!action.value.notificationSeverity) {
+        action.value.notificationSeverity = 'Info';
+      }
       if (!action.value.notificationMessage) {
         action.value.notificationMessage = '';
       }
+      action.value.deviceId = null;
+      action.value.recipeId = null;
       if (!action.value.discordWebhookUrl) {
         action.value.discordWebhookUrl = '';
       }

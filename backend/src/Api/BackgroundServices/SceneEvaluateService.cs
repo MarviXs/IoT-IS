@@ -263,7 +263,7 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
                 var message = messageBuilder.ToString().TrimEnd();
                 if (!string.IsNullOrWhiteSpace(action.DiscordWebhookUrl))
                 {
-                    await discordNotificationService.SendAsync(action.DiscordWebhookUrl!, message, cancellationToken);
+                    await discordNotificationService.SendAsync(action.DiscordWebhookUrl!, message, action.NotificationSeverity, cancellationToken);
                 }
                 else
                 {
