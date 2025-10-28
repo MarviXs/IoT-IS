@@ -15,17 +15,15 @@ export type DeviceFirmwareDetail = DeviceFirmwareDetailResponse;
 
 export type DeviceFirmwareFormPayload = {
   versionNumber: string;
-  versionDate: string;
   isActive: boolean;
   firmwareFile: File | null;
 };
 
-function mapToFormData(payload: Pick<CreateDeviceFirmwareRequest, 'versionNumber' | 'versionDate' | 'isActive'> & {
+function mapToFormData(payload: Pick<CreateDeviceFirmwareRequest, 'versionNumber' | 'isActive'> & {
   firmwareFile?: File | null;
 }) {
   const formData = new FormData();
   formData.append('versionNumber', payload.versionNumber);
-  formData.append('versionDate', payload.versionDate);
   formData.append('isActive', payload.isActive ? 'true' : 'false');
 
   if (payload.firmwareFile) {
@@ -49,12 +47,12 @@ class DeviceFirmwareService {
   }
 
   async createDeviceFirmware(templateId: string, payload: DeviceFirmwareFormPayload) {
-    const { versionNumber, versionDate, isActive, firmwareFile } = payload;
+    const { versionNumber, isActive, firmwareFile } = payload;
     if (!firmwareFile) {
       throw new Error('Firmware file is required');
     }
 
-    const body = mapToFormData({ versionNumber, versionDate, isActive, firmwareFile });
+    const body = mapToFormData({ versionNumber, isActive, firmwareFile });
 
     return await client.POST('/device-templates/{templateId}/firmwares', {
       params: { path: { templateId } },
@@ -63,8 +61,8 @@ class DeviceFirmwareService {
   }
 
   async updateDeviceFirmware(templateId: string, firmwareId: string, payload: DeviceFirmwareFormPayload) {
-    const { versionNumber, versionDate, isActive, firmwareFile } = payload;
-    const body = mapToFormData({ versionNumber, versionDate, isActive, firmwareFile: firmwareFile ?? undefined });
+    const { versionNumber, isActive, firmwareFile } = payload;
+    const body = mapToFormData({ versionNumber, isActive, firmwareFile: firmwareFile ?? undefined });
 
     return await client.PUT('/device-templates/{templateId}/firmwares/{firmwareId}', {
       params: { path: { templateId, firmwareId } },

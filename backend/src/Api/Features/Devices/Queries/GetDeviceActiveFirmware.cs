@@ -89,7 +89,6 @@ public static class GetDeviceActiveFirmware
             var response = new Response(
                 activeFirmware.Id,
                 activeFirmware.VersionNumber,
-                activeFirmware.VersionDate,
                 activeFirmware.OriginalFileName,
                 downloadUrl
             );
@@ -106,5 +105,5 @@ public static class GetDeviceActiveFirmware
         }
     }
 
-    public record Response(Guid FirmwareId, string VersionNumber, DateTime VersionDate, string OriginalFileName, string DownloadUrl);
+    public record Response(Guid FirmwareId, string VersionNumber, string OriginalFileName, string DownloadUrl);
 }

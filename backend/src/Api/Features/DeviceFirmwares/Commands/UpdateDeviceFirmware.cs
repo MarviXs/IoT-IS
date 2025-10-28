@@ -18,7 +18,7 @@ namespace Fei.Is.Api.Features.DeviceFirmwares.Commands;
 
 public static class UpdateDeviceFirmware
 {
-    public record Request(string VersionNumber, DateTime VersionDate, bool IsActive, IFormFile? FirmwareFile);
+    public record Request(string VersionNumber, bool IsActive, IFormFile? FirmwareFile);
 
     public sealed class Endpoint : ICarterModule
     {
@@ -121,7 +121,6 @@ public static class UpdateDeviceFirmware
             }
 
             firmware.VersionNumber = message.Request.VersionNumber;
-            firmware.VersionDate = message.Request.VersionDate;
             firmware.IsActive = message.Request.IsActive;
 
             await context.SaveChangesAsync(cancellationToken);

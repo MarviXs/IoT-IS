@@ -31,9 +31,9 @@
         {{ message }}
       </div>
     </template>
-    <template #body-cell-versionDate="props">
+    <template #body-cell-createdAt="props">
       <q-td :props="props">
-        {{ formatDate(props.row.versionDate) }}
+        {{ formatDate(props.row.createdAt) }}
       </q-td>
     </template>
     <template #body-cell-isActive="props">
@@ -126,11 +126,11 @@ const columns = computed<QTableProps['columns']>(() => [
     label: t('device_template.firmwares.version_number'),
   },
   {
-    name: 'versionDate',
-    field: 'versionDate',
+    name: 'createdAt',
+    field: 'createdAt',
     align: 'left',
     sortable: true,
-    label: t('device_template.firmwares.version_date'),
+    label: t('device_template.firmwares.created_at'),
   },
   {
     name: 'isActive',

@@ -74,14 +74,12 @@ public static class GetDeviceFirmwares
 
             var firmwares = deviceTemplate
                 .Firmwares
-                .OrderByDescending(f => f.VersionDate)
-                .ThenByDescending(f => f.CreatedAt)
+                .OrderByDescending(f => f.CreatedAt)
                 .Select(
                     firmware =>
                         new Response(
                             firmware.Id,
                             firmware.VersionNumber,
-                            firmware.VersionDate,
                             firmware.IsActive,
                             firmware.OriginalFileName,
                             BuildDownloadUrl(deviceTemplate.Id, firmware.Id),
@@ -101,7 +99,6 @@ public static class GetDeviceFirmwares
     public record Response(
         Guid Id,
         string VersionNumber,
-        DateTime VersionDate,
         bool IsActive,
         string OriginalFileName,
         string DownloadUrl,

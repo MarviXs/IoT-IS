@@ -7,13 +7,6 @@
         :rules="[requiredRule]"
         autofocus
       />
-      <q-input
-        v-model="versionDateInput"
-        type="datetime-local"
-        :label="t('device_template.firmwares.version_date')"
-        :rules="[requiredRule]"
-        @update:model-value="handleVersionDateChange"
-      />
       <div class="row items-center justify-between">
         <div class="text-subtitle2">{{ t('device_template.firmwares.is_active') }}</div>
         <q-toggle v-model="firmware.isActive" color="primary" />
@@ -39,13 +32,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { date as quasarDate } from 'quasar';
 
 export type DeviceFirmwareFormModel = {
   versionNumber: string;
-  versionDate: string;
   isActive: boolean;
   firmwareFile: File | null;
 };
@@ -72,32 +63,6 @@ const firmware = defineModel<DeviceFirmwareFormModel>({ required: true });
 const { t } = useI18n();
 
 const formRef = ref();
-
-const versionDateInput = ref('');
-
-watch(
-  () => firmware.value.versionDate,
-  (value) => {
-    if (!value) {
-      versionDateInput.value = '';
-      return;
-    }
-    const formatted = quasarDate.formatDate(value, 'YYYY-MM-DDTHH:mm');
-    if (formatted !== versionDateInput.value) {
-      versionDateInput.value = formatted;
-    }
-  },
-  { immediate: true },
-);
-
-function handleVersionDateChange(value: string | null) {
-  if (!value) {
-    firmware.value.versionDate = '';
-    return;
-  }
-  const isoString = new Date(value).toISOString();
-  firmware.value.versionDate = isoString;
-}
 
 const requiredRule = (val: string | null | undefined) =>
   (!!val && val.toString().length > 0) || t('global.rules.required');

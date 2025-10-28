@@ -18,7 +18,7 @@ namespace Fei.Is.Api.Features.DeviceFirmwares.Commands;
 
 public static class CreateDeviceFirmware
 {
-    public record Request(string VersionNumber, DateTime VersionDate, bool IsActive, IFormFile FirmwareFile);
+    public record Request(string VersionNumber, bool IsActive, IFormFile FirmwareFile);
 
     public sealed class Endpoint : ICarterModule
     {
@@ -114,7 +114,6 @@ public static class CreateDeviceFirmware
             {
                 DeviceTemplateId = message.TemplateId,
                 VersionNumber = message.Request.VersionNumber,
-                VersionDate = message.Request.VersionDate,
                 IsActive = message.Request.IsActive,
                 OriginalFileName = message.Request.FirmwareFile.FileName,
                 StoredFileName = storedFileName

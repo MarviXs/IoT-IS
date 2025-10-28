@@ -176,7 +176,7 @@
       "tab": "Firmwares",
       "title": "Firmwares",
       "version_number": "Version number",
-      "version_date": "Version date",
+      "created_at": "Created at",
       "is_active": "Active",
       "firmware_file": "Firmware file",
       "current_file": "Current file: {fileName}",

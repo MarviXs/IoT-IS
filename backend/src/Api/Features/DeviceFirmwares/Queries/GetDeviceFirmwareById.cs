@@ -78,7 +78,6 @@ public static class GetDeviceFirmwareById
             var response = new Response(
                 firmware.Id,
                 firmware.VersionNumber,
-                firmware.VersionDate,
                 firmware.IsActive,
                 firmware.OriginalFileName,
                 BuildDownloadUrl(firmware.DeviceTemplateId, firmware.Id),
@@ -96,7 +95,6 @@ public static class GetDeviceFirmwareById
     public record Response(
         Guid Id,
         string VersionNumber,
-        DateTime VersionDate,
         bool IsActive,
         string OriginalFileName,
         string DownloadUrl,

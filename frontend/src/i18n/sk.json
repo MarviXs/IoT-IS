@@ -170,7 +170,7 @@
       "tab": "Firmvéry",
       "title": "Firmvéry",
       "version_number": "Verzia",
-      "version_date": "Dátum verzie",
+      "created_at": "Dátum vytvorenia",
       "is_active": "Aktívna",
       "firmware_file": "Súbor firmvéru",
       "current_file": "Aktuálny súbor: {fileName}",

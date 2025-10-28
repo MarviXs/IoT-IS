@@ -34,7 +34,6 @@ const emit = defineEmits(['created']);
 
 const createFormDefaults: DeviceFirmwareFormModel = {
   versionNumber: '',
-  versionDate: '',
   isActive: false,
   firmwareFile: null,
 };

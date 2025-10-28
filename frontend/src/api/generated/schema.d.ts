@@ -2476,16 +2476,12 @@ export interface components {
         };
         "Fei.Is.Api.Features.DeviceFirmwares.Commands.CreateDeviceFirmware.Request": {
             versionNumber: string;
-            /** Format: date-time */
-            versionDate: string;
             isActive: boolean;
             /** Format: binary */
             firmwareFile: string;
         };
         "Fei.Is.Api.Features.DeviceFirmwares.Commands.UpdateDeviceFirmware.Request": {
             versionNumber: string;
-            /** Format: date-time */
-            versionDate: string;
             isActive: boolean;
             /** Format: binary */
             firmwareFile?: string | null;
@@ -2494,8 +2490,6 @@ export interface components {
             /** Format: uuid */
             id: string;
             versionNumber: string;
-            /** Format: date-time */
-            versionDate: string;
             isActive: boolean;
             originalFileName: string;
             downloadUrl: string;
@@ -2508,8 +2502,6 @@ export interface components {
             /** Format: uuid */
             id: string;
             versionNumber: string;
-            /** Format: date-time */
-            versionDate: string;
             isActive: boolean;
             originalFileName: string;
             downloadUrl: string;
@@ -2632,8 +2624,6 @@ export interface components {
             /** Format: uuid */
             firmwareId: string;
             versionNumber: string;
-            /** Format: date-time */
-            versionDate: string;
             originalFileName: string;
             downloadUrl: string;
         };

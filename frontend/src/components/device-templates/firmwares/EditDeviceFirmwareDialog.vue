@@ -42,7 +42,6 @@ const emit = defineEmits(['updated']);
 
 const form = ref<DeviceFirmwareFormModel>({
   versionNumber: '',
-  versionDate: '',
   isActive: false,
   firmwareFile: null,
 });
@@ -63,7 +62,6 @@ async function loadFirmware() {
 
   form.value = {
     versionNumber: data.versionNumber,
-    versionDate: data.versionDate,
     isActive: data.isActive,
     firmwareFile: null,
   };
@@ -102,7 +100,6 @@ watch(isDialogOpen, (open) => {
   } else {
     form.value = {
       versionNumber: '',
-      versionDate: '',
       isActive: false,
       firmwareFile: null,
     };
