@@ -9,6 +9,7 @@ using FluentResults;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
 
 namespace Fei.Is.Api.Features.Devices.Commands;
 
@@ -71,6 +72,17 @@ public static class CreateDevice
             if (message.Request.TemplateId.HasValue && templates == null)
             {
                 return Result.Fail(new NotFoundError());
+            }
+
+            var accessTokenExists = await context.Devices.AnyAsync(
+                device => device.AccessToken == message.Request.AccessToken,
+                cancellationToken
+            );
+            if (accessTokenExists)
+            {
+                return Result.Fail(
+                    new ValidationError(nameof(Request.AccessToken), "Access token is already in use")
+                );
             }
 
             var device = new Device
