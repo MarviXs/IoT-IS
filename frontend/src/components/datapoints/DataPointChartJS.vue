@@ -4,7 +4,7 @@
       <p class="text-weight-medium text-h6 chart-title">{{ t('chart.label') }}</p>
       <q-space></q-space>
 
-      <div class="col-12 col-md-auto">
+      <div class="col-12 col-md-auto gt-sm">
         <q-btn
           padding="0.5rem 1rem"
           outline
@@ -20,7 +20,7 @@
         </q-btn>
       </div>
 
-      <div class="col-12 col-md-auto">
+      <div class="col-12 col-md-auto gt-sm">
         <q-btn
           padding="0.5rem 1rem"
           outline
@@ -34,7 +34,7 @@
         </q-btn>
       </div>
 
-      <div class="col-12 col-md-auto">
+      <div class="col-12 col-md-auto gt-sm">
         <q-btn
           padding="0.5rem 1rem"
           outline
@@ -48,7 +48,7 @@
         </q-btn>
       </div>
 
-      <div class="col-12 col-md-auto">
+      <div class="col-12 col-md-auto gt-sm">
         <q-btn
           padding="0.5rem 1rem"
           outline
@@ -65,7 +65,38 @@
           </template>
         </q-btn>
       </div>
-      <div class="col-12 col-md-auto">
+      <div class="col-12 lt-md">
+        <q-btn
+          padding="0.5rem 1rem"
+          outline
+          no-caps
+          color="grey-7"
+          text-color="grey-5"
+          class="options-btn full-width"
+          :icon="mdiDotsHorizontal"
+        >
+          <q-menu anchor="bottom right" self="top right">
+            <q-list style="min-width: 180px">
+              <q-item clickable v-close-popup @click="openExportDialog">
+                <q-item-section>{{ t('chart.export_csv') }}</q-item-section>
+              </q-item>
+              <q-item clickable v-close-popup @click="openDeleteDialog">
+                <q-item-section>{{ t('chart.delete_data_points') }}</q-item-section>
+              </q-item>
+              <q-item clickable v-close-popup @click="isGraphOptionsDialogOpen = true">
+                <q-item-section>{{ t('global.options') }}</q-item-section>
+              </q-item>
+              <q-item clickable v-close-popup @click="resetZoom">
+                <q-item-section>Reset zoom</q-item-section>
+              </q-item>
+              <q-item clickable v-close-popup @click="refresh">
+                <q-item-section>{{ t('global.refresh') }}</q-item-section>
+              </q-item>
+            </q-list>
+          </q-menu>
+        </q-btn>
+      </div>
+      <div class="col-12 col-md-auto gt-sm">
         <q-btn
           padding="0.5rem 1rem"
           outline
@@ -248,7 +279,7 @@ import type { ChartDataset, ChartEvent, LegendItem, ScaleOptions } from 'chart.j
 import { Chart } from 'chart.js/auto';
 import 'chartjs-adapter-date-fns';
 import zoomPlugin from 'chartjs-plugin-zoom';
-import { mdiRefresh } from '@quasar/extras/mdi-v7';
+import { mdiDotsHorizontal, mdiRefresh } from '@quasar/extras/mdi-v7';
 import { useInterval } from '@/composables/useInterval';
 import { mkConfig, generateCsv, download } from 'export-to-csv';
 import { format } from 'date-fns/format';

@@ -62,7 +62,7 @@
         :icon="mdiViewGridOutline"
       />
       <q-btn
-        class="shadow col-grow col-lg-auto"
+        class="shadow col-grow col-lg-auto device-edit-action"
         color="primary"
         unelevated
         no-caps
@@ -255,4 +255,16 @@ onUnmounted(() => {
 });
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+:deep(.actions .device-edit-action) {
+  order: 1;
+}
+
+@media (max-width: 1023.98px) {
+  :deep(.actions .device-edit-action) {
+    order: -1;
+    flex-basis: 100%;
+    width: 100%;
+  }
+}
+</style>
