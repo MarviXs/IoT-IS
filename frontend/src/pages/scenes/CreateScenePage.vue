@@ -8,6 +8,7 @@
     <template #actions>
       <q-btn
         unelevated
+        class="col-12 col-md-auto"
         color="primary"
         :label="t('global.save')"
         @click="createScene"
@@ -17,6 +18,7 @@
       />
     </template>
     <SceneForm v-model="scene" ref="sceneForm" @on-submit="createScene" />
+    dasdsa
   </PageLayout>
 </template>
 

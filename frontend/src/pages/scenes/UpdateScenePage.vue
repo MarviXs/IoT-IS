@@ -7,6 +7,7 @@
   >
     <template #actions>
       <q-btn
+        class="col-12 col-md-auto"
         unelevated
         color="primary"
         :label="t('global.save')"
