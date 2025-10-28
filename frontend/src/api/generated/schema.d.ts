@@ -448,17 +448,17 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/devices/firmwares/active": {
+    "/devices/{deviceAccessToken}/firmwares/active": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get?: never;
-        put?: never;
         /** Get the active firmware for a device using its access token */
-        post: operations["GetDeviceActiveFirmware"];
+        get: operations["GetDeviceActiveFirmware"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -519,7 +519,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/devices/firmwares/current": {
+    "/devices/{accessToken}/firmwares/current": {
         parameters: {
             query?: never;
             header?: never;
@@ -2201,7 +2201,7 @@ export interface components {
         /** @enum {string} */
         "Fei.Is.Api.Data.Enums.Role": "Admin" | "User";
         /** @enum {string} */
-        "Fei.Is.Api.Data.Enums.SceneActionType": "JOB" | "NOTIFICATION";
+        "Fei.Is.Api.Data.Enums.SceneActionType": "JOB" | "NOTIFICATION" | "DISCORD_NOTIFICATION";
         /**
          * Format: int32
          * @enum {integer}
@@ -2614,11 +2614,7 @@ export interface components {
             dataPointRetentionDays?: number | null;
         };
         "Fei.Is.Api.Features.Devices.Commands.UpdateDeviceCurrentFirmware.Request": {
-            accessToken: string;
             versionNumber: string;
-        };
-        "Fei.Is.Api.Features.Devices.Queries.GetDeviceActiveFirmware.Request": {
-            accessToken: string;
         };
         "Fei.Is.Api.Features.Devices.Queries.GetDeviceActiveFirmware.Response": {
             /** Format: uuid */
@@ -3573,6 +3569,7 @@ export interface components {
             recipeId?: string | null;
             notificationSeverity: components["schemas"]["Fei.Is.Api.Data.Enums.NotificationSeverity"];
             notificationMessage?: string | null;
+            discordWebhookUrl?: string | null;
         };
         "Fei.Is.Api.Features.Scenes.Commands.EnableScene.Request": {
             isEnabled: boolean;
@@ -3594,6 +3591,7 @@ export interface components {
             recipeId?: string | null;
             notificationSeverity: components["schemas"]["Fei.Is.Api.Data.Enums.NotificationSeverity"];
             notificationMessage?: string | null;
+            discordWebhookUrl?: string | null;
         };
         "Fei.Is.Api.Features.Scenes.Queries.GetSceneById.Response": {
             name: string;
@@ -3614,6 +3612,7 @@ export interface components {
             recipeId?: string | null;
             notificationSeverity: components["schemas"]["Fei.Is.Api.Data.Enums.NotificationSeverity"];
             notificationMessage?: string | null;
+            discordWebhookUrl?: string | null;
         };
         "Fei.Is.Api.Features.Scenes.Queries.GetScenes.Response": {
             /** Format: uuid */
@@ -4868,14 +4867,12 @@ export interface operations {
         parameters: {
             query?: never;
             header?: never;
-            path?: never;
+            path: {
+                deviceAccessToken: string;
+            };
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Fei.Is.Api.Features.Devices.Queries.GetDeviceActiveFirmware.Request"];
-            };
-        };
+        requestBody?: never;
         responses: {
             /** @description OK */
             200: {
@@ -5096,7 +5093,9 @@ export interface operations {
         parameters: {
             query?: never;
             header?: never;
-            path?: never;
+            path: {
+                accessToken: string;
+            };
             cookie?: never;
         };
         requestBody: {
@@ -5504,7 +5503,6 @@ export interface operations {
         requestBody: {
             content: {
                 "multipart/form-data": components["schemas"]["Fei.Is.Api.Features.DeviceFirmwares.Commands.UpdateDeviceFirmware.Request"];
-                "application/x-www-form-urlencoded": components["schemas"]["Fei.Is.Api.Features.DeviceFirmwares.Commands.UpdateDeviceFirmware.Request"];
             };
         };
         responses: {

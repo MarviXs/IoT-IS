@@ -27,6 +27,7 @@ function addAction() {
     notificationSeverity: 'Info',
     deviceId: null,
     recipeId: null,
+    discordWebhookUrl: '',
   });
 }
 

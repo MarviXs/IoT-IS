@@ -16,6 +16,7 @@ using Fei.Is.Api.Redis;
 using Fei.Is.Api.Services.DeviceFirmwares;
 using Fei.Is.Api.Services.EANCode;
 using Fei.Is.Api.Services.FileSystem;
+using Fei.Is.Api.Services.Notifications;
 using Fei.Is.Api.Services.PLUCode;
 using Fei.Is.Api.SignalR.Hubs;
 using FluentValidation;
@@ -98,6 +99,7 @@ public class Startup(IConfiguration configuration)
         services.AddScoped<EANCodeService>();
         services.AddScoped<IDeviceFirmwareFileService, DeviceFirmwareFileService>();
         services.AddHostedService<SceneEvaluateService>();
+        services.AddHttpClient<IDiscordNotificationService, DiscordNotificationService>();
 
         services.AddScoped<IFileSystemService, LocalFileSystem>();
 

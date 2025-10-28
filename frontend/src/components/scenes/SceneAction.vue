@@ -55,11 +55,27 @@
         class="q-mr-sm"
       />
     </div>
+    <div v-else-if="action.type == 'DISCORD_NOTIFICATION'" class="row">
+      <q-input
+        v-model="action.notificationMessage"
+        label="Message"
+        outlined
+        class="q-mr-sm"
+        :rules="notificationMessageRules"
+      />
+      <q-input
+        v-model="action.discordWebhookUrl"
+        label="Webhook URL"
+        outlined
+        class="q-mr-sm"
+        :rules="discordWebhookRules"
+      />
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import type { PropType} from 'vue';
+import type { PropType } from 'vue';
 import { computed, ref, watch } from 'vue';
 import type { SceneAction } from '@/models/Scene';
 import { mdiCloseCircleOutline } from '@quasar/extras/mdi-v7';
@@ -77,6 +93,7 @@ const action = defineModel<SceneAction>({ required: true });
 
 const actionTypeOptions = ref([
   { label: 'Notification', value: 'NOTIFICATION' },
+  { label: 'Discord notification', value: 'DISCORD_NOTIFICATION' },
   { label: 'Run job', value: 'JOB' },
 ]);
 
@@ -113,6 +130,49 @@ const actionRules = [(val: string) => (val && val.length > 0) || t('global.rules
 const deviceRules = [(val: string) => (val && val.length > 0) || t('global.rules.required')];
 const recipeRules = [(val: string) => (val && val.length > 0) || t('global.rules.required')];
 const notificationMessageRules = [(val: string) => (val && val.length > 0) || t('global.rules.required')];
+const discordWebhookRules = [
+  (val: string | null) => {
+    if (!val || val.length === 0) {
+      return t('global.rules.required');
+    }
+
+    try {
+      new URL(val);
+      return true;
+    } catch {
+      return 'Invalid URL';
+    }
+  },
+];
+
+watch(
+  () => action.value.type,
+  (type) => {
+    if (type === 'NOTIFICATION') {
+      if (!action.value.notificationSeverity) {
+        action.value.notificationSeverity = 'Info';
+      }
+      action.value.discordWebhookUrl = null;
+      action.value.deviceId = null;
+      action.value.recipeId = null;
+    } else if (type === 'DISCORD_NOTIFICATION') {
+      action.value.notificationSeverity = null;
+      action.value.deviceId = null;
+      action.value.recipeId = null;
+      if (!action.value.notificationMessage) {
+        action.value.notificationMessage = '';
+      }
+      if (!action.value.discordWebhookUrl) {
+        action.value.discordWebhookUrl = '';
+      }
+    } else if (type === 'JOB') {
+      action.value.notificationSeverity = null;
+      action.value.notificationMessage = null;
+      action.value.discordWebhookUrl = null;
+    }
+  },
+  { immediate: true },
+);
 </script>
 
 <style scoped lang="scss"></style>

@@ -1,11 +1,12 @@
 import type { RulesLogic } from 'json-logic-js';
 
 interface SceneAction {
-  type: 'JOB' | 'NOTIFICATION';
+  type: 'JOB' | 'NOTIFICATION' | 'DISCORD_NOTIFICATION';
   deviceId?: string | null;
   recipeId?: string | null;
   notificationMessage?: string | null;
-  notificationSeverity: 'Info' | 'Warning' | 'Serious' | 'Critical';
+  notificationSeverity?: 'Info' | 'Warning' | 'Serious' | 'Critical' | null;
+  discordWebhookUrl?: string | null;
 }
 
 interface Scene {

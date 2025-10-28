@@ -21,7 +21,8 @@ public static class UpdateScene
         Guid? DeviceId,
         Guid? RecipeId,
         NotificationSeverity? NotificationSeverity,
-        string? NotificationMessage
+        string? NotificationMessage,
+        string? DiscordWebhookUrl
     );
 
     public record Request(
@@ -97,7 +98,8 @@ public static class UpdateScene
                     DeviceId = x.DeviceId,
                     RecipeId = x.RecipeId,
                     NotificationSeverity = x.NotificationSeverity ?? NotificationSeverity.Info,
-                    NotificationMessage = x.NotificationMessage
+                    NotificationMessage = x.NotificationMessage,
+                    DiscordWebhookUrl = x.DiscordWebhookUrl
                 })
                 .ToList();
 

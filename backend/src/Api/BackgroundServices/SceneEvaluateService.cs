@@ -6,6 +6,7 @@ using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Features.Jobs.Services;
 using Fei.Is.Api.Redis;
+using Fei.Is.Api.Services.Notifications;
 using Json.Logic;
 using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
@@ -128,7 +129,7 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
                             .Include(s => s.SensorTriggers)
                             .ToListAsync(cancellationToken);
 
-                        await EvaluateScenes(dataPoints, scenes, scope);
+                        await EvaluateScenes(dataPoints, scenes, scope, cancellationToken);
 
                         var messageIds = messages.Select(m => m.Id).ToArray();
                         await redis.Db.StreamAcknowledgeAsync(StreamName, GroupName, messageIds);
@@ -144,9 +145,13 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
         }
     }
 
-    private async Task EvaluateScenes(List<DataPoint> dataPoints, List<Scene> scenes, IServiceScope serviceScope)
+    private async Task EvaluateScenes(
+        List<DataPoint> dataPoints,
+        List<Scene> scenes,
+        IServiceScope serviceScope,
+        CancellationToken cancellationToken
+    )
     {
-        var dbContext = serviceScope.ServiceProvider.GetRequiredService<AppDbContext>();
         var redis = serviceScope.ServiceProvider.GetRequiredService<RedisService>();
         var timescale = serviceScope.ServiceProvider.GetRequiredService<TimeScaleDbContext>();
 
@@ -191,7 +196,7 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
 
                     if (result is JsonValue booleanResult && booleanResult.TryGetValue<bool>(out var isTriggered) && isTriggered)
                     {
-                        await HandleTriggeredScene(scene, serviceScope);
+                        await HandleTriggeredScene(scene, serviceScope, cancellationToken);
                     }
                 }
             }
@@ -202,10 +207,15 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
         }
     }
 
-    private async Task HandleTriggeredScene(Scene scene, IServiceScope serviceScope)
+    private async Task HandleTriggeredScene(
+        Scene scene,
+        IServiceScope serviceScope,
+        CancellationToken cancellationToken
+    )
     {
         var dbContext = serviceScope.ServiceProvider.GetRequiredService<AppDbContext>();
         var jobService = serviceScope.ServiceProvider.GetRequiredService<JobService>();
+        var discordNotificationService = serviceScope.ServiceProvider.GetRequiredService<IDiscordNotificationService>();
 
         scene.LastTriggeredAt = DateTimeOffset.UtcNow;
 
@@ -215,21 +225,51 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
         {
             if (action.Type == SceneActionType.NOTIFICATION)
             {
+                var message = string.IsNullOrWhiteSpace(action.NotificationMessage)
+                    ? "Scene triggered"
+                    : action.NotificationMessage!;
                 var notification = new SceneNotification
                 {
                     SceneId = scene.Id,
-                    Message = action.NotificationMessage ?? "Scene triggered",
+                    Message = message,
                     Severity = action.NotificationSeverity
                 };
                 dbContext.SceneNotifications.Add(notification);
             }
+            else if (action.Type == SceneActionType.DISCORD_NOTIFICATION)
+            {
+                var message = string.IsNullOrWhiteSpace(action.NotificationMessage)
+                    ? "Scene triggered"
+                    : action.NotificationMessage!;
+                if (!string.IsNullOrWhiteSpace(action.DiscordWebhookUrl))
+                {
+                    await discordNotificationService.SendAsync(
+                        action.DiscordWebhookUrl!,
+                        message,
+                        cancellationToken
+                    );
+                }
+                else
+                {
+                    logger.LogWarning(
+                        "Scene {SceneId} Discord notification is missing a webhook URL.",
+                        scene.Id
+                    );
+                }
+            }
             else if (action.Type == SceneActionType.JOB && action.RecipeId.HasValue && action.DeviceId.HasValue)
             {
-                await jobService.CreateJobFromRecipe(action.DeviceId.Value, action.RecipeId.Value, 1, false, CancellationToken.None);
+                await jobService.CreateJobFromRecipe(
+                    action.DeviceId.Value,
+                    action.RecipeId.Value,
+                    1,
+                    false,
+                    cancellationToken
+                );
             }
         }
 
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(cancellationToken);
     }
 
     private static async Task<DataPoint?> GetDataPointFromCache(SceneSensorTrigger trigger, RedisService redis)

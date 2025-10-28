@@ -7,4 +7,5 @@ public enum SceneActionType
 {
     JOB,
     NOTIFICATION,
+    DISCORD_NOTIFICATION,
 }

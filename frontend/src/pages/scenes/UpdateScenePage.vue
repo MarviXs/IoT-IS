@@ -69,6 +69,7 @@ async function getScene() {
         recipeId: action.recipeId,
         notificationSeverity: action.notificationSeverity,
         notificationMessage: action.notificationMessage,
+        discordWebhookUrl: action.discordWebhookUrl,
       })) ?? [],
   };
 
