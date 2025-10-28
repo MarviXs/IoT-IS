@@ -6,7 +6,7 @@
       <DeviceNotificationRefreshButton
         v-model="refreshInterval"
         :loading="loadingNotifications"
-        class="col-grow col-lg-auto"
+        class="col-shrink"
         @on-refresh="getNotifications(pagination)"
       />
     </template>
@@ -69,10 +69,7 @@ import { mdiBellOutline } from '@quasar/extras/mdi-v7';
 import type { PaginationClient, PaginationTable } from '@/models/Pagination';
 import { handleError } from '@/utils/error-handler';
 import type { QTableProps } from 'quasar';
-import type {
-  NotificationQueryParams,
-  NotificationsPaginated,
-} from '@/api/services/NotificationService';
+import type { NotificationQueryParams, NotificationsPaginated } from '@/api/services/NotificationService';
 import NotificationService from '@/api/services/NotificationService';
 import { formatTimeToDistance } from '@/utils/date-utils';
 import { useStorage } from '@vueuse/core';
