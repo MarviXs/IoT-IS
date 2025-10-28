@@ -43,6 +43,7 @@ public class AppDbContext
         modelBuilder.ApplyConfiguration(new RecipeStepConfiguration());
         modelBuilder.ApplyConfiguration(new DeviceTemplateConfiguration());
         modelBuilder.ApplyConfiguration(new DeviceConfiguration());
+        modelBuilder.ApplyConfiguration(new DeviceFirmwareConfiguration());
         modelBuilder.ApplyConfiguration(new CollectionItemConfiguration());
         modelBuilder.ApplyConfiguration(new SceneConfiguration());
         modelBuilder.ApplyConfiguration(new SceneSensorTriggerConfiguration());
@@ -79,6 +80,7 @@ public class AppDbContext
     //IoT tables
     public DbSet<DeviceTemplate> DeviceTemplates { get; set; }
     public DbSet<Device> Devices { get; set; }
+    public DbSet<DeviceFirmware> DeviceFirmwares { get; set; }
     public DbSet<Sensor> Sensors { get; set; }
     public DbSet<Job> Jobs { get; set; }
     public DbSet<JobSchedule> JobSchedules { get; set; }

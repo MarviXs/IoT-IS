@@ -83,6 +83,7 @@ public static class GetDeviceById
                 device.Name,
                 device.Mac,
                 device.AccessToken,
+                device.CurrentFirmwareVersion,
                 device.DeviceTemplate != null
                     ? new TemplateResponse(
                         device.DeviceTemplate.Id,
@@ -137,6 +138,7 @@ public static class GetDeviceById
         string Name,
         string? Mac,
         string? AccessToken,
+        string? CurrentFirmwareVersion,
         TemplateResponse? DeviceTemplate,
         DateTime CreatedAt,
         DateTime UpdatedAt,

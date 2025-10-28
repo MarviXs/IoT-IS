@@ -6,13 +6,14 @@ using Fei.Is.Api.Common.OpenAPI;
 using Fei.Is.Api.Extensions;
 using Fei.Is.Api.Features.Auth;
 using Fei.Is.Api.Features.DataPoints.Jobs;
+using Fei.Is.Api.Features.Jobs.Services;
 using Fei.Is.Api.Features.JobSchedules.Jobs;
 using Fei.Is.Api.Features.JobSchedules.Services;
-using Fei.Is.Api.Features.Jobs.Services;
 using Fei.Is.Api.MqttClient;
 using Fei.Is.Api.MqttClient.Publish;
 using Fei.Is.Api.MqttClient.Subscribe;
 using Fei.Is.Api.Redis;
+using Fei.Is.Api.Services.DeviceFirmwares;
 using Fei.Is.Api.Services.EANCode;
 using Fei.Is.Api.Services.FileSystem;
 using Fei.Is.Api.Services.PLUCode;
@@ -95,6 +96,7 @@ public class Startup(IConfiguration configuration)
 
         services.AddScoped<PLUCodeService>();
         services.AddScoped<EANCodeService>();
+        services.AddScoped<IDeviceFirmwareFileService, DeviceFirmwareFileService>();
         services.AddHostedService<SceneEvaluateService>();
 
         services.AddScoped<IFileSystemService, LocalFileSystem>();

@@ -15,6 +15,7 @@ public class DeviceTemplate : BaseModel
     public ICollection<Recipe> Recipes { get; set; } = [];
     public ICollection<DeviceControl> Controls { get; set; } = [];
     public ICollection<Device> Devices { get; set; } = [];
+    public ICollection<DeviceFirmware> Firmwares { get; set; } = [];
     public int? GridRowSpan { get; set; }
     public int? GridColumnSpan { get; set; }
 }
