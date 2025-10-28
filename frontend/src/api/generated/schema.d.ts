@@ -431,6 +431,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/devices/firmwares/{firmwareId}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Download a firmware file using device access token */
+        get: operations["DownloadDeviceFirmware"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/devices/firmwares/active": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Get the active firmware for a device using its access token */
+        post: operations["GetDeviceActiveFirmware"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/devices/{id}": {
         parameters: {
             query?: never;
@@ -479,6 +513,23 @@ export interface paths {
         get: operations["GetDevicesWithSensors"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/devices/firmwares/current": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Update the current firmware version reported by a device */
+        post: operations["UpdateDeviceCurrentFirmware"];
         delete?: never;
         options?: never;
         head?: never;
@@ -588,6 +639,60 @@ export interface paths {
          */
         put: operations["UpdateDeviceTemplateControls"];
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/device-templates/{templateId}/firmwares/{firmwareId}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Download a firmware file */
+        get: operations["DownloadDeviceFirmware"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/device-templates/{templateId}/firmwares/{firmwareId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a firmware version by id */
+        get: operations["GetDeviceFirmwareById"];
+        /** Update a firmware version for a device template */
+        put: operations["UpdateDeviceFirmware"];
+        post?: never;
+        /** Delete a firmware version for a device template */
+        delete: operations["DeleteDeviceFirmware"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/device-templates/{templateId}/firmwares": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get firmware versions for a device template */
+        get: operations["GetDeviceFirmwares"];
+        put?: never;
+        /** Create a firmware version for a device template */
+        post: operations["CreateDeviceFirmware"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1730,6 +1835,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/system/storage/vacuum": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Run VACUUM on the datapoints hypertable
+         * @description Triggers VACUUM (ANALYZE) on the TimescaleDB datapoints hypertable to reclaim storage.
+         */
+        post: operations["VacuumTimescaleDatapoints"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/templates/download": {
         parameters: {
             query?: never;
@@ -2349,6 +2474,50 @@ export interface components {
             /** Format: int32 */
             order: number;
         };
+        "Fei.Is.Api.Features.DeviceFirmwares.Commands.CreateDeviceFirmware.Request": {
+            versionNumber: string;
+            /** Format: date-time */
+            versionDate: string;
+            isActive: boolean;
+            /** Format: binary */
+            firmwareFile: string;
+        };
+        "Fei.Is.Api.Features.DeviceFirmwares.Commands.UpdateDeviceFirmware.Request": {
+            versionNumber: string;
+            /** Format: date-time */
+            versionDate: string;
+            isActive: boolean;
+            /** Format: binary */
+            firmwareFile?: string | null;
+        };
+        "Fei.Is.Api.Features.DeviceFirmwares.Queries.GetDeviceFirmwareById.Response": {
+            /** Format: uuid */
+            id: string;
+            versionNumber: string;
+            /** Format: date-time */
+            versionDate: string;
+            isActive: boolean;
+            originalFileName: string;
+            downloadUrl: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        "Fei.Is.Api.Features.DeviceFirmwares.Queries.GetDeviceFirmwares.Response": {
+            /** Format: uuid */
+            id: string;
+            versionNumber: string;
+            /** Format: date-time */
+            versionDate: string;
+            isActive: boolean;
+            originalFileName: string;
+            downloadUrl: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
         "Fei.Is.Api.Features.DeviceSharing.Commands.ShareDeviceToUser.Request": {
             email: string;
             permission: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceSharePermission"];
@@ -2452,12 +2621,29 @@ export interface components {
             /** Format: int32 */
             dataPointRetentionDays?: number | null;
         };
+        "Fei.Is.Api.Features.Devices.Commands.UpdateDeviceCurrentFirmware.Request": {
+            accessToken: string;
+            versionNumber: string;
+        };
+        "Fei.Is.Api.Features.Devices.Queries.GetDeviceActiveFirmware.Request": {
+            accessToken: string;
+        };
+        "Fei.Is.Api.Features.Devices.Queries.GetDeviceActiveFirmware.Response": {
+            /** Format: uuid */
+            firmwareId: string;
+            versionNumber: string;
+            /** Format: date-time */
+            versionDate: string;
+            originalFileName: string;
+            downloadUrl: string;
+        };
         "Fei.Is.Api.Features.Devices.Queries.GetDeviceById.Response": {
             /** Format: uuid */
             id: string;
             name: string;
             mac?: string | null;
             accessToken?: string | null;
+            currentFirmwareVersion?: string | null;
             deviceTemplate: components["schemas"]["Fei.Is.Api.Features.Devices.Queries.GetDeviceById.TemplateResponse"];
             /** Format: date-time */
             createdAt: string;
@@ -4657,6 +4843,77 @@ export interface operations {
             };
         };
     };
+    DownloadDeviceFirmware: {
+        parameters: {
+            query: {
+                AccessToken: string;
+            };
+            header?: never;
+            path: {
+                firmwareId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GetDeviceActiveFirmware: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.Devices.Queries.GetDeviceActiveFirmware.Request"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.Devices.Queries.GetDeviceActiveFirmware.Response"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     GetDeviceById: {
         parameters: {
             query?: never;
@@ -4842,6 +5099,44 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["Fei.Is.Api.Features.Devices.Queries.GetDevicesWithSensors.Response"][];
                 };
+            };
+        };
+    };
+    UpdateDeviceCurrentFirmware: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.Devices.Commands.UpdateDeviceCurrentFirmware.Request"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -5136,6 +5431,199 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DownloadDeviceFirmware: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                templateId: string;
+                firmwareId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GetDeviceFirmwareById: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                templateId: string;
+                firmwareId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.DeviceFirmwares.Queries.GetDeviceFirmwareById.Response"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UpdateDeviceFirmware: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                templateId: string;
+                firmwareId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Fei.Is.Api.Features.DeviceFirmwares.Commands.UpdateDeviceFirmware.Request"];
+                "application/x-www-form-urlencoded": components["schemas"]["Fei.Is.Api.Features.DeviceFirmwares.Commands.UpdateDeviceFirmware.Request"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DeleteDeviceFirmware: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                templateId: string;
+                firmwareId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GetDeviceFirmwares: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                templateId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.DeviceFirmwares.Queries.GetDeviceFirmwares.Response"][];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CreateDeviceFirmware: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                templateId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Fei.Is.Api.Features.DeviceFirmwares.Commands.CreateDeviceFirmware.Request"];
+                "application/x-www-form-urlencoded": components["schemas"]["Fei.Is.Api.Features.DeviceFirmwares.Commands.CreateDeviceFirmware.Request"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
             };
             /** @description Bad Request */
             400: {
@@ -8025,6 +8513,24 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["Fei.Is.Api.Features.System.Queries.GetTimescaleStorageUsage.Response"];
                 };
+            };
+        };
+    };
+    VacuumTimescaleDatapoints: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
