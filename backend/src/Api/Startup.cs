@@ -35,6 +35,11 @@ public class Startup(IConfiguration configuration)
         bool isMqttEnabled = Configuration.GetValue<bool>("MqttSettings:Enabled");
 
         // Add services to the container.
+        services.AddLogging(builder =>
+        {
+            builder.ClearProviders();
+            builder.AddConsole();
+        });
         services.ConfigurePostgresContext(Configuration);
         services.ConfigureTimescaleContext(Configuration);
         services.ConfigureCors(Configuration);
