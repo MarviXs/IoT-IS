@@ -18,7 +18,6 @@
       />
     </template>
     <SceneForm v-model="scene" ref="sceneForm" @on-submit="createScene" />
-    dasdsa
   </PageLayout>
 </template>
 
