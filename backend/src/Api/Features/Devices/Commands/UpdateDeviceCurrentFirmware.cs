@@ -79,7 +79,6 @@ public static class UpdateDeviceCurrentFirmware
     {
         public Validator()
         {
-            RuleFor(c => c.Request.AccessToken).NotEmpty().WithMessage("Access token is required");
             RuleFor(c => c.Request.VersionNumber).NotEmpty().WithMessage("Version number is required");
         }
     }
