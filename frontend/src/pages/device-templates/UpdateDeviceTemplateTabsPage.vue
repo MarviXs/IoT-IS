@@ -32,6 +32,14 @@
           no-caps
         />
         <q-route-tab
+          :to="{ path: `/device-templates/${templateId}/firmwares` }"
+          style="min-width: 130px"
+          name="firmwares"
+          :icon="mdiMemory"
+          :label="t('device_template.firmwares.tab')"
+          no-caps
+        />
+        <q-route-tab
           :to="{ path: `/device-templates/${templateId}/controls` }"
           style="min-width: 130px"
           name="controls"
@@ -53,7 +61,13 @@ import type { UpdateDeviceTemplateRequest } from '@/api/services/DeviceTemplateS
 import DeviceTemplateService from '@/api/services/DeviceTemplateService';
 import { useRoute } from 'vue-router';
 import { handleError } from '@/utils/error-handler';
-import { mdiCodeTags, mdiContentCopy, mdiBookMultipleOutline, mdiGestureTapButton } from '@quasar/extras/mdi-v7';
+import {
+  mdiCodeTags,
+  mdiContentCopy,
+  mdiBookMultipleOutline,
+  mdiGestureTapButton,
+  mdiMemory,
+} from '@quasar/extras/mdi-v7';
 
 const { t } = useI18n();
 const route = useRoute();

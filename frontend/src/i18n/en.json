@@ -172,6 +172,28 @@
     "no_controls": "No controls configured yet",
     "delete_device_template": "Delete device template",
     "delete_device_template_desc": "Are you sure you want to delete this device template?",
+    "firmwares": {
+      "tab": "Firmwares",
+      "title": "Firmwares",
+      "version_number": "Version number",
+      "version_date": "Version date",
+      "is_active": "Active",
+      "firmware_file": "Firmware file",
+      "current_file": "Current file: {fileName}",
+      "create_firmware": "Add firmware",
+      "edit_firmware": "Edit firmware",
+      "delete_firmware": "Delete firmware",
+      "delete_firmware_desc": "Are you sure you want to delete this firmware version?",
+      "toasts": {
+        "load_failed": "Loading firmwares failed!",
+        "create_success": "Firmware created successfully!",
+        "create_failed": "Creating firmware failed!",
+        "update_success": "Firmware updated successfully!",
+        "update_failed": "Updating firmware failed!",
+        "delete_success": "Firmware deleted successfully!",
+        "delete_failed": "Deleting firmware failed!"
+      }
+    },
     "toasts": {
       "loading_failed": "Loading device template failed! | Loading devices templates failed!",
       "create_failed": "Creating device template failed!",

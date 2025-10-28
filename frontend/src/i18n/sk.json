@@ -166,6 +166,28 @@
     "no_controls": "Zatiaľ nie sú nastavené žiadne ovládania",
     "delete_device_template": "Vymazať šablónu zariadenia",
     "delete_device_template_desc": "Naozaj chcete vymazať túto šablónu zariadenia?",
+    "firmwares": {
+      "tab": "Firmvéry",
+      "title": "Firmvéry",
+      "version_number": "Verzia",
+      "version_date": "Dátum verzie",
+      "is_active": "Aktívna",
+      "firmware_file": "Súbor firmvéru",
+      "current_file": "Aktuálny súbor: {fileName}",
+      "create_firmware": "Pridať firmvér",
+      "edit_firmware": "Upraviť firmvér",
+      "delete_firmware": "Vymazať firmvér",
+      "delete_firmware_desc": "Naozaj chcete vymazať túto verziu firmvéru?",
+      "toasts": {
+        "load_failed": "Načítanie firmvérov zlyhalo!",
+        "create_success": "Firmvér bol vytvorený!",
+        "create_failed": "Vytvorenie firmvéru zlyhalo!",
+        "update_success": "Firmvér bol aktualizovaný!",
+        "update_failed": "Aktualizácia firmvéru zlyhala!",
+        "delete_success": "Firmvér bol vymazaný!",
+        "delete_failed": "Vymazanie firmvéru zlyhalo!"
+      }
+    },
     "toasts": {
       "loading_failed": "Načítanie šablóny zariadenia zlyhalo! | Načítanie šablón zariadenia zlyhalo!",
       "create_failed": "Vytvorenie šablóny zariadenia zlyhalo!",

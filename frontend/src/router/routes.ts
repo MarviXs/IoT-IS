@@ -96,6 +96,10 @@ const routes: RouteRecordRaw[] = [
             component: () => import('pages/recipes/RecipesPage.vue'),
           },
           {
+            path: 'firmwares',
+            component: () => import('pages/device-templates/DeviceTemplateFirmwaresPage.vue'),
+          },
+          {
             path: 'controls',
             component: () => import('pages/device-templates/UpdateDeviceTemplateControlsPage.vue'),
           },
