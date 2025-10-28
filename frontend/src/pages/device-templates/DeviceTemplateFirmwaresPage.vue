@@ -55,11 +55,7 @@
           color="grey-7"
           flat
           round
-          type="a"
-          :href="props.row.downloadUrl"
-          :download="props.row.originalFileName"
-          target="_blank"
-          rel="noopener"
+          @click.stop="downloadFirmware(props.row)"
         >
           <q-tooltip content-style="font-size: 11px" :offset="[0, 4]">{{ t('global.download') }}</q-tooltip>
         </q-btn>
@@ -106,6 +102,7 @@ import { handleError } from '@/utils/error-handler';
 import CreateDeviceFirmwareDialog from '@/components/device-templates/firmwares/CreateDeviceFirmwareDialog.vue';
 import EditDeviceFirmwareDialog from '@/components/device-templates/firmwares/EditDeviceFirmwareDialog.vue';
 import DeleteDeviceFirmwareDialog from '@/components/device-templates/firmwares/DeleteDeviceFirmwareDialog.vue';
+import type { ProblemDetails } from '@/api/types/ProblemDetails';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -187,6 +184,28 @@ function openDeleteDialog(firmwareId: string) {
 function handleDeleted() {
   loadFirmwares();
   firmwareIdForDelete.value = null;
+}
+
+async function downloadFirmware(firmware: DeviceFirmwareResponse) {
+  const { data, error } = await DeviceFirmwareService.downloadDeviceFirmware(firmware.downloadUrl);
+
+  if (!data || error) {
+    const problem = error ?? ({
+      title: t('device_template.firmwares.toasts.download_failed'),
+    } as ProblemDetails);
+
+    handleError(problem, t('device_template.firmwares.toasts.download_failed'));
+    return;
+  }
+
+  const blobUrl = URL.createObjectURL(data);
+  const link = document.createElement('a');
+  link.href = blobUrl;
+  link.download = firmware.originalFileName;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(blobUrl);
 }
 
 watch(deleteDialogOpen, (open) => {

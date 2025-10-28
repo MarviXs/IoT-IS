@@ -1,5 +1,6 @@
-import { client } from '@/api/client';
+import { baseUrl, client, customFetch } from '@/api/client';
 import type { components } from '@/api/generated/schema.d.ts';
+import type { ProblemDetails } from '@/api/types/ProblemDetails';
 
 type DeviceFirmwareListResponse =
   components['schemas']['Fei.Is.Api.Features.DeviceFirmwares.Queries.GetDeviceFirmwares.Response'];
@@ -74,6 +75,38 @@ class DeviceFirmwareService {
     return await client.DELETE('/device-templates/{templateId}/firmwares/{firmwareId}', {
       params: { path: { templateId, firmwareId } },
     });
+  }
+
+  async downloadDeviceFirmware(downloadUrl: string) {
+    try {
+      const url = new URL(downloadUrl, baseUrl);
+      const response = await customFetch(url.toString(), { method: 'GET' });
+
+      if (!response.ok) {
+        let error: ProblemDetails | null = null;
+
+        try {
+          if (response.headers.get('content-type')?.includes('application/json')) {
+            error = (await response.clone().json()) as ProblemDetails;
+          } else {
+            const message = await response.clone().text();
+            error = { title: message || 'Firmware download failed.' } as ProblemDetails;
+          }
+        } catch {
+          error = { title: 'Firmware download failed.' } as ProblemDetails;
+        }
+
+        return { data: null, error } as const;
+      }
+
+      const blob = await response.blob();
+      return { data: blob, error: null } as const;
+    } catch {
+      return {
+        data: null,
+        error: { title: 'Firmware download failed.' } as ProblemDetails,
+      } as const;
+    }
   }
 }
 

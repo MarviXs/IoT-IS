@@ -14,17 +14,15 @@ namespace Fei.Is.Api.Features.Devices.Queries;
 
 public static class GetDeviceActiveFirmware
 {
-    public record Request(string AccessToken);
-
     public sealed class Endpoint : ICarterModule
     {
         public void AddRoutes(IEndpointRouteBuilder app)
         {
-            app.MapPost(
-                    "devices/firmwares/active",
-                    async Task<Results<Ok<Response>, ValidationProblem, NotFound>> (IMediator mediator, Request request) =>
+            app.MapGet(
+                    "devices/{deviceAccessToken}/firmwares/active",
+                    async Task<Results<Ok<Response>, ValidationProblem, NotFound>> (IMediator mediator, string deviceAccessToken) =>
                     {
-                        var query = new Query(request);
+                        var query = new Query(deviceAccessToken);
                         var result = await mediator.Send(query);
 
                         if (result.HasError<ValidationError>())
@@ -50,7 +48,7 @@ public static class GetDeviceActiveFirmware
         }
     }
 
-    public record Query(Request Request) : IRequest<Result<Response>>;
+    public record Query(string DeviceAccessToken) : IRequest<Result<Response>>;
 
     public sealed class Handler(AppDbContext context, IValidator<Query> validator) : IRequestHandler<Query, Result<Response>>
     {
@@ -66,7 +64,7 @@ public static class GetDeviceActiveFirmware
                 .Devices.AsNoTracking()
                 .Include(d => d.DeviceTemplate)
                 .ThenInclude(t => t.Firmwares)
-                .FirstOrDefaultAsync(d => d.AccessToken == message.Request.AccessToken, cancellationToken);
+                .FirstOrDefaultAsync(d => d.AccessToken == message.DeviceAccessToken, cancellationToken);
 
             if (device == null)
             {
@@ -84,14 +82,9 @@ public static class GetDeviceActiveFirmware
                 return Result.Fail(new NotFoundError());
             }
 
-            var downloadUrl = $"/api/devices/firmwares/{activeFirmware.Id}/download?accessToken={Uri.EscapeDataString(message.Request.AccessToken)}";
+            var downloadUrl = $"/api/devices/firmwares/{activeFirmware.Id}/download?accessToken={Uri.EscapeDataString(message.DeviceAccessToken)}";
 
-            var response = new Response(
-                activeFirmware.Id,
-                activeFirmware.VersionNumber,
-                activeFirmware.OriginalFileName,
-                downloadUrl
-            );
+            var response = new Response(activeFirmware.Id, activeFirmware.VersionNumber, activeFirmware.OriginalFileName, downloadUrl);
 
             return Result.Ok(response);
         }
@@ -101,7 +94,7 @@ public static class GetDeviceActiveFirmware
     {
         public Validator()
         {
-            RuleFor(q => q.Request.AccessToken).NotEmpty().WithMessage("Access token is required");
+            RuleFor(q => q.DeviceAccessToken).NotEmpty().WithMessage("Access token is required");
         }
     }
 

@@ -191,7 +191,8 @@
         "update_success": "Firmware updated successfully!",
         "update_failed": "Updating firmware failed!",
         "delete_success": "Firmware deleted successfully!",
-        "delete_failed": "Deleting firmware failed!"
+        "delete_failed": "Deleting firmware failed!",
+        "download_failed": "Downloading firmware failed!"
       }
     },
     "toasts": {

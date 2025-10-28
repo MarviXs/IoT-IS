@@ -185,7 +185,8 @@
         "update_success": "Firmvér bol aktualizovaný!",
         "update_failed": "Aktualizácia firmvéru zlyhala!",
         "delete_success": "Firmvér bol vymazaný!",
-        "delete_failed": "Vymazanie firmvéru zlyhalo!"
+        "delete_failed": "Vymazanie firmvéru zlyhalo!",
+        "download_failed": "Stiahnutie firmvéru zlyhalo!"
       }
     },
     "toasts": {
