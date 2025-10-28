@@ -31,6 +31,7 @@
     "n_of_m": "{0} of {1}",
     "refresh": "Refresh",
     "actions": "Actions",
+    "active": "Active",
     "automatic_refresh_interval": "Automatic refresh interval",
     "enter_refresh_interval_s": "Enter refresh interval in seconds (0 to disable)",
     "rules": {
