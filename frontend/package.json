@@ -11,8 +11,8 @@
     "lint-fix": "eslint -c ./eslint.config.js --fix --ext .js,.ts,.vue, ./",
     "format": "prettier --write \"**/*.{js,ts,vue,scss,html,md,json}\" --ignore-path .gitignore",
     "test": "echo \"No test specified\" && exit 0",
-    "dev": "quasar dev",
-    "build": "quasar build",
+    "dev": "quasar dev -m spa",
+    "build": "quasar build -m pwa",
     "prepare": "quasar prepare",
     "generate-openapi-schema": "npx openapi-typescript http://localhost:5097/swagger/v1/swagger.json -o ./src/api/generated/schema.d.ts --properties-required-by-default",
     "check-updates": "ncu -i"

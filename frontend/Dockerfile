@@ -12,7 +12,7 @@ RUN npm run build
 FROM nginx:stable-alpine as production
 ENV API_URL=$API_URL
 COPY ./docker/nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=build-stage /app/dist/spa /usr/share/nginx/html
+COPY --from=build-stage /app/dist/pwa /usr/share/nginx/html
 COPY ./docker/env.sh /docker-entrypoint.d/env.sh
 RUN chmod +x /docker-entrypoint.d/env.sh
 EXPOSE 80
