@@ -13,17 +13,17 @@ namespace Fei.Is.Api.Features.Devices.Commands;
 
 public static class UpdateDeviceCurrentFirmware
 {
-    public record Request(string AccessToken, string VersionNumber);
+    public record Request(string VersionNumber);
 
     public sealed class Endpoint : ICarterModule
     {
         public void AddRoutes(IEndpointRouteBuilder app)
         {
             app.MapPost(
-                    "devices/firmwares/current",
-                    async Task<Results<Ok, ValidationProblem, NotFound>> (IMediator mediator, Request request) =>
+                    "devices/{accessToken}/firmwares/current",
+                    async Task<Results<Ok, ValidationProblem, NotFound>> (IMediator mediator, string accessToken, Request request) =>
                     {
-                        var command = new Command(request);
+                        var command = new Command(request, accessToken);
                         var result = await mediator.Send(command);
 
                         if (result.HasError<ValidationError>())
@@ -49,7 +49,7 @@ public static class UpdateDeviceCurrentFirmware
         }
     }
 
-    public record Command(Request Request) : IRequest<Result>;
+    public record Command(Request Request, string AccessToken) : IRequest<Result>;
 
     public sealed class Handler(AppDbContext context, IValidator<Command> validator) : IRequestHandler<Command, Result>
     {
@@ -61,10 +61,7 @@ public static class UpdateDeviceCurrentFirmware
                 return Result.Fail(new ValidationError(validationResult));
             }
 
-            var device = await context.Devices.FirstOrDefaultAsync(
-                d => d.AccessToken == message.Request.AccessToken,
-                cancellationToken
-            );
+            var device = await context.Devices.FirstOrDefaultAsync(d => d.AccessToken == message.AccessToken, cancellationToken);
 
             if (device == null)
             {
