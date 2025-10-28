@@ -28,8 +28,12 @@
           :devices="devicesPaginated"
           :loading="isLoadingDevices"
           :filter="filter"
+          :mobile-devices="mobileDevices"
+          :has-more="hasMoreDevices"
+          :reset-key="mobileResetKey"
           @on-change="getDevices(pagination)"
           @on-request="onRequest"
+          @on-load-more="loadMoreDevices"
         />
       </q-pull-to-refresh>
       <DevicesTable
@@ -45,12 +49,7 @@
   </PageLayout>
   <CreateDeviceDialog v-model="isCreateDialogOpen" @on-create="getDevices(pagination)" />
   <q-page-sticky v-if="isMobile" position="bottom-right" :offset="[18, 18]">
-    <q-btn
-      fab
-      color="primary"
-      :icon="mdiPlus"
-      @click="isCreateDialogOpen = true"
-    />
+    <q-btn fab color="primary" :icon="mdiPlus" @click="isCreateDialogOpen = true" />
   </q-page-sticky>
 </template>
 
@@ -86,14 +85,22 @@ const pagination = ref<PaginationClient>({
   rowsPerPage: 20,
   rowsNumber: 0,
 });
+type DeviceList = NonNullable<DevicesResponse['items']>;
+
 const devicesPaginated = ref<DevicesResponse>();
 const isLoadingDevices = ref(false);
+const mobileDevices = ref<DeviceList>([] as DeviceList);
+const totalDevices = ref(0);
+const mobileResetKey = ref(0);
+
+const hasMoreDevices = computed(() => mobileDevices.value.length < totalDevices.value);
 
 async function onRequest(props: { pagination: PaginationClient }) {
   await getDevices(props.pagination);
 }
 
-async function getDevices(paginationTable: PaginationTable) {
+async function getDevices(paginationTable: PaginationTable, options: { append?: boolean } = {}): Promise<boolean> {
+  const { append = false } = options;
   const paginationQuery: DevicesQueryParams = {
     SortBy: paginationTable.sortBy,
     Descending: paginationTable.descending,
@@ -107,8 +114,12 @@ async function getDevices(paginationTable: PaginationTable) {
   isLoadingDevices.value = false;
 
   if (error) {
-    handleError(error, 'Loading recipes failed');
-    return;
+    handleError(error, 'Loading devices failed');
+    return false;
+  }
+
+  if (!data) {
+    return false;
   }
 
   devicesPaginated.value = data;
@@ -117,6 +128,19 @@ async function getDevices(paginationTable: PaginationTable) {
   pagination.value.descending = paginationTable.descending;
   pagination.value.page = data.currentPage;
   pagination.value.rowsPerPage = data.pageSize;
+
+  totalDevices.value = data.totalCount ?? 0;
+
+  const items = data.items ?? [];
+
+  if (append) {
+    mobileDevices.value = [...mobileDevices.value, ...items];
+  } else {
+    mobileDevices.value = items;
+    mobileResetKey.value++;
+  }
+
+  return true;
 }
 getDevices(pagination.value);
 
@@ -124,11 +148,50 @@ const isCreateDialogOpen = ref(false);
 
 async function onPullToRefresh(done: () => void) {
   try {
+    pagination.value.page = 1;
     await getDevices(pagination.value);
   } finally {
     done();
   }
 }
 
-watchDebounced(filter, () => getDevices(pagination.value), { debounce: 400 });
+async function loadMoreDevices(done: (stop?: boolean) => void) {
+  if (isLoadingDevices.value) {
+    done();
+    return;
+  }
+
+  if (!hasMoreDevices.value) {
+    done(true);
+    return;
+  }
+
+  const nextPage = {
+    ...pagination.value,
+    page: pagination.value.page + 1,
+  };
+
+  const success = await getDevices(nextPage, { append: true });
+
+  if (!success) {
+    done();
+    return;
+  }
+
+  if (!hasMoreDevices.value) {
+    done(true);
+    return;
+  }
+
+  done();
+}
+
+watchDebounced(
+  filter,
+  async () => {
+    pagination.value.page = 1;
+    await getDevices(pagination.value);
+  },
+  { debounce: 400 },
+);
 </script>

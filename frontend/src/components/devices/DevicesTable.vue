@@ -1,55 +1,63 @@
 <template>
   <div>
-    <div v-if="isMobile" class="devices-grid">
-      <template v-if="devicesFiltered.length">
-        <q-card
-          v-for="device in devicesFiltered"
-          :key="device.id"
-          class="device-card shadow"
-          v-ripple
-          @click="goToDevice(device.id)"
-        >
-          <q-card-section class="device-card__section">
-            <div class="device-card__name text-subtitle1 ellipsis">{{ device.name }}</div>
-            <div class="device-card__status row items-center">
-              <StatusDot :connected="device.connected" />
-              <span class="q-ml-sm">{{ device.connected ? t('device.connected') : t('device.disconnected') }}</span>
-            </div>
-          </q-card-section>
-          <q-menu context-menu touch-position>
-            <q-list>
-              <q-item clickable v-close-popup @click.stop="openUpdateDialog(device.id)">
-                <div class="row items-center q-gutter-sm">
-                  <q-icon color="grey-9" size="24px" :name="mdiPencil" />
-                  <div>{{ t('global.edit') }}</div>
-                </div>
-              </q-item>
-              <q-item
-                v-if="device.permission == 'Owner'"
-                clickable
-                v-close-popup
-                @click.stop="openDeleteDialog(device.id)"
-              >
-                <div class="row items-center q-gutter-sm">
-                  <q-icon color="grey-9" size="24px" :name="mdiTrashCan" />
-                  <div>{{ t('global.delete') }}</div>
-                </div>
-              </q-item>
-              <q-item
-                v-if="device.permission == 'Owner'"
-                clickable
-                v-close-popup
-                @click.stop="openShareDialog(device.id)"
-              >
-                <div class="row items-center q-gutter-sm">
-                  <q-icon color="grey-9" size="24px" :name="mdiShare" />
-                  <div>{{ t('device.share_device') }}</div>
-                </div>
-              </q-item>
-            </q-list>
-          </q-menu>
-        </q-card>
-      </template>
+    <div v-if="isMobile">
+      <q-infinite-scroll v-if="mobileItems.length" ref="infiniteScrollRef" :offset="120" @load="onLoadMore">
+        <div class="devices-grid">
+          <q-card
+            v-for="device in mobileItems"
+            :key="device.id"
+            class="device-card shadow"
+            v-ripple
+            @click="goToDevice(device.id)"
+          >
+            <q-card-section class="device-card__section">
+              <div class="device-card__name text-subtitle1 ellipsis">{{ device.name }}</div>
+              <div class="device-card__status row items-center">
+                <StatusDot :connected="device.connected" />
+                <span class="q-ml-sm">{{ device.connected ? t('device.connected') : t('device.disconnected') }}</span>
+              </div>
+            </q-card-section>
+            <q-menu context-menu touch-position>
+              <q-list>
+                <q-item clickable v-close-popup @click.stop="openUpdateDialog(device.id)">
+                  <div class="row items-center q-gutter-sm">
+                    <q-icon color="grey-9" size="24px" :name="mdiPencil" />
+                    <div>{{ t('global.edit') }}</div>
+                  </div>
+                </q-item>
+                <q-item
+                  v-if="device.permission == 'Owner'"
+                  clickable
+                  v-close-popup
+                  @click.stop="openDeleteDialog(device.id)"
+                >
+                  <div class="row items-center q-gutter-sm">
+                    <q-icon color="grey-9" size="24px" :name="mdiTrashCan" />
+                    <div>{{ t('global.delete') }}</div>
+                  </div>
+                </q-item>
+                <q-item
+                  v-if="device.permission == 'Owner'"
+                  clickable
+                  v-close-popup
+                  @click.stop="openShareDialog(device.id)"
+                >
+                  <div class="row items-center q-gutter-sm">
+                    <q-icon color="grey-9" size="24px" :name="mdiShare" />
+                    <div>{{ t('device.share_device') }}</div>
+                  </div>
+                </q-item>
+              </q-list>
+            </q-menu>
+          </q-card>
+        </div>
+
+        <template #loading>
+          <div class="row justify-center q-my-md">
+            <q-spinner-dots color="primary" size="32px" />
+          </div>
+        </template>
+      </q-infinite-scroll>
       <div v-else class="full-width column flex-center q-pa-lg nothing-found-text">
         <q-icon :name="mdiCellphoneLink" class="q-mb-md" size="50px"></q-icon>
         {{ props.loading ? t('table.loading_label') : t('table.no_data_label') }}
@@ -161,10 +169,10 @@
 </template>
 
 <script setup lang="ts">
-import { useQuasar, type QTableProps } from 'quasar';
+import { QInfiniteScroll, useQuasar, type QTableProps } from 'quasar';
 import ShareDeviceDialog from './ShareDeviceDialog.vue';
 import type { PropType } from 'vue';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import {
   mdiCellphoneLink,
@@ -182,6 +190,8 @@ import EditDeviceDialog from '@/components/devices/EditDeviceDialog.vue';
 import StatusDot from './StatusDot.vue';
 import { useRouter } from 'vue-router';
 
+type DeviceList = NonNullable<DevicesResponse['items']>;
+
 const props = defineProps({
   devices: {
     type: Object as PropType<DevicesResponse>,
@@ -192,18 +202,59 @@ const props = defineProps({
     type: Boolean,
     required: true,
   },
+  mobileDevices: {
+    type: Array as PropType<DeviceList>,
+    required: false,
+    default: () => [] as DeviceList,
+  },
+  hasMore: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  resetKey: {
+    type: Number,
+    required: false,
+    default: 0,
+  },
 });
 
 const pagination = defineModel<PaginationClient>('pagination');
 
 const devicesFiltered = computed(() => props.devices?.items ?? []);
 
-const emit = defineEmits(['onChange', 'onRequest']);
+const emit = defineEmits(['onChange', 'onRequest', 'onLoadMore']);
 
 const { t } = useI18n();
 const $q = useQuasar();
 const router = useRouter();
 const isMobile = computed(() => $q.screen.lt.md);
+
+const mobileItems = computed(() => {
+  if (isMobile.value) {
+    return props.mobileDevices;
+  }
+
+  return devicesFiltered.value;
+});
+
+const infiniteScrollRef = ref<InstanceType<typeof QInfiniteScroll>>();
+
+watch(
+  () => props.resetKey,
+  () => {
+    infiniteScrollRef.value?.reset();
+  },
+);
+
+function onLoadMore(_index: number, done: (stop?: boolean) => void) {
+  if (!props.hasMore) {
+    done(true);
+    return;
+  }
+
+  emit('onLoadMore', done);
+}
 
 const isDeleteDialogOpen = ref(false);
 const deviceToDelete = ref<string>();
