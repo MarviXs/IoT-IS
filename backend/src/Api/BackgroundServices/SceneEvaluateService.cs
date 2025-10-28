@@ -1,5 +1,5 @@
+using System;
 using System.Globalization;
-using System.Text;
 using System.Text.Json.Nodes;
 using EFCore.BulkExtensions;
 using Fei.Is.Api.Data.Contexts;
@@ -230,12 +230,11 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
             else if (action.Type == SceneActionType.DISCORD_NOTIFICATION)
             {
                 var baseMessage = string.IsNullOrWhiteSpace(action.NotificationMessage) ? "Scene triggered" : action.NotificationMessage!;
-                var messageBuilder = new StringBuilder(baseMessage);
+                var sensorFields = new List<(string Name, string Value)>();
 
                 if (action.IncludeSensorValues && scene.SensorTriggers.Count != 0)
                 {
                     var seenSensors = new HashSet<(Guid DeviceId, string SensorTag)>();
-                    var sensorLines = new List<string>();
 
                     foreach (var trigger in scene.SensorTriggers)
                     {
@@ -247,23 +246,21 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
 
                         sensorValues.TryGetValue(key, out var value);
                         var formattedValue = value.HasValue ? value.Value.ToString("0.##", CultureInfo.InvariantCulture) : "N/A";
-                        sensorLines.Add($"{trigger.SensorTag}: {formattedValue}");
-                    }
-
-                    if (sensorLines.Count != 0)
-                    {
-                        messageBuilder.AppendLine();
-                        foreach (var sensorLine in sensorLines)
-                        {
-                            messageBuilder.AppendLine(sensorLine);
-                        }
+                        sensorFields.Add((trigger.SensorTag, formattedValue));
                     }
                 }
 
-                var message = messageBuilder.ToString().TrimEnd();
+                var fields = sensorFields.Count == 0 ? Array.Empty<(string Name, string Value)>() : [.. sensorFields];
                 if (!string.IsNullOrWhiteSpace(action.DiscordWebhookUrl))
                 {
-                    await discordNotificationService.SendAsync(action.DiscordWebhookUrl!, message, action.NotificationSeverity, cancellationToken);
+                    await discordNotificationService.SendAsync(
+                        action.DiscordWebhookUrl!,
+                        scene.Name,
+                        baseMessage,
+                        fields,
+                        action.NotificationSeverity,
+                        cancellationToken
+                    );
                 }
                 else
                 {

@@ -6,7 +6,9 @@ public interface IDiscordNotificationService
 {
     Task SendAsync(
         string webhookUrl,
-        string message,
+        string title,
+        string description,
+        IReadOnlyCollection<(string Name, string Value)> fields,
         NotificationSeverity severity,
         CancellationToken cancellationToken = default
     );
