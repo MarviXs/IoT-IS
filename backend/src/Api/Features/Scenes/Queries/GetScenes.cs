@@ -86,7 +86,13 @@ public static class GetScenes
 
     public sealed class ParametersValidator : AbstractValidator<QueryParameters>
     {
-        private static readonly string[] ValidSortByFields = [nameof(Scene.Name), nameof(Scene.CreatedAt), nameof(Scene.UpdatedAt)];
+        private static readonly string[] ValidSortByFields =
+        [
+            nameof(Scene.Name),
+            nameof(Scene.CreatedAt),
+            nameof(Scene.UpdatedAt),
+            nameof(Scene.LastTriggeredAt)
+        ];
 
         public ParametersValidator()
         {
