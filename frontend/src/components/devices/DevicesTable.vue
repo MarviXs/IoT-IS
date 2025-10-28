@@ -79,7 +79,7 @@
 
       <template #body-cell-name="propsCell">
         <q-td :props="propsCell">
-          <router-link :to="`/devices/${propsCell.row.id}`" class="text-black text-weight-medium">
+          <router-link :to="`/devices/${propsCell.row.id}`" class="text-weight-medium">
             {{ propsCell.row.name }}
           </router-link>
         </q-td>
