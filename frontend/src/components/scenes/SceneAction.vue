@@ -70,6 +70,12 @@
         class="q-mr-sm"
         :rules="discordWebhookRules"
       />
+      <q-checkbox
+        v-model="action.includeSensorValues"
+        label="Include sensor values"
+        dense
+        class="q-mt-sm"
+      />
     </div>
   </div>
 </template>
@@ -155,6 +161,7 @@ watch(
       action.value.discordWebhookUrl = null;
       action.value.deviceId = null;
       action.value.recipeId = null;
+      action.value.includeSensorValues = false;
     } else if (type === 'DISCORD_NOTIFICATION') {
       action.value.notificationSeverity = null;
       action.value.deviceId = null;
@@ -165,10 +172,14 @@ watch(
       if (!action.value.discordWebhookUrl) {
         action.value.discordWebhookUrl = '';
       }
+      if (action.value.includeSensorValues === undefined || action.value.includeSensorValues === null) {
+        action.value.includeSensorValues = false;
+      }
     } else if (type === 'JOB') {
       action.value.notificationSeverity = null;
       action.value.notificationMessage = null;
       action.value.discordWebhookUrl = null;
+      action.value.includeSensorValues = false;
     }
   },
   { immediate: true },

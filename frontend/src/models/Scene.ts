@@ -7,6 +7,7 @@ interface SceneAction {
   notificationMessage?: string | null;
   notificationSeverity: 'Info' | 'Warning' | 'Serious' | 'Critical' | null;
   discordWebhookUrl?: string | null;
+  includeSensorValues: boolean | null;
 }
 
 interface Scene {

@@ -22,7 +22,8 @@ public static class UpdateScene
         Guid? RecipeId,
         NotificationSeverity? NotificationSeverity,
         string? NotificationMessage,
-        string? DiscordWebhookUrl
+        string? DiscordWebhookUrl,
+        bool IncludeSensorValues
     );
 
     public record Request(
@@ -99,7 +100,8 @@ public static class UpdateScene
                     RecipeId = x.RecipeId,
                     NotificationSeverity = x.NotificationSeverity ?? NotificationSeverity.Info,
                     NotificationMessage = x.NotificationMessage,
-                    DiscordWebhookUrl = x.DiscordWebhookUrl
+                    DiscordWebhookUrl = x.DiscordWebhookUrl,
+                    IncludeSensorValues = x.IncludeSensorValues
                 })
                 .ToList();
 

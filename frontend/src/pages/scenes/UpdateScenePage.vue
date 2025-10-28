@@ -70,6 +70,7 @@ async function getScene() {
         notificationSeverity: action.notificationSeverity,
         notificationMessage: action.notificationMessage,
         discordWebhookUrl: action.discordWebhookUrl,
+        includeSensorValues: action.includeSensorValues ?? false,
       })) ?? [],
   };
 

@@ -28,6 +28,7 @@ function addAction() {
     deviceId: null,
     recipeId: null,
     discordWebhookUrl: '',
+    includeSensorValues: false,
   });
 }
 

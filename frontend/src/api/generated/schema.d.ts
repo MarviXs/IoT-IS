@@ -3570,6 +3570,7 @@ export interface components {
             notificationSeverity: components["schemas"]["Fei.Is.Api.Data.Enums.NotificationSeverity"];
             notificationMessage?: string | null;
             discordWebhookUrl?: string | null;
+            includeSensorValues: boolean;
         };
         "Fei.Is.Api.Features.Scenes.Commands.EnableScene.Request": {
             isEnabled: boolean;
@@ -3592,6 +3593,7 @@ export interface components {
             notificationSeverity: components["schemas"]["Fei.Is.Api.Data.Enums.NotificationSeverity"];
             notificationMessage?: string | null;
             discordWebhookUrl?: string | null;
+            includeSensorValues: boolean;
         };
         "Fei.Is.Api.Features.Scenes.Queries.GetSceneById.Response": {
             name: string;
@@ -3613,6 +3615,7 @@ export interface components {
             notificationSeverity: components["schemas"]["Fei.Is.Api.Data.Enums.NotificationSeverity"];
             notificationMessage?: string | null;
             discordWebhookUrl?: string | null;
+            includeSensorValues: boolean;
         };
         "Fei.Is.Api.Features.Scenes.Queries.GetScenes.Response": {
             /** Format: uuid */

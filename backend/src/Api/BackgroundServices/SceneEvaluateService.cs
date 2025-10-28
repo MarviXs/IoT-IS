@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text;
 using System.Text.Json.Nodes;
 using EFCore.BulkExtensions;
 using Fei.Is.Api.Data.Contexts;
@@ -52,14 +53,7 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
                         {
                             var parsed = ParseResult(message);
 
-                            if (
-                                !double.TryParse(
-                                    parsed["value"],
-                                    NumberStyles.Float,
-                                    CultureInfo.InvariantCulture,
-                                    out var value
-                                )
-                            )
+                            if (!double.TryParse(parsed["value"], NumberStyles.Float, CultureInfo.InvariantCulture, out var value))
                             {
                                 continue;
                             }
@@ -145,12 +139,7 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
         }
     }
 
-    private async Task EvaluateScenes(
-        List<DataPoint> dataPoints,
-        List<Scene> scenes,
-        IServiceScope serviceScope,
-        CancellationToken cancellationToken
-    )
+    private async Task EvaluateScenes(List<DataPoint> dataPoints, List<Scene> scenes, IServiceScope serviceScope, CancellationToken cancellationToken)
     {
         var redis = serviceScope.ServiceProvider.GetRequiredService<RedisService>();
         var timescale = serviceScope.ServiceProvider.GetRequiredService<TimeScaleDbContext>();
@@ -174,11 +163,14 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
             }
 
             var data = new JsonObject();
+            var sensorValues = new Dictionary<(Guid DeviceId, string SensorTag), double?>();
             foreach (var trigger in scene.SensorTriggers)
             {
                 var dataPoint = dataPoints.FirstOrDefault(dp => dp.DeviceId == trigger.DeviceId && dp.SensorTag == trigger.SensorTag);
                 dataPoint ??= await GetDataPointFromCache(trigger, redis);
                 dataPoint ??= await GetDataPointFromDb(trigger, timescale);
+
+                sensorValues[(trigger.DeviceId, trigger.SensorTag)] = dataPoint?.Value;
 
                 if (dataPoint != null)
                 {
@@ -196,7 +188,7 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
 
                     if (result is JsonValue booleanResult && booleanResult.TryGetValue<bool>(out var isTriggered) && isTriggered)
                     {
-                        await HandleTriggeredScene(scene, serviceScope, cancellationToken);
+                        await HandleTriggeredScene(scene, sensorValues, serviceScope, cancellationToken);
                     }
                 }
             }
@@ -209,6 +201,7 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
 
     private async Task HandleTriggeredScene(
         Scene scene,
+        Dictionary<(Guid DeviceId, string SensorTag), double?> sensorValues,
         IServiceScope serviceScope,
         CancellationToken cancellationToken
     )
@@ -225,9 +218,7 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
         {
             if (action.Type == SceneActionType.NOTIFICATION)
             {
-                var message = string.IsNullOrWhiteSpace(action.NotificationMessage)
-                    ? "Scene triggered"
-                    : action.NotificationMessage!;
+                var message = string.IsNullOrWhiteSpace(action.NotificationMessage) ? "Scene triggered" : action.NotificationMessage!;
                 var notification = new SceneNotification
                 {
                     SceneId = scene.Id,
@@ -238,34 +229,50 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
             }
             else if (action.Type == SceneActionType.DISCORD_NOTIFICATION)
             {
-                var message = string.IsNullOrWhiteSpace(action.NotificationMessage)
-                    ? "Scene triggered"
-                    : action.NotificationMessage!;
+                var baseMessage = string.IsNullOrWhiteSpace(action.NotificationMessage) ? "Scene triggered" : action.NotificationMessage!;
+                var messageBuilder = new StringBuilder(baseMessage);
+
+                if (action.IncludeSensorValues && scene.SensorTriggers.Count != 0)
+                {
+                    var seenSensors = new HashSet<(Guid DeviceId, string SensorTag)>();
+                    var sensorLines = new List<string>();
+
+                    foreach (var trigger in scene.SensorTriggers)
+                    {
+                        var key = (trigger.DeviceId, trigger.SensorTag);
+                        if (!seenSensors.Add(key))
+                        {
+                            continue;
+                        }
+
+                        sensorValues.TryGetValue(key, out var value);
+                        var formattedValue = value.HasValue ? value.Value.ToString("0.##", CultureInfo.InvariantCulture) : "N/A";
+                        sensorLines.Add($"{trigger.SensorTag}: {formattedValue}");
+                    }
+
+                    if (sensorLines.Count != 0)
+                    {
+                        messageBuilder.AppendLine();
+                        foreach (var sensorLine in sensorLines)
+                        {
+                            messageBuilder.AppendLine(sensorLine);
+                        }
+                    }
+                }
+
+                var message = messageBuilder.ToString().TrimEnd();
                 if (!string.IsNullOrWhiteSpace(action.DiscordWebhookUrl))
                 {
-                    await discordNotificationService.SendAsync(
-                        action.DiscordWebhookUrl!,
-                        message,
-                        cancellationToken
-                    );
+                    await discordNotificationService.SendAsync(action.DiscordWebhookUrl!, message, cancellationToken);
                 }
                 else
                 {
-                    logger.LogWarning(
-                        "Scene {SceneId} Discord notification is missing a webhook URL.",
-                        scene.Id
-                    );
+                    logger.LogWarning("Scene {SceneId} Discord notification is missing a webhook URL.", scene.Id);
                 }
             }
             else if (action.Type == SceneActionType.JOB && action.RecipeId.HasValue && action.DeviceId.HasValue)
             {
-                await jobService.CreateJobFromRecipe(
-                    action.DeviceId.Value,
-                    action.RecipeId.Value,
-                    1,
-                    false,
-                    cancellationToken
-                );
+                await jobService.CreateJobFromRecipe(action.DeviceId.Value, action.RecipeId.Value, 1, false, cancellationToken);
             }
         }
 

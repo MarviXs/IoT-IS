@@ -78,7 +78,8 @@ public static class GetSceneById
                         action.RecipeId,
                         action.NotificationSeverity,
                         action.NotificationMessage,
-                        action.DiscordWebhookUrl
+                        action.DiscordWebhookUrl,
+                        action.IncludeSensorValues
                     ))
                     .ToList(),
                 scene.CooldownAfterTriggerTime,
@@ -95,7 +96,8 @@ public static class GetSceneById
         Guid? RecipeId,
         NotificationSeverity? NotificationSeverity,
         string? NotificationMessage,
-        string? DiscordWebhookUrl
+        string? DiscordWebhookUrl,
+        bool IncludeSensorValues
     );
 
     public record Response(

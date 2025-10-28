@@ -14,4 +14,5 @@ public class SceneAction
     public NotificationSeverity NotificationSeverity { get; set; } = NotificationSeverity.Info;
     public string? NotificationMessage { get; set; }
     public string? DiscordWebhookUrl { get; set; }
+    public bool IncludeSensorValues { get; set; }
 }
