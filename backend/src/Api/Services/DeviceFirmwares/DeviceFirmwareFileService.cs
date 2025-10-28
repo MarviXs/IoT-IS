@@ -6,8 +6,7 @@ namespace Fei.Is.Api.Services.DeviceFirmwares;
 
 public class DeviceFirmwareFileService : IDeviceFirmwareFileService
 {
-    private readonly string _basePath =
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Fei.Is", "firmwares");
+    private readonly string _basePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Fei.Is", "firmwares");
 
     public async Task<string> SaveAsync(IFormFile file, string? existingFileName, CancellationToken cancellationToken = default)
     {

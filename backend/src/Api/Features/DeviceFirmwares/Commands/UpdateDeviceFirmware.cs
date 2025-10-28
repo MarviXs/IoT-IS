@@ -18,7 +18,12 @@ namespace Fei.Is.Api.Features.DeviceFirmwares.Commands;
 
 public static class UpdateDeviceFirmware
 {
-    public record Request(string VersionNumber, bool IsActive, IFormFile? FirmwareFile);
+    public sealed class Request
+    {
+        public string VersionNumber { get; set; } = default!;
+        public bool IsActive { get; set; }
+        public IFormFile? FirmwareFile { get; set; }
+    }
 
     public sealed class Endpoint : ICarterModule
     {
@@ -56,6 +61,7 @@ public static class UpdateDeviceFirmware
                 .DisableAntiforgery()
                 .WithName(nameof(UpdateDeviceFirmware))
                 .WithTags(nameof(DeviceFirmware))
+                .Accepts<Request>("multipart/form-data")
                 .WithOpenApi(o =>
                 {
                     o.Summary = "Update a firmware version for a device template";

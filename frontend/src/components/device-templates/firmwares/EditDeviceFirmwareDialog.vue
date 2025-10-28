@@ -94,18 +94,22 @@ watch(
   },
 );
 
-watch(isDialogOpen, (open) => {
-  if (open) {
-    loadFirmware();
-  } else {
-    form.value = {
-      versionNumber: '',
-      isActive: false,
-      firmwareFile: null,
-    };
-    firmwareMeta.value = undefined;
-  }
-});
+watch(
+  isDialogOpen,
+  (open) => {
+    if (open) {
+      loadFirmware();
+    } else {
+      form.value = {
+        versionNumber: '',
+        isActive: false,
+        firmwareFile: null,
+      };
+      firmwareMeta.value = undefined;
+    }
+  },
+  { immediate: true },
+);
 </script>
 
 <style lang="scss" scoped></style>

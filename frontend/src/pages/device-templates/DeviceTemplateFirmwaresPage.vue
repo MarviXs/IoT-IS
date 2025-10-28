@@ -50,6 +50,19 @@
     </template>
     <template #body-cell-actions="props">
       <q-td auto-width :props="props">
+        <q-btn
+          :icon="mdiDownload"
+          color="grey-7"
+          flat
+          round
+          type="a"
+          :href="props.row.downloadUrl"
+          :download="props.row.originalFileName"
+          target="_blank"
+          rel="noopener"
+        >
+          <q-tooltip content-style="font-size: 11px" :offset="[0, 4]">{{ t('global.download') }}</q-tooltip>
+        </q-btn>
         <q-btn :icon="mdiPencil" color="grey-7" flat round @click.stop="openEditDialog(props.row.id)">
           <q-tooltip content-style="font-size: 11px" :offset="[0, 4]">{{ t('global.edit') }}</q-tooltip>
         </q-btn>
@@ -87,7 +100,7 @@ import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import type { QTableProps } from 'quasar';
 import { date as quasarDate } from 'quasar';
-import { mdiMemory, mdiPencil, mdiTrashCanOutline, mdiPlus } from '@quasar/extras/mdi-v7';
+import { mdiMemory, mdiPencil, mdiTrashCanOutline, mdiPlus, mdiDownload } from '@quasar/extras/mdi-v7';
 import DeviceFirmwareService, { type DeviceFirmwareResponse } from '@/api/services/DeviceFirmwareService';
 import { handleError } from '@/utils/error-handler';
 import CreateDeviceFirmwareDialog from '@/components/device-templates/firmwares/CreateDeviceFirmwareDialog.vue';
