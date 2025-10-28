@@ -16,7 +16,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fei.Is.Api.Features.Devices.Queries;
 
-public static class DownloadDeviceFirmware
+public static class DownloadDeviceFirmwareFromDevice
 {
     public record Request(string AccessToken);
 
@@ -57,7 +57,7 @@ public static class DownloadDeviceFirmware
                     }
                 )
                 .AllowAnonymous()
-                .WithName(nameof(DownloadDeviceFirmware))
+                .WithName(nameof(DownloadDeviceFirmwareFromDevice))
                 .WithTags(nameof(Device))
                 .WithOpenApi(o =>
                 {
