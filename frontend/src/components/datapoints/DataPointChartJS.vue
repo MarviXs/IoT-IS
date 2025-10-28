@@ -852,8 +852,11 @@ async function submitDelete() {
 
 const currentXMin = ref<string>();
 const currentXMax = ref<string>();
+const shouldResetZoom = ref(false);
 
 function onTimeRangeChanged(timeRangeName: string, customRangeData?: { from: string; to: string } | null) {
+  shouldResetZoom.value = true;
+
   if (storedTimeRange.value !== timeRangeName) {
     storedTimeRange.value = timeRangeName;
   }
@@ -935,6 +938,7 @@ function roundNumber(num: number | undefined | null, decimals: number) {
 function updateChartData() {
   if (!chart.value) return;
   const isZoomed = chart.value.isZoomedOrPanned();
+  const shouldResetChartZoom = shouldResetZoom.value;
 
   const datasets: DataSetCustom[] = [];
   const uniqueUnits = new Map<string, { key: string; color: string }>();
@@ -1006,7 +1010,7 @@ function updateChartData() {
   currentXMin.value = selectedTimeRange.value?.from;
   currentXMax.value = selectedTimeRange.value?.to;
 
-  if (chart.value.options.scales.x && !isZoomed) {
+  if (chart.value.options.scales.x && (!isZoomed || shouldResetChartZoom)) {
     chart.value.options.scales.x.min = selectedTimeRange.value?.from;
     chart.value.options.scales.x.max = selectedTimeRange.value?.to;
   }
@@ -1014,6 +1018,11 @@ function updateChartData() {
   Object.assign(chart.value.options.scales, yScales);
 
   chart.value.update();
+
+  if (shouldResetChartZoom) {
+    chart.value?.resetZoom?.();
+    shouldResetZoom.value = false;
+  }
 }
 
 function onLegendClick(e: ChartEvent, legendItem: LegendItem) {
