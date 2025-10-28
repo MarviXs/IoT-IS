@@ -439,7 +439,7 @@ export interface paths {
             cookie?: never;
         };
         /** Download a firmware file using device access token */
-        get: operations["DownloadDeviceFirmware"];
+        get: operations["DownloadDeviceFirmwareFromDevice"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4833,7 +4833,7 @@ export interface operations {
             };
         };
     };
-    DownloadDeviceFirmware: {
+    DownloadDeviceFirmwareFromDevice: {
         parameters: {
             query: {
                 AccessToken: string;
