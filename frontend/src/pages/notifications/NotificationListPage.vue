@@ -2,6 +2,7 @@
   <PageLayout :breadcrumbs="[{ label: 'Notifications', to: '/scenes' }]">
     <template #actions>
       <AutoRefreshButton
+        v-if="!isMobile"
         v-model="refreshInterval"
         :loading="loadingNotifications"
         class="col-grow col-lg-auto"
@@ -9,52 +10,54 @@
       />
     </template>
     <template #default>
-      <q-table
-        v-model:pagination="pagination"
-        :rows="notifications"
-        :columns="columns"
-        :loading="loadingNotifications"
-        flat
-        binary-state-sort
-        :rows-per-page-options="[10, 20, 50]"
-        class="shadow"
-        :no-data-label="t('table.no_data_label')"
-        :loading-label="t('table.loading_label')"
-        :rows-per-page-label="t('table.rows_per_page_label')"
-        @request="(requestProp) => getNotifications(requestProp.pagination)"
-      >
-        <template #no-data="{ message }">
-          <div class="full-width column flex-center q-pa-lg nothing-found-text">
-            <q-icon :name="mdiBellOutline" class="q-mb-md" size="50px"></q-icon>
-            {{ message }}
-          </div>
-        </template>
+      <q-pull-to-refresh :disable="!isMobile" @refresh="onPullToRefresh">
+        <q-table
+          v-model:pagination="pagination"
+          :rows="notifications"
+          :columns="columns"
+          :loading="loadingNotifications"
+          flat
+          binary-state-sort
+          :rows-per-page-options="[10, 20, 50]"
+          class="shadow"
+          :no-data-label="t('table.no_data_label')"
+          :loading-label="t('table.loading_label')"
+          :rows-per-page-label="t('table.rows_per_page_label')"
+          @request="(requestProp) => getNotifications(requestProp.pagination)"
+        >
+          <template #no-data="{ message }">
+            <div class="full-width column flex-center q-pa-lg nothing-found-text">
+              <q-icon :name="mdiBellOutline" class="q-mb-md" size="50px"></q-icon>
+              {{ message }}
+            </div>
+          </template>
 
-        <template #body-cell-severity="props">
-          <q-td auto-width :props="props">
-            <q-chip
-              :label="props.row.severity"
-              :color="notificationColors[props.row.severity]"
-              class="text-white"
-            ></q-chip>
-          </q-td>
-        </template>
+          <template #body-cell-severity="props">
+            <q-td auto-width :props="props">
+              <q-chip
+                :label="props.row.severity"
+                :color="notificationColors[props.row.severity]"
+                class="text-white"
+              ></q-chip>
+            </q-td>
+          </template>
 
-        <template #body-cell-name="props">
-          <q-td :props="props">
-            <RouterLink :to="`/scenes/${props.row.sceneId}`">{{ props.row.sceneName }}</RouterLink>
-          </q-td>
-        </template>
+          <template #body-cell-name="props">
+            <q-td :props="props">
+              <RouterLink :to="`/scenes/${props.row.sceneId}`">{{ props.row.sceneName }}</RouterLink>
+            </q-td>
+          </template>
 
-        <template #body-cell-createdAt="propsContact">
-          <q-td auto-width :props="propsContact">
-            {{ formatTimeToDistance(propsContact.row.createdAt) }}
-            <q-tooltip v-if="propsContact.row.createdAt" content-style="font-size: 11px" :offset="[0, 4]">
-              {{ new Date(propsContact.row.createdAt).toLocaleString() }}
-            </q-tooltip>
-          </q-td>
-        </template>
-      </q-table>
+          <template #body-cell-createdAt="propsContact">
+            <q-td auto-width :props="propsContact">
+              {{ formatTimeToDistance(propsContact.row.createdAt) }}
+              <q-tooltip v-if="propsContact.row.createdAt" content-style="font-size: 11px" :offset="[0, 4]">
+                {{ new Date(propsContact.row.createdAt).toLocaleString() }}
+              </q-tooltip>
+            </q-td>
+          </template>
+        </q-table>
+      </q-pull-to-refresh>
     </template>
   </PageLayout>
 </template>
@@ -76,10 +79,14 @@ import { formatTimeToDistance } from '@/utils/date-utils';
 import { useStorage } from '@vueuse/core';
 import AutoRefreshButton from '@/components/core/AutoRefreshButton.vue';
 import { notificationColors } from '@/utils/colors';
+import { useQuasar } from 'quasar';
 
 const { t, locale } = useI18n();
 const filter = ref('');
 const refreshInterval = useStorage('auto_notifications_refresh', 30);
+
+const $q = useQuasar();
+const isMobile = computed(() => $q.screen.lt.md);
 
 const pagination = ref<PaginationClient>({
   sortBy: 'createdAt',
@@ -118,6 +125,14 @@ async function getNotifications(paginationTable: PaginationTable) {
   pagination.value.rowsNumber = data.totalCount ?? 0;
 }
 getNotifications(pagination.value);
+
+async function onPullToRefresh(done: () => void) {
+  try {
+    await getNotifications(pagination.value);
+  } finally {
+    done();
+  }
+}
 
 const columns = computed<QTableProps['columns']>(() => [
   {
