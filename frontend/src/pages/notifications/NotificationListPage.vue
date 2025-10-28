@@ -136,7 +136,7 @@ const filter = ref('');
 const refreshInterval = useStorage('auto_notifications_refresh', 30);
 
 const $q = useQuasar();
-const isMobile = computed(() => $q.screen.lt.md);
+const isMobile = computed(() => $q.platform.is.mobile);
 
 const pagination = ref<PaginationClient>({
   sortBy: 'createdAt',

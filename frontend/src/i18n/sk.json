@@ -611,6 +611,12 @@
       "add_device_to_module_failed": "Pridanie zariadenia do modulu zlyhalo!"
     }
   },
+  "scene": {
+    "label": "Scéna | Scény",
+    "create_scene": "Vytvoriť scénu",
+    "last_triggered": "Naposledy spustené",
+    "never_triggered": "Nikdy nespustené"
+  },
   "scenario": {
     "label": "Scenár | Scenáre",
     "all": "Všetky",

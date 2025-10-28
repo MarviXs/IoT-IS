@@ -228,7 +228,7 @@ const emit = defineEmits(['onChange', 'onRequest', 'onLoadMore']);
 const { t } = useI18n();
 const $q = useQuasar();
 const router = useRouter();
-const isMobile = computed(() => $q.screen.lt.md);
+const isMobile = computed(() => $q.platform.is.mobile);
 
 const mobileItems = computed(() => {
   if (isMobile.value) {

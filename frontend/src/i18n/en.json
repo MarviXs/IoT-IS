@@ -636,7 +636,9 @@
   },
   "scene": {
     "label": "Scene | Scenes",
-    "create_scene": "Create Scene"
+    "create_scene": "Create Scene",
+    "last_triggered": "Last triggered",
+    "never_triggered": "Never triggered"
   },
   "notification": {
     "label": "Notification | Notifications"

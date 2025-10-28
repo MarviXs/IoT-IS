@@ -186,7 +186,7 @@ import { useQuasar } from 'quasar';
 const { t } = useI18n();
 
 const $q = useQuasar();
-const isMobile = computed(() => $q.screen.lt.md);
+const isMobile = computed(() => $q.platform.is.mobile);
 
 const pagination = ref<PaginationClient>({
   sortBy: 'name',
