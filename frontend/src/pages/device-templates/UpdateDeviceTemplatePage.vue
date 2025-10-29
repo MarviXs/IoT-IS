@@ -39,6 +39,7 @@ async function getDeviceTemplate() {
   templateData.value = {
     name: data.name,
     deviceType: data.deviceType,
+    isGlobal: data.isGlobal,
     enableMap: data.enableMap,
     enableGrid: data.enableGrid,
     gridRowSpan: data.enableGrid ? data.gridRowSpan ?? 1 : null,
@@ -75,6 +76,7 @@ async function submitForm() {
   const payload: UpdateDeviceTemplateRequest = {
     name: templateData.value.name,
     deviceType: templateData.value.deviceType,
+    isGlobal: templateData.value.isGlobal,
     enableMap: templateData.value.enableMap,
     enableGrid: templateData.value.enableGrid,
     gridRowSpan: templateData.value.enableGrid ? templateData.value.gridRowSpan : null,

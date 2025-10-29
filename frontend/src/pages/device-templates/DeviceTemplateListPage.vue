@@ -47,22 +47,34 @@
 
         <template #body-cell-name="props">
           <q-td :props="props">
-            <RouterLink :to="`/device-templates/${props.row.id}`">{{ props.row.name }}</RouterLink>
+            <RouterLink v-if="props.row.canEdit" :to="`/device-templates/${props.row.id}`">
+              {{ props.row.name }}
+            </RouterLink>
+            <span v-else>{{ props.row.name }}</span>
+          </q-td>
+        </template>
+
+        <template #body-cell-isGlobal="props">
+          <q-td :props="props">
+            <q-badge v-if="props.row.isGlobal" color="primary" outline>{{ t('device_template.global') }}</q-badge>
+            <span v-else>{{ t('global.no') }}</span>
           </q-td>
         </template>
 
         <template #body-cell-actions="props">
           <q-td auto-width :props="props">
-            <q-btn :icon="mdiPencil" color="grey-color" flat round :to="`/device-templates/${props.row.id}`">
-              <q-tooltip content-style="font-size: 11px" :offset="[0, 4]">
-                {{ t('global.edit') }}
-              </q-tooltip>
-            </q-btn>
-            <q-btn :icon="mdiTrashCanOutline" color="grey-color" flat round @click="openDeleteDialog(props.row.id)"
-              ><q-tooltip content-style="font-size: 11px" :offset="[0, 4]">
-                {{ t('global.delete') }}
-              </q-tooltip>
-            </q-btn>
+            <template v-if="props.row.canEdit">
+              <q-btn :icon="mdiPencil" color="grey-color" flat round :to="`/device-templates/${props.row.id}`">
+                <q-tooltip content-style="font-size: 11px" :offset="[0, 4]">
+                  {{ t('global.edit') }}
+                </q-tooltip>
+              </q-btn>
+              <q-btn :icon="mdiTrashCanOutline" color="grey-color" flat round @click="openDeleteDialog(props.row.id)"
+                ><q-tooltip content-style="font-size: 11px" :offset="[0, 4]">
+                  {{ t('global.delete') }}
+                </q-tooltip>
+              </q-btn>
+            </template>
           </q-td>
         </template>
       </q-table>
@@ -147,6 +159,13 @@ const columns = computed<QTableProps['columns']>(() => [
     name: 'name',
     label: t('global.name'),
     field: 'name',
+    sortable: true,
+    align: 'left',
+  },
+  {
+    name: 'isGlobal',
+    label: t('device_template.global'),
+    field: 'isGlobal',
     sortable: true,
     align: 'left',
   },

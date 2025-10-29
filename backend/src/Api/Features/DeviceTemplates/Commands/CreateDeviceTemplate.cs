@@ -18,6 +18,7 @@ public static class CreateDeviceTemplate
     public record Request(
         string Name,
         DeviceType DeviceType = DeviceType.Generic,
+        bool IsGlobal = false,
         bool EnableMap = false,
         bool EnableGrid = false,
         int? GridRowSpan = null,
@@ -71,6 +72,7 @@ public static class CreateDeviceTemplate
                 OwnerId = message.User.GetUserId(),
                 Name = message.Request.Name,
                 DeviceType = message.Request.DeviceType,
+                IsGlobal = message.User.IsAdmin() && message.Request.IsGlobal,
                 EnableMap = message.Request.EnableMap,
                 EnableGrid = message.Request.EnableGrid,
                 GridRowSpan = message.Request.EnableGrid ? message.Request.GridRowSpan : null,

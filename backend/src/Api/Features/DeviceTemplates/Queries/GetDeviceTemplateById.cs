@@ -62,7 +62,8 @@ public static class GetDeviceTemplateById
             {
                 return Result.Fail(new NotFoundError());
             }
-            if (!template.IsOwner(message.User))
+            var canEdit = template.CanEdit(message.User);
+            if (!canEdit && !template.IsGlobal)
             {
                 return Result.Fail(new ForbiddenError());
             }
@@ -74,7 +75,9 @@ public static class GetDeviceTemplateById
                 template.EnableMap,
                 template.EnableGrid,
                 template.GridRowSpan,
-                template.GridColumnSpan
+                template.GridColumnSpan,
+                template.IsGlobal,
+                canEdit
             );
 
             return Result.Ok(response);
@@ -88,6 +91,8 @@ public static class GetDeviceTemplateById
         bool EnableMap,
         bool EnableGrid,
         int? GridRowSpan,
-        int? GridColumnSpan
+        int? GridColumnSpan,
+        bool IsGlobal,
+        bool CanEdit
     );
 }

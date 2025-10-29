@@ -9,6 +9,12 @@
           :label="t('global.name')"
           :rules="[(val) => !!val || t('global.rules.required')]"
         />
+        <q-toggle
+          v-if="authStore.isAdmin"
+          v-model="isGlobal"
+          :label="t('device_template.global_template')"
+          :hint="t('device_template.global_template_hint')"
+        />
         <q-file outlined v-model="templateFile" label="Select Template File">
           <template v-slot:prepend>
             <q-icon name="attach_file" />
@@ -39,6 +45,7 @@ import { toast } from 'vue3-toastify';
 import { useI18n } from 'vue-i18n';
 import DialogCommon from '@/components/core/DialogCommon.vue';
 import DeviceTemplateService from '@/api/services/DeviceTemplateService';
+import { useAuthStore } from '@/stores/auth-store';
 
 const isDialogOpen = defineModel<boolean>();
 const emit = defineEmits(['onImported']);
@@ -48,6 +55,8 @@ const { t } = useI18n();
 const templateName = ref('');
 const templateFile = ref<File | null>(null);
 const importingTemplate = ref(false);
+const isGlobal = ref(false);
+const authStore = useAuthStore();
 
 async function importTemplate() {
   if (!templateFile.value) {
@@ -68,6 +77,7 @@ async function importTemplate() {
     }
 
     templateData.templateData.name = templateName.value;
+    templateData.templateData.isGlobal = isGlobal.value;
 
     importingTemplate.value = true;
     const { error } = await DeviceTemplateService.importDeviceTemplate(templateData);

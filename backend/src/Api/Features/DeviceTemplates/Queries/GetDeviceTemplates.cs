@@ -65,9 +65,10 @@ public static class GetDeviceTemplates
                 return Result.Fail(new ValidationError(result));
             }
 
+            var isAdmin = message.User.IsAdmin();
             var query = context.DeviceTemplates.AsNoTracking();
             var userId = message.User.GetUserId();
-            query = query.Where(d => d.OwnerId == userId);
+            query = query.Where(d => d.OwnerId == userId || d.IsGlobal);
 
             query = query
                 .Where(d => d.Name.ToLower().Contains(StringUtils.Normalized(templateParameters.SearchTerm)))
@@ -84,7 +85,9 @@ public static class GetDeviceTemplates
                     template.EnableMap,
                     template.EnableGrid,
                     template.GridRowSpan,
-                    template.GridColumnSpan
+                    template.GridColumnSpan,
+                    template.IsGlobal,
+                    template.OwnerId == userId || isAdmin
                 ))
                 .ToListAsync(cancellationToken);
 
@@ -92,7 +95,17 @@ public static class GetDeviceTemplates
         }
     }
 
-    public record Response(Guid Id, string Name, DateTime UpdatedAt, bool EnableMap, bool EnableGrid, int? GridRowSpan, int? GridColumnSpan);
+    public record Response(
+        Guid Id,
+        string Name,
+        DateTime UpdatedAt,
+        bool EnableMap,
+        bool EnableGrid,
+        int? GridRowSpan,
+        int? GridColumnSpan,
+        bool IsGlobal,
+        bool CanEdit
+    );
 
     public sealed class ParametersValidator : AbstractValidator<QueryParameters>
     {
@@ -100,7 +113,8 @@ public static class GetDeviceTemplates
         [
             nameof(DeviceTemplate.Name),
             nameof(DeviceTemplate.CreatedAt),
-            nameof(DeviceTemplate.UpdatedAt)
+            nameof(DeviceTemplate.UpdatedAt),
+            nameof(DeviceTemplate.IsGlobal)
         ];
 
         public ParametersValidator()

@@ -33,6 +33,7 @@ const router = useRouter();
 const templateData = ref<DeviceTemplateFormData>({
   name: '',
   deviceType: 'Generic',
+  isGlobal: false,
   enableMap: false,
   enableGrid: false,
   gridRowSpan: null,

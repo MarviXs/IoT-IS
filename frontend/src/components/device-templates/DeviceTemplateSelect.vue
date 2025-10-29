@@ -38,7 +38,7 @@ const lastPage = ref(1);
 
 const options = computed(() => {
   return items.value?.map((i) => ({
-    name: i.name,
+    name: i.isGlobal ? `${i.name} (${t('device_template.global')})` : i.name,
     id: i.id,
   }));
 });

@@ -19,6 +19,7 @@ public static class UpdateDeviceTemplate
     public record Request(
         string Name,
         DeviceType DeviceType = DeviceType.Generic,
+        bool IsGlobal = false,
         bool EnableMap = false,
         bool EnableGrid = false,
         int? GridRowSpan = null,
@@ -92,6 +93,7 @@ public static class UpdateDeviceTemplate
 
             deviceTemplate.Name = message.Request.Name;
             deviceTemplate.DeviceType = message.Request.DeviceType;
+            deviceTemplate.IsGlobal = message.User.IsAdmin() && message.Request.IsGlobal;
             deviceTemplate.EnableMap = message.Request.EnableMap;
             deviceTemplate.EnableGrid = message.Request.EnableGrid;
             deviceTemplate.GridRowSpan = message.Request.EnableGrid ? message.Request.GridRowSpan : null;

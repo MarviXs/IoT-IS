@@ -85,6 +85,7 @@ async function getDeviceTemplate() {
   deviceRequest.value = {
     name: data.name,
     deviceType: data.deviceType,
+    isGlobal: data.isGlobal,
     enableMap: data.enableMap,
     enableGrid: data.enableGrid,
     gridRowSpan: data.gridRowSpan,

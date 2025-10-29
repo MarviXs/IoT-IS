@@ -176,6 +176,9 @@
     "select_new_owner": "Select new owner",
     "current_owner": "Current owner: {email}",
     "current_owner_unknown": "Current owner is unknown",
+    "global": "Global",
+    "global_template": "Global template",
+    "global_template_hint": "Make this template available to all users when creating devices.",
     "delete_device_template": "Delete device template",
     "delete_device_template_desc": "Are you sure you want to delete this device template?",
     "firmwares": {

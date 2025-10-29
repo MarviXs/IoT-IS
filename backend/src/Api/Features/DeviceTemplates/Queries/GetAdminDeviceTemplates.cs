@@ -77,7 +77,8 @@ public static class GetAdminDeviceTemplates
                             template.EnableMap,
                             template.EnableGrid,
                             template.GridRowSpan,
-                            template.GridColumnSpan
+                            template.GridColumnSpan,
+                            template.IsGlobal
                         )
                 )
                 .ToList();
@@ -95,6 +96,7 @@ public static class GetAdminDeviceTemplates
         bool EnableMap,
         bool EnableGrid,
         int? GridRowSpan,
-        int? GridColumnSpan
+        int? GridColumnSpan,
+        bool IsGlobal
     );
 }

@@ -23,12 +23,19 @@
               emit-value
               map-options
             />
+            <div v-if="authStore.isAdmin" class="col-12">
+              <q-toggle v-model="template.isGlobal" :label="t('device_template.global_template')" />
+              <div class="text-caption text-grey-7 q-ml-lg">
+                {{ t('device_template.global_template_hint') }}
+              </div>
+            </div>
             <div class="col-12">
               <q-toggle v-model="template.enableMap" :label="t('device_template.enable_map')" />
             </div>
             <div class="col-12">
               <q-toggle v-model="template.enableGrid" :label="t('device_template.enable_grid')" />
             </div>
+
             <q-input
               v-if="template.enableGrid"
               v-model.number="template.gridRowSpan"
@@ -105,10 +112,12 @@ import type { SensorFormData } from './SensorForm.vue';
 import SensorForm from './SensorForm.vue';
 import { mdiPencil, mdiPlusCircle } from '@quasar/extras/mdi-v7';
 import { matSensors } from '@quasar/extras/material-icons';
+import { useAuthStore } from '@/stores/auth-store';
 
 export type DeviceTemplateFormData = {
   name: string;
   deviceType: 'Generic' | 'NuviaMSU';
+  isGlobal: boolean;
   enableMap: boolean;
   enableGrid: boolean;
   gridRowSpan: number | null;
@@ -131,6 +140,8 @@ defineProps({
     required: true,
   },
 });
+
+const authStore = useAuthStore();
 
 const formStep = ref(1);
 

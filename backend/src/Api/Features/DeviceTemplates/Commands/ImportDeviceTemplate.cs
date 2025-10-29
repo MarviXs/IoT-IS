@@ -26,7 +26,8 @@ public static class ImportDeviceTemplate
         bool EnableMap = false,
         bool EnableGrid = false,
         int? GridRowSpan = null,
-        int? GridColumnSpan = null
+        int? GridColumnSpan = null,
+        bool IsGlobal = false
     );
 
     public record Request(TemplateRequest TemplateData, string Version);
@@ -78,6 +79,7 @@ public static class ImportDeviceTemplate
                 OwnerId = message.User.GetUserId(),
                 Name = message.Request.TemplateData.Name,
                 DeviceType = message.Request.TemplateData.DeviceType,
+                IsGlobal = message.User.IsAdmin() && message.Request.TemplateData.IsGlobal,
                 EnableMap = message.Request.TemplateData.EnableMap,
                 EnableGrid = message.Request.TemplateData.EnableGrid,
                 GridRowSpan = message.Request.TemplateData.EnableGrid ? message.Request.TemplateData.GridRowSpan : null,

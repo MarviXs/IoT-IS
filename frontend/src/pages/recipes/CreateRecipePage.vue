@@ -108,6 +108,8 @@ async function getDeviceTemplate() {
     enableGrid: data.enableGrid,
     gridRowSpan: data.gridRowSpan,
     gridColumnSpan: data.gridColumnSpan,
+    isGlobal: data.isGlobal,
+    canEdit: data.canEdit,
   };
 }
 getDeviceTemplate();

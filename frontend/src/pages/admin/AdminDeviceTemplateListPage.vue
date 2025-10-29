@@ -57,6 +57,13 @@
           </q-td>
         </template>
 
+        <template #body-cell-isGlobal="propsGlobal">
+          <q-td :props="propsGlobal">
+            <q-badge v-if="propsGlobal.row.isGlobal" color="primary" outline>{{ t('device_template.global') }}</q-badge>
+            <span v-else>{{ t('global.no') }}</span>
+          </q-td>
+        </template>
+
         <template #body-cell-updatedAt="propsUpdated">
           <q-td :props="propsUpdated">
             {{ new Date(propsUpdated.row.updatedAt).toLocaleString(locale) }}
@@ -221,6 +228,13 @@ const columns = computed<QTableProps['columns']>(() => [
     label: t('global.owner'),
     field: 'ownerEmail',
     sortable: false,
+    align: 'left',
+  },
+  {
+    name: 'isGlobal',
+    label: t('device_template.global'),
+    field: 'isGlobal',
+    sortable: true,
     align: 'left',
   },
   {

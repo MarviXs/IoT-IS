@@ -2638,6 +2638,7 @@ export interface components {
         "Fei.Is.Api.Features.DeviceTemplates.Commands.CreateDeviceTemplate.Request": {
             name: string;
             deviceType: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceType"];
+            isGlobal: boolean;
             enableMap: boolean;
             enableGrid: boolean;
             /** Format: int32 */
@@ -2673,10 +2674,12 @@ export interface components {
             gridRowSpan?: number | null;
             /** Format: int32 */
             gridColumnSpan?: number | null;
+            isGlobal: boolean;
         };
         "Fei.Is.Api.Features.DeviceTemplates.Commands.UpdateDeviceTemplate.Request": {
             name: string;
             deviceType: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceType"];
+            isGlobal: boolean;
             enableMap: boolean;
             enableGrid: boolean;
             /** Format: int32 */
@@ -2699,6 +2702,7 @@ export interface components {
             gridRowSpan?: number | null;
             /** Format: int32 */
             gridColumnSpan?: number | null;
+            isGlobal: boolean;
         };
         "Fei.Is.Api.Features.DeviceTemplates.Queries.GetDeviceTemplateById.Response": {
             /** Format: uuid */
@@ -2711,6 +2715,8 @@ export interface components {
             gridRowSpan?: number | null;
             /** Format: int32 */
             gridColumnSpan?: number | null;
+            isGlobal: boolean;
+            canEdit: boolean;
         };
         "Fei.Is.Api.Features.DeviceTemplates.Queries.GetDeviceTemplates.Response": {
             /** Format: uuid */
@@ -2724,6 +2730,8 @@ export interface components {
             gridRowSpan?: number | null;
             /** Format: int32 */
             gridColumnSpan?: number | null;
+            isGlobal: boolean;
+            canEdit: boolean;
         };
         "Fei.Is.Api.Features.Devices.Commands.ChangeDeviceOwner.Request": {
             /** Format: uuid */
