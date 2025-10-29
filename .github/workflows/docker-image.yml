@@ -163,7 +163,6 @@ jobs:
 
       # Optional: inspect
       - name: Inspect backend image
-        run: docker buildx imagetools inspect ${{ env.DOCKERHUB_USER }}/${{ env.DO
-CKERHUB_REPO_BACKEND }}:latest
+        run: docker buildx imagetools inspect ${{ env.DOCKERHUB_USER }}/${{ env.DOCKERHUB_REPO_BACKEND }}:latest
       - name: Inspect frontend image
         run: docker buildx imagetools inspect ${{ env.DOCKERHUB_USER }}/${{ env.DOCKERHUB_REPO_FRONTEND }}:latest
