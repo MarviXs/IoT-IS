@@ -209,6 +209,7 @@
   },
   "device": {
     "label": "Zariadenie | Zariadenia",
+    "all_devices": "Všetky zariadenia",
     "device_info": "Informácie o zariadení",
     "add_device": "Pridať zariadenie",
     "type": "Typ",

@@ -73,6 +73,12 @@
           </template>
           <side-menu-button
             v-if="authStore.isAdmin"
+            to="/admin/devices"
+            :label="t('device.all_devices')"
+            :icon="mdiLan"
+          />
+          <side-menu-button
+            v-if="authStore.isAdmin"
             to="/user-management"
             :label="t('global.user_management')"
             :icon="mdiAccountGroup"
@@ -124,6 +130,7 @@ import {
   mdiSproutOutline,
   mdiPaletteOutline,
   mdiDatabase,
+  mdiLan,
 } from '@quasar/extras/mdi-v7';
 import { toast } from 'vue3-toastify';
 

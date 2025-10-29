@@ -10,6 +10,11 @@ public static class DeviceExtensions
 {
     public static bool IsOwner(this Device device, ClaimsPrincipal user)
     {
+        if (user.IsAdmin())
+        {
+            return true;
+        }
+
         return device.OwnerId == user.GetUserId();
     }
 
@@ -35,16 +40,31 @@ public static class DeviceExtensions
 
     public static bool CanView(this Device device, ClaimsPrincipal user)
     {
+        if (user.IsAdmin())
+        {
+            return true;
+        }
+
         return device.IsOwner(user) || device.IsSharedWithUser(user);
     }
 
     public static bool CanEdit(this Device device, ClaimsPrincipal user)
     {
+        if (user.IsAdmin())
+        {
+            return true;
+        }
+
         return device.IsOwner(user) || device.IsEditor(user);
     }
 
     public static DevicePermission GetPermission(this Device device, ClaimsPrincipal user)
     {
+        if (user.IsAdmin())
+        {
+            return DevicePermission.Owner;
+        }
+
         if (device.IsOwner(user))
         {
             return DevicePermission.Owner;

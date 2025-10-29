@@ -89,6 +89,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/devices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get all devices for administrators */
+        get: operations["GetAdminDevices"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/device": {
         parameters: {
             query?: never;
@@ -1993,6 +2010,19 @@ export interface components {
             readonly hasNext: boolean;
             items: components["schemas"]["Fei.Is.Api.Features.Devices.Queries.GetDevices.Response"][];
         };
+        "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Devices.Queries.GetAdminDevices.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+            /** Format: int32 */
+            currentPage: number;
+            /** Format: int32 */
+            totalPages: number;
+            /** Format: int32 */
+            pageSize: number;
+            /** Format: int32 */
+            totalCount: number;
+            readonly hasPrevious: boolean;
+            readonly hasNext: boolean;
+            items: components["schemas"]["Fei.Is.Api.Features.Devices.Queries.GetAdminDevices.Response"][];
+        };
         "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.GreenHouses.Queries.GetGreenHouses.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
             /** Format: int32 */
             currentPage: number;
@@ -2671,6 +2701,18 @@ export interface components {
             /** Format: uuid */
             id: string;
             name: string;
+            connected: boolean;
+            permission: components["schemas"]["Fei.Is.Api.Data.Enums.DevicePermission"];
+            /** Format: date-time */
+            lastSeen?: string | null;
+        };
+        "Fei.Is.Api.Features.Devices.Queries.GetAdminDevices.Response": {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            /** Format: uuid */
+            ownerId: string;
+            ownerEmail?: string | null;
             connected: boolean;
             permission: components["schemas"]["Fei.Is.Api.Data.Enums.DevicePermission"];
             /** Format: date-time */
@@ -5004,6 +5046,32 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    GetAdminDevices: {
+        parameters: {
+            query?: {
+                SortBy?: string;
+                Descending?: boolean;
+                SearchTerm?: string;
+                PageNumber?: number;
+                PageSize?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Devices.Queries.GetAdminDevices.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"];
+                };
             };
         };
     };

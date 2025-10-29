@@ -215,6 +215,7 @@
   },
   "device": {
     "label": "Device | Devices",
+    "all_devices": "All devices",
     "device_info": "Device info",
     "add_device": "Add device",
     "edit_device": "Edit device",

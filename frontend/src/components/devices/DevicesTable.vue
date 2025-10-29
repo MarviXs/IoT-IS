@@ -10,13 +10,16 @@
             v-ripple
             @click="goToDevice(device.id)"
           >
-            <q-card-section class="device-card__section">
-              <div class="device-card__name text-subtitle1 ellipsis">{{ device.name }}</div>
-              <div class="device-card__status row items-center">
-                <StatusDot :connected="device.connected" />
-                <span class="q-ml-sm">{{ device.connected ? t('device.connected') : t('device.disconnected') }}</span>
-              </div>
-            </q-card-section>
+          <q-card-section class="device-card__section">
+            <div class="device-card__name text-subtitle1 ellipsis">{{ device.name }}</div>
+            <div class="device-card__status row items-center">
+              <StatusDot :connected="device.connected" />
+              <span class="q-ml-sm">{{ device.connected ? t('device.connected') : t('device.disconnected') }}</span>
+            </div>
+            <div v-if="showOwner" class="device-card__owner text-caption text-grey-7">
+              {{ t('global.owner') }}: {{ device.ownerEmail ?? '—' }}
+            </div>
+          </q-card-section>
             <q-menu context-menu touch-position>
               <q-list>
                 <q-item clickable v-close-popup @click.stop="openUpdateDialog(device.id)">
@@ -99,6 +102,12 @@
           <q-tooltip v-if="propsContact.row.lastSeen" content-style="font-size: 11px" :offset="[0, 4]">
             {{ new Date(propsContact.row.lastSeen).toLocaleString() }}
           </q-tooltip>
+        </q-td>
+      </template>
+
+      <template #body-cell-owner="propsOwner">
+        <q-td :props="propsOwner">
+          {{ propsOwner.row.ownerEmail ?? '—' }}
         </q-td>
       </template>
 
@@ -186,15 +195,21 @@ import DeleteDeviceDialog from '@/components/devices/DeleteDeviceDialog.vue';
 import { formatTimeToDistance } from '@/utils/date-utils';
 import type { PaginationClient } from '@/models/Pagination';
 import type { DevicesResponse } from '@/api/services/DeviceService';
+import type { AdminDevicesResponse } from '@/api/services/AdminDeviceService';
 import EditDeviceDialog from '@/components/devices/EditDeviceDialog.vue';
 import StatusDot from './StatusDot.vue';
 import { useRouter } from 'vue-router';
 
-type DeviceList = NonNullable<DevicesResponse['items']>;
+type DeviceListItem = NonNullable<DevicesResponse['items']>[number] &
+  Partial<NonNullable<AdminDevicesResponse['items']>[number]>;
+type DeviceList = DeviceListItem[];
+type DeviceListResponse =
+  | (Omit<DevicesResponse, 'items'> & { items?: DeviceListItem[] })
+  | (Omit<AdminDevicesResponse, 'items'> & { items?: DeviceListItem[] });
 
 const props = defineProps({
   devices: {
-    type: Object as PropType<DevicesResponse>,
+    type: Object as PropType<DeviceListResponse | null>,
     required: false,
     default: null,
   },
@@ -217,11 +232,16 @@ const props = defineProps({
     required: false,
     default: 0,
   },
+  showOwner: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
 });
 
 const pagination = defineModel<PaginationClient>('pagination');
 
-const devicesFiltered = computed(() => props.devices?.items ?? []);
+const devicesFiltered = computed<DeviceList>(() => props.devices?.items ?? []);
 
 const emit = defineEmits(['onChange', 'onRequest', 'onLoadMore']);
 
@@ -229,6 +249,7 @@ const { t } = useI18n();
 const $q = useQuasar();
 const router = useRouter();
 const isMobile = computed(() => $q.platform.is.mobile);
+const showOwner = computed(() => props.showOwner);
 
 const mobileItems = computed(() => {
   if (isMobile.value) {
@@ -288,45 +309,53 @@ function openShareDialog(deviceId: string) {
 //   return t('global.shared');
 // };
 
-const columns = computed<QTableProps['columns']>(() => [
-  {
-    name: 'status',
-    label: t('device.status'),
-    field: 'connected',
-    align: 'center',
-    sortable: false,
-  },
-  {
-    name: 'name',
-    label: t('global.name'),
-    field: 'name',
-    sortable: true,
-    align: 'left',
-  },
-  {
-    name: 'lastResponse',
-    label: t('device.last_activity'),
-    field: 'lastSeen',
-    align: 'left',
-    sortable: false,
-  },
-  // {
-  //   name: 'jobstatus',
-  //   label: t('job.job_status'),
-  //   field(row) {
-  //     return 'LastJobStatus';
-  //   },
-  //   align: 'center',
-  //   sortable: false,
-  // },
-  {
-    name: 'actions',
-    label: '',
-    field: '',
-    align: 'center',
-    sortable: false,
-  },
-]);
+const columns = computed<QTableProps['columns']>(() => {
+  const baseColumns: QTableProps['columns'][number][] = [
+    {
+      name: 'status',
+      label: t('device.status'),
+      field: 'connected',
+      align: 'center',
+      sortable: false,
+    },
+    {
+      name: 'name',
+      label: t('global.name'),
+      field: 'name',
+      sortable: true,
+      align: 'left',
+    },
+  ];
+
+  if (props.showOwner) {
+    baseColumns.push({
+      name: 'owner',
+      label: t('global.owner'),
+      field: 'ownerEmail',
+      align: 'left',
+      sortable: false,
+    });
+  }
+
+  baseColumns.push(
+    {
+      name: 'lastResponse',
+      label: t('device.last_activity'),
+      field: 'lastSeen',
+      align: 'left',
+      sortable: false,
+    },
+    {
+      name: 'actions',
+      label: '',
+      field: '',
+      align: 'center',
+      sortable: false,
+    },
+  );
+
+  return baseColumns;
+});
 </script>
 
 <style lang="scss" scoped>
@@ -348,6 +377,10 @@ const columns = computed<QTableProps['columns']>(() => [
 
   &__status {
     font-size: 14px;
+  }
+
+  &__owner {
+    margin-top: 4px;
   }
 }
 </style>
