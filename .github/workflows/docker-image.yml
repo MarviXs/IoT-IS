@@ -59,7 +59,7 @@ jobs:
       - name: Upload digest (backend)
         uses: actions/upload-artifact@v4
         with:
-          name: backend-digests-${{ matrix.platform.replace('/', '-') }}
+          name: backend-digests-${{ matrix.platform }}
           path: ${{ runner.temp }}/digests/*
           retention-days: 1
 
@@ -112,7 +112,7 @@ jobs:
       - name: Upload digest (frontend)
         uses: actions/upload-artifact@v4
         with:
-          name: frontend-digests-${{ matrix.platform.replace('/', '-') }}
+          name: frontend-digests-${{ matrix.platform }}
           path: ${{ runner.temp }}/digests/*
           retention-days: 1
 
