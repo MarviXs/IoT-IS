@@ -115,6 +115,8 @@ watch(
     }
   },
 );
+
+getSharedUsers();
 </script>
 
 <style lang="scss" scoped>

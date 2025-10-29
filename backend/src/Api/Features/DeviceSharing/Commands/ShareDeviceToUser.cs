@@ -89,7 +89,6 @@ public static class ShareDeviceToUser
             {
                 DeviceId = device.Id,
                 Device = device,
-                SharingUserId = message.User.GetUserId(),
                 SharedToUser = user,
                 Permission = message.Request.Permission
             };

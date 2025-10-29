@@ -10,18 +10,5 @@ public class ApplicationUserConfiguration : IEntityTypeConfiguration<Application
     public void Configure(EntityTypeBuilder<ApplicationUser> builder)
     {
         builder.HasMany(e => e.UserRoles).WithOne(e => e.User).HasForeignKey(ur => ur.UserId).IsRequired();
-
-        builder
-            .HasMany(e => e.DeviceSharesTo)
-            .WithOne(e => e.SharedToUser)
-            .HasForeignKey(e => e.SharedToUserId)
-            .IsRequired()
-            .OnDelete(DeleteBehavior.NoAction);
-        builder
-            .HasMany(e => e.DeviceSharesFrom)
-            .WithOne(e => e.SharingUser)
-            .HasForeignKey(e => e.SharingUserId)
-            .IsRequired()
-            .OnDelete(DeleteBehavior.NoAction);
     }
 }

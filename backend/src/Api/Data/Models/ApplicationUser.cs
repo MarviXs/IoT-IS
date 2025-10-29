@@ -9,6 +9,4 @@ public class ApplicationUser : IdentityUser<Guid>
     public ICollection<Device> Devices { get; } = [];
     public ICollection<DeviceTemplate> DeviceTemplates { get; } = [];
     public ICollection<CollectionShare> CollectionShares { get; } = [];
-    public ICollection<DeviceShare> DeviceSharesTo { get; } = [];
-    public ICollection<DeviceShare> DeviceSharesFrom { get; } = [];
 }

@@ -66,37 +66,60 @@ public static class GetRecipes
     {
         public async Task<Result<PagedList<Response>>> Handle(Query message, CancellationToken cancellationToken)
         {
-            var queryParameters = message.Parameters;
+            var qp = message.Parameters;
 
-            var result = validator.Validate(queryParameters);
-            if (!result.IsValid)
+            var val = validator.Validate(qp);
+            if (!val.IsValid)
+                return Result.Fail(new ValidationError(val));
+
+            var userId = message.User.GetUserId();
+
+            // 1) All templates the user can access: owned OR via shared devices.
+            //    (If you support template-level shares, UNION them here.)
+            IQueryable<Guid> accessibleTemplateIds = context
+                .DeviceTemplates.Where(t => t.OwnerId == userId)
+                .Select(t => t.Id)
+                .Union(
+                    context
+                        .Devices.Where(d => d.DeviceTemplateId != null && d.SharedWithUsers.Any(s => s.SharedToUserId == userId))
+                        .Select(d => d.DeviceTemplateId!.Value)
+                );
+
+            // 2) Base query: recipes under accessible templates only.
+            var query = context.Recipes.AsNoTracking().Where(r => accessibleTemplateIds.Contains(r.DeviceTemplateId));
+
+            // 3) Search
+            if (!string.IsNullOrWhiteSpace(qp.SearchTerm))
             {
-                return Result.Fail(new ValidationError(result));
+                // If using Npgsql, prefer ILIKE for case/diacritic friendly search:
+                // query = query.Where(r => EF.Functions.ILike(r.Name, $"%{qp.SearchTerm}%"));
+                query = query.Where(r => r.Name.ToLower().Contains(StringUtils.Normalized(qp.SearchTerm)));
             }
 
-            var query = context
-                .Recipes.AsNoTracking()
-                .AsSplitQuery()
-                .Include(d => d.DeviceTemplate)
-                .Include(d => d.DeviceTemplate!.Devices)
-                .ThenInclude(device => device.SharedWithUsers)
-                .Where(d =>
-                    d.DeviceTemplate!.OwnerId == message.User.GetUserId()
-                    || d.DeviceTemplate!.Devices.Any(device => device.SharedWithUsers.Any(u => u.SharedToUserId == message.User.GetUserId()))
-                )
-                .Where(d => d.Name.ToLower().Contains(StringUtils.Normalized(queryParameters.SearchTerm)))
-                .Where(d => queryParameters.DeviceTemplateId == null || d.DeviceTemplateId == queryParameters.DeviceTemplateId)
-                .Where(d => queryParameters.DeviceId == null || d.DeviceTemplate!.Devices.Any(device => device.Id == queryParameters.DeviceId));
+            // 4) Optional filters
+            if (qp.DeviceTemplateId is Guid templateId)
+            {
+                query = query.Where(r => r.DeviceTemplateId == templateId);
+            }
 
+            if (qp.DeviceId is Guid deviceId)
+            {
+                // Constrain to the template that the given device belongs to
+                var templateIdForDevice = context.Devices.Where(d => d.Id == deviceId).Select(d => d.DeviceTemplateId);
+
+                query = query.Where(r => templateIdForDevice.Contains(r.DeviceTemplateId));
+            }
+
+            // 5) Count, sort, paginate, project
             var totalCount = await query.CountAsync(cancellationToken);
 
             var recipes = await query
-                .Sort(queryParameters.SortBy ?? nameof(Recipe.UpdatedAt), queryParameters.Descending)
-                .Paginate(queryParameters)
-                .Select(recipe => new Response(recipe.Id, recipe.Name, recipe.UpdatedAt))
+                .Sort(qp.SortBy ?? nameof(Recipe.UpdatedAt), qp.Descending)
+                .Paginate(qp)
+                .Select(r => new Response(r.Id, r.Name, r.UpdatedAt))
                 .ToListAsync(cancellationToken);
 
-            return Result.Ok(recipes.ToPagedList(totalCount, queryParameters.PageNumber, queryParameters.PageSize));
+            return Result.Ok(recipes.ToPagedList(totalCount, qp.PageNumber, qp.PageSize));
         }
     }
 
