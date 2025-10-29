@@ -22,7 +22,12 @@
             </q-card-section>
             <q-menu context-menu touch-position>
               <q-list>
-                <q-item clickable v-close-popup @click.stop="openUpdateDialog(device.id)">
+                <q-item
+                  v-if="device.permission == 'Owner' || adminView"
+                  clickable
+                  v-close-popup
+                  @click.stop="openUpdateDialog(device.id)"
+                >
                   <div class="row items-center q-gutter-sm">
                     <q-icon color="grey-9" size="24px" :name="mdiPencil" />
                     <div>{{ t('global.edit') }}</div>
