@@ -24,7 +24,7 @@ public static class UnshareDeviceToUser
         {
             app.MapPost(
                     "devices/{deviceId:guid}/unshare",
-                    async Task<Results<Created<Guid>, ValidationProblem, NotFound>> (
+                    async Task<Results<Created<Guid>, ValidationProblem, NotFound, ForbidHttpResult>> (
                         IMediator mediator,
                         ClaimsPrincipal user,
                         [FromBody] Request request,
@@ -42,6 +42,10 @@ public static class UnshareDeviceToUser
                         if (result.HasError<NotFoundError>())
                         {
                             return TypedResults.NotFound();
+                        }
+                        if (result.HasError<ForbiddenError>())
+                        {
+                            return TypedResults.Forbid();
                         }
 
                         return TypedResults.Created(result.Value.ToString(), result.Value);
@@ -69,14 +73,12 @@ public static class UnshareDeviceToUser
                 return Result.Fail(new ValidationError(result));
             }
 
+            var userId = message.User.GetUserId();
+
             var device = await context.Devices.FirstOrDefaultAsync(x => x.Id == message.DeviceId, cancellationToken);
             if (device == null)
             {
                 return Result.Fail(new NotFoundError());
-            }
-            if (!message.User.IsAdmin() && device.OwnerId != message.User.GetUserId())
-            {
-                return Result.Fail(new ForbiddenError());
             }
 
             var sharedUser = await context.Users.FirstOrDefaultAsync(x => x.Email == message.Request.Email, cancellationToken);
@@ -89,10 +91,17 @@ public static class UnshareDeviceToUser
                 x => x.DeviceId == message.DeviceId && x.SharedToUserId == sharedUser.Id,
                 cancellationToken
             );
-
             if (deviceShare == null)
             {
                 return Result.Fail(new NotFoundError());
+            }
+
+            var isOwner = device.OwnerId == userId;
+            var isShared = deviceShare.SharedToUserId == userId;
+            var isAdmin = message.User.IsAdmin();
+            if (!isAdmin && !(isOwner || isShared))
+            {
+                return Result.Fail(new ForbiddenError());
             }
 
             context.DeviceShares.Remove(deviceShare);
