@@ -16,13 +16,7 @@ namespace Fei.Is.Api.Features.Devices.Commands;
 
 public static class UpdateDevice
 {
-    public record Request(
-        string Name,
-        string AccessToken,
-        Guid? TemplateId,
-        DeviceConnectionProtocol Protocol,
-        int? DataPointRetentionDays
-    );
+    public record Request(string Name, string AccessToken, Guid? TemplateId, DeviceConnectionProtocol Protocol, int? DataPointRetentionDays);
 
     public sealed class Endpoint : ICarterModule
     {

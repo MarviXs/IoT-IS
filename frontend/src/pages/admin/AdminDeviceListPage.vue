@@ -31,7 +31,7 @@
           :mobile-devices="mobileDevices"
           :has-more="hasMoreDevices"
           :reset-key="mobileResetKey"
-          show-owner
+          admin-view
           @on-change="getDevices(pagination)"
           @on-request="onRequest"
           @on-load-more="loadMoreDevices"
@@ -43,7 +43,7 @@
         :devices="devicesPaginated"
         :loading="isLoadingDevices"
         :filter="filter"
-        show-owner
+        admin-view
         @on-change="getDevices(pagination)"
         @on-request="onRequest"
       />

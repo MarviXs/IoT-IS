@@ -465,40 +465,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/device-templates": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get all device templates for administrators */
-        get: operations["GetAdminDeviceTemplates"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/admin/device-templates/{id}/owner": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Change device template owner */
-        put: operations["ChangeDeviceTemplateOwner"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/devices/{deviceAccessToken}/firmwares/active": {
         parameters: {
             query?: never;
@@ -812,6 +778,40 @@ export interface paths {
         put?: never;
         /** Unshare a device with a user by email */
         post: operations["UnshareDeviceToUser"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/device-templates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get all device templates for administrators */
+        get: operations["GetAdminDeviceTemplates"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/device-templates/{id}/owner": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Change device template owner */
+        put: operations["ChangeDeviceTemplateOwner"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -2035,19 +2035,6 @@ export interface components {
             readonly hasNext: boolean;
             items: components["schemas"]["Fei.Is.Api.Features.DeviceCollections.Queries.GetDeviceCollections.Response"][];
         };
-        "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.DeviceTemplates.Queries.GetDeviceTemplates.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
-            /** Format: int32 */
-            currentPage: number;
-            /** Format: int32 */
-            totalPages: number;
-            /** Format: int32 */
-            pageSize: number;
-            /** Format: int32 */
-            totalCount: number;
-            readonly hasPrevious: boolean;
-            readonly hasNext: boolean;
-            items: components["schemas"]["Fei.Is.Api.Features.DeviceTemplates.Queries.GetDeviceTemplates.Response"][];
-        };
         "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.DeviceTemplates.Queries.GetAdminDeviceTemplates.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
             /** Format: int32 */
             currentPage: number;
@@ -2060,6 +2047,19 @@ export interface components {
             readonly hasPrevious: boolean;
             readonly hasNext: boolean;
             items: components["schemas"]["Fei.Is.Api.Features.DeviceTemplates.Queries.GetAdminDeviceTemplates.Response"][];
+        };
+        "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.DeviceTemplates.Queries.GetDeviceTemplates.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+            /** Format: int32 */
+            currentPage: number;
+            /** Format: int32 */
+            totalPages: number;
+            /** Format: int32 */
+            pageSize: number;
+            /** Format: int32 */
+            totalCount: number;
+            readonly hasPrevious: boolean;
+            readonly hasNext: boolean;
+            items: components["schemas"]["Fei.Is.Api.Features.DeviceTemplates.Queries.GetDeviceTemplates.Response"][];
         };
         "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Devices.Queries.GetAdminDevices.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
             /** Format: int32 */
@@ -2615,6 +2615,10 @@ export interface components {
             email: string;
             permission: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceSharePermission"];
         };
+        "Fei.Is.Api.Features.DeviceTemplates.Commands.ChangeDeviceTemplateOwner.Request": {
+            /** Format: uuid */
+            ownerId: string;
+        };
         "Fei.Is.Api.Features.DeviceTemplates.Commands.CreateDeviceTemplate.Request": {
             name: string;
             deviceType: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceType"];
@@ -2664,6 +2668,22 @@ export interface components {
             /** Format: int32 */
             gridColumnSpan?: number | null;
         };
+        "Fei.Is.Api.Features.DeviceTemplates.Queries.GetAdminDeviceTemplates.Response": {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            /** Format: uuid */
+            ownerId: string;
+            ownerEmail?: string | null;
+            /** Format: date-time */
+            updatedAt: string;
+            enableMap: boolean;
+            enableGrid: boolean;
+            /** Format: int32 */
+            gridRowSpan?: number | null;
+            /** Format: int32 */
+            gridColumnSpan?: number | null;
+        };
         "Fei.Is.Api.Features.DeviceTemplates.Queries.GetDeviceTemplateById.Response": {
             /** Format: uuid */
             id: string;
@@ -2688,26 +2708,6 @@ export interface components {
             gridRowSpan?: number | null;
             /** Format: int32 */
             gridColumnSpan?: number | null;
-        };
-        "Fei.Is.Api.Features.DeviceTemplates.Queries.GetAdminDeviceTemplates.Response": {
-            /** Format: uuid */
-            id: string;
-            name: string;
-            /** Format: uuid */
-            ownerId: string;
-            ownerEmail?: string | null;
-            /** Format: date-time */
-            updatedAt: string;
-            enableMap: boolean;
-            enableGrid: boolean;
-            /** Format: int32 */
-            gridRowSpan?: number | null;
-            /** Format: int32 */
-            gridColumnSpan?: number | null;
-        };
-        "Fei.Is.Api.Features.DeviceTemplates.Commands.ChangeDeviceTemplateOwner.Request": {
-            /** Format: uuid */
-            ownerId: string;
         };
         "Fei.Is.Api.Features.Devices.Commands.ChangeDeviceOwner.Request": {
             /** Format: uuid */
@@ -5022,32 +5022,6 @@ export interface operations {
             };
         };
     };
-    GetAdminDeviceTemplates: {
-        parameters: {
-            query?: {
-                SortBy?: string;
-                Descending?: boolean;
-                SearchTerm?: string;
-                PageNumber?: number;
-                PageSize?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.DeviceTemplates.Queries.GetAdminDeviceTemplates.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"];
-                };
-            };
-        };
-    };
     GetDeviceActiveFirmware: {
         parameters: {
             query?: never;
@@ -5286,46 +5260,6 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["Fei.Is.Api.Features.Devices.Commands.ChangeDeviceOwner.Request"];
-            };
-        };
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    ChangeDeviceTemplateOwner: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Fei.Is.Api.Features.DeviceTemplates.Commands.ChangeDeviceTemplateOwner.Request"];
             };
         };
         responses: {
@@ -5990,6 +5924,72 @@ export interface operations {
                 content: {
                     "application/json": string;
                 };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GetAdminDeviceTemplates: {
+        parameters: {
+            query?: {
+                SortBy?: string;
+                Descending?: boolean;
+                SearchTerm?: string;
+                PageNumber?: number;
+                PageSize?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.DeviceTemplates.Queries.GetAdminDeviceTemplates.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"];
+                };
+            };
+        };
+    };
+    ChangeDeviceTemplateOwner: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.DeviceTemplates.Commands.ChangeDeviceTemplateOwner.Request"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Bad Request */
             400: {

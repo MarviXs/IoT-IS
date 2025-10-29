@@ -59,7 +59,7 @@ public static class DeleteDevice
             {
                 return Result.Fail(new NotFoundError());
             }
-            if (!device.IsOwner(message.User))
+            if (!device.IsOwner(message.User) && !message.User.IsAdmin())
             {
                 return Result.Fail(new ForbiddenError());
             }

@@ -256,6 +256,7 @@
     "decimal": "Decimal places",
     "init_window": "Initialize 1min window",
     "share_device": "Share",
+    "unshare_me": "Unshare me",
     "shared_with": "Shared with",
     "no_shared_users": "No users shared with",
     "change_owner": "Change owner",
@@ -300,6 +301,8 @@
         "already_shared": "Device is already shared with this user!",
         "user_remove_success": "User removed from device!",
         "user_remove_failed": "Removing user from device failed!",
+        "unshare_success": "You are no longer sharing this device!",
+        "unshare_failed": "Leaving shared device failed!",
         "shared_users_load_failed": "Loading shared users failed!",
         "change_owner_success": "Device ownership updated!",
         "change_owner_failed": "Updating device ownership failed!"

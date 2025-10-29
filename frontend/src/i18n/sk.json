@@ -245,6 +245,7 @@
     "decimal": "Počet desatinných miest",
     "init_window": "Inicializovať 1min okno",
     "share_device": "Zdieľať",
+    "unshare_me": "Zrušiť zdieľanie",
     "shared_with": "Zdieľané s",
     "no_shared_users": "Zariadenie nie je zdieľané",
     "change_owner": "Zmeniť vlastníka",
@@ -289,6 +290,8 @@
         "already_shared": "Zariadenie je už zdieľané s týmto používateľom!",
         "user_remove_success": "Používateľ bol odstránený zo zariadenia!",
         "user_remove_failed": "Odstránenie používateľa zo zariadenia zlyhalo!",
+        "unshare_success": "Zdieľanie zariadenia bolo ukončené!",
+        "unshare_failed": "Nepodarilo sa ukončiť zdieľanie zariadenia!",
         "shared_users_load_failed": "Načítanie používateľov zlyhalo!",
         "change_owner_success": "Vlastníctvo zariadenia bolo aktualizované!",
         "change_owner_failed": "Aktualizácia vlastníctva zariadenia zlyhala!"

@@ -10,16 +10,16 @@
             v-ripple
             @click="goToDevice(device.id)"
           >
-          <q-card-section class="device-card__section">
-            <div class="device-card__name text-subtitle1 ellipsis">{{ device.name }}</div>
-            <div class="device-card__status row items-center">
-              <StatusDot :connected="device.connected" />
-              <span class="q-ml-sm">{{ device.connected ? t('device.connected') : t('device.disconnected') }}</span>
-            </div>
-            <div v-if="showOwner" class="device-card__owner text-caption text-grey-7">
-              {{ t('global.owner') }}: {{ device.ownerEmail ?? '—' }}
-            </div>
-          </q-card-section>
+            <q-card-section class="device-card__section">
+              <div class="device-card__name text-subtitle1 ellipsis">{{ device.name }}</div>
+              <div class="device-card__status row items-center">
+                <StatusDot :connected="device.connected" />
+                <span class="q-ml-sm">{{ device.connected ? t('device.connected') : t('device.disconnected') }}</span>
+              </div>
+              <div v-if="showOwner" class="device-card__owner text-caption text-grey-7">
+                {{ t('global.owner') }}: {{ device.ownerEmail ?? '—' }}
+              </div>
+            </q-card-section>
             <q-menu context-menu touch-position>
               <q-list>
                 <q-item clickable v-close-popup @click.stop="openUpdateDialog(device.id)">
@@ -29,7 +29,7 @@
                   </div>
                 </q-item>
                 <q-item
-                  v-if="device.permission == 'Owner'"
+                  v-if="device.permission == 'Owner' || adminView"
                   clickable
                   v-close-popup
                   @click.stop="openDeleteDialog(device.id)"
@@ -40,7 +40,7 @@
                   </div>
                 </q-item>
                 <q-item
-                  v-if="device.permission == 'Owner'"
+                  v-if="device.permission == 'Owner' || adminView"
                   clickable
                   v-close-popup
                   @click.stop="openShareDialog(device.id)"
@@ -50,12 +50,13 @@
                     <div>{{ t('device.share_device') }}</div>
                   </div>
                 </q-item>
-                <q-item
-                  v-if="showOwner"
-                  clickable
-                  v-close-popup
-                  @click.stop="openChangeOwnerDialog(device)"
-                >
+                <q-item v-else clickable v-close-popup @click.stop="unshareDevice(device.id)">
+                  <div class="row items-center q-gutter-sm">
+                    <q-icon color="grey-9" size="24px" :name="mdiShareOff" />
+                    <div>{{ t('device.unshare_me') }}</div>
+                  </div>
+                </q-item>
+                <q-item v-if="adminView" clickable v-close-popup @click.stop="openChangeOwnerDialog(device)">
                   <div class="row items-center q-gutter-sm">
                     <q-icon color="grey-9" size="24px" :name="mdiAccountSwitch" />
                     <div>{{ t('device.change_owner') }}</div>
@@ -144,7 +145,7 @@
             <q-menu anchor="bottom right" self="top right">
               <q-list>
                 <q-item
-                  v-if="propsActions.row.permission == 'Owner'"
+                  v-if="propsActions.row.permission == 'Owner' || adminView"
                   v-close-popup
                   clickable
                   @click.stop="openDeleteDialog(propsActions.row.id)"
@@ -155,7 +156,7 @@
                   </div>
                 </q-item>
                 <q-item
-                  v-if="propsActions.row.permission == 'Owner'"
+                  v-if="propsActions.row.permission == 'Owner' || adminView"
                   v-close-popup
                   clickable
                   @click="openShareDialog(propsActions.row.id)"
@@ -165,12 +166,13 @@
                     <div>{{ t('device.share_device') }}</div>
                   </div>
                 </q-item>
-                <q-item
-                  v-if="showOwner"
-                  v-close-popup
-                  clickable
-                  @click="openChangeOwnerDialog(propsActions.row)"
-                >
+                <q-item v-else v-close-popup clickable @click="unshareDevice(propsActions.row.id)">
+                  <div class="row items-center q-gutter-sm">
+                    <q-icon color="grey-9" size="24px" :name="mdiShareOff" />
+                    <div>{{ t('device.unshare_me') }}</div>
+                  </div>
+                </q-item>
+                <q-item v-if="showOwner" v-close-popup clickable @click="openChangeOwnerDialog(propsActions.row)">
                   <div class="row items-center q-gutter-sm">
                     <q-icon color="grey-9" size="24px" :name="mdiAccountSwitch" />
                     <div>{{ t('device.change_owner') }}</div>
@@ -220,6 +222,7 @@ import {
   mdiDotsVertical,
   mdiPencil,
   mdiShare,
+  mdiShareOff,
   mdiTrashCan,
 } from '@quasar/extras/mdi-v7';
 import DeleteDeviceDialog from '@/components/devices/DeleteDeviceDialog.vue';
@@ -231,6 +234,11 @@ import EditDeviceDialog from '@/components/devices/EditDeviceDialog.vue';
 import StatusDot from './StatusDot.vue';
 import ChangeDeviceOwnerDialog from '@/components/devices/ChangeDeviceOwnerDialog.vue';
 import { useRouter } from 'vue-router';
+import DeviceSharingService from '@/api/services/DeviceSharingService';
+import { useAuthStore } from '@/stores/auth-store';
+import { storeToRefs } from 'pinia';
+import { handleError } from '@/utils/error-handler';
+import { toast } from 'vue3-toastify';
 
 type DeviceListItem = NonNullable<DevicesResponse['items']>[number] &
   Partial<NonNullable<AdminDevicesResponse['items']>[number]>;
@@ -264,7 +272,7 @@ const props = defineProps({
     required: false,
     default: 0,
   },
-  showOwner: {
+  adminView: {
     type: Boolean,
     required: false,
     default: false,
@@ -281,7 +289,10 @@ const { t } = useI18n();
 const $q = useQuasar();
 const router = useRouter();
 const isMobile = computed(() => $q.platform.is.mobile);
-const showOwner = computed(() => props.showOwner);
+const showOwner = computed(() => props.adminView);
+
+const authStore = useAuthStore();
+const { user } = storeToRefs(authStore);
 
 const mobileItems = computed(() => {
   if (isMobile.value) {
@@ -334,15 +345,30 @@ function openShareDialog(deviceId: string) {
   deviceToShare.value = deviceId;
 }
 
+async function unshareDevice(deviceId: string) {
+  const email = user.value?.email;
+  if (!email) {
+    toast.error(t('device.toasts.share.unshare_failed'));
+    return;
+  }
+
+  const { error } = await DeviceSharingService.unshareDevice({ email }, deviceId);
+
+  if (error) {
+    handleError(error, t('device.toasts.share.unshare_failed'));
+    return;
+  }
+
+  toast.success(t('device.toasts.share.unshare_success'));
+  emit('onChange');
+}
+
 const isChangeOwnerDialogOpen = ref(false);
-const deviceToChangeOwner = ref<
-  | {
-      deviceId: string;
-      ownerId: string;
-      ownerEmail?: string;
-    }
-  | null
->(null);
+const deviceToChangeOwner = ref<{
+  deviceId: string;
+  ownerId: string;
+  ownerEmail?: string;
+} | null>(null);
 
 function openChangeOwnerDialog(device: DeviceListItem) {
   if (!device.ownerId) {
@@ -388,7 +414,7 @@ const columns = computed<QTableProps['columns']>(() => {
     },
   ];
 
-  if (props.showOwner) {
+  if (props.adminView) {
     baseColumns.push({
       name: 'owner',
       label: t('global.owner'),

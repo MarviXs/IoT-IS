@@ -43,6 +43,10 @@ public static class ShareDeviceToUser
                         {
                             return TypedResults.NotFound();
                         }
+                        if (result.HasError<ForbiddenError>())
+                        {
+                            return TypedResults.Forbid();
+                        }
 
                         return TypedResults.Created(result.Value.ToString(), result.Value);
                     }
@@ -74,7 +78,7 @@ public static class ShareDeviceToUser
             {
                 return Result.Fail(new NotFoundError());
             }
-            if (!device.IsOwner(message.User))
+            if (!device.IsOwner(message.User) && !message.User.IsAdmin())
             {
                 return Result.Fail(new ForbiddenError());
             }
