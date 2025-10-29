@@ -47,9 +47,12 @@ public static class GetDeviceCollections
         {
             var queryParameters = message.Parameters;
 
-            var query = context
-                .DeviceCollections.AsNoTracking()
-                .Where(c => c.OwnerId == message.User.GetUserId())
+            var query = context.DeviceCollections.AsNoTracking();
+
+            var userId = message.User.GetUserId();
+            query = query.Where(c => c.OwnerId == userId);
+
+            query = query
                 .Where(c => c.IsRoot)
                 .Where(c => c.Name.ToLower().Contains(StringUtils.Normalized(queryParameters.SearchTerm)))
                 .Sort(queryParameters.SortBy ?? nameof(DeviceCollection.UpdatedAt), queryParameters.Descending);

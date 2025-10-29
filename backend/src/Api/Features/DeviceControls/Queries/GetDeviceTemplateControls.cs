@@ -7,6 +7,7 @@ using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
+using Fei.Is.Api.Features.DeviceTemplates.Extensions;
 using FluentResults;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -78,7 +79,7 @@ public static class GetDeviceTemplateControls
                 return Result.Fail(new NotFoundError());
             }
 
-            if (template.OwnerId != request.User.GetUserId())
+            if (!template.IsOwner(request.User))
             {
                 return Result.Fail(new ForbiddenError());
             }

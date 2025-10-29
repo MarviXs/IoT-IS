@@ -5,6 +5,7 @@ using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
+using Fei.Is.Api.Features.DeviceTemplates.Extensions;
 using FluentResults;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -55,32 +56,28 @@ public static class GetDeviceTemplateById
         {
             var template = await context
                 .DeviceTemplates.AsNoTracking()
-                .Where(template => template.Id == message.TemplateId)
-                .Select(template => new
-                {
-                    template.OwnerId,
-                    Response = new Response(
-                        template.Id,
-                        template.Name,
-                        template.DeviceType,
-                        template.EnableMap,
-                        template.EnableGrid,
-                        template.GridRowSpan,
-                        template.GridColumnSpan
-                    )
-                })
-                .FirstOrDefaultAsync(cancellationToken);
+                .FirstOrDefaultAsync(t => t.Id == message.TemplateId, cancellationToken);
 
             if (template == null)
             {
                 return Result.Fail(new NotFoundError());
             }
-            if (template.OwnerId != message.User.GetUserId())
+            if (!template.IsOwner(message.User))
             {
                 return Result.Fail(new ForbiddenError());
             }
 
-            return Result.Ok(template.Response);
+            var response = new Response(
+                template.Id,
+                template.Name,
+                template.DeviceType,
+                template.EnableMap,
+                template.EnableGrid,
+                template.GridRowSpan,
+                template.GridColumnSpan
+            );
+
+            return Result.Ok(response);
         }
     }
 

@@ -61,7 +61,7 @@ public static class GetSceneById
             {
                 return Result.Fail(new NotFoundError());
             }
-            if (scene.OwnerId != request.User.GetUserId())
+            if (!request.User.IsAdmin() && scene.OwnerId != request.User.GetUserId())
             {
                 return Result.Fail(new ForbiddenError());
             }

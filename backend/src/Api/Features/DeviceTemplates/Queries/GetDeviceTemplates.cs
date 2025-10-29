@@ -65,9 +65,11 @@ public static class GetDeviceTemplates
                 return Result.Fail(new ValidationError(result));
             }
 
-            var query = context
-                .DeviceTemplates.AsNoTracking()
-                .Where(d => d.OwnerId == message.User.GetUserId())
+            var query = context.DeviceTemplates.AsNoTracking();
+            var userId = message.User.GetUserId();
+            query = query.Where(d => d.OwnerId == userId);
+
+            query = query
                 .Where(d => d.Name.ToLower().Contains(StringUtils.Normalized(templateParameters.SearchTerm)))
                 .Sort(templateParameters.SortBy ?? nameof(DeviceTemplate.UpdatedAt), templateParameters.Descending);
 
@@ -75,32 +77,22 @@ public static class GetDeviceTemplates
 
             var templates = await query
                 .Paginate(templateParameters)
-                .Select(
-                    template => new Response(
-                        template.Id,
-                        template.Name,
-                        template.UpdatedAt,
-                        template.EnableMap,
-                        template.EnableGrid,
-                        template.GridRowSpan,
-                        template.GridColumnSpan
-                    )
-                )
+                .Select(template => new Response(
+                    template.Id,
+                    template.Name,
+                    template.UpdatedAt,
+                    template.EnableMap,
+                    template.EnableGrid,
+                    template.GridRowSpan,
+                    template.GridColumnSpan
+                ))
                 .ToListAsync(cancellationToken);
 
             return Result.Ok(templates.ToPagedList(totalCount, templateParameters.PageNumber, templateParameters.PageSize));
         }
     }
 
-    public record Response(
-        Guid Id,
-        string Name,
-        DateTime UpdatedAt,
-        bool EnableMap,
-        bool EnableGrid,
-        int? GridRowSpan,
-        int? GridColumnSpan
-    );
+    public record Response(Guid Id, string Name, DateTime UpdatedAt, bool EnableMap, bool EnableGrid, int? GridRowSpan, int? GridColumnSpan);
 
     public sealed class ParametersValidator : AbstractValidator<QueryParameters>
     {

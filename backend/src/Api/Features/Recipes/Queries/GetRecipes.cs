@@ -72,18 +72,31 @@ public static class GetRecipes
             if (!val.IsValid)
                 return Result.Fail(new ValidationError(val));
 
-            var userId = message.User.GetUserId();
+            // Admins can access all templates; other users are constrained to owned/shared templates.
+            IQueryable<Guid> accessibleTemplateIds;
+            if (message.User.IsAdmin())
+            {
+                accessibleTemplateIds = context.DeviceTemplates.Select(t => t.Id);
+            }
+            else
+            {
+                var userId = message.User.GetUserId();
 
-            // 1) All templates the user can access: owned OR via shared devices.
-            //    (If you support template-level shares, UNION them here.)
-            IQueryable<Guid> accessibleTemplateIds = context
-                .DeviceTemplates.Where(t => t.OwnerId == userId)
-                .Select(t => t.Id)
-                .Union(
-                    context
-                        .Devices.Where(d => d.DeviceTemplateId != null && d.SharedWithUsers.Any(s => s.SharedToUserId == userId))
-                        .Select(d => d.DeviceTemplateId!.Value)
-                );
+                // 1) All templates the user can access: owned OR via shared devices.
+                //    (If you support template-level shares, UNION them here.)
+                accessibleTemplateIds = context
+                    .DeviceTemplates.Where(t => t.OwnerId == userId)
+                    .Select(t => t.Id)
+                    .Union(
+                        context
+                            .Devices.Where(
+                                d =>
+                                    d.DeviceTemplateId != null
+                                    && d.SharedWithUsers.Any(s => s.SharedToUserId == userId)
+                            )
+                            .Select(d => d.DeviceTemplateId!.Value)
+                    );
+            }
 
             // 2) Base query: recipes under accessible templates only.
             var query = context.Recipes.AsNoTracking().Where(r => accessibleTemplateIds.Contains(r.DeviceTemplateId));

@@ -3,6 +3,7 @@ using Carter;
 using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Extensions;
+using Fei.Is.Api.Features.DeviceTemplates.Extensions;
 using FluentResults;
 using FluentValidation;
 using MediatR;
@@ -66,7 +67,7 @@ public static class CreateCommand
             {
                 return Result.Fail(new NotFoundError());
             }
-            if (deviceTemplate.OwnerId != message.User.GetUserId())
+            if (!deviceTemplate.CanEdit(message.User))
             {
                 return Result.Fail(new ForbiddenError());
             }

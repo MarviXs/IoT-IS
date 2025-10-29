@@ -65,9 +65,15 @@ public static class GetScenes
                 return Result.Fail(new ValidationError(result));
             }
 
-            var query = context
-                .Scenes.AsNoTracking()
-                .Where(s => s.OwnerId == message.User.GetUserId())
+            var query = context.Scenes.AsNoTracking();
+
+            if (!message.User.IsAdmin())
+            {
+                var userId = message.User.GetUserId();
+                query = query.Where(s => s.OwnerId == userId);
+            }
+
+            query = query
                 .Where(d => d.Name.ToLower().Contains(StringUtils.Normalized(queryParameters.SearchTerm)))
                 .Sort(queryParameters.SortBy ?? nameof(Scene.UpdatedAt), queryParameters.Descending);
 

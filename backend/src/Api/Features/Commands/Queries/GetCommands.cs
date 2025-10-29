@@ -72,7 +72,15 @@ public static class GetCommands
             var query = context
                 .Commands.AsNoTracking()
                 .Include(d => d.DeviceTemplate)
-                .Where(d => d.DeviceTemplate!.OwnerId == message.User.GetUserId())
+                .AsQueryable();
+
+            if (!message.User.IsAdmin())
+            {
+                var userId = message.User.GetUserId();
+                query = query.Where(d => d.DeviceTemplate!.OwnerId == userId);
+            }
+
+            query = query
                 .Where(d => d.Name.ToLower().Contains(StringUtils.Normalized(queryParameters.SearchTerm)))
                 .Where(d => queryParameters.DeviceTemplateId == null || d.DeviceTemplateId == queryParameters.DeviceTemplateId)
                 .Sort(queryParameters.SortBy ?? nameof(Command.UpdatedAt), queryParameters.Descending);

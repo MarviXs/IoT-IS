@@ -7,6 +7,7 @@ using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
+using Fei.Is.Api.Features.DeviceTemplates.Extensions;
 using FluentResults;
 using FluentValidation;
 using FluentValidation.Results;
@@ -98,7 +99,7 @@ public static class UpdateDeviceTemplateControls
                 return Result.Fail(new NotFoundError());
             }
 
-            if (template.OwnerId != message.User.GetUserId())
+            if (!template.CanEdit(message.User))
             {
                 return Result.Fail(new ForbiddenError());
             }

@@ -59,7 +59,7 @@ public static class GetDeviceSharedUsers
             {
                 return Result.Fail(new NotFoundError());
             }
-            if (device.OwnerId != message.User.GetUserId())
+            if (!message.User.IsAdmin() && device.OwnerId != message.User.GetUserId())
             {
                 return Result.Fail(new ForbiddenError());
             }

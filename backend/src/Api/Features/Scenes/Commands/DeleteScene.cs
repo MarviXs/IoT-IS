@@ -59,7 +59,7 @@ public static class DeleteScene
             {
                 return Result.Fail(new NotFoundError());
             }
-            if (scene.OwnerId != message.User.GetUserId())
+            if (!message.User.IsAdmin() && scene.OwnerId != message.User.GetUserId())
             {
                 return Result.Fail(new ForbiddenError());
             }

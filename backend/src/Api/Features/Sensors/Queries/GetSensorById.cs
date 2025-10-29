@@ -64,7 +64,7 @@ public static class GetSensorById
             {
                 return Result.Fail(new NotFoundError());
             }
-            if (sensor.DeviceTemplate == null || sensor.DeviceTemplate.OwnerId != userId)
+            if (sensor.DeviceTemplate == null || (!request.User.IsAdmin() && sensor.DeviceTemplate.OwnerId != userId))
             {
                 return Result.Fail(new ForbiddenError());
             }

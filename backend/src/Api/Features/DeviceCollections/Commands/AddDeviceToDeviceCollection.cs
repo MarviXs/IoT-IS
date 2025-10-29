@@ -56,7 +56,7 @@ public static class AddDeviceToDeviceCollection
             {
                 return Result.Fail(new NotFoundError());
             }
-            if (deviceCollection.OwnerId != message.User.GetUserId())
+            if (!message.User.IsAdmin() && deviceCollection.OwnerId != message.User.GetUserId())
             {
                 return Result.Fail(new ForbiddenError());
             }

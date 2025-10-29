@@ -4,6 +4,7 @@ using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
+using Fei.Is.Api.Features.DeviceTemplates.Extensions;
 using FluentResults;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -70,7 +71,7 @@ public static class GetDeviceFirmwareById
                 return Result.Fail(new NotFoundError());
             }
 
-            if (firmware.DeviceTemplate == null || firmware.DeviceTemplate.OwnerId != message.User.GetUserId())
+            if (firmware.DeviceTemplate == null || !firmware.DeviceTemplate.IsOwner(message.User))
             {
                 return Result.Fail(new ForbiddenError());
             }

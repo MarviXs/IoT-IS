@@ -73,7 +73,13 @@ public static class GetSceneNotifications
                 .SceneNotifications.AsNoTracking()
                 .Include(sn => sn.Scene)
                 .ThenInclude(s => s.SensorTriggers)
-                .Where(sn => sn.Scene!.OwnerId == message.User.GetUserId());
+                .AsQueryable();
+
+            if (!message.User.IsAdmin())
+            {
+                var userId = message.User.GetUserId();
+                baseQuery = baseQuery.Where(sn => sn.Scene!.OwnerId == userId);
+            }
 
             if (queryParameters.DeviceId.HasValue)
             {
