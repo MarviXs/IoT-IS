@@ -143,6 +143,7 @@
   },
   "device_template": {
     "label": "Šablóna zariadenia | Šablóny zariadení",
+    "all_device_templates": "Všetky šablóny zariadení",
     "template_details": "Detaily šablóny",
     "grid_settings": "Mriežka",
     "enable_map": "Povoliť mapu",
@@ -165,6 +166,10 @@
     "control_infinite": "Spúšťať neobmedzene",
     "control_default_name": "Ovládanie {index}",
     "no_controls": "Zatiaľ nie sú nastavené žiadne ovládania",
+    "change_owner": "Zmeniť vlastníka",
+    "select_new_owner": "Vyberte nového vlastníka",
+    "current_owner": "Aktuálny vlastník: {email}",
+    "current_owner_unknown": "Aktuálny vlastník nie je známy",
     "delete_device_template": "Vymazať šablónu zariadenia",
     "delete_device_template_desc": "Naozaj chcete vymazať túto šablónu zariadenia?",
     "firmwares": {
@@ -198,7 +203,9 @@
       "update_success": "Šablóna zariadenia aktualizovaná!",
       "update_controls_success": "Ovládania aktualizované!",
       "delete_success": "Šablóna zariadenia vymazaná!",
-      "delete_failed": "Vymazanie šablóny zariadenia zlyhalo!"
+      "delete_failed": "Vymazanie šablóny zariadenia zlyhalo!",
+      "change_owner_success": "Vlastníctvo šablóny zariadenia bolo aktualizované!",
+      "change_owner_failed": "Aktualizácia vlastníctva šablóny zariadenia zlyhala!"
     },
     "rules": {
       "decimal_min": "Desatinné miesta musia byť väčšie ako 0!",

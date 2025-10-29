@@ -47,6 +47,11 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/admin/AdminDeviceListPage.vue'),
         meta: { requiresAdmin: true },
       },
+      {
+        path: '/admin/device-templates',
+        component: () => import('pages/admin/AdminDeviceTemplateListPage.vue'),
+        meta: { requiresAdmin: true },
+      },
 
       {
         path: '/devices',

@@ -74,6 +74,11 @@
           <template v-if="authStore.isAdmin">
             <q-separator class="q-my-md" />
             <side-menu-button to="/admin/devices" :label="t('device.all_devices')" :icon="mdiLan" />
+            <side-menu-button
+              to="/admin/device-templates"
+              :label="t('device_template.all_device_templates')"
+              :icon="mdiContentCopy"
+            />
             <side-menu-button to="/user-management" :label="t('global.user_management')" :icon="mdiAccountGroup" />
           </template>
         </div>

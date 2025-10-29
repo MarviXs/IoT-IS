@@ -149,6 +149,7 @@
   },
   "device_template": {
     "label": "Device Template | Device Templates",
+    "all_device_templates": "All device templates",
     "template_details": "Template details",
     "grid_settings": "Grid",
     "enable_map": "Enable map",
@@ -171,6 +172,10 @@
     "control_infinite": "Run infinitely",
     "control_default_name": "Control {index}",
     "no_controls": "No controls configured yet",
+    "change_owner": "Change owner",
+    "select_new_owner": "Select new owner",
+    "current_owner": "Current owner: {email}",
+    "current_owner_unknown": "Current owner is unknown",
     "delete_device_template": "Delete device template",
     "delete_device_template_desc": "Are you sure you want to delete this device template?",
     "firmwares": {
@@ -204,7 +209,9 @@
       "update_success": "Device template updated!",
       "update_controls_success": "Controls updated!",
       "delete_success": "Device template deleted!",
-      "delete_failed": "Deleting device template failed!"
+      "delete_failed": "Deleting device template failed!",
+      "change_owner_success": "Device template ownership updated!",
+      "change_owner_failed": "Updating device template ownership failed!"
     },
     "rules": {
       "decimal_min": "Decimal places must be greater than 0!",
