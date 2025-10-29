@@ -60,11 +60,11 @@ import { toast } from 'vue3-toastify';
 import PageLayout from '@/layouts/PageLayout.vue';
 import StatusDot from '@/components/devices/StatusDot.vue';
 import DeviceService from '@/api/services/DeviceService';
-import DeviceTemplateControlService from '@/api/services/DeviceTemplateControlService';
+import DeviceControlService from '@/api/services/DeviceControlService';
 import JobService from '@/api/services/JobService';
 import { handleError } from '@/utils/error-handler';
 import type { DeviceResponse } from '@/api/services/DeviceService';
-import type { DeviceTemplateControlResponse } from '@/api/services/DeviceTemplateControlService';
+import type { DeviceControlResponse } from '@/api/services/DeviceControlService';
 import type { StartJobRequest } from '@/api/services/JobService';
 import DataPointService from '@/api/services/DataPointService';
 import type { LastDataPoint } from '@/models/LastDataPoint';
@@ -75,7 +75,7 @@ const route = useRoute();
 const deviceId = route.params.id as string;
 
 const device = ref<DeviceResponse>();
-const controls = ref<DeviceTemplateControlResponse[]>([]);
+const controls = ref<DeviceControlResponse[]>([]);
 const isLoading = ref(false);
 const loadingControlId = ref<string | null>(null);
 const toggleStates = ref<Record<string, boolean>>({});
@@ -127,14 +127,14 @@ async function loadDevice() {
 }
 
 async function loadControls() {
-  if (!device.value?.deviceTemplate?.id) {
+  if (!device.value) {
     controls.value = [];
     toggleStates.value = {};
     toggleDisabled.value = {};
     pendingToggleStates.value = {};
     return;
   }
-  const { data, error } = await DeviceTemplateControlService.getTemplateControls(device.value.deviceTemplate.id);
+  const { data, error } = await DeviceControlService.getDeviceControls(device.value.id);
   if (error) {
     handleError(error, t('device.controls.toasts.load_failed'));
     return;
@@ -143,7 +143,7 @@ async function loadControls() {
   await initializeToggleStates();
 }
 
-async function startControl(control: DeviceTemplateControlResponse) {
+async function startControl(control: DeviceControlResponse) {
   if (!device.value) {
     return;
   }
@@ -164,7 +164,7 @@ async function startControl(control: DeviceTemplateControlResponse) {
   toast.success(t('device.controls.toasts.start_success'));
 }
 
-async function toggleControl(control: DeviceTemplateControlResponse, desiredState: boolean) {
+async function toggleControl(control: DeviceControlResponse, desiredState: boolean) {
   if (!device.value || !hasToggleDependencies(control)) {
     return;
   }
@@ -274,12 +274,12 @@ const controlIdBySensorTag = computed<Record<string, string>>(() => {
   );
 });
 
-function isToggleControl(control: DeviceTemplateControlResponse) {
+function isToggleControl(control: DeviceControlResponse) {
   const type = control.type as number | string;
   return type === 1 || type === 'Toggle';
 }
 
-function hasToggleDependencies(control: DeviceTemplateControlResponse) {
+function hasToggleDependencies(control: DeviceControlResponse) {
   return Boolean(control.recipeOnId && control.recipeOffId && control.sensorId);
 }
 

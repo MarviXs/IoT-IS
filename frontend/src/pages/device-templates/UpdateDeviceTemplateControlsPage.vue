@@ -182,11 +182,11 @@ import type { QForm, QPopupProxy } from 'quasar';
 import { toast } from 'vue3-toastify';
 import { handleError } from '@/utils/error-handler';
 import RecipeService from '@/api/services/RecipeService';
-import DeviceTemplateControlService from '@/api/services/DeviceTemplateControlService';
+import DeviceControlService from '@/api/services/DeviceControlService';
 import type {
-  DeviceTemplateControlResponse,
+  DeviceControlResponse,
   UpdateDeviceTemplateControlsRequest,
-} from '@/api/services/DeviceTemplateControlService';
+} from '@/api/services/DeviceControlService';
 import SensorService from '@/api/services/SensorService';
 
 type DeviceControlType = 'Run' | 'Toggle';
@@ -318,7 +318,7 @@ async function loadSensors() {
 }
 
 async function loadControls() {
-  const { data, error } = await DeviceTemplateControlService.getTemplateControls(templateId);
+  const { data, error } = await DeviceControlService.getTemplateControls(templateId);
   if (error) {
     handleError(error, 'Error fetching controls');
     return;
@@ -334,7 +334,7 @@ function mapControlType(type: unknown): DeviceControlType {
   return 'Run';
 }
 
-function mapControlResponse(control: DeviceTemplateControlResponse): ControlFormData {
+function mapControlResponse(control: DeviceControlResponse): ControlFormData {
   ensureRecipeOption(control.recipeId, control.recipeName);
   ensureRecipeOption(control.recipeOnId, control.recipeOnName ?? undefined);
   ensureRecipeOption(control.recipeOffId, control.recipeOffName ?? undefined);
@@ -435,7 +435,7 @@ async function submitForm() {
     } satisfies UpdateDeviceTemplateControlsRequest;
   });
 
-  const { error } = await DeviceTemplateControlService.updateTemplateControls(templateId, payload);
+  const { error } = await DeviceControlService.updateTemplateControls(templateId, payload);
   isSaving.value = false;
 
   if (error) {

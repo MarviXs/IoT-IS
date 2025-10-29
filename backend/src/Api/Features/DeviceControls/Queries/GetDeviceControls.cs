@@ -7,6 +7,7 @@ using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
+using Fei.Is.Api.Features.Devices.Extensions;
 using Fei.Is.Api.Features.DeviceTemplates.Extensions;
 using FluentResults;
 using MediatR;
@@ -15,21 +16,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fei.Is.Api.Features.DeviceControls.Queries;
 
-public static class GetDeviceTemplateControls
+public static class GetDeviceControls
 {
     public sealed class Endpoint : ICarterModule
     {
         public void AddRoutes(IEndpointRouteBuilder app)
         {
             app.MapGet(
-                    "device-templates/{templateId:guid}/controls",
-                    async Task<Results<Ok<List<Response>>, NotFound, ForbidHttpResult>> (
-                        IMediator mediator,
-                        ClaimsPrincipal user,
-                        Guid templateId
-                    ) =>
+                    "devices/{deviceId:guid}/controls",
+                    async Task<Results<Ok<List<Response>>, NotFound, ForbidHttpResult>> (IMediator mediator, ClaimsPrincipal user, Guid deviceId) =>
                     {
-                        var query = new Query(user, templateId);
+                        var query = new Query(user, deviceId);
                         var result = await mediator.Send(query);
 
                         if (result.HasError<NotFoundError>())
@@ -45,24 +42,73 @@ public static class GetDeviceTemplateControls
                         return TypedResults.Ok(result.Value);
                     }
                 )
-                .WithName(nameof(GetDeviceTemplateControls))
+                .WithName(nameof(GetDeviceControls))
                 .WithTags(nameof(DeviceControl))
                 .WithOpenApi(o =>
                 {
-                    o.Summary = "Get all controls on a device template";
+                    o.Summary = "Get all controls on a device";
                     return o;
                 });
         }
     }
 
-    public record Query(ClaimsPrincipal User, Guid TemplateId) : IRequest<Result<List<Response>>>;
+    public record Query(ClaimsPrincipal User, Guid DeviceId) : IRequest<Result<List<Response>>>;
 
     public sealed class Handler(AppDbContext context) : IRequestHandler<Query, Result<List<Response>>>
     {
         public async Task<Result<List<Response>>> Handle(Query request, CancellationToken cancellationToken)
         {
-            var template = await context
-                .DeviceTemplates.Where(template => template.Id == request.TemplateId)
+            var device = await context
+                .Devices.Where(device => device.Id == request.DeviceId)
+                .Include(device => device.SharedWithUsers)
+                .AsNoTracking()
+                .SingleOrDefaultAsync(cancellationToken);
+
+            if (device != null)
+            {
+                if (!device.CanView(request.User))
+                {
+                    return Result.Fail(new ForbiddenError());
+                }
+
+                if (device.DeviceTemplateId is null)
+                {
+                    return Result.Ok(new List<Response>());
+                }
+
+                var template = await LoadTemplateWithControls(context, device.DeviceTemplateId.Value, cancellationToken);
+
+                if (template == null)
+                {
+                    return Result.Fail(new NotFoundError());
+                }
+
+                return Result.Ok(MapControls(template));
+            }
+
+            var templateFallback = await LoadTemplateWithControls(context, request.DeviceId, cancellationToken);
+
+            if (templateFallback == null)
+            {
+                return Result.Fail(new NotFoundError());
+            }
+
+            if (!templateFallback.IsOwner(request.User))
+            {
+                return Result.Fail(new ForbiddenError());
+            }
+
+            return Result.Ok(MapControls(templateFallback));
+        }
+
+        private static async Task<DeviceTemplate?> LoadTemplateWithControls(
+            AppDbContext context,
+            Guid templateId,
+            CancellationToken cancellationToken
+        )
+        {
+            return await context
+                .DeviceTemplates.Where(template => template.Id == templateId)
                 .Include(template => template.Controls)
                 .ThenInclude(control => control.Recipe)
                 .Include(template => template.Controls)
@@ -73,18 +119,11 @@ public static class GetDeviceTemplateControls
                 .ThenInclude(control => control.Sensor)
                 .AsNoTracking()
                 .SingleOrDefaultAsync(cancellationToken);
+        }
 
-            if (template == null)
-            {
-                return Result.Fail(new NotFoundError());
-            }
-
-            if (!template.IsOwner(request.User))
-            {
-                return Result.Fail(new ForbiddenError());
-            }
-
-            var controls = template
+        private static List<Response> MapControls(DeviceTemplate template)
+        {
+            return template
                 .Controls.Select(control => new Response(
                     control.Id,
                     control.Name,
@@ -104,8 +143,6 @@ public static class GetDeviceTemplateControls
                 ))
                 .OrderBy(control => control.Order)
                 .ToList();
-
-            return Result.Ok(controls);
         }
     }
 

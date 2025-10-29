@@ -658,6 +658,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/devices/{deviceId}/controls": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get all controls on a device */
+        get: operations["GetDeviceControls"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/device-templates/{templateId}/controls": {
         parameters: {
             query?: never;
@@ -665,8 +682,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get all controls on a device template */
-        get: operations["GetDeviceTemplateControls"];
+        get?: never;
         /**
          * Update controls of a device template
          * @description Set the controls of a device template, replacing the existing controls. If Id is null, the control will be created.
@@ -2544,7 +2560,7 @@ export interface components {
             /** Format: uuid */
             sensorId?: string | null;
         };
-        "Fei.Is.Api.Features.DeviceControls.Queries.GetDeviceTemplateControls.Response": {
+        "Fei.Is.Api.Features.DeviceControls.Queries.GetDeviceControls.Response": {
             /** Format: uuid */
             id: string;
             name: string;
@@ -5569,12 +5585,12 @@ export interface operations {
             };
         };
     };
-    GetDeviceTemplateControls: {
+    GetDeviceControls: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                templateId: string;
+                deviceId: string;
             };
             cookie?: never;
         };
@@ -5586,7 +5602,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Features.DeviceControls.Queries.GetDeviceTemplateControls.Response"][];
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.DeviceControls.Queries.GetDeviceControls.Response"][];
                 };
             };
             /** @description Not Found */

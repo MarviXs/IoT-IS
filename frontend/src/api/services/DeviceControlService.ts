@@ -1,16 +1,20 @@
 import { client } from '@/api/client';
 import type { components } from '@/api/generated/schema.d.ts';
 
-export type DeviceTemplateControlResponse =
-  components['schemas']['Fei.Is.Api.Features.DeviceControls.Queries.GetDeviceTemplateControls.Response'];
+export type DeviceControlResponse =
+  components['schemas']['Fei.Is.Api.Features.DeviceControls.Queries.GetDeviceControls.Response'];
 export type UpdateDeviceTemplateControlsRequest =
   components['schemas']['Fei.Is.Api.Features.DeviceControls.Commands.UpdateDeviceTemplateControls.Request'];
 
-class DeviceTemplateControlService {
-  async getTemplateControls(templateId: string) {
-    return await client.GET('/device-templates/{templateId}/controls', {
-      params: { path: { templateId } },
+class DeviceControlService {
+  async getDeviceControls(deviceId: string) {
+    return await client.GET('/devices/{deviceId}/controls', {
+      params: { path: { deviceId } },
     });
+  }
+
+  async getTemplateControls(templateId: string) {
+    return await this.getDeviceControls(templateId);
   }
 
   async updateTemplateControls(templateId: string, body: UpdateDeviceTemplateControlsRequest[]) {
@@ -21,4 +25,4 @@ class DeviceTemplateControlService {
   }
 }
 
-export default new DeviceTemplateControlService();
+export default new DeviceControlService();
