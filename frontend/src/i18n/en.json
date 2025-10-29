@@ -162,7 +162,7 @@
     "control_name": "Control name",
     "control_color": "Color",
     "control_type": "Control type",
-    "control_type_run": "Run",
+    "control_type_run": "Button",
     "control_type_toggle": "Toggle",
     "control_recipe": "Recipe",
     "control_recipe_on": "Recipe (On state)",

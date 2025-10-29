@@ -156,7 +156,7 @@
     "control_name": "Názov ovládania",
     "control_color": "Farba",
     "control_type": "Typ ovládania",
-    "control_type_run": "Spustiť",
+    "control_type_run": "Tlačidlo",
     "control_type_toggle": "Prepínať",
     "control_recipe": "Recept",
     "control_recipe_on": "Recept (stav zapnuté)",
