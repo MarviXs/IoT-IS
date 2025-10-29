@@ -71,18 +71,11 @@
             <side-menu-button to="/lifecycle" :label="t('lifecycle.label', 2)" :icon="mdiSproutOutline" />
             <side-menu-button to="/greenhouse" :label="t('editor.label', 2)" :icon="mdiPaletteOutline" />
           </template>
-          <side-menu-button
-            v-if="authStore.isAdmin"
-            to="/admin/devices"
-            :label="t('device.all_devices')"
-            :icon="mdiLan"
-          />
-          <side-menu-button
-            v-if="authStore.isAdmin"
-            to="/user-management"
-            :label="t('global.user_management')"
-            :icon="mdiAccountGroup"
-          />
+          <template v-if="authStore.isAdmin">
+            <q-separator class="q-my-md" />
+            <side-menu-button to="/admin/devices" :label="t('device.all_devices')" :icon="mdiLan" />
+            <side-menu-button to="/user-management" :label="t('global.user_management')" :icon="mdiAccountGroup" />
+          </template>
         </div>
       </div>
     </q-drawer>
