@@ -36,6 +36,7 @@ RUN pnpm run build
 ########################
 FROM nginx:stable-alpine AS production
 ENV API_URL=$API_URL
+ENV IOT_ONLY=$IOT_ONLY
 COPY ./docker/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist/pwa /usr/share/nginx/html
 COPY ./docker/env.sh /docker-entrypoint.d/env.sh
