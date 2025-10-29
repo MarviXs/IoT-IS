@@ -239,6 +239,12 @@
     "init_window": "Inicializovať 1min okno",
     "share_device": "Zdieľať",
     "shared_with": "Zdieľané s",
+    "no_shared_users": "Zariadenie nie je zdieľané",
+    "change_owner": "Zmeniť vlastníka",
+    "select_new_owner": "Vybrať nového vlastníka",
+    "current_owner": "Aktuálny vlastník: {email}",
+    "current_owner_unknown": "Aktuálny vlastník nie je známy",
+    "new_owner": "Nový vlastník",
     "controls": {
       "title": "Ovládania",
       "no_controls": "Pre toto zariadenie nie sú dostupné žiadne ovládania.",
@@ -276,7 +282,9 @@
         "already_shared": "Zariadenie je už zdieľané s týmto používateľom!",
         "user_remove_success": "Používateľ bol odstránený zo zariadenia!",
         "user_remove_failed": "Odstránenie používateľa zo zariadenia zlyhalo!",
-        "shared_users_load_failed": "Načítanie používateľov zlyhalo!"
+        "shared_users_load_failed": "Načítanie používateľov zlyhalo!",
+        "change_owner_success": "Vlastníctvo zariadenia bolo aktualizované!",
+        "change_owner_failed": "Aktualizácia vlastníctva zariadenia zlyhala!"
       }
     },
     "rules": {

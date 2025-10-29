@@ -50,6 +50,17 @@
                     <div>{{ t('device.share_device') }}</div>
                   </div>
                 </q-item>
+                <q-item
+                  v-if="showOwner"
+                  clickable
+                  v-close-popup
+                  @click.stop="openChangeOwnerDialog(device)"
+                >
+                  <div class="row items-center q-gutter-sm">
+                    <q-icon color="grey-9" size="24px" :name="mdiAccountSwitch" />
+                    <div>{{ t('device.change_owner') }}</div>
+                  </div>
+                </q-item>
               </q-list>
             </q-menu>
           </q-card>
@@ -154,6 +165,17 @@
                     <div>{{ t('device.share_device') }}</div>
                   </div>
                 </q-item>
+                <q-item
+                  v-if="showOwner"
+                  v-close-popup
+                  clickable
+                  @click="openChangeOwnerDialog(propsActions.row)"
+                >
+                  <div class="row items-center q-gutter-sm">
+                    <q-icon color="grey-9" size="24px" :name="mdiAccountSwitch" />
+                    <div>{{ t('device.change_owner') }}</div>
+                  </div>
+                </q-item>
               </q-list>
             </q-menu>
           </q-btn>
@@ -174,6 +196,14 @@
     />
 
     <ShareDeviceDialog v-if="deviceToShare" v-model="shareDialog" :device-id="deviceToShare" />
+    <ChangeDeviceOwnerDialog
+      v-if="deviceToChangeOwner"
+      v-model="isChangeOwnerDialogOpen"
+      :device-id="deviceToChangeOwner.deviceId"
+      :current-owner-id="deviceToChangeOwner.ownerId"
+      :current-owner-email="deviceToChangeOwner.ownerEmail"
+      @on-changed="emit('onChange')"
+    />
   </div>
 </template>
 
@@ -184,6 +214,7 @@ import type { PropType } from 'vue';
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import {
+  mdiAccountSwitch,
   mdiCellphoneLink,
   mdiChartLine,
   mdiDotsVertical,
@@ -198,6 +229,7 @@ import type { DevicesResponse } from '@/api/services/DeviceService';
 import type { AdminDevicesResponse } from '@/api/services/AdminDeviceService';
 import EditDeviceDialog from '@/components/devices/EditDeviceDialog.vue';
 import StatusDot from './StatusDot.vue';
+import ChangeDeviceOwnerDialog from '@/components/devices/ChangeDeviceOwnerDialog.vue';
 import { useRouter } from 'vue-router';
 
 type DeviceListItem = NonNullable<DevicesResponse['items']>[number] &
@@ -301,6 +333,35 @@ function openShareDialog(deviceId: string) {
   shareDialog.value = true;
   deviceToShare.value = deviceId;
 }
+
+const isChangeOwnerDialogOpen = ref(false);
+const deviceToChangeOwner = ref<
+  | {
+      deviceId: string;
+      ownerId: string;
+      ownerEmail?: string;
+    }
+  | null
+>(null);
+
+function openChangeOwnerDialog(device: DeviceListItem) {
+  if (!device.ownerId) {
+    return;
+  }
+
+  deviceToChangeOwner.value = {
+    deviceId: device.id,
+    ownerId: device.ownerId,
+    ownerEmail: device.ownerEmail ?? undefined,
+  };
+  isChangeOwnerDialogOpen.value = true;
+}
+
+watch(isChangeOwnerDialogOpen, (open) => {
+  if (!open) {
+    deviceToChangeOwner.value = null;
+  }
+});
 
 // const getPermissions = (device: Device) => {
 //   if (DeviceService.isOwner(device)) {
