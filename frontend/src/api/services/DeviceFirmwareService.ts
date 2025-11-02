@@ -20,15 +20,37 @@ export type DeviceFirmwareFormPayload = {
   firmwareFile: File | null;
 };
 
+function normalizeFirmwareFile(file: unknown): File | null {
+  if (!file) {
+    return null;
+  }
+
+  if (file instanceof File) {
+    return file;
+  }
+
+  if (Array.isArray(file)) {
+    return file.find((candidate): candidate is File => candidate instanceof File) ?? null;
+  }
+
+  if (typeof FileList !== 'undefined' && file instanceof FileList) {
+    return file.length > 0 ? file.item(0) : null;
+  }
+
+  return null;
+}
+
 function mapToFormData(payload: Pick<CreateDeviceFirmwareRequest, 'versionNumber' | 'isActive'> & {
-  firmwareFile?: File | null;
+  firmwareFile?: unknown;
 }) {
   const formData = new FormData();
   formData.append('versionNumber', payload.versionNumber);
   formData.append('isActive', payload.isActive ? 'true' : 'false');
 
-  if (payload.firmwareFile) {
-    formData.append('firmwareFile', payload.firmwareFile);
+  const firmwareFile = normalizeFirmwareFile(payload.firmwareFile);
+
+  if (firmwareFile) {
+    formData.append('firmwareFile', firmwareFile, firmwareFile.name);
   }
 
   return formData;
@@ -49,11 +71,13 @@ class DeviceFirmwareService {
 
   async createDeviceFirmware(templateId: string, payload: DeviceFirmwareFormPayload) {
     const { versionNumber, isActive, firmwareFile } = payload;
-    if (!firmwareFile) {
+    const normalizedFile = normalizeFirmwareFile(firmwareFile);
+
+    if (!normalizedFile) {
       throw new Error('Firmware file is required');
     }
 
-    const body = mapToFormData({ versionNumber, isActive, firmwareFile });
+    const body = mapToFormData({ versionNumber, isActive, firmwareFile: normalizedFile });
 
     return await client.POST('/device-templates/{templateId}/firmwares', {
       params: { path: { templateId } },
@@ -63,7 +87,11 @@ class DeviceFirmwareService {
 
   async updateDeviceFirmware(templateId: string, firmwareId: string, payload: DeviceFirmwareFormPayload) {
     const { versionNumber, isActive, firmwareFile } = payload;
-    const body = mapToFormData({ versionNumber, isActive, firmwareFile: firmwareFile ?? undefined });
+    const body = mapToFormData({
+      versionNumber,
+      isActive,
+      firmwareFile: normalizeFirmwareFile(firmwareFile ?? undefined) ?? undefined,
+    });
 
     return await client.PUT('/device-templates/{templateId}/firmwares/{firmwareId}', {
       params: { path: { templateId, firmwareId } },
