@@ -178,6 +178,9 @@ export default configure((/* ctx */) => {
     // https://v2.quasar.dev/quasar-cli-vite/developing-pwa/configuring-pwa
     pwa: {
       workboxMode: 'GenerateSW',
+      workboxOptions: {
+        navigateFallbackDenylist: [/^\/backend\//],
+      },
       // swFilename: 'sw.js',
       // manifestFilename: 'manifest.json'
       // extendManifestJson (json) {},
