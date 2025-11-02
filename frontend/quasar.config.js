@@ -178,16 +178,16 @@ export default configure((/* ctx */) => {
     // https://v2.quasar.dev/quasar-cli-vite/developing-pwa/configuring-pwa
     pwa: {
       workboxMode: 'GenerateSW',
-      workboxOptions: {
-        navigateFallbackDenylist: [/^\/backend\//],
-      },
       // swFilename: 'sw.js',
       // manifestFilename: 'manifest.json'
       // extendManifestJson (json) {},
       // useCredentialsForManifestTag: true,
       // injectPwaMetaTags: false,
       // extendPWACustomSWConf (esbuildConf) {},
-      // extendGenerateSWOptions (cfg) {},
+      extendGenerateSWOptions(cfg) {
+        cfg.navigateFallbackDenylist = cfg.navigateFallbackDenylist || [];
+        cfg.navigateFallbackDenylist.push(/^\/backend\//);
+      },
       // extendInjectManifestOptions (cfg) {}
     },
 
