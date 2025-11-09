@@ -77,6 +77,12 @@ public static class GetJobsOnDevice
             var userId = message.User.GetUserId();
             query = query.Where(j => j.Device!.OwnerId == userId || j.Device!.SharedWithUsers.Any(u => u.SharedToUserId == userId));
 
+            if (message.queryParameters.DeviceId.HasValue)
+            {
+                var deviceId = message.queryParameters.DeviceId.Value;
+                query = query.Where(j => j.DeviceId == deviceId);
+            }
+
             if (message.queryParameters.SortBy == "DeviceName")
             {
                 query = query.Sort(j => j.Device!.Name, message.queryParameters.Descending);

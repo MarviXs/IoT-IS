@@ -1,19 +1,9 @@
 <template>
   <div>
     <div v-if="isMobile">
-      <q-infinite-scroll
-        v-if="mobileJobs.length"
-        :offset="120"
-        @load="onLoadMore"
-      >
+      <q-infinite-scroll v-if="mobileJobs.length" :offset="120" @load="onLoadMore">
         <div class="jobs-grid">
-          <q-card
-            v-for="job in mobileJobs"
-            :key="job.id"
-            class="job-card shadow"
-            v-ripple
-            @click="goToJob(job)"
-          >
+          <q-card v-for="job in mobileJobs" :key="job.id" class="job-card shadow" v-ripple @click="goToJob(job)">
             <q-card-section class="job-card__header">
               <div class="job-card__title">
                 <div class="text-subtitle1 text-weight-medium ellipsis">{{ job.name }}</div>
@@ -49,13 +39,7 @@
               </div>
             </q-card-section>
             <q-card-actions class="job-card__actions" align="right">
-              <q-btn
-                :icon="mdiOpenInNew"
-                color="grey-color"
-                flat
-                round
-                @click.stop="goToJob(job)"
-              >
+              <q-btn :icon="mdiOpenInNew" color="grey-color" flat round @click.stop="goToJob(job)">
                 <q-tooltip content-style="font-size: 11px" :offset="[0, 4]">
                   {{ t('global.open') }}
                 </q-tooltip>
@@ -367,7 +351,7 @@ const columns = computed<QTableProps['columns']>(() => {
     {
       name: 'CreatedAt',
       label: t('job.started_at'),
-      field: 'createdAt',
+      field: 'startedAt',
       sortable: true,
       align: 'left',
       format: (val: string) => new Date(val).toLocaleString(),
