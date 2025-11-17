@@ -151,15 +151,12 @@ watch(
   },
 );
 
-watch(
-  [() => jobCount.value, () => sensorTag.value],
-  () => {
-    if (!device.value || !sensorTag.value) {
-      return;
-    }
-    loadComparison();
-  },
-);
+watch([() => jobCount.value, () => sensorTag.value], () => {
+  if (!device.value || !sensorTag.value) {
+    return;
+  }
+  loadComparison();
+});
 
 async function loadDevice() {
   if (!deviceId) {
@@ -281,9 +278,3 @@ function formatDate(value?: string | null) {
   return new Date(value).toLocaleString();
 }
 </script>
-
-<style scoped>
-.q-card :deep(.q-field__bottom) {
-  padding-bottom: 0;
-}
-</style>

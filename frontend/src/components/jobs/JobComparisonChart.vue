@@ -122,10 +122,6 @@ watch(
 onMounted(() => {
   createChart();
 });
-
-onBeforeUnmount(() => {
-  chart.value?.destroy();
-});
 </script>
 
 <style scoped>
