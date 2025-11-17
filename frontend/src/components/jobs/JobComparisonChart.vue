@@ -5,7 +5,7 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { Chart, type ChartDataset } from 'chart.js/auto';
 import type { JobComparisonSeries } from '@/models/JobComparison';
 
