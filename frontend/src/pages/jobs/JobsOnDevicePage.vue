@@ -6,6 +6,17 @@
       { label: t('job.label', 2), to: `/devices/${deviceId}/jobs` },
     ]"
   >
+    <template #actions>
+      <q-btn
+        v-if="deviceId"
+        unelevated
+        color="primary"
+        no-caps
+        :icon="mdiChartBellCurve"
+        :label="t('job.compare.button')"
+        :to="`/devices/${deviceId}/jobs/compare`"
+      />
+    </template>
     <JobTable :device-id="deviceId" />
   </PageLayout>
 </template>
@@ -19,6 +30,7 @@ import JobTable from '@/components/jobs/JobTable.vue';
 import { handleError } from '@/utils/error-handler';
 import type { DeviceResponse } from '@/api/services/DeviceService';
 import DeviceService from '@/api/services/DeviceService';
+import { mdiChartBellCurve } from '@quasar/extras/mdi-v7';
 
 const { t } = useI18n();
 

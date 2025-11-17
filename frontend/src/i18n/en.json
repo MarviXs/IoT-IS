@@ -420,6 +420,20 @@
     "graph_missing_range": "Unable to determine the time range for this job.",
     "graph_no_sensors": "No sensors available for this device.",
     "graph_load_failed": "Unable to load the job graph.",
+    "compare": {
+      "title": "Compare jobs",
+      "button": "Compare jobs",
+      "description": "Compare sensor data from multiple finished jobs.",
+      "count_label": "Jobs to compare",
+      "count_hint": "Enter how many of the latest jobs to compare.",
+      "sensor_label": "Sensor",
+      "chart_title": "Job comparison",
+      "no_sensors": "This device does not have any sensors to chart.",
+      "no_data": "No finished jobs with data points for the selected sensor.",
+      "error_loading": "Unable to load the job comparison.",
+      "x_axis": "Time since start (ms)",
+      "value_label": "Sensor value"
+    },
     "infinite": "Infinite",
     "infinite_job": "Infinite job",
     "controls": {

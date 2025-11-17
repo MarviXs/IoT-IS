@@ -28,7 +28,7 @@ public static class GetJobsOnDevice
         {
             app.MapGet(
                     "jobs",
-                    async Task<Results<Ok<PagedList<Response>>, NotFound, ForbidHttpResult>> (
+                    async Task<Results<Ok<PagedList<Response>>, NotFound, ForbidHttpResult, ValidationProblem>> (
                         IMediator mediator,
                         ClaimsPrincipal user,
                         [AsParameters] QueryParameters parameters
@@ -45,6 +45,10 @@ public static class GetJobsOnDevice
                         if (result.HasError<ForbiddenError>())
                         {
                             return TypedResults.Forbid();
+                        }
+                        if (result.HasError<ValidationError>())
+                        {
+                            return TypedResults.ValidationProblem(result.ToValidationErrors());
                         }
 
                         return TypedResults.Ok(result.Value);
@@ -145,6 +149,7 @@ public static class GetJobsOnDevice
         [
             nameof(Job.Name),
             nameof(Job.CreatedAt),
+            nameof(Job.StartedAt),
             nameof(Job.FinishedAt),
             nameof(Job.UpdatedAt),
             nameof(Job.Status),

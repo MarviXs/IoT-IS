@@ -21,7 +21,7 @@
             <q-card-section class="job-card__meta">
               <div class="job-card__meta-item">
                 <div class="job-card__meta-label text-caption text-grey-7">{{ t('job.started_at') }}</div>
-                <div class="text-body2">{{ formatDateTime(job.createdAt) }}</div>
+                <div class="text-body2">{{ formatDateTime(job.startedAt) }}</div>
               </div>
               <div class="job-card__meta-item">
                 <div class="job-card__meta-label text-caption text-grey-7">{{ t('job.finished_at') }}</div>
@@ -164,7 +164,7 @@ const props = defineProps({
 });
 
 const pagination = ref<PaginationClient>({
-  sortBy: 'CreatedAt',
+  sortBy: 'StartedAt',
   descending: true,
   page: 1,
   rowsPerPage: 20,
@@ -344,7 +344,7 @@ const columns = computed<QTableProps['columns']>(() => {
       align: 'left',
     },
     {
-      name: 'CreatedAt',
+      name: 'StartedAt',
       label: t('job.started_at'),
       field: 'startedAt',
       sortable: true,

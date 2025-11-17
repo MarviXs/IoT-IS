@@ -404,6 +404,20 @@
     "progress": "Priebeh",
     "infinite": "Nekonečný",
     "infinity_job": "Nekonečná úloha",
+    "compare": {
+      "title": "Porovnať úlohy",
+      "button": "Porovnať úlohy",
+      "description": "Porovnajte dáta senzorov z viacerých dokončených úloh.",
+      "count_label": "Úlohy na porovnanie",
+      "count_hint": "Zadajte, koľko posledných úloh chcete porovnať.",
+      "sensor_label": "Senzor",
+      "chart_title": "Porovnanie úloh",
+      "no_sensors": "Toto zariadenie nemá žiadne senzory pre graf.",
+      "no_data": "Pre zvolený senzor nie sú dostupné dokončené úlohy s dátami.",
+      "error_loading": "Porovnanie úloh sa nepodarilo načítať.",
+      "x_axis": "Čas od začiatku (ms)",
+      "value_label": "Hodnota senzora"
+    },
     "controls": {
       "pause": "Pozastaviť",
       "resume": "Pokračovať",
