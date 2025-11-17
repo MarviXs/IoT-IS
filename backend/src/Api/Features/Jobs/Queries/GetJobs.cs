@@ -79,7 +79,10 @@ public static class GetJobsOnDevice
             var query = context.Jobs.AsNoTracking().Include(j => j.Device).ThenInclude(d => d!.SharedWithUsers).AsQueryable();
 
             var userId = message.User.GetUserId();
-            query = query.Where(j => j.Device!.OwnerId == userId || j.Device!.SharedWithUsers.Any(u => u.SharedToUserId == userId));
+            if (!message.User.IsAdmin())
+            {
+                query = query.Where(j => j.Device!.OwnerId == userId || j.Device!.SharedWithUsers.Any(u => u.SharedToUserId == userId));
+            }
 
             if (message.queryParameters.DeviceId.HasValue)
             {
@@ -95,9 +98,7 @@ public static class GetJobsOnDevice
             {
                 // Pending jobs without a start time stay at the top, all other null-started jobs drop to the bottom.
                 query = query
-                    .OrderBy(job => job.StartedAt == null
-                        ? (job.Status == JobStatusEnum.JOB_QUEUED ? 0 : 2)
-                        : 1)
+                    .OrderBy(job => job.StartedAt == null ? (job.Status == JobStatusEnum.JOB_QUEUED ? 0 : 2) : 1)
                     .ThenByDescending(job => job.StartedAt ?? DateTime.MinValue);
             }
             else if (message.queryParameters.SortBy != null)
