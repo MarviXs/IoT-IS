@@ -265,7 +265,7 @@ function getGraphRoute(job: JobTableRow) {
     path: `/jobs/${job.id}/graph`,
     query: {
       device: job.device.id,
-      from: job.createdAt,
+      from: job.startedAt,
       to: job.finishedAt,
     },
   };
