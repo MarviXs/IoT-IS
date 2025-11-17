@@ -22,20 +22,10 @@
               </span>
             </div>
           </q-card>
-          <q-banner
-            v-if="!initialCustomTimeRange"
-            class="bg-warning text-white shadow"
-            dense
-            rounded
-          >
+          <q-banner v-if="!initialCustomTimeRange" class="bg-warning text-white shadow" dense rounded>
             {{ t('job.graph_missing_range') }}
           </q-banner>
-          <q-banner
-            v-else-if="sensors.length === 0"
-            class="bg-warning text-white shadow"
-            dense
-            rounded
-          >
+          <q-banner v-else-if="sensors.length === 0" class="bg-warning text-white shadow" dense rounded>
             {{ t('job.graph_no_sensors') }}
           </q-banner>
           <DataPointChartJS
@@ -43,15 +33,10 @@
             class="bg-white shadow q-pa-lg"
             :sensors="sensors"
             :initial-custom-time-range="initialCustomTimeRange"
-            :time-range-storage-key="`job-${job.id}`"
+            :time-range-storage-key="`job-graph`"
           />
         </template>
-        <q-banner
-          v-else
-          class="bg-negative text-white shadow"
-          dense
-          rounded
-        >
+        <q-banner v-else class="bg-negative text-white shadow" dense rounded>
           {{ t('job.graph_load_failed') }}
         </q-banner>
       </div>
@@ -105,8 +90,8 @@ const initialCustomTimeRange = computed(() => {
   }
 
   return {
-    from: format(fromDate, 'yyyy-MM-dd HH:mm:ss'),
-    to: format(toDate, 'yyyy-MM-dd HH:mm:ss'),
+    from: format(fromDate, 'yyyy-MM-dd HH:mm:ss.SSS'),
+    to: format(toDate, 'yyyy-MM-dd HH:mm:ss.SSS'),
   };
 });
 
@@ -137,7 +122,16 @@ function formatDate(date: string | undefined) {
     return t('job.graph_missing_range');
   }
 
-  return new Date(date).toLocaleString();
+  return new Date(date).toLocaleString(undefined, {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    fractionalSecondDigits: 3,
+    hour12: false,
+  });
 }
 
 async function loadJob() {
@@ -185,7 +179,6 @@ watch(
 );
 
 loadJob();
-
 </script>
 
 <style scoped></style>

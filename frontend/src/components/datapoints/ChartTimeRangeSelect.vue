@@ -158,7 +158,7 @@ function setPredefinedTimeRange(val: PredefinedTimeRange) {
   updateTimeRange();
 }
 
-const formatDate = (date: Date) => format(date, 'yyyy-MM-dd HH:mm:ss');
+const formatDate = (date: Date) => format(date, 'yyyy-MM-dd HH:mm:ss.SSS');
 
 const parseDateString = (value?: string | null): Date | null => {
   if (!value) {
@@ -177,8 +177,7 @@ function updateTimeRange() {
       return;
     }
 
-    const toDate =
-      parseDateString(customTimeRangeSelected.value.to) ?? new Date();
+    const toDate = parseDateString(customTimeRangeSelected.value.to) ?? new Date();
 
     customTimeRangeSelected.value = {
       from: formatDate(fromDate),
