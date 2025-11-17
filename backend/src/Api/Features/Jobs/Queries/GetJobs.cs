@@ -79,7 +79,7 @@ public static class GetJobsOnDevice
             var query = context.Jobs.AsNoTracking().Include(j => j.Device).ThenInclude(d => d!.SharedWithUsers).AsQueryable();
 
             var userId = message.User.GetUserId();
-            query = query.Where(j => j.Device!.OwnerId == userId || j.Device!.SharedWithUsers.Any(u => u.SharedToUserId == userId));
+            query = query.Where(j => j.Device!.OwnerId == userId || j.Device!.SharedWithUsers.Any(u => u.SharedToUserId == userId)).Where(j => j.StartedAt.HasValue);
 
             if (message.queryParameters.DeviceId.HasValue)
             {
