@@ -103,19 +103,21 @@ public static class GetJobById
                 job.Name,
                 job.CurrentStep,
                 job.TotalSteps,
-                job.CurrentCycle,
-                job.TotalCycles,
-                job.GetCurrentCommand(),
-                job.Paused,
-                job.IsInfinite,
-                job.GetProgress(),
-                job.Status,
-                commands
-            );
+            job.CurrentCycle,
+            job.TotalCycles,
+            job.GetCurrentCommand(),
+            job.Paused,
+            job.IsInfinite,
+            job.GetProgress(),
+            job.Status,
+            job.StartedAt,
+            job.FinishedAt,
+            commands
+        );
 
-            return Result.Ok(response);
-        }
+        return Result.Ok(response);
     }
+}
 
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum CommandProgress
@@ -140,6 +142,8 @@ public static class GetJobById
         bool IsInfinite,
         double Progress,
         JobStatusEnum Status,
+        DateTime? StartedAt,
+        DateTime? FinishedAt,
         List<CommandResponse> Commands
     );
 }

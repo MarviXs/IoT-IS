@@ -13,12 +13,12 @@
             <div class="text-h6 q-mb-sm">{{ job.name }}</div>
             <div class="text-body2">
               {{ t('job.started_at') }}:
-              <span class="text-weight-medium">{{ formatDate(queryFrom) }}</span>
+              <span class="text-weight-medium">{{ formatDate(jobStartedAt) }}</span>
             </div>
             <div class="text-body2 q-mt-xs">
               {{ t('job.finished_at') }}:
               <span class="text-weight-medium">
-                {{ queryTo ? formatDate(queryTo) : t('job.not_finished') }}
+                {{ jobFinishedAt ? formatDate(jobFinishedAt) : t('job.not_finished') }}
               </span>
             </div>
           </q-card>
@@ -62,8 +62,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import { format } from 'date-fns';
-import { useRoute, useRouter } from 'vue-router';
-import type { LocationQueryRaw } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import PageLayout from '@/layouts/PageLayout.vue';
 import DataPointChartJS from '@/components/datapoints/DataPointChartJS.vue';
@@ -76,35 +75,30 @@ import type { SensorData } from '@/models/SensorData';
 
 const { t } = useI18n();
 const route = useRoute();
-const router = useRouter();
 
 const jobId = computed(() => route.params.id?.toString() ?? '');
-const job = ref<JobResponse>();
+type JobWithTimestamps = JobResponse & {
+  startedAt?: string | null;
+  finishedAt?: string | null;
+};
+const job = ref<JobWithTimestamps>();
 const device = ref<DeviceResponse>();
 
 const isLoadingJob = ref(false);
 const isLoadingDevice = ref(false);
 
-function normalizeQueryParam(value: unknown): string | undefined {
-  if (Array.isArray(value)) {
-    return value[0];
-  }
-  return typeof value === 'string' ? value : undefined;
-}
+const jobStartedAt = computed(() => job.value?.startedAt ?? undefined);
+const jobFinishedAt = computed(() => job.value?.finishedAt ?? undefined);
 
-const queryDeviceId = computed(() => normalizeQueryParam(route.query.device));
-const queryFrom = computed(() => normalizeQueryParam(route.query.from));
-const queryTo = computed(() => normalizeQueryParam(route.query.to));
-
-const needsDeviceFetch = computed(() => !device.value && !!queryDeviceId.value);
+const needsDeviceFetch = computed(() => !!job.value?.deviceId && !device.value);
 
 const initialCustomTimeRange = computed(() => {
-  if (!queryFrom.value || !queryTo.value) {
+  if (!jobStartedAt.value || !jobFinishedAt.value) {
     return undefined;
   }
 
-  const fromDate = new Date(queryFrom.value);
-  const toDate = new Date(queryTo.value);
+  const fromDate = new Date(jobStartedAt.value);
+  const toDate = new Date(jobFinishedAt.value);
 
   if (Number.isNaN(fromDate.getTime()) || Number.isNaN(toDate.getTime())) {
     return undefined;
@@ -161,24 +155,6 @@ async function loadJob() {
   }
 
   job.value = data;
-  ensureQueryParameters(data);
-}
-
-function ensureQueryParameters(jobData: JobResponse) {
-  const currentQuery: LocationQueryRaw = { ...route.query };
-  let requiresUpdate = false;
-
-  if (!normalizeQueryParam(currentQuery.device) && jobData.deviceId) {
-    currentQuery.device = jobData.deviceId;
-    requiresUpdate = true;
-  }
-
-  if (requiresUpdate) {
-    router.replace({
-      params: route.params,
-      query: currentQuery,
-    });
-  }
 }
 
 async function loadDevice(deviceId: string) {
@@ -199,7 +175,7 @@ async function loadDevice(deviceId: string) {
 }
 
 watch(
-  () => queryDeviceId.value,
+  () => job.value?.deviceId,
   (deviceId) => {
     if (deviceId) {
       loadDevice(deviceId);

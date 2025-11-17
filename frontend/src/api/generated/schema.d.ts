@@ -3154,6 +3154,10 @@ export interface components {
             /** Format: double */
             progress: number;
             status: components["schemas"]["Fei.Is.Api.Data.Enums.JobStatusEnum"];
+            /** Format: date-time */
+            startedAt?: string | null;
+            /** Format: date-time */
+            finishedAt?: string | null;
             commands: components["schemas"]["Fei.Is.Api.Features.Jobs.Queries.GetJobById.CommandResponse"][];
         };
         "Fei.Is.Api.Features.Jobs.Queries.GetJobsOnDevice.DeviceResponse": {
