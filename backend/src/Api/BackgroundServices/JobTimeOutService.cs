@@ -21,8 +21,8 @@ public class JobTimeOutService(IServiceProvider serviceProvider, ILogger<JobTime
 
                 var timeoutThreshold = DateTime.UtcNow.AddMilliseconds(-JobTimeout);
 
-                var timedOutJobs = await context.Jobs
-                    .Where(j => j.Status == JobStatusEnum.JOB_QUEUED && j.CreatedAt < timeoutThreshold)
+                var timedOutJobs = await context
+                    .Jobs.Where(j => j.Status == JobStatusEnum.JOB_QUEUED && j.CreatedAt < timeoutThreshold)
                     .ToListAsync(stoppingToken);
 
                 foreach (var job in timedOutJobs)

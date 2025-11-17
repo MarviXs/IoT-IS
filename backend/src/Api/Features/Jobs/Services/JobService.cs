@@ -31,7 +31,6 @@ public class JobService(AppDbContext context)
             Name = recipe.Name,
             CurrentStep = 1,
             CurrentCycle = 1,
-            StartedAt = DateTime.UtcNow,
             TotalCycles = cycles,
             IsInfinite = isInfite,
             Status = JobStatusEnum.JOB_QUEUED
