@@ -164,7 +164,7 @@ const props = defineProps({
 });
 
 const pagination = ref<PaginationClient>({
-  sortBy: 'StartedAt',
+  sortBy: 'CreatedAt',
   descending: true,
   page: 1,
   rowsPerPage: 20,
@@ -342,6 +342,14 @@ const columns = computed<QTableProps['columns']>(() => {
       field: 'name',
       sortable: true,
       align: 'left',
+    },
+    {
+      name: 'CreatedAt',
+      label: t('job.created_at'),
+      field: 'createdAt',
+      sortable: true,
+      align: 'left',
+      format: (val: string) => new Date(val).toLocaleString(),
     },
     {
       name: 'StartedAt',

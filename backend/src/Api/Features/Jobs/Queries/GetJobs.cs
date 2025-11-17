@@ -91,6 +91,15 @@ public static class GetJobsOnDevice
             {
                 query = query.Sort(j => j.Device!.Name, message.queryParameters.Descending);
             }
+            else if (message.queryParameters.SortBy == nameof(Job.StartedAt) && (message.queryParameters.Descending ?? false))
+            {
+                // Pending jobs without a start time stay at the top, all other null-started jobs drop to the bottom.
+                query = query
+                    .OrderBy(job => job.StartedAt == null
+                        ? (job.Status == JobStatusEnum.JOB_QUEUED ? 0 : 2)
+                        : 1)
+                    .ThenByDescending(job => job.StartedAt ?? DateTime.MinValue);
+            }
             else if (message.queryParameters.SortBy != null)
             {
                 query = query.Sort(message.queryParameters.SortBy ?? nameof(Job.StartedAt), message.queryParameters.Descending);

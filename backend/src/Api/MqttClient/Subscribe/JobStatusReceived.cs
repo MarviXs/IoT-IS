@@ -60,14 +60,25 @@ public class JobStatusReceived(AppDbContext appContext, RedisService redis, IHub
             return Result.Fail(new NotFoundError());
         }
 
+        if (jobFbs.StartedAt != 0)
+        {
+            job.StartedAt = DateTimeOffset.FromUnixTimeMilliseconds(jobFbs.StartedAt).UtcDateTime;
+        }
+        else if (job.Status == JobStatusEnum.JOB_QUEUED && (JobStatusEnum)jobFbs.Status != JobStatusEnum.JOB_QUEUED)
+        {
+            job.StartedAt = DateTime.UtcNow;
+        }
+
         job.Status = (JobStatusEnum)jobFbs.Status;
         job.CurrentStep = jobFbs.CurrentStep;
         job.TotalSteps = jobFbs.TotalSteps;
         job.CurrentCycle = jobFbs.CurrentCycle;
         job.TotalCycles = jobFbs.TotalCycles;
         job.Paused = jobFbs.Paused;
-        job.StartedAt = DateTimeOffset.FromUnixTimeMilliseconds(jobFbs.StartedAt).UtcDateTime;
+
         job.FinishedAt = DateTimeOffset.FromUnixTimeMilliseconds(jobFbs.FinishedAt).UtcDateTime;
+
+
         await appContext.SaveChangesAsync(cancellationToken);
 
         var jobUpdate = new JobUpdateDto(

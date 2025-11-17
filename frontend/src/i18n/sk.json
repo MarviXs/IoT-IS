@@ -400,6 +400,7 @@
     "schedule": "Naplánovanie",
     "scheduled_time": "Naplánovaný čas",
     "started_at": "Začiatok",
+    "created_at": "Vytvorené",
     "finished_at": "Ukončenie",
     "status": "Stav",
     "progress": "Priebeh",

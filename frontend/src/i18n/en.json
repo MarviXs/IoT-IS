@@ -412,6 +412,7 @@
     "schedule": "Schedule",
     "scheduled_time": "Scheduled time",
     "started_at": "Started at",
+    "created_at": "Created at",
     "finished_at": "Finished at",
     "status": "Status",
     "progress": "Progress",
