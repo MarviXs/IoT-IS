@@ -4,7 +4,7 @@ ARG TARGETARCH
 ARG TARGETOS
 
 # Install dependencies
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache gcompat
 
 WORKDIR /app
 
