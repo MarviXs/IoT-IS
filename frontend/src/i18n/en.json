@@ -400,6 +400,7 @@
     "run_job": "Run job",
     "no_running_job": "No running job",
     "not_finished": "Not finished yet",
+    "not_started": "Not started yet",
     "step": "Step",
     "step_of": "Step {0} of {1}",
     "cycle": "Cycle | Cycles",

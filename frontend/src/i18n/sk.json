@@ -388,6 +388,7 @@
     "run_job": "Spustiť úlohu",
     "no_running_job": "Žiadna bežiaca úloha",
     "not_finished": "Prebieha",
+    "not_started": "Ešte nezačaté",
     "step": "Krok",
     "step_of": "Krok {0} z {1}",
     "cycle": "Cyklus | Cykly",

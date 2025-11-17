@@ -21,7 +21,7 @@
             <q-card-section class="job-card__meta">
               <div class="job-card__meta-item">
                 <div class="job-card__meta-label text-caption text-grey-7">{{ t('job.started_at') }}</div>
-                <div class="text-body2">{{ formatDateTime(job.startedAt) }}</div>
+                <div class="text-body2">{{ formatDateTime(job.startedAt, t('job.not_started')) }}</div>
               </div>
               <div class="job-card__meta-item">
                 <div class="job-card__meta-label text-caption text-grey-7">{{ t('job.finished_at') }}</div>
@@ -282,9 +282,9 @@ function openGraph(job: JobTableRow) {
   router.push(route);
 }
 
-function formatDateTime(value?: string | null) {
+function formatDateTime(value?: string | null, emptyText = '—') {
   if (!value) {
-    return '—';
+    return emptyText;
   }
 
   return new Date(value).toLocaleString();
@@ -349,7 +349,7 @@ const columns = computed<QTableProps['columns']>(() => {
       field: 'startedAt',
       sortable: true,
       align: 'left',
-      format: (val: string) => new Date(val).toLocaleString(),
+      format: (val: string | undefined) => formatDateTime(val, t('job.not_started')),
     },
     {
       name: 'FinishedAt',
