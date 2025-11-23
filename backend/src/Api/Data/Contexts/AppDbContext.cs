@@ -49,6 +49,7 @@ public class AppDbContext
         modelBuilder.ApplyConfiguration(new SceneSensorTriggerConfiguration());
         modelBuilder.ApplyConfiguration(new JobScheduleConfiguration());
         modelBuilder.ApplyConfiguration(new JobScheduleWeekDayConfiguration());
+        modelBuilder.ApplyConfiguration(new ExperimentConfiguration());
 
         //IS configurations
         modelBuilder.ApplyConfiguration(new AdditionalOrderConfiguration());

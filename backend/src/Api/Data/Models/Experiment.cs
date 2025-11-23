@@ -7,7 +7,7 @@ public class Experiment : BaseModel
 
     public string? Note { get; set; }
 
-    public required Guid? RecipeToRunId { get; set; }
+    public Guid? RecipeToRunId { get; set; }
     public Recipe? RecipeToRun { get; set; }
 
     public Guid? RanJobId { get; set; }
