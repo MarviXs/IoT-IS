@@ -61,8 +61,7 @@ public static class GetExperiments
 
     public record Query(ClaimsPrincipal User, QueryParameters Parameters) : IRequest<Result<PagedList<Response>>>;
 
-    public sealed class Handler(AppDbContext context, IValidator<QueryParameters> validator)
-        : IRequestHandler<Query, Result<PagedList<Response>>>
+    public sealed class Handler(AppDbContext context, IValidator<QueryParameters> validator) : IRequestHandler<Query, Result<PagedList<Response>>>
     {
         public async Task<Result<PagedList<Response>>> Handle(Query message, CancellationToken cancellationToken)
         {
@@ -103,20 +102,7 @@ public static class GetExperiments
             var experiments = await query
                 .Sort(qp.SortBy ?? nameof(Experiment.UpdatedAt), qp.Descending)
                 .Paginate(qp)
-                .Select(
-                    e =>
-                        new Response(
-                            e.Id,
-                            e.Note,
-                            e.DeviceId,
-                            e.RecipeToRunId,
-                            e.RanJobId,
-                            e.StartedAt,
-                            e.FinishedAt,
-                            e.CreatedAt,
-                            e.UpdatedAt
-                        )
-                )
+                .Select(e => new Response(e.Id, e.Note, e.DeviceId, e.RecipeToRunId, e.RanJobId, e.StartedAt, e.FinishedAt, e.CreatedAt, e.UpdatedAt))
                 .ToListAsync(cancellationToken);
 
             return Result.Ok(experiments.ToPagedList(totalCount, qp.PageNumber, qp.PageSize));
