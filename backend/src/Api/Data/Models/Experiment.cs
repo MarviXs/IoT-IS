@@ -5,6 +5,9 @@ public class Experiment : BaseModel
     public Guid OwnerId { get; set; } = Guid.Empty;
     public ApplicationUser? Owner { get; set; } = null!;
 
+    public Guid? DeviceId { get; set; }
+    public Device? Device { get; set; }
+
     public string? Note { get; set; }
 
     public Guid? RecipeToRunId { get; set; }

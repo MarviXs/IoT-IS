@@ -54,6 +54,7 @@ public static class GetExperimentById
         {
             var experiment = await context
                 .Experiments.AsNoTracking()
+                .Include(e => e.Device)
                 .Include(e => e.RecipeToRun)
                 .Include(e => e.RanJob)
                 .FirstOrDefaultAsync(e => e.Id == request.ExperimentId, cancellationToken);
@@ -71,6 +72,8 @@ public static class GetExperimentById
             var response = new Response(
                 experiment.Id,
                 experiment.Note,
+                experiment.DeviceId,
+                experiment.Device?.Name,
                 experiment.RecipeToRunId,
                 experiment.RecipeToRun?.Name,
                 experiment.RanJobId,
@@ -88,6 +91,8 @@ public static class GetExperimentById
     public record Response(
         Guid Id,
         string? Note,
+        Guid? DeviceId,
+        string? DeviceName,
         Guid? RecipeToRunId,
         string? RecipeToRunName,
         Guid? RanJobId,

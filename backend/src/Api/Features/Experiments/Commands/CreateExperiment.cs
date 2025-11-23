@@ -80,13 +80,11 @@ public static class CreateExperiment
             }
 
             Job? job = null;
+            Device? device = null;
 
-            if (message.Request.RecipeToRunId is Guid recipeId)
+            if (message.Request.DeviceId is Guid deviceId)
             {
-                var device = await context
-                    .Devices.Include(d => d.SharedWithUsers)
-                    .FirstOrDefaultAsync(d => d.Id == message.Request.DeviceId, cancellationToken);
-
+                device = await context.Devices.Include(d => d.SharedWithUsers).FirstOrDefaultAsync(d => d.Id == deviceId, cancellationToken);
                 if (device == null)
                 {
                     return Result.Fail(new NotFoundError());
@@ -94,6 +92,14 @@ public static class CreateExperiment
                 if (!device.CanEdit(message.User))
                 {
                     return Result.Fail(new ForbiddenError());
+                }
+            }
+
+            if (message.Request.RecipeToRunId is Guid recipeId)
+            {
+                if (device == null)
+                {
+                    return Result.Fail(new ValidationError("DeviceId", "Device ID is required when a recipe is provided."));
                 }
 
                 var jobResult = await jobService.CreateJobFromRecipe(
@@ -115,6 +121,7 @@ public static class CreateExperiment
             var experiment = new Experiment
             {
                 OwnerId = message.User.GetUserId(),
+                DeviceId = device?.Id,
                 Note = message.Request.Note,
                 RecipeToRunId = message.Request.RecipeToRunId,
                 RanJobId = job?.Id,

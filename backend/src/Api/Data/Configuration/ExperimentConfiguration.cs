@@ -9,8 +9,10 @@ public class ExperimentConfiguration : IEntityTypeConfiguration<Experiment>
     public void Configure(EntityTypeBuilder<Experiment> builder)
     {
         builder.HasIndex(e => e.OwnerId);
+        builder.HasIndex(e => e.DeviceId);
 
         builder.HasOne(e => e.Owner).WithMany().HasForeignKey(e => e.OwnerId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne(e => e.Device).WithMany().HasForeignKey(e => e.DeviceId).OnDelete(DeleteBehavior.NoAction);
         builder.HasOne(e => e.RecipeToRun).WithMany().HasForeignKey(e => e.RecipeToRunId).OnDelete(DeleteBehavior.NoAction);
         builder.HasOne(e => e.RanJob).WithMany().HasForeignKey(e => e.RanJobId).OnDelete(DeleteBehavior.NoAction);
     }

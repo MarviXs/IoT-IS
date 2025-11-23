@@ -4,6 +4,7 @@ using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
+using Fei.Is.Api.Features.Devices.Extensions;
 using FluentResults;
 using FluentValidation;
 using MediatR;
@@ -14,7 +15,7 @@ namespace Fei.Is.Api.Features.Experiments.Commands;
 
 public static class UpdateExperiment
 {
-    public record Request(string? Note, Guid? RecipeToRunId, Guid? RanJobId, DateTime? StartedAt, DateTime? FinishedAt);
+    public record Request(string? Note, Guid? RecipeToRunId, Guid? DeviceId, Guid? RanJobId, DateTime? StartedAt, DateTime? FinishedAt);
 
     public sealed class Endpoint : ICarterModule
     {
@@ -80,6 +81,20 @@ public static class UpdateExperiment
                 return Result.Fail(new ForbiddenError());
             }
 
+            Device? device = null;
+            if (message.Request.DeviceId is Guid deviceId)
+            {
+                device = await context.Devices.Include(d => d.SharedWithUsers).FirstOrDefaultAsync(d => d.Id == deviceId, cancellationToken);
+                if (device == null)
+                {
+                    return Result.Fail(new NotFoundError());
+                }
+                if (!device.CanEdit(message.User))
+                {
+                    return Result.Fail(new ForbiddenError());
+                }
+            }
+
             if (message.Request.RecipeToRunId is Guid recipeId)
             {
                 var recipeExists = await context.Recipes.AnyAsync(r => r.Id == recipeId, cancellationToken);
@@ -99,6 +114,7 @@ public static class UpdateExperiment
             }
 
             experiment.Note = message.Request.Note;
+            experiment.DeviceId = device?.Id ?? message.Request.DeviceId;
             experiment.RecipeToRunId = message.Request.RecipeToRunId;
             experiment.RanJobId = message.Request.RanJobId;
             experiment.StartedAt = message.Request.StartedAt;
@@ -114,6 +130,13 @@ public static class UpdateExperiment
         public Validator()
         {
             RuleFor(x => x.Request.Note).MaximumLength(1024);
+            When(
+                x => x.Request.RecipeToRunId.HasValue,
+                () =>
+                {
+                    RuleFor(x => x.Request.DeviceId).NotEmpty().WithMessage("Device ID is required when a recipe is provided");
+                }
+            );
         }
     }
 }

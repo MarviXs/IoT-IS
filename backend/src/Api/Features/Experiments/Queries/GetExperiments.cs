@@ -108,6 +108,7 @@ public static class GetExperiments
                         new Response(
                             e.Id,
                             e.Note,
+                            e.DeviceId,
                             e.RecipeToRunId,
                             e.RanJobId,
                             e.StartedAt,
@@ -125,6 +126,7 @@ public static class GetExperiments
     public record Response(
         Guid Id,
         string? Note,
+        Guid? DeviceId,
         Guid? RecipeToRunId,
         Guid? RanJobId,
         DateTime? StartedAt,
