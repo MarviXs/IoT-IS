@@ -87,6 +87,7 @@ public class AppDbContext
     public DbSet<JobScheduleWeekDay> JobScheduleWeekDays { get; set; }
     public DbSet<Recipe> Recipes { get; set; }
     public DbSet<RecipeStep> RecipeSteps { get; set; }
+    public DbSet<Experiment> Experiments { get; set; }
     public DbSet<Command> Commands { get; set; }
     public DbSet<DeviceControl> DeviceControls { get; set; }
     public DbSet<JobCommand> JobCommands { get; set; }
