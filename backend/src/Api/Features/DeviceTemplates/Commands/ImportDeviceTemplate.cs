@@ -18,10 +18,24 @@ public static class ImportDeviceTemplate
 
     public record SensorRequest(string Tag, string Name, string? Unit, int? AccuracyDecimals, string? Group);
 
+    public record DeviceControlRequest(
+        string Name,
+        string Color,
+        DeviceControlType Type,
+        string? RecipeName,
+        int Cycles,
+        bool IsInfinite,
+        string? RecipeOnName,
+        string? RecipeOffName,
+        string? SensorTag,
+        int Order
+    );
+
     public record TemplateRequest(
         string Name,
         List<DeviceCommandRequest> Commands,
         List<SensorRequest> Sensors,
+        List<DeviceControlRequest>? Controls = null,
         DeviceType DeviceType = DeviceType.Generic,
         bool EnableMap = false,
         bool EnableGrid = false,
@@ -119,6 +133,99 @@ public static class ImportDeviceTemplate
             }
             await context.SaveChangesAsync(cancellationToken);
 
+            var controlRequests = message.Request.TemplateData.Controls ?? [];
+            if (controlRequests.Count > 0)
+            {
+                var recipeNames = controlRequests
+                    .SelectMany(control => new[] { control.RecipeName, control.RecipeOnName, control.RecipeOffName })
+                    .Where(name => !string.IsNullOrWhiteSpace(name))
+                    .Select(name => name!.Trim())
+                    .Distinct(StringComparer.OrdinalIgnoreCase);
+
+                var recipesByName = new Dictionary<string, Recipe>(StringComparer.OrdinalIgnoreCase);
+                foreach (var recipeName in recipeNames)
+                {
+                    var recipe = new Recipe { Name = recipeName, DeviceTemplateId = template.Id };
+                    await context.Recipes.AddAsync(recipe, cancellationToken);
+                    recipesByName[recipeName] = recipe;
+                }
+
+                await context.SaveChangesAsync(cancellationToken);
+
+                var sensorsByTag = context
+                    .Sensors.Local.Where(sensor => sensor.DeviceTemplateId == template.Id)
+                    .ToDictionary(sensor => sensor.Tag, StringComparer.OrdinalIgnoreCase);
+
+                for (var index = 0; index < controlRequests.Count; index++)
+                {
+                    var controlRequest = controlRequests[index];
+
+                    var recipeId =
+                        controlRequest.Type == DeviceControlType.Run
+                            ? recipesByName.GetValueOrDefault(controlRequest.RecipeName?.Trim() ?? string.Empty)?.Id
+                            : null;
+                    var recipeOnId =
+                        controlRequest.Type == DeviceControlType.Toggle
+                            ? recipesByName.GetValueOrDefault(controlRequest.RecipeOnName?.Trim() ?? string.Empty)?.Id
+                            : null;
+                    var recipeOffId =
+                        controlRequest.Type == DeviceControlType.Toggle
+                            ? recipesByName.GetValueOrDefault(controlRequest.RecipeOffName?.Trim() ?? string.Empty)?.Id
+                            : null;
+
+                    Sensor? controlSensor = null;
+                    if (controlRequest.Type == DeviceControlType.Toggle && !string.IsNullOrWhiteSpace(controlRequest.SensorTag))
+                    {
+                        sensorsByTag.TryGetValue(controlRequest.SensorTag.Trim(), out controlSensor);
+                    }
+
+                    if (controlRequest.Type == DeviceControlType.Run && recipeId == null)
+                    {
+                        return Result.Fail(new ValidationError(nameof(DeviceControlRequest.RecipeName), "Recipe is required for run controls"));
+                    }
+
+                    if (controlRequest.Type == DeviceControlType.Toggle && (recipeOnId == null || recipeOffId == null || controlSensor == null))
+                    {
+                        var errors = new Dictionary<string, string[]>();
+                        if (recipeOnId == null)
+                        {
+                            errors.Add(nameof(DeviceControlRequest.RecipeOnName), ["On recipe must be defined in controls"]);
+                        }
+
+                        if (recipeOffId == null)
+                        {
+                            errors.Add(nameof(DeviceControlRequest.RecipeOffName), ["Off recipe must be defined in controls"]);
+                        }
+
+                        if (controlSensor == null)
+                        {
+                            errors.Add(nameof(DeviceControlRequest.SensorTag), ["Sensor must be defined in template sensors"]);
+                        }
+
+                        return Result.Fail(new ValidationError(errors));
+                    }
+
+                    var control = new DeviceControl
+                    {
+                        Name = controlRequest.Name,
+                        Color = controlRequest.Color,
+                        Type = controlRequest.Type,
+                        RecipeId = controlRequest.Type == DeviceControlType.Run ? recipeId : null,
+                        RecipeOnId = controlRequest.Type == DeviceControlType.Toggle ? recipeOnId : null,
+                        RecipeOffId = controlRequest.Type == DeviceControlType.Toggle ? recipeOffId : null,
+                        SensorId = controlRequest.Type == DeviceControlType.Toggle ? controlSensor?.Id : null,
+                        Cycles = controlRequest.Type == DeviceControlType.Run ? controlRequest.Cycles : 1,
+                        IsInfinite = controlRequest.Type == DeviceControlType.Run && controlRequest.IsInfinite,
+                        Order = controlRequest.Order,
+                        DeviceTemplateId = template.Id,
+                    };
+
+                    await context.DeviceControls.AddAsync(control, cancellationToken);
+                }
+
+                await context.SaveChangesAsync(cancellationToken);
+            }
+
             return Result.Ok(template.Id);
         }
     }
@@ -128,6 +235,49 @@ public static class ImportDeviceTemplate
         public Validator()
         {
             RuleFor(x => x.Request.TemplateData.Name).NotEmpty().WithMessage("Name is required");
+            When(
+                x => x.Request.TemplateData.Controls != null,
+                () =>
+                {
+                    RuleForEach(c => c.Request.TemplateData.Controls)
+                        .ChildRules(control =>
+                        {
+                            control.RuleFor(x => x.Name).NotEmpty().WithMessage("Name is required");
+                            control.RuleFor(x => x.Color).NotEmpty().WithMessage("Color is required");
+                            control.RuleFor(x => x.Type).IsInEnum();
+                            control
+                                .RuleFor(x => x.RecipeName)
+                                .NotEmpty()
+                                .When(x => x.Type == DeviceControlType.Run)
+                                .WithMessage("Recipe is required for run controls");
+                            control
+                                .RuleFor(x => x.Cycles)
+                                .GreaterThan(0)
+                                .When(x => x.Type == DeviceControlType.Run)
+                                .WithMessage("Cycles must be greater than 0");
+                            control
+                                .RuleFor(x => x.IsInfinite)
+                                .Equal(false)
+                                .When(x => x.Type == DeviceControlType.Toggle)
+                                .WithMessage("Toggle controls cannot run infinitely");
+                            control
+                                .RuleFor(x => x.RecipeOnName)
+                                .NotEmpty()
+                                .When(x => x.Type == DeviceControlType.Toggle)
+                                .WithMessage("On recipe is required for toggle controls");
+                            control
+                                .RuleFor(x => x.RecipeOffName)
+                                .NotEmpty()
+                                .When(x => x.Type == DeviceControlType.Toggle)
+                                .WithMessage("Off recipe is required for toggle controls");
+                            control
+                                .RuleFor(x => x.SensorTag)
+                                .NotEmpty()
+                                .When(x => x.Type == DeviceControlType.Toggle)
+                                .WithMessage("Sensor tag is required for toggle controls");
+                        });
+                }
+            );
         }
     }
 }

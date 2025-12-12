@@ -7,15 +7,8 @@
           v-model="templateName"
           autofocus
           :label="t('global.name')"
-          :rules="[(val) => !!val || t('global.rules.required')]"
         />
-        <q-toggle
-          v-if="authStore.isAdmin"
-          v-model="isGlobal"
-          :label="t('device_template.global_template')"
-          :hint="t('device_template.global_template_hint')"
-        />
-        <q-file outlined v-model="templateFile" label="Select Template File">
+        <q-file outlined v-model="templateFile" label="Select Template File" @update:model-value="onFileSelected">
           <template v-slot:prepend>
             <q-icon name="attach_file" />
           </template>
@@ -45,7 +38,6 @@ import { toast } from 'vue3-toastify';
 import { useI18n } from 'vue-i18n';
 import DialogCommon from '@/components/core/DialogCommon.vue';
 import DeviceTemplateService from '@/api/services/DeviceTemplateService';
-import { useAuthStore } from '@/stores/auth-store';
 
 const isDialogOpen = defineModel<boolean>();
 const emit = defineEmits(['onImported']);
@@ -55,44 +47,84 @@ const { t } = useI18n();
 const templateName = ref('');
 const templateFile = ref<File | null>(null);
 const importingTemplate = ref(false);
-const isGlobal = ref(false);
-const authStore = useAuthStore();
+const parsedTemplateData = ref<any | null>(null);
 
 async function importTemplate() {
   if (!templateFile.value) {
-    toast.error(t('device_template.toasts.no_file_selected'));
+    toast.error(t('device_template.toasts.no_file_selected') ?? 'No template file selected');
     return;
   }
 
-  // json file to object
-  const reader = new FileReader();
-  reader.readAsText(templateFile.value);
-  reader.onload = async () => {
-    const fileContent = reader.result as string;
-    const templateData = JSON.parse(fileContent);
-
-    if (!templateData) {
-      toast.error('Invalid template file');
-      return;
+  const loadTemplateData = async () => {
+    if (parsedTemplateData.value) {
+      return parsedTemplateData.value;
     }
 
-    templateData.templateData.name = templateName.value;
-    templateData.templateData.isGlobal = isGlobal.value;
-
-    importingTemplate.value = true;
-    const { error } = await DeviceTemplateService.importDeviceTemplate(templateData);
-    importingTemplate.value = false;
-
-    if (error) {
-      handleError(error, 'Importing template failed');
-      return;
-    }
-
-    emit('onImported');
-    isDialogOpen.value = false;
-
-    toast.success('Template imported successfully');
+    const reader = new FileReader();
+    const promise = new Promise<any | null>((resolve) => {
+      reader.onload = () => {
+        const fileContent = reader.result as string;
+        try {
+          resolve(JSON.parse(fileContent));
+        } catch {
+          resolve(null);
+        }
+      };
+    });
+    reader.readAsText(templateFile.value);
+    return await promise;
   };
+
+  const templateData = await loadTemplateData();
+  if (!templateData || !templateData.templateData) {
+    toast.error('Invalid template file');
+    return;
+  }
+
+  const incomingName = templateData?.templateData?.name ?? '';
+  const finalName = templateName.value?.trim() || incomingName;
+  if (!finalName) {
+    toast.error(t('global.rules.required'));
+    return;
+  }
+  templateName.value = finalName;
+  templateData.templateData.name = finalName;
+
+  importingTemplate.value = true;
+  const { error } = await DeviceTemplateService.importDeviceTemplate(templateData);
+  importingTemplate.value = false;
+
+  if (error) {
+    handleError(error, 'Importing template failed');
+    return;
+  }
+
+  emit('onImported');
+  isDialogOpen.value = false;
+
+  toast.success('Template imported successfully');
+}
+
+async function onFileSelected(file: File | null) {
+  parsedTemplateData.value = null;
+  if (!file) {
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result as string);
+      parsedTemplateData.value = data;
+      const incomingName = data?.templateData?.name;
+      if (!templateName.value && incomingName) {
+        templateName.value = incomingName;
+      }
+    } catch {
+      parsedTemplateData.value = null;
+    }
+  };
+  reader.readAsText(file);
 }
 </script>
 

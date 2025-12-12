@@ -13,6 +13,8 @@ export type UpdateDeviceTemplateRequest =
 
 export type ImportDeviceTemplateRequest =
   paths['/device-templates/import']['post']['requestBody']['content']['application/json'];
+export type ExportDeviceTemplateResponse =
+  paths['/device-templates/{id}/export']['get']['responses']['200']['content']['application/json'];
 
 class DeviceTemplateService {
   async getDeviceTemplates(queryParams: DeviceTemplatesQueryParams) {
@@ -37,6 +39,10 @@ class DeviceTemplateService {
 
   async importDeviceTemplate(body: ImportDeviceTemplateRequest) {
     return await client.POST('/device-templates/import', { body });
+  }
+
+  async exportDeviceTemplate(deviceTemplateId: string) {
+    return await client.GET('/device-templates/{id}/export', { params: { path: { id: deviceTemplateId } } });
   }
 }
 

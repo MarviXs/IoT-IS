@@ -800,6 +800,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/device-templates/{id}/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Export a device template
+         * @description Returns a payload compatible with the import device template endpoint.
+         */
+        get: operations["ExportDeviceTemplate"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/device-templates": {
         parameters: {
             query?: never;
@@ -914,6 +934,42 @@ export interface paths {
         put?: never;
         /** Create multiple editor plants */
         post: operations["CreateEditorPlants"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/experiments/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get an experiment by id */
+        get: operations["GetExperimentById"];
+        /** Update an experiment */
+        put: operations["UpdateExperiment"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/experiments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get experiments (paginated) */
+        get: operations["GetExperiments"];
+        put?: never;
+        /** Create an experiment */
+        post: operations["CreateExperiment"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1046,6 +1102,26 @@ export interface paths {
          */
         put: operations["CancelJob"];
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/devices/{deviceAccessToken}/jobs/custom": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create a custom job
+         * @description Create a custom job from device without commands.
+         */
+        post: operations["CreateCustomJob"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2103,6 +2179,19 @@ export interface components {
             readonly hasNext: boolean;
             items: components["schemas"]["Fei.Is.Api.Features.Devices.Queries.GetDevices.Response"][];
         };
+        "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Experiments.Queries.GetExperiments.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+            /** Format: int32 */
+            currentPage: number;
+            /** Format: int32 */
+            totalPages: number;
+            /** Format: int32 */
+            pageSize: number;
+            /** Format: int32 */
+            totalCount: number;
+            readonly hasPrevious: boolean;
+            readonly hasNext: boolean;
+            items: components["schemas"]["Fei.Is.Api.Features.Experiments.Queries.GetExperiments.Response"][];
+        };
         "Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.GreenHouses.Queries.GetGreenHouses.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
             /** Format: int32 */
             currentPage: number;
@@ -2651,6 +2740,20 @@ export interface components {
             name: string;
             params: number[];
         };
+        "Fei.Is.Api.Features.DeviceTemplates.Commands.ImportDeviceTemplate.DeviceControlRequest": {
+            name: string;
+            color: string;
+            type: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceControlType"];
+            recipeName?: string | null;
+            /** Format: int32 */
+            cycles: number;
+            isInfinite: boolean;
+            recipeOnName?: string | null;
+            recipeOffName?: string | null;
+            sensorTag?: string | null;
+            /** Format: int32 */
+            order: number;
+        };
         "Fei.Is.Api.Features.DeviceTemplates.Commands.ImportDeviceTemplate.Request": {
             templateData: components["schemas"]["Fei.Is.Api.Features.DeviceTemplates.Commands.ImportDeviceTemplate.TemplateRequest"];
             version: string;
@@ -2667,6 +2770,7 @@ export interface components {
             name: string;
             commands: components["schemas"]["Fei.Is.Api.Features.DeviceTemplates.Commands.ImportDeviceTemplate.DeviceCommandRequest"][];
             sensors: components["schemas"]["Fei.Is.Api.Features.DeviceTemplates.Commands.ImportDeviceTemplate.SensorRequest"][];
+            controls?: components["schemas"]["Fei.Is.Api.Features.DeviceTemplates.Commands.ImportDeviceTemplate.DeviceControlRequest"][] | null;
             deviceType: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceType"];
             enableMap: boolean;
             enableGrid: boolean;
@@ -2893,6 +2997,74 @@ export interface components {
             /** Format: uuid */
             greenHouseId: string;
         };
+        "Fei.Is.Api.Features.Experiments.Commands.CreateExperiment.Request": {
+            note?: string | null;
+            /** Format: uuid */
+            recipeToRunId?: string | null;
+            /** Format: uuid */
+            deviceId?: string | null;
+            /** Format: int32 */
+            cycles: number;
+            isInfinite: boolean;
+            /** Format: date-time */
+            startedAt?: string | null;
+            /** Format: date-time */
+            finishedAt?: string | null;
+        };
+        "Fei.Is.Api.Features.Experiments.Commands.UpdateExperiment.Request": {
+            note: string | null;
+            /** Format: uuid */
+            recipeToRunId: string | null;
+            /** Format: uuid */
+            deviceId: string | null;
+            /** Format: uuid */
+            ranJobId: string | null;
+            /** Format: date-time */
+            startedAt: string | null;
+            /** Format: date-time */
+            finishedAt: string | null;
+        };
+        "Fei.Is.Api.Features.Experiments.Queries.GetExperimentById.Response": {
+            /** Format: uuid */
+            id: string;
+            note?: string | null;
+            /** Format: uuid */
+            deviceId?: string | null;
+            deviceName?: string | null;
+            /** Format: uuid */
+            recipeToRunId?: string | null;
+            recipeToRunName?: string | null;
+            /** Format: uuid */
+            ranJobId?: string | null;
+            ranJobName?: string | null;
+            /** Format: date-time */
+            startedAt?: string | null;
+            /** Format: date-time */
+            finishedAt?: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        "Fei.Is.Api.Features.Experiments.Queries.GetExperiments.Response": {
+            /** Format: uuid */
+            id: string;
+            note?: string | null;
+            /** Format: uuid */
+            deviceId?: string | null;
+            /** Format: uuid */
+            recipeToRunId?: string | null;
+            /** Format: uuid */
+            ranJobId?: string | null;
+            /** Format: date-time */
+            startedAt?: string | null;
+            /** Format: date-time */
+            finishedAt?: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
         "Fei.Is.Api.Features.GreenHouses.Commands.CreateGreenHouse.Request": {
             /** Format: uuid */
             greenHouseID: string;
@@ -3057,6 +3229,13 @@ export interface components {
             /** Format: int32 */
             cycles: number;
             isActive: boolean;
+        };
+        "Fei.Is.Api.Features.Jobs.Commands.CreateCustomJob.Request": {
+            jobName: string;
+            /** Format: int64 */
+            startedAt: number;
+            /** Format: int64 */
+            finishedAt: number;
         };
         "Fei.Is.Api.Features.Jobs.Commands.CreateJob.Request": {
             /** Format: uuid */
@@ -5971,6 +6150,35 @@ export interface operations {
             };
         };
     };
+    ExportDeviceTemplate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.DeviceTemplates.Commands.ImportDeviceTemplate.Request"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     GetAdminDeviceTemplates: {
         parameters: {
             query?: {
@@ -6247,6 +6455,152 @@ export interface operations {
                 content: {
                     "application/json": string;
                 };
+            };
+        };
+    };
+    GetExperimentById: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.Experiments.Queries.GetExperimentById.Response"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UpdateExperiment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.Experiments.Commands.UpdateExperiment.Request"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GetExperiments: {
+        parameters: {
+            query?: {
+                RecipeId?: string;
+                RanJobId?: string;
+                SortBy?: string;
+                Descending?: boolean;
+                SearchTerm?: string;
+                PageNumber?: number;
+                PageSize?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Experiments.Queries.GetExperiments.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+        };
+    };
+    CreateExperiment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.Experiments.Commands.CreateExperiment.Request"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -6557,6 +6911,15 @@ export interface operations {
                     "application/json": components["schemas"]["Fei.Is.Api.Common.Pagination.PagedList`1[[Fei.Is.Api.Features.Jobs.Queries.GetJobsOnDevice.Response, Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"];
                 };
             };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
             /** @description Not Found */
             404: {
                 headers: {
@@ -6600,6 +6963,48 @@ export interface operations {
             };
             /** @description Unprocessable Entity */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CreateCustomJob: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                deviceAccessToken: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.Jobs.Commands.CreateCustomJob.Request"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

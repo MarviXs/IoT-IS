@@ -176,6 +176,7 @@
     "select_new_owner": "Select new owner",
     "current_owner": "Current owner: {email}",
     "current_owner_unknown": "Current owner is unknown",
+    "export": "Export",
     "global": "Global",
     "global_template": "Global template",
     "global_template_hint": "Make this template available to all users when creating devices.",
@@ -214,7 +215,9 @@
       "delete_success": "Device template deleted!",
       "delete_failed": "Deleting device template failed!",
       "change_owner_success": "Device template ownership updated!",
-      "change_owner_failed": "Updating device template ownership failed!"
+      "change_owner_failed": "Updating device template ownership failed!",
+      "export_failed": "Exporting device template failed!",
+      "no_file_selected": "Please select a template file before importing."
     },
     "rules": {
       "decimal_min": "Decimal places must be greater than 0!",

@@ -63,6 +63,19 @@
 
         <template #body-cell-actions="props">
           <q-td auto-width :props="props">
+            <q-btn
+              :icon="mdiDownload"
+              color="grey-color"
+              flat
+              round
+              class="q-mr-sm"
+              :loading="exportingId === props.row.id"
+              @click.stop="exportTemplate(props.row.id, props.row.name)"
+            >
+              <q-tooltip content-style="font-size: 11px" :offset="[0, 4]">
+                {{ t('device_template.export') }}
+              </q-tooltip>
+            </q-btn>
             <template v-if="props.row.canEdit">
               <q-btn :icon="mdiPencil" color="grey-color" flat round :to="`/device-templates/${props.row.id}`">
                 <q-tooltip content-style="font-size: 11px" :offset="[0, 4]">
@@ -90,7 +103,7 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import { mdiPlus, mdiCodeTags, mdiPencil, mdiTrashCanOutline } from '@quasar/extras/mdi-v7';
+import { mdiPlus, mdiCodeTags, mdiPencil, mdiTrashCanOutline, mdiDownload } from '@quasar/extras/mdi-v7';
 import PageLayout from '@/layouts/PageLayout.vue';
 import { computed, ref } from 'vue';
 import SearchBar from '@/components/core/SearchBar.vue';
@@ -102,6 +115,7 @@ import type { QTableProps } from 'quasar';
 import DeleteDeviceTemplateDialog from '@/components/device-templates/DeleteDeviceTemplateDialog.vue';
 import ImportDeviceTemplateDialog from '@/components/device-templates/ImportDeviceTemplateDialog.vue';
 import { watchDebounced } from '@vueuse/core';
+import type { ProblemDetails } from '@/api/types/ProblemDetails';
 
 const { t, locale } = useI18n();
 const filter = ref('');
@@ -121,6 +135,7 @@ const importTemplateDialogOpen = ref(false);
 const loadingTemplates = ref(false);
 const deleteDialogOpen = ref(false);
 const deleteTemplateId = ref<string>();
+const exportingId = ref<string | null>(null);
 
 async function getTemplates(paginationTable: PaginationTable) {
   const paginationQuery: DeviceTemplatesQueryParams = {
@@ -152,6 +167,38 @@ getTemplates(pagination.value);
 function openDeleteDialog(id: string) {
   deleteTemplateId.value = id;
   deleteDialogOpen.value = true;
+}
+
+async function exportTemplate(templateId: string, templateName: string) {
+  exportingId.value = templateId;
+  try {
+    const { data, error } = await DeviceTemplateService.exportDeviceTemplate(templateId);
+
+    if (!data || error) {
+      const problem = error ?? ({ title: t('device_template.toasts.export_failed') } as ProblemDetails);
+      handleError(problem, t('device_template.toasts.export_failed'));
+      return;
+    }
+
+    const filename = `${slugify(templateName)}.json`;
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
+  } finally {
+    exportingId.value = null;
+  }
+}
+
+function slugify(value: string) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '') || 'device-template';
 }
 
 const columns = computed<QTableProps['columns']>(() => [
