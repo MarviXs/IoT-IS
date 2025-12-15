@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Security.Claims;
 using Carter;
 using Fei.Is.Api.Common.Errors;
@@ -9,6 +10,7 @@ using FluentResults;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
+using DataCommand = Fei.Is.Api.Data.Models.Command;
 
 namespace Fei.Is.Api.Features.DeviceTemplates.Commands;
 
@@ -31,11 +33,16 @@ public static class ImportDeviceTemplate
         int Order
     );
 
+    public record RecipeStepRequest(string? CommandName, string? SubrecipeName, int Cycles, int Order);
+
+    public record RecipeRequest(string Name, List<RecipeStepRequest>? Steps = null);
+
     public record TemplateRequest(
         string Name,
         List<DeviceCommandRequest> Commands,
         List<SensorRequest> Sensors,
         List<DeviceControlRequest>? Controls = null,
+        List<RecipeRequest>? Recipes = null,
         DeviceType DeviceType = DeviceType.Generic,
         bool EnableMap = false,
         bool EnableGrid = false,
@@ -103,47 +110,84 @@ public static class ImportDeviceTemplate
             await context.DeviceTemplates.AddAsync(template, cancellationToken);
             await context.SaveChangesAsync(cancellationToken);
 
+            var commandsByName = new Dictionary<string, DataCommand>(StringComparer.OrdinalIgnoreCase);
             foreach (var command in message.Request.TemplateData.Commands)
             {
-                var deviceCommand = new Data.Models.Command
+                var commandName = command.Name.Trim();
+                var deviceCommand = new DataCommand
                 {
                     DisplayName = command.DisplayName,
-                    Name = command.Name,
+                    Name = commandName,
                     Params = command.Params,
                     DeviceTemplateId = template.Id
                 };
 
                 await context.Commands.AddAsync(deviceCommand, cancellationToken);
+                commandsByName[commandName] = deviceCommand;
             }
 
-            foreach (var sensor in message.Request.TemplateData.Sensors)
+            await context.SaveChangesAsync(cancellationToken);
+
+            var sensorsByTag = new Dictionary<string, Sensor>(StringComparer.OrdinalIgnoreCase);
+            for (var index = 0; index < message.Request.TemplateData.Sensors.Count; index++)
             {
+                var sensor = message.Request.TemplateData.Sensors[index];
+                var sensorTag = sensor.Tag.Trim();
                 var deviceSensor = new Sensor
                 {
-                    Tag = sensor.Tag,
+                    Tag = sensorTag,
                     Name = sensor.Name,
                     Unit = sensor.Unit,
-                    Order = message.Request.TemplateData.Sensors.IndexOf(sensor),
+                    Order = index,
                     AccuracyDecimals = sensor.AccuracyDecimals,
                     DeviceTemplateId = template.Id,
                     Group = sensor.Group
                 };
 
                 await context.Sensors.AddAsync(deviceSensor, cancellationToken);
+                sensorsByTag[sensorTag] = deviceSensor;
             }
+
             await context.SaveChangesAsync(cancellationToken);
 
             var controlRequests = message.Request.TemplateData.Controls ?? [];
-            if (controlRequests.Count > 0)
-            {
-                var recipeNames = controlRequests
-                    .SelectMany(control => new[] { control.RecipeName, control.RecipeOnName, control.RecipeOffName })
-                    .Where(name => !string.IsNullOrWhiteSpace(name))
-                    .Select(name => name!.Trim())
-                    .Distinct(StringComparer.OrdinalIgnoreCase);
 
-                var recipesByName = new Dictionary<string, Recipe>(StringComparer.OrdinalIgnoreCase);
-                foreach (var recipeName in recipeNames)
+            var recipeStepsByName = new Dictionary<string, List<RecipeStepRequest>>(StringComparer.OrdinalIgnoreCase);
+            var providedRecipes = message.Request.TemplateData.Recipes ?? [];
+            foreach (var recipeRequest in providedRecipes)
+            {
+                var recipeName = recipeRequest.Name?.Trim();
+                if (string.IsNullOrWhiteSpace(recipeName))
+                {
+                    return Result.Fail(new ValidationError(nameof(TemplateRequest.Recipes), "Recipe name is required"));
+                }
+
+                if (recipeStepsByName.ContainsKey(recipeName))
+                {
+                    return Result.Fail(new ValidationError(nameof(TemplateRequest.Recipes), "Recipe names must be unique"));
+                }
+
+                recipeStepsByName[recipeName] = recipeRequest.Steps?.ToList() ?? new List<RecipeStepRequest>();
+            }
+
+            var referencedRecipeNames = controlRequests
+                .SelectMany(control => new[] { control.RecipeName, control.RecipeOnName, control.RecipeOffName })
+                .Where(name => !string.IsNullOrWhiteSpace(name))
+                .Select(name => name!.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var recipeName in referencedRecipeNames)
+            {
+                if (!recipeStepsByName.ContainsKey(recipeName))
+                {
+                    recipeStepsByName[recipeName] = new List<RecipeStepRequest>();
+                }
+            }
+
+            var recipesByName = new Dictionary<string, Recipe>(StringComparer.OrdinalIgnoreCase);
+            if (recipeStepsByName.Count > 0)
+            {
+                foreach (var recipeName in recipeStepsByName.Keys)
                 {
                     var recipe = new Recipe { Name = recipeName, DeviceTemplateId = template.Id };
                     await context.Recipes.AddAsync(recipe, cancellationToken);
@@ -152,10 +196,73 @@ public static class ImportDeviceTemplate
 
                 await context.SaveChangesAsync(cancellationToken);
 
-                var sensorsByTag = context
-                    .Sensors.Local.Where(sensor => sensor.DeviceTemplateId == template.Id)
-                    .ToDictionary(sensor => sensor.Tag, StringComparer.OrdinalIgnoreCase);
+                foreach (var (recipeName, steps) in recipeStepsByName)
+                {
+                    var recipe = recipesByName[recipeName];
 
+                    foreach (var stepRequest in steps)
+                    {
+                        var commandName = stepRequest.CommandName?.Trim();
+                        var subrecipeName = stepRequest.SubrecipeName?.Trim();
+
+                        if (!string.IsNullOrWhiteSpace(commandName) && !string.IsNullOrWhiteSpace(subrecipeName))
+                        {
+                            return Result.Fail(
+                                new ValidationError(nameof(RecipeStepRequest), "Step cannot reference both a command and a subrecipe")
+                            );
+                        }
+
+                        Guid? commandId = null;
+                        if (!string.IsNullOrWhiteSpace(commandName))
+                        {
+                            if (!commandsByName.TryGetValue(commandName, out var command))
+                            {
+                                return Result.Fail(
+                                    new ValidationError(
+                                        nameof(RecipeStepRequest.CommandName),
+                                        $"Command '{commandName}' must be defined in the template commands"
+                                    )
+                                );
+                            }
+
+                            commandId = command.Id;
+                        }
+
+                        Guid? subrecipeId = null;
+                        if (!string.IsNullOrWhiteSpace(subrecipeName))
+                        {
+                            if (!recipesByName.TryGetValue(subrecipeName, out var subrecipe))
+                            {
+                                return Result.Fail(
+                                    new ValidationError(
+                                        nameof(RecipeStepRequest.SubrecipeName),
+                                        $"Subrecipe '{subrecipeName}' must be defined in the template"
+                                    )
+                                );
+                            }
+
+                            subrecipeId = subrecipe.Id;
+                        }
+
+                        await context.RecipeSteps.AddAsync(
+                            new RecipeStep
+                            {
+                                RecipeId = recipe.Id,
+                                CommandId = commandId,
+                                SubrecipeId = subrecipeId,
+                                Cycles = stepRequest.Cycles,
+                                Order = stepRequest.Order
+                            },
+                            cancellationToken
+                        );
+                    }
+                }
+
+                await context.SaveChangesAsync(cancellationToken);
+            }
+
+            if (controlRequests.Count > 0)
+            {
                 for (var index = 0; index < controlRequests.Count; index++)
                 {
                     var controlRequest = controlRequests[index];
@@ -189,17 +296,17 @@ public static class ImportDeviceTemplate
                         var errors = new Dictionary<string, string[]>();
                         if (recipeOnId == null)
                         {
-                            errors.Add(nameof(DeviceControlRequest.RecipeOnName), ["On recipe must be defined in controls"]);
+                            errors.Add(nameof(DeviceControlRequest.RecipeOnName), new[] { "On recipe must be defined in controls" });
                         }
 
                         if (recipeOffId == null)
                         {
-                            errors.Add(nameof(DeviceControlRequest.RecipeOffName), ["Off recipe must be defined in controls"]);
+                            errors.Add(nameof(DeviceControlRequest.RecipeOffName), new[] { "Off recipe must be defined in controls" });
                         }
 
                         if (controlSensor == null)
                         {
-                            errors.Add(nameof(DeviceControlRequest.SensorTag), ["Sensor must be defined in template sensors"]);
+                            errors.Add(nameof(DeviceControlRequest.SensorTag), new[] { "Sensor must be defined in template sensors" });
                         }
 
                         return Result.Fail(new ValidationError(errors));
@@ -278,6 +385,45 @@ public static class ImportDeviceTemplate
                         });
                 }
             );
+
+            When(
+                x => x.Request.TemplateData.Recipes != null,
+                () =>
+                {
+                    RuleForEach(x => x.Request.TemplateData.Recipes)
+                        .ChildRules(recipe =>
+                        {
+                            recipe.RuleFor(r => r.Name).NotEmpty().WithMessage("Recipe name is required");
+                            recipe
+                                .RuleForEach(r => r.Steps ?? new List<RecipeStepRequest>())
+                                .ChildRules(step =>
+                                {
+                                    step.RuleFor(s => s)
+                                        .Must(s => string.IsNullOrWhiteSpace(s.CommandName) != string.IsNullOrWhiteSpace(s.SubrecipeName))
+                                        .WithMessage("Step must reference either a command or a subrecipe");
+                                    step.RuleFor(s => s.Cycles).GreaterThan(0).WithMessage("Cycles must be greater than 0");
+                                    step.RuleFor(s => s.Order).GreaterThanOrEqualTo(0).WithMessage("Order must be 0 or greater");
+                                });
+                        });
+                }
+            );
+
+            RuleFor(x => x.Request.TemplateData.Recipes)
+                .Must(recipes =>
+                {
+                    if (recipes == null)
+                    {
+                        return true;
+                    }
+
+                    var normalized = recipes
+                        .Select(recipe => recipe.Name?.Trim() ?? string.Empty)
+                        .Where(name => !string.IsNullOrWhiteSpace(name))
+                        .ToList();
+
+                    return normalized.Count == normalized.Distinct(StringComparer.OrdinalIgnoreCase).Count();
+                })
+                .WithMessage("Recipe names must be unique");
         }
     }
 }

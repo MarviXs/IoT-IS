@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Security.Claims;
 using Carter;
 using Fei.Is.Api.Common.Errors;
@@ -70,6 +71,12 @@ public static class ExportDeviceTemplate
                 .ThenInclude(control => control.RecipeOff)
                 .Include(t => t.Controls)
                 .ThenInclude(control => control.Sensor)
+                .Include(t => t.Recipes)
+                .ThenInclude(recipe => recipe.Steps)
+                .ThenInclude(step => step.Command)
+                .Include(t => t.Recipes)
+                .ThenInclude(recipe => recipe.Steps)
+                .ThenInclude(step => step.Subrecipe)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(t => t.Id == message.TemplateId, cancellationToken);
 
@@ -108,11 +115,23 @@ public static class ExportDeviceTemplate
                 ))
                 .ToList();
 
+            var recipes = template
+                .Recipes.OrderBy(recipe => recipe.Name)
+                .Select(recipe => new ImportDeviceTemplate.RecipeRequest(
+                    recipe.Name,
+                    recipe
+                        .Steps?.OrderBy(step => step.Order)
+                        .Select(step => new ImportDeviceTemplate.RecipeStepRequest(step.Command?.Name, step.Subrecipe?.Name, step.Cycles, step.Order))
+                        .ToList()
+                ))
+                .ToList();
+
             var templateData = new ImportDeviceTemplate.TemplateRequest(
                 template.Name,
                 commands,
                 sensors,
                 controls,
+                recipes,
                 template.DeviceType,
                 template.EnableMap,
                 template.EnableGrid,
@@ -121,7 +140,7 @@ public static class ExportDeviceTemplate
                 template.IsGlobal
             );
 
-            var response = new ImportDeviceTemplate.Request(templateData, "1.1");
+            var response = new ImportDeviceTemplate.Request(templateData, "1.2");
 
             return Result.Ok(response);
         }
