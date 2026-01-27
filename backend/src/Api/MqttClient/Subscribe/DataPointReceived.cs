@@ -24,14 +24,19 @@ public class DataPointReceived(AppDbContext appContext, RedisService redis, IHub
         var cachedDeviceId = await redis.Db.StringGetAsync(redisKey);
 
         string deviceId;
+        Guid deviceGuid;
 
         if (cachedDeviceId.HasValue)
         {
             deviceId = cachedDeviceId!;
+            if (!Guid.TryParse(deviceId, out deviceGuid))
+            {
+                return Result.Fail("Invalid device ID");
+            }
         }
         else
         {
-            var deviceGuid = await appContext
+            deviceGuid = await appContext
                 .Devices.Where(d => d.AccessToken == deviceAccessToken)
                 .Select(d => d.Id)
                 .FirstOrDefaultAsync(cancellationToken);
@@ -53,6 +58,9 @@ public class DataPointReceived(AppDbContext appContext, RedisService redis, IHub
         {
             return Result.Fail("Invalid datapoint value");
         }
+
+        await UpdateSampleRateIfNeeded(deviceGuid, datapoint.Tag, datapoint.Value, cancellationToken);
+
         var redisResult = await redis.Db.StreamAddAsync(
             "datapoints",
             [
@@ -105,6 +113,27 @@ public class DataPointReceived(AppDbContext appContext, RedisService redis, IHub
             );
 
         return Result.Ok();
+    }
+
+    private async Task UpdateSampleRateIfNeeded(Guid deviceId, string? tag, double value, CancellationToken cancellationToken)
+    {
+        if (!string.Equals(tag, "samplerate", StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+        if (value <= 0 || double.IsNaN(value) || double.IsInfinity(value))
+        {
+            return;
+        }
+
+        var device = await appContext.Devices.FindAsync([deviceId], cancellationToken);
+        if (device == null)
+        {
+            return;
+        }
+
+        device.SampleRateSeconds = (float)value;
+        await appContext.SaveChangesAsync(cancellationToken);
     }
 
     private static DateTimeOffset GetDataPointTimeStampOrCurrentTime(long? timeStamp)

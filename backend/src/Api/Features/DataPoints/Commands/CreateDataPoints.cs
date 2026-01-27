@@ -89,6 +89,9 @@ public static class CreateDataPoints
             {
                 return Result.Fail(new NotFoundError());
             }
+
+            await UpdateSampleRateIfNeeded(appContext, device.Id, message.Request, cancellationToken);
+
             var dataPoints = message.Request.Select(dataPoint => new DataPoint
             {
                 DeviceId = device.Id,
@@ -144,6 +147,33 @@ public static class CreateDataPoints
             await timescaleContext.BulkInsertAsync(dataPoints, cancellationToken: cancellationToken);
 
             return Result.Ok();
+        }
+
+        private static async Task UpdateSampleRateIfNeeded(
+            AppDbContext appContext,
+            Guid deviceId,
+            IReadOnlyCollection<Request> requests,
+            CancellationToken cancellationToken
+        )
+        {
+            var sampleRateRequest = requests.FirstOrDefault(request => string.Equals(request.Tag, "samplerate", StringComparison.OrdinalIgnoreCase));
+            if (sampleRateRequest == null || double.IsNaN(sampleRateRequest.Value) || double.IsInfinity(sampleRateRequest.Value))
+            {
+                return;
+            }
+            if (sampleRateRequest.Value <= 0)
+            {
+                return;
+            }
+
+            var device = await appContext.Devices.FindAsync([deviceId], cancellationToken);
+            if (device == null)
+            {
+                return;
+            }
+
+            device.SampleRateSeconds = (float)sampleRateRequest.Value;
+            await appContext.SaveChangesAsync(cancellationToken);
         }
 
         private static DateTimeOffset GetDataPointTimeStampOrCurrentTime(long? timeStamp)
