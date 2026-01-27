@@ -243,6 +243,7 @@
     "last_activity": "Posledná aktivita",
     "status": "Stav",
     "connected": "Pripojené",
+    "degraded": "Zhoršené",
     "disconnected": "Odpojené",
     "decimal": "Počet desatinných miest",
     "init_window": "Inicializovať 1min okno",

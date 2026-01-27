@@ -88,12 +88,14 @@ public static class GetAdminDevices
                             lastSeen = DateTimeOffset.FromUnixTimeSeconds(timestamp);
                         }
 
+                        var connectionState = device.GetConnectionState(online, lastSeen, DateTimeOffset.UtcNow);
                         return new Response(
                             device.Id,
                             device.Name,
                             device.OwnerId,
                             device.Owner?.Email,
                             online,
+                            connectionState,
                             device.GetPermission(message.User),
                             lastSeen
                         );
@@ -111,6 +113,7 @@ public static class GetAdminDevices
         Guid OwnerId,
         string? OwnerEmail,
         bool Connected,
+        DeviceConnectionState ConnectionState,
         DevicePermission Permission,
         DateTimeOffset? LastSeen = null
     );

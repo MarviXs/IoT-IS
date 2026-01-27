@@ -72,6 +72,45 @@ public static class DeviceExtensions
         return DevicePermission.Viewer;
     }
 
+    public static DeviceConnectionState GetConnectionState(this Device device, bool mqttConnected, DateTimeOffset? lastSeen, DateTimeOffset nowUtc)
+    {
+        if (device.Protocol == DeviceConnectionProtocol.MQTT && !mqttConnected)
+        {
+            return DeviceConnectionState.Offline;
+        }
+
+        var sampleRateSeconds = device.SampleRateSeconds;
+        if (device.Protocol == DeviceConnectionProtocol.HTTP && (!sampleRateSeconds.HasValue || sampleRateSeconds <= 0))
+        {
+            sampleRateSeconds = 60;
+        }
+
+        if (!lastSeen.HasValue)
+        {
+            return DeviceConnectionState.Offline;
+        }
+
+        if (!sampleRateSeconds.HasValue || sampleRateSeconds <= 0)
+        {
+            return DeviceConnectionState.Online;
+        }
+
+        var elapsed = nowUtc - lastSeen.Value;
+        var window = TimeSpan.FromSeconds(sampleRateSeconds.Value);
+
+        if (elapsed > window + window)
+        {
+            return DeviceConnectionState.Offline;
+        }
+
+        if (elapsed > window)
+        {
+            return DeviceConnectionState.Degraded;
+        }
+
+        return DeviceConnectionState.Online;
+    }
+
     public static IQueryable<Device> WhereOwned(this IQueryable<Device> devices, Guid ownerId)
     {
         return devices.Where(d => d.OwnerId == ownerId);

@@ -82,7 +82,8 @@ public static class GetDevices
                         {
                             lastSeen = DateTimeOffset.FromUnixTimeSeconds(timestamp);
                         }
-                        return new Response(device.Id, device.Name, online, device.GetPermission(message.User), lastSeen);
+                        var connectionState = device.GetConnectionState(online, lastSeen, DateTimeOffset.UtcNow);
+                        return new Response(device.Id, device.Name, online, connectionState, device.GetPermission(message.User), lastSeen);
                     }
                 )
                 .ToList();
@@ -91,5 +92,12 @@ public static class GetDevices
         }
     }
 
-    public record Response(Guid Id, string Name, bool Connected, DevicePermission Permission, DateTimeOffset? LastSeen = null);
+    public record Response(
+        Guid Id,
+        string Name,
+        bool Connected,
+        DeviceConnectionState ConnectionState,
+        DevicePermission Permission,
+        DateTimeOffset? LastSeen = null
+    );
 }

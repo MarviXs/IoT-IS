@@ -6,7 +6,7 @@
     ]"
   >
     <template #after-title>
-      <StatusDot v-if="device" :connected="device.connected" />
+      <StatusDot v-if="device" :status="device.connectionState" />
     </template>
     <template v-if="device" #actions>
       <q-btn

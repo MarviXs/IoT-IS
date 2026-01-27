@@ -1,7 +1,7 @@
 <template>
   <PageLayout :breadcrumbs="breadcrumbs">
     <template #after-title>
-      <StatusDot v-if="device" :connected="device.connected" />
+      <StatusDot v-if="device" :status="device.connectionState" />
     </template>
     <template #default>
       <q-card class="shadow container q-pa-lg">

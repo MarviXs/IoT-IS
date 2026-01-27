@@ -2375,6 +2375,8 @@ export interface components {
             items: components["schemas"]["Fei.Is.Api.Features.UserManagement.Queries.GetUsers.Response"][];
         };
         /** @enum {string} */
+        "Fei.Is.Api.Data.Enums.DeviceConnectionState": "Online" | "Degraded" | "Offline";
+        /** @enum {string} */
         "Fei.Is.Api.Data.Enums.DeviceConnectionProtocol": "HTTP" | "MQTT";
         /**
          * Format: int32
@@ -2887,6 +2889,7 @@ export interface components {
             ownerId: string;
             ownerEmail?: string | null;
             connected: boolean;
+            connectionState: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceConnectionState"];
             permission: components["schemas"]["Fei.Is.Api.Data.Enums.DevicePermission"];
             /** Format: date-time */
             lastSeen?: string | null;
@@ -2913,6 +2916,7 @@ export interface components {
             connected: boolean;
             /** Format: date-time */
             lastSeen?: string | null;
+            connectionState: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceConnectionState"];
             protocol: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceConnectionProtocol"];
             /** Format: int32 */
             dataPointRetentionDays?: number | null;
@@ -2949,6 +2953,7 @@ export interface components {
             id: string;
             name: string;
             connected: boolean;
+            connectionState: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceConnectionState"];
             permission: components["schemas"]["Fei.Is.Api.Data.Enums.DevicePermission"];
             /** Format: date-time */
             lastSeen?: string | null;

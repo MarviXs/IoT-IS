@@ -260,6 +260,7 @@
     "last_activity": "Last activity",
     "status": "Status",
     "connected": "Connected",
+    "degraded": "Degraded",
     "disconnected": "Disconnected",
     "decimal": "Decimal places",
     "init_window": "Initialize 1min window",

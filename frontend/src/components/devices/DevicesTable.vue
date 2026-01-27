@@ -13,8 +13,8 @@
             <q-card-section class="device-card__section">
               <div class="device-card__name text-subtitle1 ellipsis">{{ device.name }}</div>
               <div class="device-card__status row items-center">
-                <StatusDot :connected="device.connected" />
-                <span class="q-ml-sm">{{ device.connected ? t('device.connected') : t('device.disconnected') }}</span>
+                <StatusDot :status="device.connectionState" />
+                <span class="q-ml-sm">{{ getStatusLabel(device.connectionState) }}</span>
               </div>
               <div v-if="showOwner" class="device-card__owner text-caption text-grey-7">
                 {{ t('global.owner') }}: {{ device.ownerEmail ?? '—' }}
@@ -130,7 +130,7 @@
 
       <template #body-cell-status="propsStatus">
         <q-td auto-width :props="propsStatus">
-          <StatusDot :connected="propsStatus.row.connected" />
+          <StatusDot :status="propsStatus.row.connectionState" />
         </q-td>
       </template>
 
@@ -238,6 +238,8 @@ import type { AdminDevicesResponse } from '@/api/services/AdminDeviceService';
 import EditDeviceDialog from '@/components/devices/EditDeviceDialog.vue';
 import StatusDot from './StatusDot.vue';
 import ChangeDeviceOwnerDialog from '@/components/devices/ChangeDeviceOwnerDialog.vue';
+
+type DeviceConnectionState = 'Online' | 'Degraded' | 'Offline';
 import { useRouter } from 'vue-router';
 import DeviceSharingService from '@/api/services/DeviceSharingService';
 import { useAuthStore } from '@/stores/auth-store';
@@ -393,6 +395,16 @@ watch(isChangeOwnerDialogOpen, (open) => {
     deviceToChangeOwner.value = null;
   }
 });
+
+function getStatusLabel(state?: DeviceConnectionState) {
+  if (state === 'Degraded') {
+    return t('device.degraded');
+  }
+  if (state === 'Online') {
+    return t('device.connected');
+  }
+  return t('device.disconnected');
+}
 
 // const getPermissions = (device: Device) => {
 //   if (DeviceService.isOwner(device)) {

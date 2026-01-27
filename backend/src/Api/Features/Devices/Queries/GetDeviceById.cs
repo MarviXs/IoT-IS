@@ -78,6 +78,12 @@ public static class GetDeviceById
             RedisValue isOnline = await redis.Db.StringGetAsync(isOnlineKey);
             RedisValue lastSeen = await redis.Db.StringGetAsync(lastSeenKey);
 
+            var connectionState = device.GetConnectionState(
+                isOnline.HasValue && isOnline == "1",
+                lastSeen.HasValue && long.TryParse(lastSeen, out var timestampValue) ? DateTimeOffset.FromUnixTimeSeconds(timestampValue) : null,
+                DateTimeOffset.UtcNow
+            );
+
             var response = new Response(
                 device.Id,
                 device.Name,
@@ -112,6 +118,7 @@ public static class GetDeviceById
                 device.UpdatedAt,
                 isOnline.HasValue && isOnline == "1",
                 lastSeen.HasValue && long.TryParse(lastSeen, out var timestamp) ? DateTimeOffset.FromUnixTimeSeconds(timestamp) : null,
+                connectionState,
                 device.Protocol,
                 device.DataPointRetentionDays,
                 device.SampleRateSeconds
@@ -145,6 +152,7 @@ public static class GetDeviceById
         DateTime UpdatedAt,
         bool Connected,
         DateTimeOffset? LastSeen,
+        DeviceConnectionState ConnectionState,
         DeviceConnectionProtocol Protocol,
         int? DataPointRetentionDays,
         float? SampleRateSeconds
