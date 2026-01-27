@@ -20,7 +20,8 @@ public static class CreateDevice
         string AccessToken,
         Guid? TemplateId,
         DeviceConnectionProtocol Protocol,
-        int? DataPointRetentionDays
+        int? DataPointRetentionDays,
+        float? SampleRateSeconds
     );
 
     public sealed class Endpoint : ICarterModule
@@ -93,6 +94,7 @@ public static class CreateDevice
                 DeviceTemplateId = message.Request.TemplateId,
                 Protocol = message.Request.Protocol,
                 DataPointRetentionDays = message.Request.DataPointRetentionDays,
+                SampleRateSeconds = message.Request.SampleRateSeconds,
             };
 
             await context.Devices.AddAsync(device, cancellationToken);
@@ -112,6 +114,10 @@ public static class CreateDevice
                 .GreaterThan(0)
                 .WithMessage("Data point retention must be greater than zero days")
                 .When(r => r.Request.DataPointRetentionDays.HasValue);
+            RuleFor(r => r.Request.SampleRateSeconds)
+                .GreaterThan(0)
+                .WithMessage("Sample rate must be greater than zero seconds")
+                .When(r => r.Request.SampleRateSeconds.HasValue);
         }
     }
 }

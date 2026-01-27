@@ -14,5 +14,6 @@ public class DeviceFake : Faker<Device>
         RuleFor(x => x.Mac, f => f.Internet.Mac());
         RuleFor(x => x.AccessToken, f => f.Internet.Mac());
         RuleFor(x => x.DataPointRetentionDays, f => f.Random.Int(1, 30));
+        RuleFor(x => x.SampleRateSeconds, f => f.Random.Float(1f, 300f));
     }
 }

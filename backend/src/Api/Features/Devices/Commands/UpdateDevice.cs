@@ -16,7 +16,14 @@ namespace Fei.Is.Api.Features.Devices.Commands;
 
 public static class UpdateDevice
 {
-    public record Request(string Name, string AccessToken, Guid? TemplateId, DeviceConnectionProtocol Protocol, int? DataPointRetentionDays);
+    public record Request(
+        string Name,
+        string AccessToken,
+        Guid? TemplateId,
+        DeviceConnectionProtocol Protocol,
+        int? DataPointRetentionDays,
+        float? SampleRateSeconds
+    );
 
     public sealed class Endpoint : ICarterModule
     {
@@ -94,6 +101,7 @@ public static class UpdateDevice
             device.DeviceTemplateId = message.Request.TemplateId;
             device.Protocol = message.Request.Protocol;
             device.DataPointRetentionDays = message.Request.DataPointRetentionDays;
+            device.SampleRateSeconds = message.Request.SampleRateSeconds;
 
             await context.SaveChangesAsync(cancellationToken);
 
@@ -114,6 +122,10 @@ public static class UpdateDevice
                 .GreaterThan(0)
                 .WithMessage("Data point retention must be greater than zero days")
                 .When(r => r.Request.DataPointRetentionDays.HasValue);
+            RuleFor(r => r.Request.SampleRateSeconds)
+                .GreaterThan(0)
+                .WithMessage("Sample rate must be greater than zero seconds")
+                .When(r => r.Request.SampleRateSeconds.HasValue);
         }
     }
 }

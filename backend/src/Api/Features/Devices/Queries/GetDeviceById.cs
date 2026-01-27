@@ -113,7 +113,8 @@ public static class GetDeviceById
                 isOnline.HasValue && isOnline == "1",
                 lastSeen.HasValue && long.TryParse(lastSeen, out var timestamp) ? DateTimeOffset.FromUnixTimeSeconds(timestamp) : null,
                 device.Protocol,
-                device.DataPointRetentionDays
+                device.DataPointRetentionDays,
+                device.SampleRateSeconds
             );
 
             return Result.Ok(response);
@@ -145,6 +146,7 @@ public static class GetDeviceById
         bool Connected,
         DateTimeOffset? LastSeen,
         DeviceConnectionProtocol Protocol,
-        int? DataPointRetentionDays
+        int? DataPointRetentionDays,
+        float? SampleRateSeconds
     );
 }

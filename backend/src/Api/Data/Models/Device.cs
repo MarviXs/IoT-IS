@@ -16,7 +16,7 @@ public class Device : BaseModel
     public DeviceConnectionProtocol Protocol { get; set; } = DeviceConnectionProtocol.HTTP;
     public int? DataPointRetentionDays { get; set; }
     public string? CurrentFirmwareVersion { get; set; }
-    public float SampleRateSeconds { get; set; } = 60;
+    public float? SampleRateSeconds { get; set; }
     public ICollection<Job> Jobs { get; set; } = [];
     public ICollection<JobSchedule> JobSchedules { get; set; } = [];
     public ICollection<CollectionItem> CollectionItems { get; set; } = [];

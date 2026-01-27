@@ -2754,6 +2754,18 @@ export interface components {
             /** Format: int32 */
             order: number;
         };
+        "Fei.Is.Api.Features.DeviceTemplates.Commands.ImportDeviceTemplate.RecipeRequest": {
+            name: string;
+            steps?: components["schemas"]["Fei.Is.Api.Features.DeviceTemplates.Commands.ImportDeviceTemplate.RecipeStepRequest"][] | null;
+        };
+        "Fei.Is.Api.Features.DeviceTemplates.Commands.ImportDeviceTemplate.RecipeStepRequest": {
+            commandName?: string | null;
+            subrecipeName?: string | null;
+            /** Format: int32 */
+            cycles: number;
+            /** Format: int32 */
+            order: number;
+        };
         "Fei.Is.Api.Features.DeviceTemplates.Commands.ImportDeviceTemplate.Request": {
             templateData: components["schemas"]["Fei.Is.Api.Features.DeviceTemplates.Commands.ImportDeviceTemplate.TemplateRequest"];
             version: string;
@@ -2771,6 +2783,7 @@ export interface components {
             commands: components["schemas"]["Fei.Is.Api.Features.DeviceTemplates.Commands.ImportDeviceTemplate.DeviceCommandRequest"][];
             sensors: components["schemas"]["Fei.Is.Api.Features.DeviceTemplates.Commands.ImportDeviceTemplate.SensorRequest"][];
             controls?: components["schemas"]["Fei.Is.Api.Features.DeviceTemplates.Commands.ImportDeviceTemplate.DeviceControlRequest"][] | null;
+            recipes?: components["schemas"]["Fei.Is.Api.Features.DeviceTemplates.Commands.ImportDeviceTemplate.RecipeRequest"][] | null;
             deviceType: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceType"];
             enableMap: boolean;
             enableGrid: boolean;
@@ -2849,6 +2862,8 @@ export interface components {
             protocol: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceConnectionProtocol"];
             /** Format: int32 */
             dataPointRetentionDays?: number | null;
+            /** Format: float */
+            sampleRateSeconds: number;
         };
         "Fei.Is.Api.Features.Devices.Commands.UpdateDevice.Request": {
             name: string;
@@ -2858,6 +2873,8 @@ export interface components {
             protocol: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceConnectionProtocol"];
             /** Format: int32 */
             dataPointRetentionDays?: number | null;
+            /** Format: float */
+            sampleRateSeconds: number;
         };
         "Fei.Is.Api.Features.Devices.Commands.UpdateDeviceCurrentFirmware.Request": {
             versionNumber: string;
@@ -2899,6 +2916,8 @@ export interface components {
             protocol: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceConnectionProtocol"];
             /** Format: int32 */
             dataPointRetentionDays?: number | null;
+            /** Format: float */
+            sampleRateSeconds: number;
         };
         "Fei.Is.Api.Features.Devices.Queries.GetDeviceById.SensorResponse": {
             /** Format: uuid */

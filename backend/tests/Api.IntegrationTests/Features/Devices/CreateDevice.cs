@@ -34,6 +34,7 @@ public class CreateDeviceTests(IntegrationTestWebAppFactory factory) : BaseInteg
         createdDevice.AccessToken.Should().Be(deviceRequest.AccessToken);
         createdDevice.DeviceTemplateId.Should().Be(deviceRequest.TemplateId);
         createdDevice.DataPointRetentionDays.Should().Be(deviceRequest.DataPointRetentionDays);
+        createdDevice.SampleRateSeconds.Should().Be(deviceRequest.SampleRateSeconds);
     }
 }
 
@@ -47,7 +48,8 @@ public class CreateDeviceRequestFake : Faker<CreateDevice.Request>
                 f.Internet.Mac(),
                 templateId,
                 DeviceConnectionProtocol.HTTP,
-                f.Random.Int(1, 30)
+                f.Random.Int(1, 30),
+                f.Random.Float(1f, 300f)
             )
         );
     }

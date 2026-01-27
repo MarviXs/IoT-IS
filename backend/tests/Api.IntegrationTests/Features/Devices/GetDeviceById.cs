@@ -33,5 +33,6 @@ public class GetDeviceByIdTests(IntegrationTestWebAppFactory factory) : BaseInte
         deviceResponse.AccessToken.Should().Be(device.AccessToken);
         deviceResponse.DeviceTemplate?.Id.Should().Be(deviceTemplate.Id);
         deviceResponse.DataPointRetentionDays.Should().Be(device.DataPointRetentionDays);
+        deviceResponse.SampleRateSeconds.Should().Be(device.SampleRateSeconds);
     }
 }
