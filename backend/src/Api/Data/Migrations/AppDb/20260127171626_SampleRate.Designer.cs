@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Fei.Is.Api.Data.Migrations.AppDb
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260127165745_DeviceSampleRate")]
-    partial class DeviceSampleRate
+    [Migration("20260127171626_SampleRate")]
+    partial class SampleRate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -280,7 +280,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                     b.Property<int>("Protocol")
                         .HasColumnType("integer");
 
-                    b.Property<float>("SampleRateSeconds")
+                    b.Property<float?>("SampleRateSeconds")
                         .HasColumnType("real");
 
                     b.Property<DateTime>("UpdatedAt")

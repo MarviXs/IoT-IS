@@ -31,6 +31,7 @@ const device = ref<DeviceFormData>({
   deviceTemplate: undefined,
   protocol: undefined,
   dataPointRetentionDays: undefined,
+  sampleRateSeconds: undefined,
 });
 const deviceForm = ref();
 
@@ -41,6 +42,7 @@ async function createDevice() {
     accessToken: device.value.accessToken ?? '',
     protocol: device.value.protocol,
     dataPointRetentionDays: device.value.dataPointRetentionDays ?? null,
+    sampleRateSeconds: device.value.sampleRateSeconds ?? null,
   };
 
   creatingDevice.value = true;

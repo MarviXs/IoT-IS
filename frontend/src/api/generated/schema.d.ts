@@ -2863,7 +2863,7 @@ export interface components {
             /** Format: int32 */
             dataPointRetentionDays?: number | null;
             /** Format: float */
-            sampleRateSeconds: number;
+            sampleRateSeconds?: number | null;
         };
         "Fei.Is.Api.Features.Devices.Commands.UpdateDevice.Request": {
             name: string;
@@ -2874,7 +2874,7 @@ export interface components {
             /** Format: int32 */
             dataPointRetentionDays?: number | null;
             /** Format: float */
-            sampleRateSeconds: number;
+            sampleRateSeconds?: number | null;
         };
         "Fei.Is.Api.Features.Devices.Commands.UpdateDeviceCurrentFirmware.Request": {
             versionNumber: string;
@@ -2917,7 +2917,7 @@ export interface components {
             /** Format: int32 */
             dataPointRetentionDays?: number | null;
             /** Format: float */
-            sampleRateSeconds: number;
+            sampleRateSeconds?: number | null;
         };
         "Fei.Is.Api.Features.Devices.Queries.GetDeviceById.SensorResponse": {
             /** Format: uuid */

@@ -46,6 +46,7 @@ async function getDevice() {
     accessToken: data.accessToken ?? '',
     protocol: data.protocol,
     dataPointRetentionDays: data.dataPointRetentionDays ?? undefined,
+    sampleRateSeconds: data.sampleRateSeconds ?? undefined,
   };
 
   if (!data.deviceTemplate?.id) {
@@ -62,6 +63,7 @@ async function updateDevice() {
     accessToken: device.value.accessToken,
     protocol: device.value.protocol,
     dataPointRetentionDays: device.value.dataPointRetentionDays ?? null,
+    sampleRateSeconds: device.value.sampleRateSeconds ?? null,
   };
 
   updatingDevice.value = true;

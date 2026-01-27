@@ -241,6 +241,8 @@
     "generate_access_token": "Generate access token",
     "auto_delete_datapoints_label": "Auto-delete datapoints older than (days)",
     "auto_delete_datapoints_hint": "Leave empty to keep all datapoints.",
+    "sample_rate_label": "Sample rate (seconds)",
+    "sample_rate_hint": "Leave empty to use the device default.",
     "auto_delete_datapoints_disabled": "Disabled",
     "auto_delete_datapoints_value": "After {days} days",
     "firmware": "Firmware",
@@ -316,6 +318,7 @@
     },
     "rules": {
       "retention_positive": "Enter at least one day or leave the field empty.",
+      "sample_rate_positive": "Enter a positive number of seconds or leave the field empty.",
       "decimal_min": "Decimal places must be greater than 0!"
     }
   },

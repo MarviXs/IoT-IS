@@ -32,6 +32,16 @@
         :min="1"
         clearable
       />
+      <q-input
+        v-model.number="sampleRateSeconds"
+        type="number"
+        class="q-mt-lg"
+        :label="t('device.sample_rate_label')"
+        :hint="t('device.sample_rate_hint')"
+        :rules="sampleRateRules"
+        :min="1"
+        clearable
+      />
     </q-card-section>
     <q-card-actions align="right" class="text-primary">
       <q-btn v-close-popup flat :label="t('global.cancel')" no-caps />
@@ -62,6 +72,7 @@ export interface DeviceFormData {
   deviceTemplate?: DeviceTemplateSelectData;
   protocol?: 'MQTT' | 'HTTP';
   dataPointRetentionDays?: number | null;
+  sampleRateSeconds?: number | null;
 }
 
 const props = defineProps<{
@@ -104,6 +115,10 @@ const retentionRules = [
   (val: number | null | undefined) =>
     val === null || val === undefined || val >= 1 || t('device.rules.retention_positive'),
 ];
+const sampleRateRules = [
+  (val: number | null | undefined) =>
+    val === null || val === undefined || val >= 1 || t('device.rules.sample_rate_positive'),
+];
 
 const retentionDays = computed<number | null>({
   get: () => device.value.dataPointRetentionDays ?? null,
@@ -112,6 +127,17 @@ const retentionDays = computed<number | null>({
       device.value.dataPointRetentionDays = undefined;
     } else {
       device.value.dataPointRetentionDays = value;
+    }
+  },
+});
+
+const sampleRateSeconds = computed<number | null>({
+  get: () => device.value.sampleRateSeconds ?? null,
+  set: (value) => {
+    if (value === null || value === undefined) {
+      device.value.sampleRateSeconds = undefined;
+    } else {
+      device.value.sampleRateSeconds = value;
     }
   },
 });

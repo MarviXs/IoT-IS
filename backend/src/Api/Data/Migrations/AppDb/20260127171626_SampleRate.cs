@@ -5,7 +5,7 @@
 namespace Fei.Is.Api.Data.Migrations.AppDb
 {
     /// <inheritdoc />
-    public partial class DeviceSampleRate : Migration
+    public partial class SampleRate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -14,8 +14,7 @@ namespace Fei.Is.Api.Data.Migrations.AppDb
                 name: "SampleRateSeconds",
                 table: "Devices",
                 type: "real",
-                nullable: false,
-                defaultValue: 0f);
+                nullable: true);
         }
 
         /// <inheritdoc />
