@@ -315,6 +315,8 @@ const props = defineProps({
   },
 });
 
+const emit = defineEmits(['refresh']);
+
 const tickedNodes = defineModel('tickedNodes', {
   type: Array as PropType<string[]>,
   default: [],
@@ -927,6 +929,7 @@ async function getDataPoints() {
 
 async function refresh() {
   timeRangeSelectRef.value?.updateTimeRange();
+  emit('refresh');
 }
 
 function roundNumber(num: number | undefined | null, decimals: number) {
