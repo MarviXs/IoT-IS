@@ -183,12 +183,12 @@ public static class GetAdminDevices
                 orderedIds = (deviceParameters.Descending ?? false)
                     ? lastSeenItems
                         .OrderByDescending(item => item.HasLastSeen)
-                        .ThenByDescending(item => item.LastSeen)
+                        .ThenBy(item => item.LastSeen)
                         .ThenBy(item => item.Id)
                         .Select(item => item.Id)
                     : lastSeenItems
                         .OrderByDescending(item => item.HasLastSeen)
-                        .ThenBy(item => item.LastSeen)
+                        .ThenByDescending(item => item.LastSeen)
                         .ThenBy(item => item.Id)
                         .Select(item => item.Id);
             }

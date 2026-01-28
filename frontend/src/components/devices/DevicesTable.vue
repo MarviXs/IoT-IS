@@ -1,6 +1,31 @@
 <template>
   <div>
     <div v-if="isMobile">
+      <div class="row items-center q-gutter-sm q-mb-sm">
+        <q-select
+          v-model="mobileSortBy"
+          dense
+          filled
+          bg-color="white"
+          emit-value
+          map-options
+          :options="mobileSortOptions"
+          :label="t('global.sort_by')"
+          class="col shadow"
+        />
+        <q-btn
+          flat
+          round
+          :icon="mobileDescending ? mdiArrowDown : mdiArrowUp"
+          :aria-label="t('global.sort_toggle')"
+          @click="toggleMobileSortDirection"
+          class="bg-white shadow"
+        >
+          <q-tooltip content-style="font-size: 11px" :offset="[0, 4]">
+            {{ mobileDescending ? t('global.sort_descending') : t('global.sort_ascending') }}
+          </q-tooltip>
+        </q-btn>
+      </div>
       <q-infinite-scroll v-if="mobileItems.length" ref="infiniteScrollRef" :offset="120" @load="onLoadMore">
         <div class="devices-grid">
           <q-card
@@ -225,6 +250,8 @@ import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import {
   mdiAccountSwitch,
+  mdiArrowDown,
+  mdiArrowUp,
   mdiCellphoneLink,
   mdiChartLine,
   mdiDotsVertical,
@@ -311,6 +338,40 @@ const mobileItems = computed(() => {
 
   return devicesFiltered.value;
 });
+
+const mobileSortOptions = computed(() =>
+  columns.value
+    .filter((column) => column.sortable && column.name !== 'actions')
+    .map((column) => ({
+      label: column.label ?? column.name,
+      value: column.name,
+    })),
+);
+
+const mobileSortBy = computed({
+  get: () => pagination.value?.sortBy ?? 'name',
+  set: (value: string) => {
+    if (!pagination.value || value === pagination.value.sortBy) {
+      return;
+    }
+
+    pagination.value.sortBy = value;
+    pagination.value.page = 1;
+    emit('onRequest', { pagination: pagination.value });
+  },
+});
+
+const mobileDescending = computed(() => pagination.value?.descending ?? false);
+
+function toggleMobileSortDirection() {
+  if (!pagination.value) {
+    return;
+  }
+
+  pagination.value.descending = !pagination.value.descending;
+  pagination.value.page = 1;
+  emit('onRequest', { pagination: pagination.value });
+}
 
 const infiniteScrollRef = ref<InstanceType<typeof QInfiniteScroll>>();
 
