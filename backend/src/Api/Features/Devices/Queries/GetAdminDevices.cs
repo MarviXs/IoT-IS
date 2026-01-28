@@ -51,6 +51,10 @@ public static class GetAdminDevices
         public async Task<PagedList<Response>> Handle(Query message, CancellationToken cancellationToken)
         {
             var deviceParameters = message.Parameters;
+            var sortBy = deviceParameters.SortBy?.Trim();
+            var normalizedSort = sortBy?.ToLowerInvariant();
+            var sortByStatus = normalizedSort is "status" or "connectionstate";
+            var sortByLastActivity = normalizedSort is "lastactivity" or "lastseen";
             var normalizedSearch = StringUtils.Normalized(deviceParameters.SearchTerm);
 
             var query = context
@@ -63,47 +67,164 @@ public static class GetAdminDevices
                             && device.Owner.Email != null
                             && device.Owner.Email.ToLower().Contains(normalizedSearch))
                 )
-                .Sort(deviceParameters.SortBy ?? nameof(Device.UpdatedAt), deviceParameters.Descending);
+                .Sort(sortByStatus || sortByLastActivity ? null : sortBy ?? nameof(Device.UpdatedAt), deviceParameters.Descending);
 
             var totalCount = await query.CountAsync(cancellationToken);
 
-            var devices = await query.Paginate(deviceParameters).ToListAsync(cancellationToken);
+            if (!sortByStatus && !sortByLastActivity)
+            {
+                var devices = await query.Paginate(deviceParameters).ToListAsync(cancellationToken);
 
-            var deviceIds = devices.Select(d => d.Id).ToList();
-            var onlineKeys = deviceIds.Select(id => (RedisKey)$"device:{id}:connected").ToArray();
-            var lastSeenKeys = deviceIds.Select(id => (RedisKey)$"device:{id}:lastSeen").ToArray();
+                var deviceIds = devices.Select(d => d.Id).ToList();
+                var onlineKeys = deviceIds.Select(id => (RedisKey)$"device:{id}:connected").ToArray();
+                var lastSeenKeys = deviceIds.Select(id => (RedisKey)$"device:{id}:lastSeen").ToArray();
 
-            var onlineStatuses = await redis.Db.StringGetAsync(onlineKeys);
-            var lastSeenTimestamps = await redis.Db.StringGetAsync(lastSeenKeys);
+                var onlineStatuses = await redis.Db.StringGetAsync(onlineKeys);
+                var lastSeenTimestamps = await redis.Db.StringGetAsync(lastSeenKeys);
 
-            var responseDevices = devices
-                .Select(
-                    (device, index) =>
-                    {
-                        var online = onlineStatuses[index].HasValue && onlineStatuses[index] == "1";
-                        DateTimeOffset? lastSeen = null;
-
-                        if (lastSeenTimestamps[index].HasValue && long.TryParse(lastSeenTimestamps[index], out var timestamp))
+                var responseDevices = devices
+                    .Select(
+                        (device, index) =>
                         {
-                            lastSeen = DateTimeOffset.FromUnixTimeSeconds(timestamp);
-                        }
+                            var online = onlineStatuses[index].HasValue && onlineStatuses[index] == "1";
+                            DateTimeOffset? lastSeen = null;
 
-                        var connectionState = device.GetConnectionState(online, lastSeen, DateTimeOffset.UtcNow);
+                            if (lastSeenTimestamps[index].HasValue && long.TryParse(lastSeenTimestamps[index], out var timestamp))
+                            {
+                                lastSeen = DateTimeOffset.FromUnixTimeSeconds(timestamp);
+                            }
+
+                            var connectionState = device.GetConnectionState(online, lastSeen, DateTimeOffset.UtcNow);
+                            return new Response(
+                                device.Id,
+                                device.Name,
+                                device.OwnerId,
+                                device.Owner?.Email,
+                                online,
+                                connectionState,
+                                device.GetPermission(message.User),
+                                lastSeen
+                            );
+                        }
+                    )
+                    .ToList();
+
+                return responseDevices.ToPagedList(totalCount, deviceParameters.PageNumber, deviceParameters.PageSize);
+            }
+
+            var deviceSnapshots = await query
+                .Select(device => new { device.Id, device.Protocol, device.SampleRateSeconds })
+                .ToListAsync(cancellationToken);
+
+            if (deviceSnapshots.Count == 0)
+            {
+                return new List<Response>().ToPagedList(totalCount, deviceParameters.PageNumber, deviceParameters.PageSize);
+            }
+
+            var deviceIdsForSort = deviceSnapshots.Select(device => device.Id).ToList();
+            var sortOnlineKeys = deviceIdsForSort.Select(id => (RedisKey)$"device:{id}:connected").ToArray();
+            var sortLastSeenKeys = deviceIdsForSort.Select(id => (RedisKey)$"device:{id}:lastSeen").ToArray();
+
+            var sortOnlineStatuses = await redis.Db.StringGetAsync(sortOnlineKeys);
+            var sortLastSeenTimestamps = await redis.Db.StringGetAsync(sortLastSeenKeys);
+
+            var nowUtc = DateTimeOffset.UtcNow;
+            var deviceStateById = new Dictionary<Guid, (bool Online, DateTimeOffset? LastSeen, DeviceConnectionState State)>(
+                deviceSnapshots.Count
+            );
+
+            for (var index = 0; index < deviceSnapshots.Count; index++)
+            {
+                var snapshot = deviceSnapshots[index];
+                var online = sortOnlineStatuses[index].HasValue && sortOnlineStatuses[index] == "1";
+                DateTimeOffset? lastSeen = null;
+
+                if (sortLastSeenTimestamps[index].HasValue && long.TryParse(sortLastSeenTimestamps[index], out var timestamp))
+                {
+                    lastSeen = DateTimeOffset.FromUnixTimeSeconds(timestamp);
+                }
+
+                var connectionState = DeviceExtensions.GetConnectionState(
+                    snapshot.Protocol,
+                    snapshot.SampleRateSeconds,
+                    online,
+                    lastSeen,
+                    nowUtc
+                );
+
+                deviceStateById[snapshot.Id] = (online, lastSeen, connectionState);
+            }
+
+            IEnumerable<Guid> orderedIds = deviceSnapshots.Select(snapshot => snapshot.Id);
+            if (sortByStatus)
+            {
+                var stateItems = deviceSnapshots
+                    .Select(
+                        snapshot =>
+                        {
+                            var state = deviceStateById[snapshot.Id].State;
+                            return new { snapshot.Id, StateOrder = (int)state };
+                        }
+                    );
+                orderedIds = (deviceParameters.Descending ?? false)
+                    ? stateItems.OrderByDescending(item => item.StateOrder).ThenBy(item => item.Id).Select(item => item.Id)
+                    : stateItems.OrderBy(item => item.StateOrder).ThenBy(item => item.Id).Select(item => item.Id);
+            }
+            else if (sortByLastActivity)
+            {
+                var lastSeenItems = deviceSnapshots
+                    .Select(
+                        snapshot =>
+                        {
+                            var lastSeen = deviceStateById[snapshot.Id].LastSeen;
+                            return new { snapshot.Id, HasLastSeen = lastSeen.HasValue, LastSeen = lastSeen ?? DateTimeOffset.MinValue };
+                        }
+                    );
+                orderedIds = (deviceParameters.Descending ?? false)
+                    ? lastSeenItems
+                        .OrderByDescending(item => item.HasLastSeen)
+                        .ThenByDescending(item => item.LastSeen)
+                        .ThenBy(item => item.Id)
+                        .Select(item => item.Id)
+                    : lastSeenItems
+                        .OrderByDescending(item => item.HasLastSeen)
+                        .ThenBy(item => item.LastSeen)
+                        .ThenBy(item => item.Id)
+                        .Select(item => item.Id);
+            }
+
+            var pageNumber = deviceParameters.PageNumber ?? 1;
+            var pageSize = deviceParameters.PageSize.GetValueOrDefault();
+            var pagedIds = orderedIds.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
+            if (pagedIds.Count == 0)
+            {
+                return new List<Response>().ToPagedList(totalCount, deviceParameters.PageNumber, deviceParameters.PageSize);
+            }
+
+            var devicesForPage = await query.Where(device => pagedIds.Contains(device.Id)).ToListAsync(cancellationToken);
+            var deviceById = devicesForPage.ToDictionary(device => device.Id);
+
+            var responseDevicesForPage = pagedIds
+                .Select(
+                    id =>
+                    {
+                        var device = deviceById[id];
+                        var state = deviceStateById[id];
                         return new Response(
                             device.Id,
                             device.Name,
                             device.OwnerId,
                             device.Owner?.Email,
-                            online,
-                            connectionState,
+                            state.Online,
+                            state.State,
                             device.GetPermission(message.User),
-                            lastSeen
+                            state.LastSeen
                         );
                     }
                 )
                 .ToList();
 
-            return responseDevices.ToPagedList(totalCount, deviceParameters.PageNumber, deviceParameters.PageSize);
+            return responseDevicesForPage.ToPagedList(totalCount, deviceParameters.PageNumber, deviceParameters.PageSize);
         }
     }
 

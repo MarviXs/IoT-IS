@@ -113,7 +113,7 @@
         </q-td>
       </template>
 
-      <template #body-cell-lastResponse="propsContact">
+      <template #body-cell-lastActivity="propsContact">
         <q-td auto-width :props="propsContact">
           {{ formatTimeToDistance(propsContact.row.lastSeen) }}
           <q-tooltip v-if="propsContact.row.lastSeen" content-style="font-size: 11px" :offset="[0, 4]">
@@ -420,7 +420,7 @@ const columns = computed<QTableProps['columns']>(() => {
       label: t('device.status'),
       field: 'connected',
       align: 'center',
-      sortable: false,
+      sortable: true,
     },
     {
       name: 'name',
@@ -441,14 +441,14 @@ const columns = computed<QTableProps['columns']>(() => {
     });
   }
 
-  baseColumns.push(
-    {
-      name: 'lastResponse',
-      label: t('device.last_activity'),
-      field: 'lastSeen',
-      align: 'left',
-      sortable: false,
-    },
+    baseColumns.push(
+      {
+        name: 'lastActivity',
+        label: t('device.last_activity'),
+        field: 'lastSeen',
+        align: 'left',
+        sortable: true,
+      },
     {
       name: 'actions',
       label: '',

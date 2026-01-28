@@ -74,13 +74,23 @@ public static class DeviceExtensions
 
     public static DeviceConnectionState GetConnectionState(this Device device, bool mqttConnected, DateTimeOffset? lastSeen, DateTimeOffset nowUtc)
     {
-        if (device.Protocol == DeviceConnectionProtocol.MQTT && !mqttConnected)
+        return GetConnectionState(device.Protocol, device.SampleRateSeconds, mqttConnected, lastSeen, nowUtc);
+    }
+
+    public static DeviceConnectionState GetConnectionState(
+        DeviceConnectionProtocol protocol,
+        float? sampleRateSeconds,
+        bool mqttConnected,
+        DateTimeOffset? lastSeen,
+        DateTimeOffset nowUtc
+    )
+    {
+        if (protocol == DeviceConnectionProtocol.MQTT && !mqttConnected)
         {
             return DeviceConnectionState.Offline;
         }
 
-        var sampleRateSeconds = device.SampleRateSeconds;
-        if (device.Protocol == DeviceConnectionProtocol.HTTP && (!sampleRateSeconds.HasValue || sampleRateSeconds <= 0))
+        if (protocol == DeviceConnectionProtocol.HTTP && (!sampleRateSeconds.HasValue || sampleRateSeconds <= 0))
         {
             sampleRateSeconds = 60;
         }
