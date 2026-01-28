@@ -16,6 +16,9 @@
                 <StatusDot :status="device.connectionState" />
                 <span class="q-ml-sm">{{ getStatusLabel(device.connectionState) }}</span>
               </div>
+              <div class="device-card__activity text-caption text-grey-7">
+                {{ t('device.last_activity') }}: {{ formatTimeToDistance(device.lastSeen) }}
+              </div>
               <div v-if="showOwner" class="device-card__owner text-caption text-grey-7">
                 {{ t('global.owner') }}: {{ device.ownerEmail ?? '—' }}
               </div>
