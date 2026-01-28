@@ -83,6 +83,9 @@
   },
   "system": {
     "menu_label": "System",
+    "version": {
+      "label": "Current version"
+    },
     "storage": {
       "title": "TimescaleDB storage",
       "subtitle": "Compressed datapoint storage usage",

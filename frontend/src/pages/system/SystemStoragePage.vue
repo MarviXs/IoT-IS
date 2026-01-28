@@ -2,6 +2,12 @@
   <q-page padding>
     <div class="column q-gutter-md">
       <q-card flat class="shadow">
+        <q-card-section>
+          <div class="text-h6">{{ t('system.version.label') }}</div>
+          <div class="text-subtitle2 text-secondary">1.0</div>
+        </q-card-section>
+      </q-card>
+      <q-card flat class="shadow">
         <q-card-section class="row items-center justify-between">
           <div>
             <div class="text-h6">{{ t('system.storage.title') }}</div>

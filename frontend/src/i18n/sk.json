@@ -79,6 +79,9 @@
   },
   "system": {
     "menu_label": "Systém",
+    "version": {
+      "label": "Aktuálna verzia"
+    },
     "storage": {
       "title": "Úložisko TimescaleDB",
       "subtitle": "Využitie úložiska komprimovaných dátových bodov",
