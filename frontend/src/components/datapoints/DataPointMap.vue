@@ -51,7 +51,19 @@
         </template>
       </q-btn>
     </div>
-    <div id="map" style="height: 550px; width: 100%"></div>
+    <div class="map-wrapper">
+      <div id="map"></div>
+      <div v-if="mapMode === 'heat'" class="heatmap-scale">
+        <div class="heatmap-scale__label">
+          {{ t('datapoints.map.heatmap') }}
+        </div>
+        <div class="heatmap-scale__bar"></div>
+        <div class="heatmap-scale__range">
+          <span>{{ heatScaleMinLabel }}</span>
+          <span>{{ heatScaleMaxLabel }}</span>
+        </div>
+      </div>
+    </div>
     <dialog-common v-model="isMapOptionsDialogOpen">
       <template #title>{{ t('global.options') }}</template>
       <template #default>
@@ -170,6 +182,23 @@ const heatLayerOptions = computed<HeatMapOptions>(() => ({
   radius: mapOptions.value.heatRadius,
   blur: mapOptions.value.heatBlur,
 }));
+const heatScaleRange = computed(() => {
+  const sensor = selectedSensor.value;
+  if (!sensor) {
+    return { min: 0, max: 1 };
+  }
+  const numericValues = dataPoints.value
+    .filter((dp) => typeof dp.value === 'number' && Number.isFinite(dp.value))
+    .map((dp) => Math.abs(dp.value));
+  if (numericValues.length === 0) {
+    return { min: 0, max: 1 };
+  }
+  const max = Math.max(...numericValues, 1);
+  const min = Math.min(...numericValues);
+  return { min, max };
+});
+const heatScaleMinLabel = computed(() => heatScaleRange.value.min.toFixed(2));
+const heatScaleMaxLabel = computed(() => heatScaleRange.value.max.toFixed(2));
 
 function createMap() {
   if (map.value) return;
@@ -305,5 +334,49 @@ watch(selectedSensorId, (newValue) => {
 <style lang="scss">
 .custom-toggle {
   border: 1px solid #027be3;
+}
+.map-wrapper {
+  position: relative;
+}
+
+#map {
+  height: 550px;
+  width: 100%;
+}
+
+.heatmap-scale {
+  position: absolute;
+  right: 6px;
+  bottom: 26px;
+  z-index: 900;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 8px 10px;
+  min-width: 140px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.heatmap-scale__label {
+  font-size: 12px;
+  color: #546e7a;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.heatmap-scale__bar {
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #2c7bb6, #abd9e9, #ffffbf, #fdae61, #d7191c);
+  border: 1px solid #d0d0d0;
+}
+
+.heatmap-scale__range {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #607d8b;
+  margin-top: 4px;
 }
 </style>
