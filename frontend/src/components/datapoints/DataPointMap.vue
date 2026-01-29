@@ -189,9 +189,11 @@ function ensureHeatLayer(mapInstance: LeafletMap) {
   }
 
   const layer = heatLayer.value;
-  layer.setOptions(heatLayerOptions.value);
   if (layer && !mapInstance.hasLayer(layer as unknown as Layer)) {
     layer.addTo(mapInstance);
+  }
+  if (layer && mapInstance.hasLayer(layer as unknown as Layer)) {
+    layer.setOptions(heatLayerOptions.value);
   }
 
   return heatLayer.value;
@@ -278,10 +280,6 @@ watch(mapMode, () => {
 watch(
   mapOptions,
   () => {
-    if (heatLayer.value) {
-      heatLayer.value.setOptions(heatLayerOptions.value);
-      heatLayer.value.redraw();
-    }
     updateMapVisualization();
   },
   { deep: true },
