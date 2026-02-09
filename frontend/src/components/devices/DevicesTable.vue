@@ -270,6 +270,7 @@ import StatusDot from './StatusDot.vue';
 import ChangeDeviceOwnerDialog from '@/components/devices/ChangeDeviceOwnerDialog.vue';
 
 type DeviceConnectionState = 'Online' | 'Degraded' | 'Offline';
+type DeviceConnectionStateValue = DeviceConnectionState | 0 | 1 | 2;
 import { useRouter } from 'vue-router';
 import DeviceSharingService from '@/api/services/DeviceSharingService';
 import { useAuthStore } from '@/stores/auth-store';
@@ -460,11 +461,11 @@ watch(isChangeOwnerDialogOpen, (open) => {
   }
 });
 
-function getStatusLabel(state?: DeviceConnectionState) {
-  if (state === 'Degraded') {
+function getStatusLabel(state?: DeviceConnectionStateValue) {
+  if (state === 1 || state === 'Degraded') {
     return t('device.degraded');
   }
-  if (state === 'Online') {
+  if (state === 0 || state === 'Online') {
     return t('device.connected');
   }
   return t('device.disconnected');

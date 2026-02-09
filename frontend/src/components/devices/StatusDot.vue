@@ -17,6 +17,7 @@ import { useI18n } from 'vue-i18n';
 import { mdiAlertCircleOutline, mdiConnection, mdiWifi } from '@quasar/extras/mdi-v7';
 
 type DeviceConnectionState = 'Online' | 'Degraded' | 'Offline';
+type DeviceConnectionStateValue = DeviceConnectionState | 0 | 1 | 2;
 
 const props = defineProps({
   connected: {
@@ -24,7 +25,7 @@ const props = defineProps({
     required: false,
   },
   status: {
-    type: String as PropType<DeviceConnectionState>,
+    type: [String, Number] as PropType<DeviceConnectionStateValue>,
     required: false,
   },
 });
@@ -32,8 +33,14 @@ const props = defineProps({
 const { t } = useI18n();
 
 const connectionState = computed<DeviceConnectionState>(() => {
-  if (props.status) {
-    return props.status;
+  if (props.status !== undefined) {
+    if (props.status === 0 || props.status === 'Online') {
+      return 'Online';
+    }
+    if (props.status === 1 || props.status === 'Degraded') {
+      return 'Degraded';
+    }
+    return 'Offline';
   }
   return props.connected ? 'Online' : 'Offline';
 });
