@@ -96,7 +96,11 @@ public static class GetExperiments
             if (!string.IsNullOrWhiteSpace(qp.SearchTerm))
             {
                 var search = StringUtils.Normalized(qp.SearchTerm);
-                query = query.Where(e => (e.Note ?? string.Empty).ToLower().Contains(search));
+                query = query.Where(e =>
+                    (e.Note ?? string.Empty).ToLower().Contains(search)
+                    || (e.Device != null && e.Device.Name.ToLower().Contains(search))
+                    || (e.RanJob != null && e.RanJob.Name.ToLower().Contains(search))
+                );
             }
 
             var totalCount = await query.CountAsync(cancellationToken);

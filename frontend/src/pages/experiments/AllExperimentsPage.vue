@@ -46,6 +46,7 @@
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { mdiPlus } from '@quasar/extras/mdi-v7';
+import { watchDebounced } from '@vueuse/core';
 import PageLayout from '@/layouts/PageLayout.vue';
 import SearchBar from '@/components/core/SearchBar.vue';
 import type { PaginationClient, PaginationTable } from '@/models/Pagination';
@@ -118,4 +119,13 @@ async function getExperiments(paginationTable: PaginationTable) {
 }
 
 getExperiments(pagination.value);
+
+watchDebounced(
+  filter,
+  async () => {
+    pagination.value.page = 1;
+    await getExperiments(pagination.value);
+  },
+  { debounce: 400 },
+);
 </script>
