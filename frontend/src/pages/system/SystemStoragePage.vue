@@ -2,9 +2,12 @@
   <q-page padding>
     <div class="column q-gutter-md">
       <q-card flat class="shadow">
-        <q-card-section>
-          <div class="text-h6">{{ t('system.version.label') }}</div>
-          <div class="text-subtitle2 text-secondary">1.1</div>
+        <q-card-section class="row items-center justify-between">
+          <div>
+            <div class="text-h6">{{ t('system.version.label') }}</div>
+            <div class="text-subtitle2 text-secondary">1.1</div>
+          </div>
+          <q-btn flat color="primary" label="Changelog" @click="isChangelogOpen = true" />
         </q-card-section>
       </q-card>
       <q-card flat class="shadow">
@@ -51,6 +54,8 @@
         </q-card-section>
       </q-card>
     </div>
+
+    <SystemChangelogDialog v-model="isChangelogOpen" />
   </q-page>
 </template>
 
@@ -60,6 +65,7 @@ import { useI18n } from 'vue-i18n';
 import { mdiDatabase, mdiRefresh } from '@quasar/extras/mdi-v7';
 import SystemService from '@/api/services/SystemService';
 import { useQuasar } from 'quasar';
+import SystemChangelogDialog from '@/components/system/SystemChangelogDialog.vue';
 
 const { t } = useI18n();
 const $q = useQuasar();
@@ -68,6 +74,7 @@ const totalSizeBytes = ref<number | null>(null);
 const isLoading = ref(false);
 const errorMessage = ref<string | null>(null);
 const isVacuuming = ref(false);
+const isChangelogOpen = ref(false);
 
 const formattedBytes = computed(() => {
   if (totalSizeBytes.value == null) {
