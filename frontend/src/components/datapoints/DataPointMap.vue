@@ -57,10 +57,13 @@
         <div class="heatmap-scale__label">
           {{ t('datapoints.map.heatmap') }}
         </div>
-        <div class="heatmap-scale__bar"></div>
-        <div class="heatmap-scale__range">
-          <span>{{ heatScaleMinLabel }}</span>
-          <span>{{ heatScaleMaxLabel }}</span>
+        <div class="heatmap-scale__body">
+          <div class="heatmap-scale__bar"></div>
+          <div class="heatmap-scale__ticks">
+            <span v-for="tick in heatScaleTickLabels" :key="tick" class="heatmap-scale__tick-label">
+              {{ tick }}
+            </span>
+          </div>
         </div>
       </div>
     </div>
@@ -197,8 +200,17 @@ const heatScaleRange = computed(() => {
   const min = Math.min(...numericValues);
   return { min, max };
 });
-const heatScaleMinLabel = computed(() => heatScaleRange.value.min.toFixed(2));
-const heatScaleMaxLabel = computed(() => heatScaleRange.value.max.toFixed(2));
+const heatScaleTickLabels = computed(() => {
+  const { min, max } = heatScaleRange.value;
+  const points = 5;
+
+  if (max <= min) {
+    return Array.from({ length: points }, () => min.toFixed(2)).reverse();
+  }
+
+  const step = (max - min) / (points - 1);
+  return Array.from({ length: points }, (_, index) => (max - index * step).toFixed(2));
+});
 
 function createMap() {
   if (map.value) return;
@@ -353,7 +365,7 @@ watch(selectedSensorId, (newValue) => {
   border: 1px solid #e0e0e0;
   border-radius: 6px;
   padding: 8px 10px;
-  min-width: 140px;
+  min-width: 92px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
@@ -366,17 +378,29 @@ watch(selectedSensorId, (newValue) => {
 }
 
 .heatmap-scale__bar {
-  height: 10px;
+  width: 12px;
+  height: 140px;
   border-radius: 999px;
-  background: linear-gradient(90deg, #2c7bb6, #abd9e9, #ffffbf, #fdae61, #d7191c);
+  background: linear-gradient(180deg, #d7191c, #fdae61, #ffffbf, #abd9e9, #2c7bb6);
   border: 1px solid #d0d0d0;
 }
 
-.heatmap-scale__range {
+.heatmap-scale__body {
   display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.heatmap-scale__ticks {
+  height: 140px;
+  display: flex;
+  flex-direction: column;
   justify-content: space-between;
   font-size: 11px;
   color: #607d8b;
-  margin-top: 4px;
+}
+
+.heatmap-scale__tick-label {
+  line-height: 1;
 }
 </style>
