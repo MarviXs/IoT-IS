@@ -944,15 +944,17 @@ function updateChartData() {
   const shouldResetChartZoom = shouldResetZoom.value;
 
   const datasets: DataSetCustom[] = [];
-  const uniqueUnits = new Map<string, { key: string; color: string }>();
+  const uniqueUnits = new Map<string, { key: string; color: string; accuracyDecimals: number }>();
   const yScales: { [key: string]: ScaleOptions } = {};
 
   props.sensors.forEach((sensor, index) => {
     const key = getSensorUniqueId(sensor);
     const unit = sensor.unit ?? '';
+    const sensorColor = getSensorColor(sensor, index);
+    const accuracyDecimals = sensor.accuracyDecimals ?? 2;
 
     if (!uniqueUnits.has(unit)) {
-      uniqueUnits.set(unit, { key, color: getGraphColor(index) });
+      uniqueUnits.set(unit, { key, color: sensorColor, accuracyDecimals });
     }
 
     const unitInfo = uniqueUnits.get(unit);
@@ -966,8 +968,8 @@ function updateChartData() {
           x: dataPoint.ts,
           y: dataPoint.value,
         })) ?? [],
-      backgroundColor: transparentize(getSensorColor(sensor, index), 0.5),
-      borderColor: getSensorColor(sensor, index),
+      backgroundColor: transparentize(sensorColor, 0.5),
+      borderColor: sensorColor,
       cubicInterpolationMode: graphOptions.value.interpolationMethod === 'bezier' ? 'monotone' : 'default',
       showLine: graphOptions.value.lineStyle === 'lines' || graphOptions.value.lineStyle === 'linesmarkers',
       borderWidth: graphOptions.value.lineWidth,
@@ -980,7 +982,7 @@ function updateChartData() {
   });
 
   uniqueUnits.forEach((unitInfo, unit) => {
-    const { key, color } = unitInfo;
+    const { key, color, accuracyDecimals } = unitInfo;
     const index = Array.from(uniqueUnits.values()).indexOf(unitInfo);
 
     yScales[key] = {
@@ -997,7 +999,7 @@ function updateChartData() {
         color: color,
         callback: function (value) {
           if (typeof value !== 'number') return value;
-          return `${roundNumber(value, props.sensors[index].accuracyDecimals ?? 2)} ${unit}`;
+          return `${roundNumber(value, accuracyDecimals)} ${unit}`;
         },
       },
     };
