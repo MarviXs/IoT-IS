@@ -2376,9 +2376,12 @@ export interface components {
             items: components["schemas"]["Fei.Is.Api.Features.UserManagement.Queries.GetUsers.Response"][];
         };
         /** @enum {string} */
-        "Fei.Is.Api.Data.Enums.DeviceConnectionState": "Online" | "Degraded" | "Offline";
-        /** @enum {string} */
         "Fei.Is.Api.Data.Enums.DeviceConnectionProtocol": "HTTP" | "MQTT";
+        /**
+         * Format: int32
+         * @enum {integer}
+         */
+        "Fei.Is.Api.Data.Enums.DeviceConnectionState": 0 | 1 | 2;
         /**
          * Format: int32
          * @enum {integer}
@@ -3028,7 +3031,7 @@ export interface components {
             recipeToRunId?: string | null;
             /** Format: uuid */
             deviceId?: string | null;
-            allowCreateWithoutMatchedJob?: boolean;
+            allowCreateWithoutMatchedJob: boolean;
             /** Format: int32 */
             cycles: number;
             isInfinite: boolean;
