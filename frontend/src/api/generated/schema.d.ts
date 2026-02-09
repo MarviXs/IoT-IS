@@ -952,7 +952,8 @@ export interface paths {
         /** Update an experiment */
         put: operations["UpdateExperiment"];
         post?: never;
-        delete?: never;
+        /** Delete an experiment */
+        delete: operations["DeleteExperiment"];
         options?: never;
         head?: never;
         patch?: never;
@@ -3027,6 +3028,7 @@ export interface components {
             recipeToRunId?: string | null;
             /** Format: uuid */
             deviceId?: string | null;
+            allowCreateWithoutMatchedJob?: boolean;
             /** Format: int32 */
             cycles: number;
             isInfinite: boolean;
@@ -3076,10 +3078,15 @@ export interface components {
             note?: string | null;
             /** Format: uuid */
             deviceId?: string | null;
+            deviceName?: string | null;
+            /** Format: uuid */
+            ownerId: string;
+            startedBy?: string | null;
             /** Format: uuid */
             recipeToRunId?: string | null;
             /** Format: uuid */
             ranJobId?: string | null;
+            ranJobName?: string | null;
             /** Format: date-time */
             startedAt?: string | null;
             /** Format: date-time */
@@ -6541,6 +6548,33 @@ export interface operations {
                 content: {
                     "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
                 };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DeleteExperiment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Not Found */
             404: {

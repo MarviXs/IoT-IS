@@ -73,12 +73,14 @@ public static class GetExperiments
                 return Result.Fail(new ValidationError(validationResult));
             }
 
-            var query = context.Experiments.AsNoTracking();
+            var query = context.Experiments.AsNoTracking().Include(e => e.Device).Include(e => e.Owner).Include(e => e.RanJob).AsQueryable();
 
             if (!message.User.IsAdmin())
             {
                 var userId = message.User.GetUserId();
-                query = query.Where(e => e.OwnerId == userId);
+                query = query.Where(e =>
+                    e.OwnerId == userId || (e.Device != null && e.Device.SharedWithUsers.Any(share => share.SharedToUserId == userId))
+                );
             }
 
             if (qp.RecipeId is Guid recipeId)
@@ -102,7 +104,21 @@ public static class GetExperiments
             var experiments = await query
                 .Sort(qp.SortBy ?? nameof(Experiment.UpdatedAt), qp.Descending)
                 .Paginate(qp)
-                .Select(e => new Response(e.Id, e.Note, e.DeviceId, e.RecipeToRunId, e.RanJobId, e.StartedAt, e.FinishedAt, e.CreatedAt, e.UpdatedAt))
+                .Select(e => new Response(
+                    e.Id,
+                    e.Note,
+                    e.DeviceId,
+                    e.Device != null ? e.Device.Name : null,
+                    e.OwnerId,
+                    e.Owner != null ? e.Owner.Email : null,
+                    e.RecipeToRunId,
+                    e.RanJobId,
+                    e.RanJob != null ? e.RanJob.Name : null,
+                    e.StartedAt,
+                    e.FinishedAt,
+                    e.CreatedAt,
+                    e.UpdatedAt
+                ))
                 .ToListAsync(cancellationToken);
 
             return Result.Ok(experiments.ToPagedList(totalCount, qp.PageNumber, qp.PageSize));
@@ -113,8 +129,12 @@ public static class GetExperiments
         Guid Id,
         string? Note,
         Guid? DeviceId,
+        string? DeviceName,
+        Guid OwnerId,
+        string? StartedBy,
         Guid? RecipeToRunId,
         Guid? RanJobId,
+        string? RanJobName,
         DateTime? StartedAt,
         DateTime? FinishedAt,
         DateTime CreatedAt,

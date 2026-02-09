@@ -817,5 +817,34 @@
         "heat_max_zoom": "Maximálne priblíženie mapy tepla"
       }
     }
+  },
+  "experiment": {
+    "label": "Experiment | Experimenty",
+    "create_experiment": "Vytvoriť experiment",
+    "edit_experiment": "Upraviť experiment",
+    "delete_experiment": "Vymazať experiment",
+    "delete_experiment_desc": "Naozaj chcete vymazať tento experiment?",
+    "automatic_from_recipe": "Automaticky",
+    "manual_from_job": "Manuálne",
+    "create_anyway": "Vytvoriť aj tak",
+    "no_job_match_title": "Nenašiel sa zodpovedajúci job",
+    "no_job_match_message": "Pre zvolené časové rozmedzie a zariadenie sa nenašiel dokončený job. Chcete experiment vytvoriť aj tak?",
+    "note": "Poznámka",
+    "device": "Zariadenie",
+    "started_by": "Spustené používateľom",
+    "recipe": "Recept",
+    "job": "Job",
+    "cycles": "Počet cyklov",
+    "started_at": "Začiatok",
+    "finished_at": "Koniec",
+    "toasts": {
+      "load_failed": "Načítanie experimentov zlyhalo!",
+      "create_success": "Experiment bol vytvorený!",
+      "create_failed": "Vytvorenie experimentu zlyhalo!",
+      "update_success": "Experiment bol aktualizovaný!",
+      "update_failed": "Aktualizácia experimentu zlyhala!",
+      "delete_success": "Experiment bol vymazaný!",
+      "delete_failed": "Vymazanie experimentu zlyhalo!"
+    }
   }
 }

@@ -872,5 +872,34 @@
         "heat_max_zoom": "Heat max zoom"
       }
     }
+  },
+  "experiment": {
+    "label": "Experiment | Experiments",
+    "create_experiment": "Create Experiment",
+    "edit_experiment": "Edit Experiment",
+    "delete_experiment": "Delete Experiment",
+    "delete_experiment_desc": "Are you sure you want to delete this experiment?",
+    "automatic_from_recipe": "Automatic",
+    "manual_from_job": "Manual",
+    "create_anyway": "Create anyway",
+    "no_job_match_title": "No matching job found",
+    "no_job_match_message": "No finished job was found in the selected time range for this device. Do you want to create the experiment anyway?",
+    "note": "Note",
+    "device": "Device",
+    "started_by": "Started by",
+    "recipe": "Recipe",
+    "job": "Job",
+    "cycles": "Cycles",
+    "started_at": "Started at",
+    "finished_at": "Finished at",
+    "toasts": {
+      "load_failed": "Loading experiments failed!",
+      "create_success": "Experiment created!",
+      "create_failed": "Creating experiment failed!",
+      "update_success": "Experiment updated!",
+      "update_failed": "Updating experiment failed!",
+      "delete_success": "Experiment deleted!",
+      "delete_failed": "Deleting experiment failed!"
+    }
   }
 }

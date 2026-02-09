@@ -1,7 +1,9 @@
 using System.Security.Claims;
+using System.Globalization;
 using Carter;
 using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
+using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
 using Fei.Is.Api.Features.Devices.Extensions;
@@ -20,6 +22,7 @@ public static class CreateExperiment
         string? Note,
         Guid? RecipeToRunId,
         Guid? DeviceId,
+        bool AllowCreateWithoutMatchedJob = false,
         int Cycles = 1,
         bool IsInfinite = false,
         DateTime? StartedAt = null,
@@ -117,6 +120,47 @@ public static class CreateExperiment
 
                 job = jobResult.Value;
             }
+            else if (device != null && message.Request.StartedAt.HasValue && message.Request.FinishedAt.HasValue)
+            {
+                var startedAt = message.Request.StartedAt.Value;
+                var finishedAt = message.Request.FinishedAt.Value;
+                var tolerance = TimeSpan.FromMinutes(1);
+
+                var candidates = await context.Jobs
+                    .Where(j =>
+                        j.DeviceId == device.Id
+                        && j.StartedAt.HasValue
+                        && j.FinishedAt.HasValue
+                        && j.Status != JobStatusEnum.JOB_QUEUED
+                        && j.Status != JobStatusEnum.JOB_IN_PROGRESS
+                        && j.Status != JobStatusEnum.JOB_PAUSED
+                        && j.StartedAt >= startedAt - tolerance
+                        && j.StartedAt <= startedAt + tolerance
+                        && j.FinishedAt >= finishedAt - tolerance
+                        && j.FinishedAt <= finishedAt + tolerance
+                    )
+                    .ToListAsync(cancellationToken);
+
+                job = candidates
+                    .OrderBy(j =>
+                        Math.Abs((j.StartedAt!.Value - startedAt).TotalMilliseconds)
+                        + Math.Abs((j.FinishedAt!.Value - finishedAt).TotalMilliseconds)
+                    )
+                    .FirstOrDefault();
+
+                if (job == null)
+                {
+                    if (!message.Request.AllowCreateWithoutMatchedJob)
+                    {
+                        return Result.Fail(
+                            new ValidationError(
+                                "StartedAt",
+                                $"No finished job found for selected device around StartedAt={startedAt.ToString("O", CultureInfo.InvariantCulture)} and FinishedAt={finishedAt.ToString("O", CultureInfo.InvariantCulture)}."
+                            )
+                        );
+                    }
+                }
+            }
 
             var experiment = new Experiment
             {
@@ -125,8 +169,8 @@ public static class CreateExperiment
                 Note = message.Request.Note,
                 RecipeToRunId = message.Request.RecipeToRunId,
                 RanJobId = job?.Id,
-                StartedAt = message.Request.StartedAt ?? DateTime.UtcNow,
-                FinishedAt = message.Request.FinishedAt
+                StartedAt = job?.StartedAt ?? message.Request.StartedAt ?? DateTime.UtcNow,
+                FinishedAt = job?.FinishedAt ?? message.Request.FinishedAt
             };
 
             await context.Experiments.AddAsync(experiment, cancellationToken);
@@ -141,12 +185,24 @@ public static class CreateExperiment
         public Validator()
         {
             RuleFor(x => x.Request.Note).MaximumLength(1024);
+
             When(
                 x => x.Request.RecipeToRunId.HasValue,
                 () =>
                 {
                     RuleFor(x => x.Request.DeviceId).NotEmpty().WithMessage("Device ID is required when a recipe is provided");
                     RuleFor(x => x.Request.Cycles).GreaterThan(0).WithMessage("Cycles must be greater than 0");
+                }
+            );
+            When(
+                x => !x.Request.RecipeToRunId.HasValue,
+                () =>
+                {
+                    RuleFor(x => x.Request.DeviceId).NotEmpty().WithMessage("Device ID is required in manual mode");
+                    RuleFor(x => x.Request.StartedAt).NotEmpty().WithMessage("StartedAt is required in manual mode");
+                    RuleFor(x => x.Request.FinishedAt).NotEmpty().WithMessage("FinishedAt is required in manual mode");
+                    RuleFor(x => x.Request).Must(x => !x.StartedAt.HasValue || !x.FinishedAt.HasValue || x.StartedAt <= x.FinishedAt)
+                        .WithMessage("StartedAt must be before or equal to FinishedAt");
                 }
             );
         }
