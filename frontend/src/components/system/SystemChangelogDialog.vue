@@ -10,6 +10,7 @@
         <div class="text-subtitle1">v1.1</div>
         <ul class="q-pl-md q-my-none">
           <li>Added experiments</li>
+          <li>Added heatmap scale</li>
           <li>Fixed disappearing heatmap issue</li>
         </ul>
       </q-card-section>
