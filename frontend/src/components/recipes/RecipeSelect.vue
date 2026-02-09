@@ -14,7 +14,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, ref } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import RecipeService from '@/api/services/RecipeService';
 import { handleError } from '@/utils/error-handler';
@@ -78,7 +78,18 @@ async function getOnScroll({ to, ref }: { to: number; ref: QSelect | null }) {
     ref.refresh();
   }
 }
-getOnScroll({ to: -1, ref: null });
+
+watch(
+  () => props.deviceId,
+  async () => {
+    filter.value = '';
+    nextPage.value = 1;
+    lastPage.value = 1;
+    recipes.value = [];
+    await getOnScroll({ to: -1, ref: null });
+  },
+  { immediate: true },
+);
 
 async function filterFn(
   val: string,
