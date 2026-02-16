@@ -4,11 +4,19 @@ import type { paths } from '@/api/generated/schema.d.ts';
 export type TimescaleStorageResponse = paths['/system/storage']['get']['responses']['200']['content']['application/json'];
 export type NodeSettingsResponse = paths['/system/node-settings']['get']['responses']['200']['content']['application/json'];
 export type SystemNodeType = NodeSettingsResponse['nodeType'];
-export type EdgeNodeResponse = NodeSettingsResponse['edgeNodes'][number];
+export type EdgeNodeResponse = NodeSettingsResponse['edgeNodes'][number] & {
+  updateRateSeconds?: number;
+};
 export type UpdateNodeSettingsRequest = paths['/system/node-settings']['put']['requestBody']['content']['application/json'];
-export type CreateEdgeNodeRequest = paths['/system/edge-nodes']['post']['requestBody']['content']['application/json'];
-export type CreateEdgeNodeResponse = paths['/system/edge-nodes']['post']['responses']['201']['content']['application/json'];
-export type UpdateEdgeNodeRequest = paths['/system/edge-nodes/{id}']['put']['requestBody']['content']['application/json'];
+export type CreateEdgeNodeRequest = paths['/system/edge-nodes']['post']['requestBody']['content']['application/json'] & {
+  updateRateSeconds: number;
+};
+export type CreateEdgeNodeResponse = paths['/system/edge-nodes']['post']['responses']['201']['content']['application/json'] & {
+  updateRateSeconds?: number;
+};
+export type UpdateEdgeNodeRequest = paths['/system/edge-nodes/{id}']['put']['requestBody']['content']['application/json'] & {
+  updateRateSeconds: number;
+};
 
 class SystemService {
   async getTimescaleStorageUsage(): Promise<TimescaleStorageResponse> {

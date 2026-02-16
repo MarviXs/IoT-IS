@@ -82,6 +82,9 @@
                       @click="toggleEdgeNodeTokenVisibility(edgeNode.id)"
                     />
                   </div>
+                  <div class="text-caption text-secondary q-mt-xs">
+                    {{ t('system.node_settings.update_rate_value', { value: edgeNode.updateRateSeconds ?? 5 }) }}
+                  </div>
                 </q-item-section>
                 <q-item-section side class="edge-node-actions">
                   <div class="row items-center q-gutter-xs">
@@ -226,6 +229,15 @@
               </q-icon>
             </template>
           </q-input>
+          <q-input
+            v-model.number="edgeNodeForm.updateRateSeconds"
+            type="number"
+            min="1"
+            max="86400"
+            :label="t('system.node_settings.update_rate_label')"
+            :hint="t('system.node_settings.update_rate_hint')"
+            persistent-hint
+          />
         </q-card-section>
         <q-card-actions align="right">
           <q-btn
@@ -319,6 +331,7 @@ const edgeNodeTokenVisibility = ref<Record<string, boolean>>({});
 const edgeNodeForm = ref({
   name: '',
   token: '',
+  updateRateSeconds: 5,
 });
 
 const nodeTypeOptions = computed<{ label: string; value: SystemNodeType }[]>(() => [
@@ -460,14 +473,18 @@ async function saveNodeSettings(options: { showSuccessToast?: boolean } = {}): P
 
 function openCreateEdgeNodeDialog() {
   editingEdgeNodeId.value = null;
-  edgeNodeForm.value = { name: '', token: generateToken() };
+  edgeNodeForm.value = { name: '', token: generateToken(), updateRateSeconds: 5 };
   isEdgeNodeTokenCopied.value = false;
   isEdgeNodeDialogOpen.value = true;
 }
 
 function openEditEdgeNodeDialog(edgeNode: EdgeNodeResponse) {
   editingEdgeNodeId.value = edgeNode.id;
-  edgeNodeForm.value = { name: edgeNode.name, token: edgeNode.token };
+  edgeNodeForm.value = {
+    name: edgeNode.name,
+    token: edgeNode.token,
+    updateRateSeconds: edgeNode.updateRateSeconds ?? 5,
+  };
   isEdgeNodeTokenCopied.value = false;
   isEdgeNodeDialogOpen.value = true;
 }
@@ -480,6 +497,7 @@ function openDeleteEdgeNodeDialog(edgeNode: EdgeNodeResponse) {
 async function submitEdgeNodeDialog() {
   const trimmedName = edgeNodeForm.value.name.trim();
   const trimmedToken = edgeNodeForm.value.token.trim();
+  const normalizedUpdateRateSeconds = Number(edgeNodeForm.value.updateRateSeconds);
 
   if (!trimmedName) {
     toast.error(t('system.node_settings.name_required'));
@@ -491,6 +509,11 @@ async function submitEdgeNodeDialog() {
     return;
   }
 
+  if (!Number.isInteger(normalizedUpdateRateSeconds) || normalizedUpdateRateSeconds < 1 || normalizedUpdateRateSeconds > 86400) {
+    toast.error(t('system.node_settings.update_rate_invalid'));
+    return;
+  }
+
   isEdgeNodeSubmitting.value = true;
 
   try {
@@ -498,12 +521,14 @@ async function submitEdgeNodeDialog() {
       await SystemService.updateEdgeNode(editingEdgeNodeId.value, {
         name: trimmedName,
         token: trimmedToken,
+        updateRateSeconds: normalizedUpdateRateSeconds,
       });
       toast.success(t('system.node_settings.update_edge_success'));
     } else {
       await SystemService.createEdgeNode({
         name: trimmedName,
         token: trimmedToken || undefined,
+        updateRateSeconds: normalizedUpdateRateSeconds,
       });
       toast.success(t('system.node_settings.create_edge_success'));
     }

@@ -10,6 +10,7 @@ public class EdgeNodeConfiguration : IEntityTypeConfiguration<EdgeNode>
     {
         builder.Property(edgeNode => edgeNode.Name).IsRequired().HasMaxLength(128);
         builder.Property(edgeNode => edgeNode.Token).IsRequired().HasMaxLength(256);
+        builder.Property(edgeNode => edgeNode.UpdateRateSeconds).IsRequired().HasDefaultValue(5);
 
         builder.HasIndex(edgeNode => edgeNode.Token).IsUnique();
     }

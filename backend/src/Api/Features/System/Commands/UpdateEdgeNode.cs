@@ -12,7 +12,7 @@ namespace Fei.Is.Api.Features.System.Commands;
 
 public static class UpdateEdgeNode
 {
-    public record Request(string Name, string Token);
+    public record Request(string Name, string Token, int UpdateRateSeconds);
 
     public sealed class Endpoint : ICarterModule
     {
@@ -47,7 +47,7 @@ public static class UpdateEdgeNode
                 .WithOpenApi(o =>
                 {
                     o.Summary = "Update edge node setting";
-                    o.Description = "Updates edge node name and token.";
+                    o.Description = "Updates edge node name, token, and update rate.";
                     return o;
                 });
         }
@@ -80,6 +80,7 @@ public static class UpdateEdgeNode
 
             edgeNode.Name = message.Request.Name.Trim();
             edgeNode.Token = token;
+            edgeNode.UpdateRateSeconds = message.Request.UpdateRateSeconds;
 
             await context.SaveChangesAsync(cancellationToken);
 
@@ -94,6 +95,7 @@ public static class UpdateEdgeNode
             RuleFor(command => command.EdgeNodeId).NotEmpty();
             RuleFor(command => command.Request.Name).NotEmpty().MaximumLength(128);
             RuleFor(command => command.Request.Token).NotEmpty().MaximumLength(256);
+            RuleFor(command => command.Request.UpdateRateSeconds).InclusiveBetween(1, 86400);
         }
     }
 }

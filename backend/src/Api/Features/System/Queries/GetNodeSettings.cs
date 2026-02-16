@@ -53,7 +53,16 @@ public static class GetNodeSettings
             var edgeNodes = await context
                 .EdgeNodes.AsNoTracking()
                 .OrderBy(edgeNode => edgeNode.Name)
-                .Select(edgeNode => new EdgeNodeResponse(edgeNode.Id, edgeNode.Name, edgeNode.Token, edgeNode.CreatedAt, edgeNode.UpdatedAt))
+                .Select(
+                    edgeNode => new EdgeNodeResponse(
+                        edgeNode.Id,
+                        edgeNode.Name,
+                        edgeNode.Token,
+                        edgeNode.UpdateRateSeconds,
+                        edgeNode.CreatedAt,
+                        edgeNode.UpdatedAt
+                    )
+                )
                 .ToListAsync(cancellationToken);
 
             return new Response(
@@ -72,5 +81,5 @@ public static class GetNodeSettings
         IReadOnlyCollection<EdgeNodeResponse> EdgeNodes
     );
 
-    public record EdgeNodeResponse(Guid Id, string Name, string Token, DateTime CreatedAt, DateTime UpdatedAt);
+    public record EdgeNodeResponse(Guid Id, string Name, string Token, int UpdateRateSeconds, DateTime CreatedAt, DateTime UpdatedAt);
 }
