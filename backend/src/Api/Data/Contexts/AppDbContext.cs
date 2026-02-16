@@ -44,6 +44,7 @@ public class AppDbContext
         modelBuilder.ApplyConfiguration(new DeviceTemplateConfiguration());
         modelBuilder.ApplyConfiguration(new DeviceConfiguration());
         modelBuilder.ApplyConfiguration(new DeviceFirmwareConfiguration());
+        modelBuilder.ApplyConfiguration(new EdgeNodeConfiguration());
         modelBuilder.ApplyConfiguration(new CollectionItemConfiguration());
         modelBuilder.ApplyConfiguration(new SceneConfiguration());
         modelBuilder.ApplyConfiguration(new SceneSensorTriggerConfiguration());
@@ -70,6 +71,7 @@ public class AppDbContext
         modelBuilder.ApplyConfiguration(new OrderItemContainerConfiguration());
         modelBuilder.ApplyConfiguration(new VATCategoryConfiguration());
         modelBuilder.ApplyConfiguration(new SystemSettingConfiguration());
+        modelBuilder.ApplyConfiguration(new SystemNodeSettingConfiguration());
         modelBuilder.ApplyConfiguration(new UserFileConfiguration());
 
         //Life-cycle configurations
@@ -82,6 +84,7 @@ public class AppDbContext
     public DbSet<DeviceTemplate> DeviceTemplates { get; set; }
     public DbSet<Device> Devices { get; set; }
     public DbSet<DeviceFirmware> DeviceFirmwares { get; set; }
+    public DbSet<EdgeNode> EdgeNodes { get; set; }
     public DbSet<Sensor> Sensors { get; set; }
     public DbSet<Job> Jobs { get; set; }
     public DbSet<JobSchedule> JobSchedules { get; set; }
@@ -116,6 +119,7 @@ public class AppDbContext
     public DbSet<Summary> Summaries { get; set; }
     public DbSet<Supplier> Suppliers { get; set; }
     public DbSet<SystemSetting> SystemSettings { get; set; }
+    public DbSet<SystemNodeSetting> SystemNodeSettings { get; set; }
     public DbSet<WorkDayDetail> WorkDayDetails { get; set; }
     public DbSet<WorkReport> WorkReports { get; set; }
     public DbSet<OrderItemContainer> OrderItemContainers { get; set; }

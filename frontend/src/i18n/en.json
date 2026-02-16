@@ -90,6 +90,42 @@
     "version": {
       "label": "Current version"
     },
+    "node_settings": {
+      "title": "Node settings",
+      "subtitle": "Configure this deployment as a hub or edge node",
+      "loading": "Loading node settings…",
+      "mode_label": "System node type",
+      "edge_nodes_title": "Edge nodes",
+      "hub_connection_title": "Hub connection",
+      "hub_url_label": "Hub URL",
+      "hub_url_hint": "Example: https://hub.example.com/api",
+      "hub_token_label": "Hub token",
+      "hub_connection_required": "Hub URL and token are required in edge mode.",
+      "add_edge_node": "Add edge node",
+      "edit_edge_node": "Edit edge node",
+      "delete_edge_node": "Delete edge node",
+      "delete_edge_node_confirm": "Are you sure you want to delete this edge node?",
+      "token_label": "Connection token",
+      "token_hint": "Leave empty to autogenerate token.",
+      "generate_token": "Generate token",
+      "copy_token": "Copy token",
+      "token_copied": "Token copied!",
+      "no_edge_nodes": "No edge nodes configured yet.",
+      "name_required": "Edge node name is required.",
+      "token_required": "Edge node token is required.",
+      "load_error": "Failed to load node settings.",
+      "save_success": "Node settings saved.",
+      "save_error": "Failed to save node settings.",
+      "create_edge_success": "Edge node created.",
+      "update_edge_success": "Edge node updated.",
+      "save_edge_error": "Failed to save edge node.",
+      "delete_edge_success": "Edge node deleted.",
+      "delete_edge_error": "Failed to delete edge node.",
+      "node_types": {
+        "hub": "Hub",
+        "edge": "Edge"
+      }
+    },
     "storage": {
       "title": "TimescaleDB storage",
       "subtitle": "Compressed datapoint storage usage",

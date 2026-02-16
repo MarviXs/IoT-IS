@@ -86,6 +86,42 @@
     "version": {
       "label": "Aktuálna verzia"
     },
+    "node_settings": {
+      "title": "Nastavenia uzla",
+      "subtitle": "Nastavte túto inštanciu ako hub alebo edge uzol",
+      "loading": "Načítavam nastavenia uzla…",
+      "mode_label": "Typ systémového uzla",
+      "edge_nodes_title": "Edge uzly",
+      "hub_connection_title": "Pripojenie k hubu",
+      "hub_url_label": "URL hubu",
+      "hub_url_hint": "Príklad: https://hub.example.com/api",
+      "hub_token_label": "Token hubu",
+      "hub_connection_required": "V režime edge sú URL hubu a token povinné.",
+      "add_edge_node": "Pridať edge uzol",
+      "edit_edge_node": "Upraviť edge uzol",
+      "delete_edge_node": "Vymazať edge uzol",
+      "delete_edge_node_confirm": "Naozaj chcete vymazať tento edge uzol?",
+      "token_label": "Prístupový token",
+      "token_hint": "Nechajte prázdne pre automatické vygenerovanie tokenu.",
+      "generate_token": "Vygenerovať token",
+      "copy_token": "Kopírovať token",
+      "token_copied": "Token skopírovaný!",
+      "no_edge_nodes": "Zatiaľ nie sú nastavené žiadne edge uzly.",
+      "name_required": "Názov edge uzla je povinný.",
+      "token_required": "Token edge uzla je povinný.",
+      "load_error": "Nepodarilo sa načítať nastavenia uzla.",
+      "save_success": "Nastavenia uzla boli uložené.",
+      "save_error": "Nepodarilo sa uložiť nastavenia uzla.",
+      "create_edge_success": "Edge uzol bol vytvorený.",
+      "update_edge_success": "Edge uzol bol upravený.",
+      "save_edge_error": "Nepodarilo sa uložiť edge uzol.",
+      "delete_edge_success": "Edge uzol bol vymazaný.",
+      "delete_edge_error": "Nepodarilo sa vymazať edge uzol.",
+      "node_types": {
+        "hub": "Hub",
+        "edge": "Edge"
+      }
+    },
     "storage": {
       "title": "Úložisko TimescaleDB",
       "subtitle": "Využitie úložiska komprimovaných dátových bodov",
