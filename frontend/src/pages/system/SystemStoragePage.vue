@@ -1,7 +1,7 @@
 <template>
   <q-page padding>
     <div class="column q-gutter-md">
-      <q-card flat class="shadow">
+      <q-card v-if="authStore.isAdmin" flat class="shadow">
         <q-card-section class="row items-center justify-between">
           <div>
             <div class="text-h6">{{ t('system.version.label') }}</div>
@@ -362,6 +362,10 @@ function formatBytes(bytes: number): string {
 }
 
 async function loadStats() {
+  if (!authStore.isAdmin) {
+    return;
+  }
+
   isLoading.value = true;
   errorMessage.value = null;
 
@@ -601,7 +605,10 @@ async function confirmDeleteEdgeNode() {
 }
 
 onMounted(() => {
-  void loadStats();
+  if (authStore.isAdmin) {
+    void loadStats();
+  }
+
   void loadNodeSettings();
 });
 
