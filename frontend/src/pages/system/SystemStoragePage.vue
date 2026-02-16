@@ -184,7 +184,7 @@
           </template>
         </q-card-section>
       </q-card>
-      <q-card flat class="shadow">
+      <q-card v-if="authStore.isAdmin" flat class="shadow">
         <q-card-section class="row items-center justify-between">
           <div>
             <div class="text-h6">{{ t('system.storage.title') }}</div>
@@ -437,6 +437,10 @@ async function loadStats() {
 }
 
 async function forceReclaimSpace() {
+  if (!authStore.isAdmin) {
+    return;
+  }
+
   isVacuuming.value = true;
 
   try {
