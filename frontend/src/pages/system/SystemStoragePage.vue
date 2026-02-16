@@ -41,18 +41,6 @@
                   :disable="isNodeSettingsLoading || isNodeSettingsSaving"
                 />
               </div>
-              <div class="col-auto">
-                <q-btn
-                  color="primary"
-                  :label="t('global.save')"
-                  :loading="isNodeSettingsSaving"
-                  :disable="isNodeSettingsLoading || isNodeSettingsSaving"
-                  no-caps
-                  unelevated
-                  padding="8px 20px"
-                  @click="saveNodeSettings"
-                />
-              </div>
             </div>
           </div>
 
@@ -140,6 +128,18 @@
                 :label="t('system.node_settings.hub_token_label')"
                 :disable="isNodeSettingsLoading || isNodeSettingsSaving"
               />
+              <div class="row justify-end">
+                <q-btn
+                  color="primary"
+                  :label="t('global.save')"
+                  :loading="isNodeSettingsSaving"
+                  :disable="isNodeSettingsLoading || isNodeSettingsSaving"
+                  no-caps
+                  unelevated
+                  padding="8px 20px"
+                  @click="saveNodeSettings()"
+                />
+              </div>
             </div>
           </template>
         </q-card-section>
@@ -276,7 +276,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import {
   mdiAutorenew,
@@ -328,6 +328,8 @@ const nodeTypeOptions = computed<{ label: string; value: SystemNodeType }[]>(() 
 
 const isEdgeNodeEditing = computed(() => editingEdgeNodeId.value !== null);
 const isHubNodeMode = computed(() => nodeType.value === 0);
+const isUpdatingNodeTypeFromServer = ref(false);
+const loadedNodeType = ref<SystemNodeType | null>(null);
 
 const formattedBytes = computed(() => {
   if (totalSizeBytes.value == null) {
@@ -395,10 +397,13 @@ async function loadNodeSettings() {
   }
 
   isNodeSettingsLoading.value = true;
+  isUpdatingNodeTypeFromServer.value = true;
 
   try {
     const response = await SystemService.getNodeSettings();
-    nodeType.value = response.nodeType;
+    const normalizedNodeType = normalizeNodeType(response.nodeType as unknown);
+    loadedNodeType.value = normalizedNodeType;
+    nodeType.value = normalizedNodeType;
     hubUrl.value = response.hubUrl ?? '';
     hubToken.value = response.hubToken ?? '';
     edgeNodeTokenVisibility.value = {};
@@ -407,17 +412,19 @@ async function loadNodeSettings() {
     console.error('Failed to load node settings', error);
     toast.error(t('system.node_settings.load_error'));
   } finally {
+    isUpdatingNodeTypeFromServer.value = false;
     isNodeSettingsLoading.value = false;
   }
 }
 
-async function saveNodeSettings() {
+async function saveNodeSettings(options: { showSuccessToast?: boolean } = {}): Promise<boolean> {
+  const { showSuccessToast = true } = options;
   const trimmedHubUrl = hubUrl.value.trim();
   const trimmedHubToken = hubToken.value.trim();
 
   if (!isHubNodeMode.value && (!trimmedHubUrl || !trimmedHubToken)) {
     toast.error(t('system.node_settings.hub_connection_required'));
-    return;
+    return false;
   }
 
   isNodeSettingsSaving.value = true;
@@ -433,10 +440,15 @@ async function saveNodeSettings() {
       hubUrl: isHubNodeMode.value ? null : normalizedHubUrl,
       hubToken: isHubNodeMode.value ? null : trimmedHubToken,
     });
-    toast.success(t('system.node_settings.save_success'));
+    if (showSuccessToast) {
+      toast.success(t('system.node_settings.save_success'));
+    }
+    loadedNodeType.value = nodeType.value;
+    return true;
   } catch (error) {
     console.error('Failed to save node settings', error);
     toast.error(t('system.node_settings.save_error'));
+    return false;
   } finally {
     isNodeSettingsSaving.value = false;
   }
@@ -527,6 +539,18 @@ function normalizeHubUrl(value: string): string {
   return `https://${trimmed}`;
 }
 
+function normalizeNodeType(value: unknown): SystemNodeType {
+  if (value === 0 || value === '0' || value === 'Hub' || value === 'hub') {
+    return 0;
+  }
+
+  if (value === 1 || value === '1' || value === 'Edge' || value === 'edge') {
+    return 1;
+  }
+
+  return 0;
+}
+
 function maskToken(token: string): string {
   return token ? '●'.repeat(token.length) : '-';
 }
@@ -579,6 +603,25 @@ async function confirmDeleteEdgeNode() {
 onMounted(() => {
   void loadStats();
   void loadNodeSettings();
+});
+
+watch(nodeType, async (nextType, previousType) => {
+  if (nextType === previousType || isNodeSettingsLoading.value || isUpdatingNodeTypeFromServer.value) {
+    return;
+  }
+
+  if (loadedNodeType.value === nextType) {
+    return;
+  }
+
+  const trimmedHubUrl = hubUrl.value.trim();
+  const trimmedHubToken = hubToken.value.trim();
+  const isSwitchingToEdgeWithoutHubConnection = nextType === 1 && (!trimmedHubUrl || !trimmedHubToken);
+  if (isSwitchingToEdgeWithoutHubConnection) {
+    return;
+  }
+
+  await saveNodeSettings({ showSuccessToast: false });
 });
 </script>
 
