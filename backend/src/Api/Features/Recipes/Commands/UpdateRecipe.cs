@@ -5,6 +5,7 @@ using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
+using Fei.Is.Api.Features.DeviceTemplates.Extensions;
 using FluentResults;
 using FluentValidation;
 using MediatR;
@@ -23,7 +24,7 @@ public static class UpdateRecipe
         {
             app.MapPut(
                     "recipes/{id:guid}",
-                    async Task<Results<NoContent, NotFound, ValidationProblem>> (
+                    async Task<Results<NoContent, NotFound, ValidationProblem, ForbidHttpResult>> (
                         IMediator mediator,
                         ClaimsPrincipal user,
                         Request request,
@@ -37,6 +38,10 @@ public static class UpdateRecipe
                         if (result.HasError<NotFoundError>())
                         {
                             return TypedResults.NotFound();
+                        }
+                        else if (result.HasError<ForbiddenError>())
+                        {
+                            return TypedResults.Forbid();
                         }
                         else if (result.HasError<ValidationError>())
                         {
@@ -68,10 +73,17 @@ public static class UpdateRecipe
                 return Result.Fail(new ValidationError(validationResult));
             }
 
-            var recipe = await context.Recipes.Include(r => r.Steps).FirstOrDefaultAsync(r => r.Id == message.RecipeId, cancellationToken);
+            var recipe = await context
+                .Recipes.Include(r => r.DeviceTemplate)
+                .Include(r => r.Steps)
+                .FirstOrDefaultAsync(r => r.Id == message.RecipeId, cancellationToken);
             if (recipe == null)
             {
                 return Result.Fail(new NotFoundError());
+            }
+            if (recipe.DeviceTemplate == null || !recipe.DeviceTemplate.CanEdit(message.User))
+            {
+                return Result.Fail(new ForbiddenError());
             }
 
             recipe.Name = message.Request.Name;

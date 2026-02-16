@@ -1,5 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Fei.Is.Api.Features.Devices.Queries;
 using Fei.Is.Api.IntegrationTests.Common;
 using FluentAssertions;
@@ -9,6 +11,11 @@ namespace Fei.Is.Api.IntegrationTests.Features.Devices;
 [Collection("IntegrationTests")]
 public class GetDeviceByIdTests(IntegrationTestWebAppFactory factory) : BaseIntegrationTest(factory)
 {
+    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
+    {
+        Converters = { new JsonStringEnumConverter() }
+    };
+
     [Fact]
     public async Task GetDeviceById_ShouldReturnDevice()
     {
@@ -27,7 +34,7 @@ public class GetDeviceByIdTests(IntegrationTestWebAppFactory factory) : BaseInte
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        var deviceResponse = await response.Content.ReadFromJsonAsync<GetDeviceById.Response>();
+        var deviceResponse = await response.Content.ReadFromJsonAsync<GetDeviceById.Response>(JsonOptions);
         deviceResponse.Should().NotBeNull();
         deviceResponse!.Name.Should().Be(device.Name);
         deviceResponse.AccessToken.Should().Be(device.AccessToken);

@@ -80,6 +80,10 @@ public static class UnshareDeviceToUser
             {
                 return Result.Fail(new NotFoundError());
             }
+            if (device.IsSyncedFromHub)
+            {
+                return Result.Fail(new ForbiddenError());
+            }
 
             var sharedUser = await context.Users.FirstOrDefaultAsync(x => x.Email == message.Request.Email, cancellationToken);
             if (sharedUser == null)

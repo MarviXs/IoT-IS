@@ -85,12 +85,19 @@
                 {{ t('device_template.export') }}
               </q-tooltip>
             </q-btn>
-            <q-btn :icon="mdiPencil" color="grey-color" flat round :to="`/device-templates/${propsActions.row.id}`">
+            <q-btn
+              v-if="canEditTemplate(propsActions.row)"
+              :icon="mdiPencil"
+              color="grey-color"
+              flat
+              round
+              :to="`/device-templates/${propsActions.row.id}`"
+            >
               <q-tooltip content-style="font-size: 11px" :offset="[0, 4]">
                 {{ t('global.edit') }}
               </q-tooltip>
             </q-btn>
-            <q-btn :icon="mdiDotsVertical" color="grey-color" flat round>
+            <q-btn v-if="canEditTemplate(propsActions.row)" :icon="mdiDotsVertical" color="grey-color" flat round>
               <q-menu anchor="bottom right" self="top right">
                 <q-list>
                   <q-item clickable v-close-popup @click="openChangeOwnerDialog(propsActions.row)">
@@ -217,6 +224,10 @@ function openDeleteDialog(id: string) {
 }
 
 function openChangeOwnerDialog(template: NonNullable<AdminDeviceTemplatesResponse['items']>[number]) {
+  if (!canEditTemplate(template)) {
+    return;
+  }
+
   templateToChangeOwner.value = {
     id: template.id,
     ownerId: template.ownerId,
@@ -261,6 +272,10 @@ function slugify(value: string) {
     .trim()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '') || 'device-template';
+}
+
+function canEditTemplate(template: NonNullable<AdminDeviceTemplatesResponse['items']>[number]): boolean {
+  return template.canEdit !== false;
 }
 
 const columns = computed<QTableProps['columns']>(() => [

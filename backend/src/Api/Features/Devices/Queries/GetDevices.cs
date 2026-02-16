@@ -89,7 +89,15 @@ public static class GetDevices
                                 lastSeen = DateTimeOffset.FromUnixTimeSeconds(timestamp);
                             }
                             var connectionState = device.GetConnectionState(online, lastSeen, DateTimeOffset.UtcNow);
-                            return new Response(device.Id, device.Name, online, connectionState, device.GetPermission(message.User), lastSeen);
+                            return new Response(
+                                device.Id,
+                                device.Name,
+                                online,
+                                connectionState,
+                                device.GetPermission(message.User),
+                                device.IsSyncedFromHub,
+                                lastSeen
+                            );
                         }
                     )
                     .ToList();
@@ -192,7 +200,15 @@ public static class GetDevices
                 {
                     var device = deviceById[id];
                     var state = deviceStateById[id];
-                    return new Response(device.Id, device.Name, state.Online, state.State, device.GetPermission(message.User), state.LastSeen);
+                    return new Response(
+                        device.Id,
+                        device.Name,
+                        state.Online,
+                        state.State,
+                        device.GetPermission(message.User),
+                        device.IsSyncedFromHub,
+                        state.LastSeen
+                    );
                 })
                 .ToList();
 
@@ -206,6 +222,7 @@ public static class GetDevices
         bool Connected,
         DeviceConnectionState ConnectionState,
         DevicePermission Permission,
+        bool IsSyncedFromHub,
         DateTimeOffset? LastSeen = null
     );
 }

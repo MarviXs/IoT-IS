@@ -12,6 +12,7 @@
   >
     <template #actions>
       <q-btn
+        v-if="templateCanEdit"
         unelevated
         color="primary"
         :label="t('global.save')"
@@ -22,6 +23,9 @@
         @click="updateRecipe"
       />
     </template>
+    <q-banner v-if="!templateCanEdit" dense rounded color="warning" text-color="black" class="q-mb-md">
+      {{ t('device_template.read_only_synced') }}
+    </q-banner>
     <RecipeForm
       v-if="recipe"
       ref="recipeForm"
@@ -45,6 +49,7 @@ import type { DeviceTemplateResponse } from '@/api/services/DeviceTemplateServic
 import DeviceTemplateService from '@/api/services/DeviceTemplateService';
 import type { RecipeResponse, UpdateRecipeRequest } from '@/api/services/RecipeService';
 import type { UpdateRecipeStepsRequest } from '@/api/services/RecipeService';
+import { computed } from 'vue';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -57,6 +62,7 @@ const recipe = ref<RecipeResponse>();
 
 const recipeForm = ref();
 const updatingRecipe = ref(false);
+const templateCanEdit = computed(() => deviceTemplate.value?.canEdit !== false);
 
 async function getRecipe() {
   const { data, error } = await RecipeService.getRecipe(recipeId);
@@ -69,6 +75,11 @@ async function getRecipe() {
 getRecipe();
 
 async function updateRecipe() {
+  if (!templateCanEdit.value) {
+    toast.error(t('device_template.read_only_synced'));
+    return;
+  }
+
   if (!recipeForm.value || !(await recipeForm.value.validate())) return;
 
   updatingRecipe.value = true;

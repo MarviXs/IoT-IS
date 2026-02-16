@@ -8,6 +8,7 @@ public class DeviceTemplateConfiguration : IEntityTypeConfiguration<DeviceTempla
 {
     public void Configure(EntityTypeBuilder<DeviceTemplate> builder)
     {
+        builder.Property(template => template.IsSyncedFromHub).IsRequired().HasDefaultValue(false);
         builder
             .HasMany(template => template.Sensors)
             .WithOne(sensor => sensor.DeviceTemplate)

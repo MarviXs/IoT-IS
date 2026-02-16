@@ -10,6 +10,7 @@
         :rules="nameRules"
         class="col-12 col-md-12 col-lg-grow"
         :label="t('global.name')"
+        :disable="readOnly"
       />
       <q-input
         ref="tagRef"
@@ -17,6 +18,7 @@
         :rules="tagRules"
         class="col-12 col-md-6 col-lg-3"
         :label="t('device.tag')"
+        :disable="readOnly"
       />
       <q-input
         ref="unitRef"
@@ -24,8 +26,9 @@
         :rules="unitRules"
         class="col-12 col-md-6 col-lg-2"
         :label="t('device.unit')"
+        :disable="readOnly"
       />
-      <q-input ref="groupRef" v-model="dataPointTag.group" class="col-12 col-md-6 col-lg-2" label="Group" />
+      <q-input ref="groupRef" v-model="dataPointTag.group" class="col-12 col-md-6 col-lg-2" label="Group" :disable="readOnly" />
       <q-input
         ref="decimalRef"
         v-model.number="dataPointTag.accuracyDecimals"
@@ -35,8 +38,9 @@
         :rules="decimalRules"
         class="col-12 col-md-6 col-lg-2"
         :label="t('device.decimal')"
+        :disable="readOnly"
       />
-      <div class="col-12 col-lg-shrink self-center flex items-center">
+      <div v-if="!readOnly" class="col-12 col-lg-shrink self-center flex items-center">
         <q-space></q-space>
         <q-btn flat round color="grey-color" :icon="mdiCloseCircle" @click="emit('remove')" />
       </div>
@@ -65,8 +69,17 @@ const dataPointTag = defineModel<SensorFormData>({
 });
 
 const emit = defineEmits(['remove']);
+const props = withDefaults(
+  defineProps<{
+    readOnly?: boolean;
+  }>(),
+  {
+    readOnly: false,
+  },
+);
 
 const { t } = useI18n();
+const readOnly = props.readOnly;
 
 const dataTagNameRef = ref<QInput>();
 const tagRef = ref<QInput>();

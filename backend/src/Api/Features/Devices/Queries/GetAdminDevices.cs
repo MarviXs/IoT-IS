@@ -103,6 +103,7 @@ public static class GetAdminDevices
                                 online,
                                 connectionState,
                                 device.GetPermission(message.User),
+                                device.IsSyncedFromHub,
                                 lastSeen
                             );
                         }
@@ -218,6 +219,7 @@ public static class GetAdminDevices
                             state.Online,
                             state.State,
                             device.GetPermission(message.User),
+                            device.IsSyncedFromHub,
                             state.LastSeen
                         );
                     }
@@ -236,6 +238,7 @@ public static class GetAdminDevices
         bool Connected,
         DeviceConnectionState ConnectionState,
         DevicePermission Permission,
+        bool IsSyncedFromHub,
         DateTimeOffset? LastSeen = null
     );
 }

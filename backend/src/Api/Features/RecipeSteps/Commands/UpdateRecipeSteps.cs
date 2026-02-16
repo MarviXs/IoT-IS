@@ -5,6 +5,7 @@ using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
+using Fei.Is.Api.Features.DeviceTemplates.Extensions;
 using FluentResults;
 using FluentValidation;
 using MediatR;
@@ -23,7 +24,7 @@ public static class UpdateRecipeSteps
         {
             app.MapPut(
                     "recipes/{recipeId:guid}/steps",
-                    async Task<Results<NoContent, NotFound, ValidationProblem>> (
+                    async Task<Results<NoContent, NotFound, ValidationProblem, ForbidHttpResult>> (
                         IMediator mediator,
                         ClaimsPrincipal user,
                         List<Request> request,
@@ -37,6 +38,10 @@ public static class UpdateRecipeSteps
                         if (result.HasError<NotFoundError>())
                         {
                             return TypedResults.NotFound();
+                        }
+                        if (result.HasError<ForbiddenError>())
+                        {
+                            return TypedResults.Forbid();
                         }
                         if (result.HasError<ValidationError>())
                         {
@@ -71,10 +76,17 @@ public static class UpdateRecipeSteps
             }
 
             // Fetch the recipe along with its steps
-            var recipe = await context.Recipes.Include(r => r.Steps).FirstOrDefaultAsync(r => r.Id == message.RecipeId, cancellationToken);
+            var recipe = await context
+                .Recipes.Include(r => r.DeviceTemplate)
+                .Include(r => r.Steps)
+                .FirstOrDefaultAsync(r => r.Id == message.RecipeId, cancellationToken);
             if (recipe == null)
             {
                 return Result.Fail(new NotFoundError());
+            }
+            if (recipe.DeviceTemplate == null || !recipe.DeviceTemplate.CanEdit(message.User))
+            {
+                return Result.Fail(new ForbiddenError());
             }
 
             // Track existing steps by their ID

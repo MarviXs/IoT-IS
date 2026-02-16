@@ -9,6 +9,7 @@ using Fei.Is.Api.Features.DataPoints.Jobs;
 using Fei.Is.Api.Features.Jobs.Services;
 using Fei.Is.Api.Features.JobSchedules.Jobs;
 using Fei.Is.Api.Features.JobSchedules.Services;
+using Fei.Is.Api.Features.System.Services;
 using Fei.Is.Api.MqttClient;
 using Fei.Is.Api.MqttClient.Publish;
 using Fei.Is.Api.MqttClient.Subscribe;
@@ -45,6 +46,7 @@ public class Startup(IConfiguration configuration)
         services.ConfigureCors(Configuration);
         services.ConfigureProblemDetails();
         services.AddCarter();
+        services.AddGrpc();
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Startup>());
         services.AddSignalR();
         services.AddQuartz(q =>
@@ -97,6 +99,7 @@ public class Startup(IConfiguration configuration)
         services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<MqttClientService>());
 
         services.AddHostedService<StoreDataPointsBatchService>();
+        services.AddHostedService<EdgeHubDataSyncBackgroundService>();
         services.AddHostedService<JobTimeOutService>();
         services.AddHostedService<JobScheduleBootstrapper>();
 
@@ -107,6 +110,8 @@ public class Startup(IConfiguration configuration)
         services.AddHttpClient<IDiscordNotificationService, DiscordNotificationService>();
 
         services.AddScoped<IFileSystemService, LocalFileSystem>();
+        services.AddSingleton<HubGrpcClientFactory>();
+        services.AddScoped<EdgeHubSnapshotSyncService>();
 
         //MQTT Services
         services.AddScoped<JobStatusReceived>();
@@ -147,6 +152,7 @@ public class Startup(IConfiguration configuration)
 
         app.UseEndpoints(endpoints =>
         {
+            endpoints.MapGrpcService<EdgeHubSyncGrpcService>();
             endpoints.MapCarter();
             endpoints.MapHub<IsHub>("/is-hub");
         });

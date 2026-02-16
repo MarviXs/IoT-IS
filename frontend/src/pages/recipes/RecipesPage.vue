@@ -1,9 +1,13 @@
 <template>
   <div class="actions">
     <div class="title">{{ t('recipe.label', 2) }}</div>
+    <q-badge v-if="!templateCanEdit" color="warning" text-color="black">
+      {{ t('device_template.read_only_synced') }}
+    </q-badge>
     <q-space />
     <SearchBar v-model="filter" />
     <q-btn
+      v-if="templateCanEdit"
       class="shadow"
       color="primary"
       :icon="mdiPlus"
@@ -38,15 +42,21 @@
 
       <template #body-cell-name="props">
         <q-td :props="props">
-          <RouterLink class="text-black" :to="`/device-templates/${deviceTemplateId}/recipes/${props.row.id}/edit`">{{
-            props.row.name
-          }}</RouterLink>
+          <RouterLink
+            v-if="templateCanEdit"
+            class="text-black"
+            :to="`/device-templates/${deviceTemplateId}/recipes/${props.row.id}/edit`"
+          >
+            {{ props.row.name }}
+          </RouterLink>
+          <span v-else>{{ props.row.name }}</span>
         </q-td>
       </template>
 
       <template #body-cell-actions="props">
         <q-td auto-width :props="props">
           <q-btn
+            v-if="templateCanEdit"
             :to="`/device-templates/${deviceTemplateId}/recipes/${props.row.id}/edit`"
             :icon="mdiPencil"
             color="grey-color"
@@ -56,7 +66,13 @@
               {{ t('global.edit') }}
             </q-tooltip>
           </q-btn>
-          <q-btn :icon="mdiTrashCanOutline" color="grey-color" flat round @click.stop="openDeleteDialog(props.row.id)"
+          <q-btn
+            v-if="templateCanEdit"
+            :icon="mdiTrashCanOutline"
+            color="grey-color"
+            flat
+            round
+            @click.stop="openDeleteDialog(props.row.id)"
             ><q-tooltip content-style="font-size: 11px" :offset="[0, 4]">
               {{ t('global.delete') }}
             </q-tooltip>
@@ -87,10 +103,12 @@ import { useRoute } from 'vue-router';
 import RecipeService from '@/api/services/RecipeService';
 import { handleError } from '@/utils/error-handler';
 import { watchDebounced } from '@vueuse/core';
+import DeviceTemplateService from '@/api/services/DeviceTemplateService';
 
 const { t } = useI18n();
 const route = useRoute();
 const deviceTemplateId = route.params.id as string;
+const templateCanEdit = ref(true);
 
 const filter = ref('');
 const pagination = ref<PaginationClient>({
@@ -131,10 +149,24 @@ async function getRecipes(paginationTable: PaginationTable) {
   pagination.value.rowsPerPage = data.pageSize;
 }
 getRecipes(pagination.value);
+void loadTemplatePermissions();
+
+async function loadTemplatePermissions() {
+  const { data, error } = await DeviceTemplateService.getDeviceTemplate(deviceTemplateId);
+  if (error || !data) {
+    return;
+  }
+
+  templateCanEdit.value = data.canEdit ?? true;
+}
 
 const recipeToDelete = ref<string>();
 const deleteDialogOpen = ref(false);
 function openDeleteDialog(commandId: string) {
+  if (!templateCanEdit.value) {
+    return;
+  }
+
   recipeToDelete.value = commandId;
   deleteDialogOpen.value = true;
 }

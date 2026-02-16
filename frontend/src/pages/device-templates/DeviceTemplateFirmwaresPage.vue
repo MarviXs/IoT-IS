@@ -1,8 +1,12 @@
 <template>
   <div class="actions">
     <div class="title">{{ t('device_template.firmwares.title') }}</div>
+    <q-badge v-if="!templateCanEdit" color="warning" text-color="black">
+      {{ t('device_template.read_only_synced') }}
+    </q-badge>
     <q-space />
     <q-btn
+      v-if="templateCanEdit"
       class="shadow col-grow col-lg-auto"
       color="primary"
       :icon="mdiPlus"
@@ -59,10 +63,17 @@
         >
           <q-tooltip content-style="font-size: 11px" :offset="[0, 4]">{{ t('global.download') }}</q-tooltip>
         </q-btn>
-        <q-btn :icon="mdiPencil" color="grey-7" flat round @click.stop="openEditDialog(props.row.id)">
+        <q-btn v-if="templateCanEdit" :icon="mdiPencil" color="grey-7" flat round @click.stop="openEditDialog(props.row.id)">
           <q-tooltip content-style="font-size: 11px" :offset="[0, 4]">{{ t('global.edit') }}</q-tooltip>
         </q-btn>
-        <q-btn :icon="mdiTrashCanOutline" color="grey-7" flat round @click.stop="openDeleteDialog(props.row.id)">
+        <q-btn
+          v-if="templateCanEdit"
+          :icon="mdiTrashCanOutline"
+          color="grey-7"
+          flat
+          round
+          @click.stop="openDeleteDialog(props.row.id)"
+        >
           <q-tooltip content-style="font-size: 11px" :offset="[0, 4]">{{ t('global.delete') }}</q-tooltip>
         </q-btn>
       </q-td>
@@ -70,19 +81,20 @@
   </q-table>
 
   <CreateDeviceFirmwareDialog
+    v-if="templateCanEdit"
     v-model="createDialogOpen"
     :template-id="templateId"
     @created="loadFirmwares"
   />
   <EditDeviceFirmwareDialog
-    v-if="firmwareIdForEdit"
+    v-if="templateCanEdit && firmwareIdForEdit"
     v-model="editDialogOpen"
     :template-id="templateId"
     :firmware-id="firmwareIdForEdit"
     @updated="loadFirmwares"
   />
   <DeleteDeviceFirmwareDialog
-    v-if="firmwareIdForDelete"
+    v-if="templateCanEdit && firmwareIdForDelete"
     v-model="deleteDialogOpen"
     :template-id="templateId"
     :firmware-id="firmwareIdForDelete"
@@ -103,11 +115,13 @@ import CreateDeviceFirmwareDialog from '@/components/device-templates/firmwares/
 import EditDeviceFirmwareDialog from '@/components/device-templates/firmwares/EditDeviceFirmwareDialog.vue';
 import DeleteDeviceFirmwareDialog from '@/components/device-templates/firmwares/DeleteDeviceFirmwareDialog.vue';
 import type { ProblemDetails } from '@/api/types/ProblemDetails';
+import DeviceTemplateService from '@/api/services/DeviceTemplateService';
 
 const { t } = useI18n();
 const route = useRoute();
 
 const templateId = route.params.id as string;
+const templateCanEdit = ref(true);
 
 const firmwares = ref<DeviceFirmwareResponse[]>([]);
 const isLoading = ref(false);
@@ -126,6 +140,16 @@ async function loadFirmwares() {
 }
 
 loadFirmwares();
+void loadTemplatePermissions();
+
+async function loadTemplatePermissions() {
+  const { data, error } = await DeviceTemplateService.getDeviceTemplate(templateId);
+  if (error || !data) {
+    return;
+  }
+
+  templateCanEdit.value = data.canEdit ?? true;
+}
 
 const columns = computed<QTableProps['columns']>(() => [
   {
@@ -172,11 +196,19 @@ const firmwareIdForEdit = ref<string | null>(null);
 const firmwareIdForDelete = ref<string | null>(null);
 
 function openEditDialog(firmwareId: string) {
+  if (!templateCanEdit.value) {
+    return;
+  }
+
   firmwareIdForEdit.value = firmwareId;
   editDialogOpen.value = true;
 }
 
 function openDeleteDialog(firmwareId: string) {
+  if (!templateCanEdit.value) {
+    return;
+  }
+
   firmwareIdForDelete.value = firmwareId;
   deleteDialogOpen.value = true;
 }

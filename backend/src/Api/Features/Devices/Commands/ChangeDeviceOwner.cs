@@ -22,7 +22,7 @@ public static class ChangeDeviceOwner
         {
             app.MapPut(
                     "admin/devices/{id:guid}/owner",
-                    async Task<Results<NoContent, NotFound, ValidationProblem>> (IMediator mediator, Guid id, Request request) =>
+                    async Task<Results<NoContent, NotFound, ValidationProblem, ForbidHttpResult>> (IMediator mediator, Guid id, Request request) =>
                     {
                         var command = new Command(id, request);
                         var result = await mediator.Send(command);
@@ -35,6 +35,10 @@ public static class ChangeDeviceOwner
                         if (result.HasError<NotFoundError>())
                         {
                             return TypedResults.NotFound();
+                        }
+                        if (result.HasError<ForbiddenError>())
+                        {
+                            return TypedResults.Forbid();
                         }
 
                         return TypedResults.NoContent();
@@ -67,6 +71,10 @@ public static class ChangeDeviceOwner
             if (device == null)
             {
                 return Result.Fail(new NotFoundError());
+            }
+            if (device.IsSyncedFromHub)
+            {
+                return Result.Fail(new ForbiddenError());
             }
 
             var newOwner = await context.Users.FirstOrDefaultAsync(u => u.Id == message.Request.OwnerId, cancellationToken);

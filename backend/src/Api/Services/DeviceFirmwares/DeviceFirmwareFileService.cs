@@ -38,6 +38,27 @@ public class DeviceFirmwareFileService : IDeviceFirmwareFileService
         return Task.FromResult(stream);
     }
 
+    public async Task SaveStreamAsAsync(Stream stream, string storedFileName, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(storedFileName))
+        {
+            throw new ArgumentException("Stored file name cannot be empty", nameof(storedFileName));
+        }
+
+        Directory.CreateDirectory(_basePath);
+
+        var safeFileName = Path.GetFileName(storedFileName);
+        var filePath = Path.Combine(_basePath, safeFileName);
+
+        if (stream.CanSeek)
+        {
+            stream.Seek(0, SeekOrigin.Begin);
+        }
+
+        await using var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None);
+        await stream.CopyToAsync(fileStream, cancellationToken);
+    }
+
     public void Delete(string? storedFileName)
     {
         if (string.IsNullOrWhiteSpace(storedFileName))

@@ -1,4 +1,6 @@
 using System.Net.Http.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Fei.Is.Api.Common.Pagination;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Features.Devices.Queries;

@@ -1,9 +1,13 @@
 <template>
+  <q-banner v-if="!templateCanEdit" class="q-mb-md" rounded dense color="warning" text-color="black">
+    {{ t('device_template.read_only_synced') }}
+  </q-banner>
   <DeviceTemplateForm
     v-if="templateData && sensorsData"
     v-model:template="templateData"
     v-model:sensors="sensorsData"
     :loading="submitting"
+    :read-only="!templateCanEdit"
     @on-submit="submitForm"
   />
 </template>
@@ -19,13 +23,16 @@ import { useRoute, useRouter } from 'vue-router';
 import { handleError } from '@/utils/error-handler';
 import type { SensorFormData } from '@/components/device-templates/SensorForm.vue';
 import type { UpdateDeviceTemplateRequest } from '@/api/services/DeviceTemplateService';
+import { useI18n } from 'vue-i18n';
 
 const router = useRouter();
 const route = useRoute();
+const { t } = useI18n();
 
 const templateData = ref<DeviceTemplateFormData>();
 const sensorsData = ref<SensorFormData[]>([]);
 const submitting = ref(false);
+const templateCanEdit = ref(true);
 
 const templateId = route.params.id as string;
 
@@ -45,6 +52,7 @@ async function getDeviceTemplate() {
     gridRowSpan: data.enableGrid ? data.gridRowSpan ?? 1 : null,
     gridColumnSpan: data.enableGrid ? data.gridColumnSpan ?? 1 : null,
   };
+  templateCanEdit.value = data.canEdit ?? true;
 }
 getDeviceTemplate();
 
@@ -66,6 +74,11 @@ async function getDeviceSensors() {
 getDeviceSensors();
 
 async function submitForm() {
+  if (!templateCanEdit.value) {
+    toast.error(t('device_template.read_only_synced'));
+    return;
+  }
+
   if (!templateData.value || !sensorsData.value) {
     console.error('Invalid form data');
     return;

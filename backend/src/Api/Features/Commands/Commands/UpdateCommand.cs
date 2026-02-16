@@ -3,10 +3,12 @@ using Carter;
 using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Extensions;
+using Fei.Is.Api.Features.DeviceTemplates.Extensions;
 using FluentResults;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
 
 namespace Fei.Is.Api.Features.Commands.Commands;
 
@@ -20,7 +22,7 @@ public static class UpdateCommand
         {
             app.MapPut(
                     "commands/{id:guid}",
-                    async Task<Results<NoContent, ValidationProblem>> (
+                    async Task<Results<NoContent, ValidationProblem, NotFound, ForbidHttpResult>> (
                         IMediator mediator,
                         ClaimsPrincipal user,
                         Guid id,
@@ -34,6 +36,14 @@ public static class UpdateCommand
                         if (result.HasError<ValidationError>())
                         {
                             return TypedResults.ValidationProblem(result.ToValidationErrors());
+                        }
+                        if (result.HasError<NotFoundError>())
+                        {
+                            return TypedResults.NotFound();
+                        }
+                        if (result.HasError<ForbiddenError>())
+                        {
+                            return TypedResults.Forbid();
                         }
 
                         return TypedResults.NoContent();
@@ -61,10 +71,16 @@ public static class UpdateCommand
                 return Result.Fail(new ValidationError(result));
             }
 
-            var command = await context.Commands.FindAsync([message.CommandId], cancellationToken);
+            var command = await context
+                .Commands.Include(c => c.DeviceTemplate)
+                .FirstOrDefaultAsync(c => c.Id == message.CommandId, cancellationToken);
             if (command == null)
             {
                 return Result.Fail(new NotFoundError());
+            }
+            if (command.DeviceTemplate == null || !command.DeviceTemplate.CanEdit(message.User))
+            {
+                return Result.Fail(new ForbiddenError());
             }
 
             command.DisplayName = message.Request.DisplayName;

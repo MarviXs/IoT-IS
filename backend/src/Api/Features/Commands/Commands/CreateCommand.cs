@@ -22,7 +22,11 @@ public static class CreateCommand
         {
             app.MapPost(
                     "commands",
-                    async Task<Results<Created<Guid>, ValidationProblem>> (IMediator mediator, ClaimsPrincipal user, Request request) =>
+                    async Task<Results<Created<Guid>, ValidationProblem, NotFound, ForbidHttpResult>> (
+                        IMediator mediator,
+                        ClaimsPrincipal user,
+                        Request request
+                    ) =>
                     {
                         var command = new Command(request, user);
 
@@ -31,6 +35,14 @@ public static class CreateCommand
                         if (result.HasError<ValidationError>())
                         {
                             return TypedResults.ValidationProblem(result.ToValidationErrors());
+                        }
+                        if (result.HasError<NotFoundError>())
+                        {
+                            return TypedResults.NotFound();
+                        }
+                        if (result.HasError<ForbiddenError>())
+                        {
+                            return TypedResults.Forbid();
                         }
 
                         return TypedResults.Created(result.Value.ToString(), result.Value);

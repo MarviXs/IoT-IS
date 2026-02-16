@@ -10,6 +10,7 @@
               :rules="nameRules"
               class="col-12"
               :label="t('global.name')"
+              :disable="readOnly"
             />
             <q-select
               v-model="template.deviceType"
@@ -22,18 +23,19 @@
               :rules="[(val) => (val && val.length > 0) || t('global.rules.required')]"
               emit-value
               map-options
+              :disable="readOnly"
             />
             <div v-if="authStore.isAdmin" class="col-12">
-              <q-toggle v-model="template.isGlobal" :label="t('device_template.global_template')" />
+              <q-toggle v-model="template.isGlobal" :label="t('device_template.global_template')" :disable="readOnly" />
               <div class="text-caption text-grey-7 q-ml-lg">
                 {{ t('device_template.global_template_hint') }}
               </div>
             </div>
             <div class="col-12">
-              <q-toggle v-model="template.enableMap" :label="t('device_template.enable_map')" />
+              <q-toggle v-model="template.enableMap" :label="t('device_template.enable_map')" :disable="readOnly" />
             </div>
             <div class="col-12">
-              <q-toggle v-model="template.enableGrid" :label="t('device_template.enable_grid')" />
+              <q-toggle v-model="template.enableGrid" :label="t('device_template.enable_grid')" :disable="readOnly" />
             </div>
 
             <q-input
@@ -45,6 +47,7 @@
               class="col-12 col-sm-6"
               :rules="gridRowRules"
               :label="t('device_template.grid_rows')"
+              :disable="readOnly"
             />
             <q-input
               v-if="template.enableGrid"
@@ -55,9 +58,10 @@
               class="col-12 col-sm-6"
               :rules="gridColumnRules"
               :label="t('device_template.grid_columns')"
+              :disable="readOnly"
             />
           </div>
-          <q-card-actions align="left" class="text-primary q-mt-sm q-px-none">
+          <q-card-actions v-if="!readOnly" align="left" class="text-primary q-mt-sm q-px-none">
             <q-btn
               unelevated
               color="primary"
@@ -74,9 +78,10 @@
       <q-step :name="2" :title="t('device.add_sensors')" :icon="matSensors">
         <q-form>
           <div v-for="(sensor, index) in sensors" :key="index">
-            <sensor-form ref="sensorFormRef" v-model="sensors[index]" @remove="deleteSensor(index)" />
+            <sensor-form ref="sensorFormRef" v-model="sensors[index]" :read-only="readOnly" @remove="deleteSensor(index)" />
           </div>
           <q-btn
+            v-if="!readOnly"
             class="full-width q-mb-md q-mt-sm"
             outline
             :icon="mdiPlusCircle"
@@ -91,6 +96,7 @@
     </q-stepper>
   </q-card>
   <q-btn
+    v-if="!readOnly"
     unelevated
     color="primary"
     :label="t('global.save')"
@@ -134,14 +140,18 @@ const sensors = defineModel<SensorFormData[]>('sensors', {
   required: true,
 });
 
-defineProps({
-  loading: {
-    type: Boolean,
-    required: true,
+const props = withDefaults(
+  defineProps<{
+    loading: boolean;
+    readOnly?: boolean;
+  }>(),
+  {
+    readOnly: false,
   },
-});
+);
 
 const authStore = useAuthStore();
+const readOnly = props.readOnly;
 
 const formStep = ref(1);
 
@@ -154,6 +164,10 @@ function goToStep(step: number) {
 }
 
 async function submitForm() {
+  if (readOnly) {
+    return;
+  }
+
   const firstStepForm = [nameRef.value];
   const firstStepValid = isFormValid(firstStepForm);
 
@@ -173,6 +187,10 @@ async function submitForm() {
 }
 
 function addSensor() {
+  if (readOnly) {
+    return;
+  }
+
   sensors.value.push({
     id: null,
     name: '',
@@ -183,6 +201,10 @@ function addSensor() {
 }
 
 function deleteSensor(index: number) {
+  if (readOnly) {
+    return;
+  }
+
   sensors.value.splice(index, 1);
 }
 

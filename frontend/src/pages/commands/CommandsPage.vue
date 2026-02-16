@@ -1,9 +1,13 @@
 <template>
   <div class="actions">
     <div class="title">{{ t('command.label', 2) }}</div>
+    <q-badge v-if="!templateCanEdit" color="warning" text-color="black">
+      {{ t('device_template.read_only_synced') }}
+    </q-badge>
     <q-space />
     <SearchBar v-model="filter" class="col-grow col-lg-auto" />
     <q-btn
+      v-if="templateCanEdit"
       class="shadow col-grow col-lg-auto"
       color="primary"
       :icon="mdiPlus"
@@ -38,12 +42,24 @@
 
       <template #body-cell-actions="props">
         <q-td auto-width :props="props">
-          <q-btn :icon="mdiPencil" color="grey-color" flat round @click.stop="openEditDialog(props.row.id)"
+          <q-btn
+            v-if="templateCanEdit"
+            :icon="mdiPencil"
+            color="grey-color"
+            flat
+            round
+            @click.stop="openEditDialog(props.row.id)"
             ><q-tooltip content-style="font-size: 11px" :offset="[0, 4]">
               {{ t('global.edit') }}
             </q-tooltip>
           </q-btn>
-          <q-btn :icon="mdiTrashCanOutline" color="grey-color" flat round @click.stop="openDeleteDialog(props.row.id)"
+          <q-btn
+            v-if="templateCanEdit"
+            :icon="mdiTrashCanOutline"
+            color="grey-color"
+            flat
+            round
+            @click.stop="openDeleteDialog(props.row.id)"
             ><q-tooltip content-style="font-size: 11px" :offset="[0, 4]">
               {{ t('global.delete') }}
             </q-tooltip>
@@ -52,7 +68,7 @@
       </template>
     </q-table>
   </div>
-  <create-command-dialog v-model="createDialogOpen" @on-create="getCommands(pagination)" />
+  <create-command-dialog v-if="templateCanEdit" v-model="createDialogOpen" @on-create="getCommands(pagination)" />
   <edit-command-dialog
     v-if="commandToEdit"
     v-model="editDialogOpen"
@@ -83,10 +99,12 @@ import type { CommandsQueryParams, CommandsResponse } from '@/api/services/Comma
 import { handleError } from '@/utils/error-handler';
 import { useRoute } from 'vue-router';
 import { watchDebounced } from '@vueuse/core';
+import DeviceTemplateService from '@/api/services/DeviceTemplateService';
 
 const { t } = useI18n();
 const route = useRoute();
 const deviceTemplateId = route.params.id as string;
+const templateCanEdit = ref(true);
 
 const filter = ref('');
 const pagination = ref<PaginationClient>({
@@ -127,12 +145,25 @@ async function getCommands(paginationTable: PaginationTable) {
   pagination.value.rowsPerPage = data.pageSize;
 }
 getCommands(pagination.value);
+void loadTemplatePermissions();
+
+async function loadTemplatePermissions() {
+  const { data, error } = await DeviceTemplateService.getDeviceTemplate(deviceTemplateId);
+  if (error || !data) {
+    return;
+  }
+
+  templateCanEdit.value = data.canEdit ?? true;
+}
 
 const createDialogOpen = ref(false);
 
 const deleteDialogOpen = ref(false);
 const commandToDelete = ref<string>();
 function openDeleteDialog(commandId: string) {
+  if (!templateCanEdit.value) {
+    return;
+  }
   commandToDelete.value = commandId;
   deleteDialogOpen.value = true;
 }
@@ -140,6 +171,9 @@ function openDeleteDialog(commandId: string) {
 const editDialogOpen = ref(false);
 const commandToEdit = ref<string>();
 function openEditDialog(commandId: string) {
+  if (!templateCanEdit.value) {
+    return;
+  }
   commandToEdit.value = commandId;
   editDialogOpen.value = true;
 }

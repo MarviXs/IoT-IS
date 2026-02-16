@@ -4,19 +4,13 @@ import type { paths } from '@/api/generated/schema.d.ts';
 export type TimescaleStorageResponse = paths['/system/storage']['get']['responses']['200']['content']['application/json'];
 export type NodeSettingsResponse = paths['/system/node-settings']['get']['responses']['200']['content']['application/json'];
 export type SystemNodeType = NodeSettingsResponse['nodeType'];
-export type EdgeNodeResponse = NodeSettingsResponse['edgeNodes'][number] & {
-  updateRateSeconds?: number;
-};
+export type EdgeNodeResponse = NodeSettingsResponse['edgeNodes'][number];
+export type HubConnectionStatusResponse = NodeSettingsResponse['hubConnectionStatus'];
 export type UpdateNodeSettingsRequest = paths['/system/node-settings']['put']['requestBody']['content']['application/json'];
-export type CreateEdgeNodeRequest = paths['/system/edge-nodes']['post']['requestBody']['content']['application/json'] & {
-  updateRateSeconds: number;
-};
-export type CreateEdgeNodeResponse = paths['/system/edge-nodes']['post']['responses']['201']['content']['application/json'] & {
-  updateRateSeconds?: number;
-};
-export type UpdateEdgeNodeRequest = paths['/system/edge-nodes/{id}']['put']['requestBody']['content']['application/json'] & {
-  updateRateSeconds: number;
-};
+export type CreateEdgeNodeRequest = paths['/system/edge-nodes']['post']['requestBody']['content']['application/json'];
+export type CreateEdgeNodeResponse = paths['/system/edge-nodes']['post']['responses']['201']['content']['application/json'];
+export type UpdateEdgeNodeRequest = paths['/system/edge-nodes/{id}']['put']['requestBody']['content']['application/json'];
+export type SyncFromHubResponse = paths['/system/edge/sync-from-hub']['post']['responses']['200']['content']['application/json'];
 
 class SystemService {
   async getTimescaleStorageUsage(): Promise<TimescaleStorageResponse> {
@@ -72,6 +66,15 @@ class SystemService {
     if (error) {
       throw new Error('Failed to delete edge node');
     }
+  }
+
+  async syncFromHub(): Promise<SyncFromHubResponse> {
+    const { data, error } = await client.POST('/system/edge/sync-from-hub');
+    if (error || !data) {
+      throw new Error('Failed to synchronize from hub');
+    }
+
+    return data;
   }
 }
 

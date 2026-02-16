@@ -3,9 +3,11 @@ using Carter;
 using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models;
+using Fei.Is.Api.Features.DeviceTemplates.Extensions;
 using FluentResults;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
 
 namespace Fei.Is.Api.Features.Recipes.Commands;
 
@@ -17,7 +19,7 @@ public static class DeleteRecipe
         {
             app.MapDelete(
                     "recipes/{id:guid}",
-                    async Task<Results<NoContent, NotFound>> (IMediator mediator, ClaimsPrincipal user, Guid id) =>
+                    async Task<Results<NoContent, NotFound, ForbidHttpResult>> (IMediator mediator, ClaimsPrincipal user, Guid id) =>
                     {
                         var command = new Command(id, user);
 
@@ -26,6 +28,10 @@ public static class DeleteRecipe
                         if (result.HasError<NotFoundError>())
                         {
                             return TypedResults.NotFound();
+                        }
+                        if (result.HasError<ForbiddenError>())
+                        {
+                            return TypedResults.Forbid();
                         }
 
                         return TypedResults.NoContent();
@@ -47,10 +53,16 @@ public static class DeleteRecipe
     {
         public async Task<Result> Handle(Command message, CancellationToken cancellationToken)
         {
-            var recipe = await context.Recipes.FindAsync([message.Id], cancellationToken);
+            var recipe = await context
+                .Recipes.Include(r => r.DeviceTemplate)
+                .FirstOrDefaultAsync(r => r.Id == message.Id, cancellationToken);
             if (recipe == null)
             {
                 return Result.Fail(new NotFoundError());
+            }
+            if (recipe.DeviceTemplate == null || !recipe.DeviceTemplate.CanEdit(message.User))
+            {
+                return Result.Fail(new ForbiddenError());
             }
 
             context.Recipes.Remove(recipe);

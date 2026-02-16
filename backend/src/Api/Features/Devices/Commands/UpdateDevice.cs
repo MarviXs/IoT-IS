@@ -85,6 +85,10 @@ public static class UpdateDevice
             {
                 return Result.Fail(new NotFoundError());
             }
+            if (device.IsSyncedFromHub)
+            {
+                return Result.Fail(new ForbiddenError());
+            }
             if (!device.CanEdit(message.User))
             {
                 return Result.Fail(new ForbiddenError());

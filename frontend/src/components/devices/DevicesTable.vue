@@ -41,6 +41,10 @@
                 <StatusDot :status="device.connectionState" />
                 <span class="q-ml-sm">{{ getStatusLabel(device.connectionState) }}</span>
               </div>
+              <div v-if="isSyncedFromHub(device)" class="device-card__synced row items-center text-caption text-grey-7">
+                <q-icon :name="mdiLock" size="16px" class="q-mr-xs" />
+                <span>{{ t('device.synced_from_hub') }}</span>
+              </div>
               <div class="device-card__activity text-caption text-grey-7">
                 {{ t('device.last_activity') }}: {{ formatTimeToDistance(device.lastSeen) }}
               </div>
@@ -51,7 +55,7 @@
             <q-menu context-menu touch-position>
               <q-list>
                 <q-item
-                  v-if="device.permission == 'Owner' || adminView"
+                  v-if="canMutateDevice(device)"
                   clickable
                   v-close-popup
                   @click.stop="openUpdateDialog(device.id)"
@@ -62,7 +66,7 @@
                   </div>
                 </q-item>
                 <q-item
-                  v-if="device.permission == 'Owner' || adminView"
+                  v-if="canMutateDevice(device)"
                   clickable
                   v-close-popup
                   @click.stop="openDeleteDialog(device.id)"
@@ -73,7 +77,7 @@
                   </div>
                 </q-item>
                 <q-item
-                  v-if="device.permission == 'Owner' || adminView"
+                  v-if="canMutateDevice(device)"
                   clickable
                   v-close-popup
                   @click.stop="openShareDialog(device.id)"
@@ -83,13 +87,13 @@
                     <div>{{ t('device.share_device') }}</div>
                   </div>
                 </q-item>
-                <q-item v-else clickable v-close-popup @click.stop="unshareDevice(device.id)">
+                <q-item v-else-if="canUnshareDevice(device)" clickable v-close-popup @click.stop="unshareDevice(device.id)">
                   <div class="row items-center q-gutter-sm">
                     <q-icon color="grey-9" size="24px" :name="mdiShareOff" />
                     <div>{{ t('device.unshare_me') }}</div>
                   </div>
                 </q-item>
-                <q-item v-if="adminView" clickable v-close-popup @click.stop="openChangeOwnerDialog(device)">
+                <q-item v-if="canChangeOwner(device)" clickable v-close-popup @click.stop="openChangeOwnerDialog(device)">
                   <div class="row items-center q-gutter-sm">
                     <q-icon color="grey-9" size="24px" :name="mdiAccountSwitch" />
                     <div>{{ t('device.change_owner') }}</div>
@@ -138,6 +142,9 @@
           <router-link :to="`/devices/${propsCell.row.id}`" class="text-weight-medium">
             {{ propsCell.row.name }}
           </router-link>
+          <q-badge v-if="isSyncedFromHub(propsCell.row)" class="q-ml-sm" color="grey-6" text-color="white">
+            {{ t('device.synced_from_hub') }}
+          </q-badge>
         </q-td>
       </template>
 
@@ -169,16 +176,22 @@
               {{ t('global.open') }}
             </q-tooltip>
           </q-btn>
-          <q-btn :icon="mdiPencil" color="grey-color" flat round @click.stop="openUpdateDialog(propsActions.row.id)"
+          <q-btn
+            v-if="canMutateDevice(propsActions.row)"
+            :icon="mdiPencil"
+            color="grey-color"
+            flat
+            round
+            @click.stop="openUpdateDialog(propsActions.row.id)"
             ><q-tooltip content-style="font-size: 11px" :offset="[0, 4]">
               {{ t('global.edit') }}
             </q-tooltip>
           </q-btn>
-          <q-btn :icon="mdiDotsVertical" color="grey-color" flat round>
+          <q-btn v-if="hasMenuActions(propsActions.row)" :icon="mdiDotsVertical" color="grey-color" flat round>
             <q-menu anchor="bottom right" self="top right">
               <q-list>
                 <q-item
-                  v-if="propsActions.row.permission == 'Owner' || adminView"
+                  v-if="canMutateDevice(propsActions.row)"
                   v-close-popup
                   clickable
                   @click.stop="openDeleteDialog(propsActions.row.id)"
@@ -189,7 +202,7 @@
                   </div>
                 </q-item>
                 <q-item
-                  v-if="propsActions.row.permission == 'Owner' || adminView"
+                  v-if="canMutateDevice(propsActions.row)"
                   v-close-popup
                   clickable
                   @click="openShareDialog(propsActions.row.id)"
@@ -199,13 +212,13 @@
                     <div>{{ t('device.share_device') }}</div>
                   </div>
                 </q-item>
-                <q-item v-else v-close-popup clickable @click="unshareDevice(propsActions.row.id)">
+                <q-item v-else-if="canUnshareDevice(propsActions.row)" v-close-popup clickable @click="unshareDevice(propsActions.row.id)">
                   <div class="row items-center q-gutter-sm">
                     <q-icon color="grey-9" size="24px" :name="mdiShareOff" />
                     <div>{{ t('device.unshare_me') }}</div>
                   </div>
                 </q-item>
-                <q-item v-if="showOwner" v-close-popup clickable @click="openChangeOwnerDialog(propsActions.row)">
+                <q-item v-if="canChangeOwner(propsActions.row)" v-close-popup clickable @click="openChangeOwnerDialog(propsActions.row)">
                   <div class="row items-center q-gutter-sm">
                     <q-icon color="grey-9" size="24px" :name="mdiAccountSwitch" />
                     <div>{{ t('device.change_owner') }}</div>
@@ -255,6 +268,7 @@ import {
   mdiCellphoneLink,
   mdiChartLine,
   mdiDotsVertical,
+  mdiLock,
   mdiPencil,
   mdiShare,
   mdiShareOff,
@@ -443,6 +457,10 @@ const deviceToChangeOwner = ref<{
 } | null>(null);
 
 function openChangeOwnerDialog(device: DeviceListItem) {
+  if (!canChangeOwner(device)) {
+    return;
+  }
+
   if (!device.ownerId) {
     return;
   }
@@ -469,6 +487,26 @@ function getStatusLabel(state?: DeviceConnectionStateValue) {
     return t('device.connected');
   }
   return t('device.disconnected');
+}
+
+function isSyncedFromHub(device: DeviceListItem): boolean {
+  return device.isSyncedFromHub === true;
+}
+
+function canMutateDevice(device: DeviceListItem): boolean {
+  return !isSyncedFromHub(device) && (device.permission == 'Owner' || props.adminView);
+}
+
+function canUnshareDevice(device: DeviceListItem): boolean {
+  return !isSyncedFromHub(device) && !props.adminView && device.permission !== 'Owner';
+}
+
+function canChangeOwner(device: DeviceListItem): boolean {
+  return props.adminView && !isSyncedFromHub(device);
+}
+
+function hasMenuActions(device: DeviceListItem): boolean {
+  return canMutateDevice(device) || canUnshareDevice(device) || canChangeOwner(device);
 }
 
 // const getPermissions = (device: Device) => {
@@ -550,6 +588,10 @@ const columns = computed<QTableProps['columns']>(() => {
 
   &__owner {
     margin-top: 4px;
+  }
+
+  &__synced {
+    margin-top: 2px;
   }
 }
 </style>

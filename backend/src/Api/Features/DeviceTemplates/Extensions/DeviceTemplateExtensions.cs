@@ -18,6 +18,11 @@ public static class DeviceTemplateExtensions
 
     public static bool CanEdit(this DeviceTemplate template, ClaimsPrincipal user)
     {
+        if (template.IsSyncedFromHub)
+        {
+            return false;
+        }
+
         return template.IsOwner(user);
     }
 }

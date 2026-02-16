@@ -121,7 +121,8 @@ public static class GetDeviceById
                 connectionState,
                 device.Protocol,
                 device.DataPointRetentionDays,
-                device.SampleRateSeconds
+                device.SampleRateSeconds,
+                device.IsSyncedFromHub
             );
 
             return Result.Ok(response);
@@ -155,6 +156,7 @@ public static class GetDeviceById
         DeviceConnectionState ConnectionState,
         DeviceConnectionProtocol Protocol,
         int? DataPointRetentionDays,
-        float? SampleRateSeconds
+        float? SampleRateSeconds,
+        bool IsSyncedFromHub
     );
 }

@@ -2,8 +2,12 @@
   <div>
     <div class="actions">
       <div class="title">{{ t('device_template.controls') }}</div>
+      <q-badge v-if="!templateCanEdit" color="warning" text-color="black">
+        {{ t('device_template.read_only_synced') }}
+      </q-badge>
       <q-space />
       <q-btn
+        v-if="templateCanEdit"
         class="shadow"
         color="primary"
         :icon="mdiPlus"
@@ -29,7 +33,15 @@
                   {{ control.name ? control.name : t('device_template.control_default_name', { index: index + 1 }) }}
                 </div>
                 <q-space />
-                <q-btn flat round dense color="grey-7" :icon="mdiTrashCanOutline" @click="removeControl(index)" />
+                <q-btn
+                  v-if="templateCanEdit"
+                  flat
+                  round
+                  dense
+                  color="grey-7"
+                  :icon="mdiTrashCanOutline"
+                  @click="removeControl(index)"
+                />
               </div>
               <div class="row q-col-gutter-md">
                 <q-input
@@ -158,6 +170,7 @@
       </q-form>
     </q-card>
     <q-btn
+      v-if="templateCanEdit"
       unelevated
       color="primary"
       class="q-mt-md"
@@ -188,6 +201,7 @@ import type {
   UpdateDeviceTemplateControlsRequest,
 } from '@/api/services/DeviceControlService';
 import SensorService from '@/api/services/SensorService';
+import DeviceTemplateService from '@/api/services/DeviceTemplateService';
 
 type DeviceControlType = 'Run' | 'Toggle';
 
@@ -213,6 +227,7 @@ type Option<T = string> = {
 const { t } = useI18n();
 const route = useRoute();
 const templateId = route.params.id as string;
+const templateCanEdit = ref(true);
 
 const controls = ref<ControlFormData[]>([]);
 const isLoading = ref(false);
@@ -251,8 +266,18 @@ const cycleRules = [
 ];
 
 onMounted(async () => {
+  await loadTemplatePermissions();
   await loadData();
 });
+
+async function loadTemplatePermissions() {
+  const { data, error } = await DeviceTemplateService.getDeviceTemplate(templateId);
+  if (error || !data) {
+    return;
+  }
+
+  templateCanEdit.value = data.canEdit ?? true;
+}
 
 async function loadData() {
   isLoading.value = true;
@@ -376,6 +401,10 @@ function ensureSensorOption(id?: string | null, name?: string | null) {
 }
 
 function addControl() {
+  if (!templateCanEdit.value) {
+    return;
+  }
+
   const id = `${Date.now()}-${Math.random()}`;
   controls.value.push({
     id: null,
@@ -393,6 +422,10 @@ function addControl() {
 }
 
 function removeControl(index: number) {
+  if (!templateCanEdit.value) {
+    return;
+  }
+
   const [removed] = controls.value.splice(index, 1);
   if (removed) {
     delete colorPickerRefs.value[removed.localId];
@@ -400,6 +433,10 @@ function removeControl(index: number) {
 }
 
 async function submitForm() {
+  if (!templateCanEdit.value) {
+    return;
+  }
+
   if (!formRef.value) {
     return;
   }
@@ -448,6 +485,10 @@ async function submitForm() {
 }
 
 function updateColor(index: number, value: string | null) {
+  if (!templateCanEdit.value) {
+    return;
+  }
+
   if (value === null) {
     return;
   }
@@ -459,6 +500,10 @@ function getPreviewColor(color: string) {
 }
 
 function handleTypeChange(index: number, value: DeviceControlType | null) {
+  if (!templateCanEdit.value) {
+    return;
+  }
+
   const control = controls.value[index];
   if (!control) {
     return;

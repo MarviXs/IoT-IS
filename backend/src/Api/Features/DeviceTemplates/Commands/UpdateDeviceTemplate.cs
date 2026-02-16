@@ -32,7 +32,7 @@ public static class UpdateDeviceTemplate
         {
             app.MapPut(
                     "device-templates/{id:guid}",
-                    async Task<Results<NoContent, NotFound, ValidationProblem, Conflict>> (
+                    async Task<Results<NoContent, NotFound, ValidationProblem, Conflict, ForbidHttpResult>> (
                         IMediator mediator,
                         ClaimsPrincipal user,
                         Guid id,
@@ -46,6 +46,10 @@ public static class UpdateDeviceTemplate
                         if (result.HasError<NotFoundError>())
                         {
                             return TypedResults.NotFound();
+                        }
+                        else if (result.HasError<ForbiddenError>())
+                        {
+                            return TypedResults.Forbid();
                         }
                         else if (result.HasError<ValidationError>())
                         {

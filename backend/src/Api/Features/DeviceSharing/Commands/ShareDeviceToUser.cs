@@ -78,6 +78,10 @@ public static class ShareDeviceToUser
             {
                 return Result.Fail(new NotFoundError());
             }
+            if (device.IsSyncedFromHub)
+            {
+                return Result.Fail(new ForbiddenError());
+            }
             if (!device.IsOwner(message.User) && !message.User.IsAdmin())
             {
                 return Result.Fail(new ForbiddenError());

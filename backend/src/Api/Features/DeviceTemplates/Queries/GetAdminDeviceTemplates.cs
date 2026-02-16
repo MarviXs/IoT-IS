@@ -78,7 +78,8 @@ public static class GetAdminDeviceTemplates
                             template.EnableGrid,
                             template.GridRowSpan,
                             template.GridColumnSpan,
-                            template.IsGlobal
+                            template.IsGlobal,
+                            !template.IsSyncedFromHub
                         )
                 )
                 .ToList();
@@ -97,6 +98,7 @@ public static class GetAdminDeviceTemplates
         bool EnableGrid,
         int? GridRowSpan,
         int? GridColumnSpan,
-        bool IsGlobal
+        bool IsGlobal,
+        bool CanEdit
     );
 }

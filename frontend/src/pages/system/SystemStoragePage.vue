@@ -85,6 +85,14 @@
                   <div class="text-caption text-secondary q-mt-xs">
                     {{ t('system.node_settings.update_rate_value', { value: edgeNode.updateRateSeconds ?? 5 }) }}
                   </div>
+                  <div class="row items-center q-gutter-sm q-mt-xs">
+                    <q-badge :color="getStatusColor(edgeNode.isOnline)" text-color="white">
+                      {{ getStatusLabel(edgeNode.isOnline) }}
+                    </q-badge>
+                    <span class="text-caption text-secondary">
+                      {{ t('system.node_settings.last_sync_at', { value: formatLastSyncAt(edgeNode.lastSyncAt) }) }}
+                    </span>
+                  </div>
                 </q-item-section>
                 <q-item-section side class="edge-node-actions">
                   <div class="row items-center q-gutter-xs">
@@ -131,7 +139,36 @@
                 :label="t('system.node_settings.hub_token_label')"
                 :disable="isNodeSettingsLoading || isNodeSettingsSaving"
               />
-              <div class="row justify-end">
+              <div class="row items-center q-gutter-sm">
+                <q-badge :color="getStatusColor(hubConnectionStatus?.isOnline)" text-color="white">
+                  {{ getStatusLabel(hubConnectionStatus?.isOnline) }}
+                </q-badge>
+                <span class="text-caption text-secondary">
+                  {{
+                    t('system.node_settings.last_sync_at', {
+                      value: formatLastSyncAt(hubConnectionStatus?.lastSyncAt),
+                    })
+                  }}
+                </span>
+                <span v-if="hubConnectionStatus?.expectedSyncSeconds" class="text-caption text-secondary">
+                  {{
+                    t('system.node_settings.expected_sync_seconds', {
+                      value: hubConnectionStatus.expectedSyncSeconds,
+                    })
+                  }}
+                </span>
+              </div>
+              <div class="row items-center justify-between q-gutter-sm">
+                <q-btn
+                  color="secondary"
+                  :label="t('system.node_settings.sync_from_hub')"
+                  :loading="isSyncingFromHub"
+                  :disable="isNodeSettingsLoading || isNodeSettingsSaving || isSyncingFromHub"
+                  no-caps
+                  unelevated
+                  padding="8px 20px"
+                  @click="syncDevicesFromHub"
+                />
                 <q-btn
                   color="primary"
                   :label="t('global.save')"
@@ -300,7 +337,11 @@ import {
   mdiPlus,
   mdiRefresh,
 } from '@quasar/extras/mdi-v7';
-import SystemService, { type EdgeNodeResponse, type SystemNodeType } from '@/api/services/SystemService';
+import SystemService, {
+  type EdgeNodeResponse,
+  type HubConnectionStatusResponse,
+  type SystemNodeType,
+} from '@/api/services/SystemService';
 import { copyToClipboard } from 'quasar';
 import SystemChangelogDialog from '@/components/system/SystemChangelogDialog.vue';
 import { useAuthStore } from '@/stores/auth-store';
@@ -316,10 +357,12 @@ const isVacuuming = ref(false);
 const isChangelogOpen = ref(false);
 const isNodeSettingsLoading = ref(false);
 const isNodeSettingsSaving = ref(false);
+const isSyncingFromHub = ref(false);
 const nodeType = ref<SystemNodeType>(0);
 const hubUrl = ref('');
 const hubToken = ref('');
 const edgeNodes = ref<EdgeNodeResponse[]>([]);
+const hubConnectionStatus = ref<HubConnectionStatusResponse | null>(null);
 const isEdgeNodeDialogOpen = ref(false);
 const isDeleteEdgeNodeDialogOpen = ref(false);
 const isEdgeNodeSubmitting = ref(false);
@@ -425,12 +468,74 @@ async function loadNodeSettings() {
     hubToken.value = response.hubToken ?? '';
     edgeNodeTokenVisibility.value = {};
     edgeNodes.value = response.edgeNodes;
+    hubConnectionStatus.value = response.hubConnectionStatus ?? null;
   } catch (error) {
     console.error('Failed to load node settings', error);
     toast.error(t('system.node_settings.load_error'));
   } finally {
     isUpdatingNodeTypeFromServer.value = false;
     isNodeSettingsLoading.value = false;
+  }
+}
+
+function getStatusLabel(isOnline?: boolean): string {
+  return isOnline ? t('system.node_settings.online') : t('system.node_settings.offline');
+}
+
+function getStatusColor(isOnline?: boolean): string {
+  return isOnline ? 'positive' : 'negative';
+}
+
+function formatLastSyncAt(value?: string | null): string {
+  if (!value) {
+    return t('system.node_settings.no_sync_yet');
+  }
+
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.valueOf())) {
+    return t('system.node_settings.no_sync_yet');
+  }
+
+  return parsed.toLocaleString();
+}
+
+function buildSyncSummaryLabel(summary: Awaited<ReturnType<typeof SystemService.syncFromHub>>) {
+  return t('system.node_settings.sync_from_hub_summary', {
+    devicesCreated: summary.devicesCreated,
+    devicesUpdated: summary.devicesUpdated,
+    devicesDeleted: summary.devicesDeleted,
+    templatesCreated: summary.templatesCreated,
+    templatesUpdated: summary.templatesUpdated,
+    templatesDeleted: summary.templatesDeleted,
+    skippedOwners: summary.skippedOwnerNotFound,
+    firmwareFiles: summary.firmwareFilesDownloaded,
+    unresolvedTemplates: summary.unresolvedTemplateReferences,
+  });
+}
+
+async function syncDevicesFromHub() {
+  if (isHubNodeMode.value) {
+    return;
+  }
+
+  const trimmedHubUrl = hubUrl.value.trim();
+  const trimmedHubToken = hubToken.value.trim();
+  if (!trimmedHubUrl || !trimmedHubToken) {
+    toast.error(t('system.node_settings.hub_connection_required'));
+    return;
+  }
+
+  isSyncingFromHub.value = true;
+
+  try {
+    const summary = await SystemService.syncFromHub();
+    toast.success(buildSyncSummaryLabel(summary));
+    await loadNodeSettings();
+  } catch (error) {
+    console.error('Hub sync failed', error);
+    toast.error(t('system.node_settings.sync_from_hub_error'));
+  } finally {
+    isSyncingFromHub.value = false;
   }
 }
 

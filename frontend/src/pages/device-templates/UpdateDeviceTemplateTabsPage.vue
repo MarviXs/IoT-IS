@@ -6,6 +6,9 @@
     ]"
   >
     <q-card class="shadow q-mb-lg">
+      <q-card-section v-if="!templateCanEdit" class="q-pb-none">
+        <q-badge color="warning" text-color="black">{{ t('device_template.read_only_synced') }}</q-badge>
+      </q-card-section>
       <q-tabs dense class="text-grey" active-color="primary" indicator-color="primary" align="left">
         <q-route-tab
           :to="{ path: `/device-templates/${templateId}` }"
@@ -73,6 +76,7 @@ const { t } = useI18n();
 const route = useRoute();
 
 const deviceRequest = ref<UpdateDeviceTemplateRequest>();
+const templateCanEdit = ref(true);
 
 const templateId = route.params.id as string;
 
@@ -91,6 +95,7 @@ async function getDeviceTemplate() {
     gridRowSpan: data.gridRowSpan,
     gridColumnSpan: data.gridColumnSpan,
   };
+  templateCanEdit.value = data.canEdit ?? true;
 }
 getDeviceTemplate();
 </script>

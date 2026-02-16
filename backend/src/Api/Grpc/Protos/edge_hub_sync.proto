@@ -1,0 +1,131 @@
+syntax = "proto3";
+
+option csharp_namespace = "Fei.Is.Api.Grpc";
+
+package edgehubsync;
+
+service EdgeHubSync {
+  rpc SyncDataPoints (SyncDataPointsRequest) returns (SyncDataPointsResponse);
+  rpc GetHubSnapshot (GetHubSnapshotRequest) returns (GetHubSnapshotResponse);
+  rpc DownloadFirmware (DownloadFirmwareRequest) returns (stream FirmwareChunk);
+}
+
+message SyncDataPointsRequest {
+  repeated HubDataPoint datapoints = 1;
+}
+
+message HubDataPoint {
+  string device_id = 1;
+  string sensor_tag = 2;
+  double value = 3;
+  int64 timestamp_unix_ms = 4;
+  optional double latitude = 5;
+  optional double longitude = 6;
+  optional int32 grid_x = 7;
+  optional int32 grid_y = 8;
+}
+
+message SyncDataPointsResponse {
+  int32 next_sync_seconds = 1;
+  int32 accepted_count = 2;
+  int32 skipped_count = 3;
+}
+
+message GetHubSnapshotRequest {}
+
+message GetHubSnapshotResponse {
+  repeated HubTemplate templates = 1;
+  repeated HubDevice devices = 2;
+}
+
+message HubTemplate {
+  string id = 1;
+  string owner_email = 2;
+  string name = 3;
+  int32 device_type = 4;
+  bool is_global = 5;
+  bool enable_map = 6;
+  bool enable_grid = 7;
+  optional int32 grid_row_span = 8;
+  optional int32 grid_column_span = 9;
+  repeated HubSensor sensors = 10;
+  repeated HubCommand commands = 11;
+  repeated HubRecipe recipes = 12;
+  repeated HubDeviceControl controls = 13;
+  repeated HubFirmware firmwares = 14;
+}
+
+message HubSensor {
+  string id = 1;
+  string tag = 2;
+  string name = 3;
+  optional string unit = 4;
+  optional int32 accuracy_decimals = 5;
+  int32 order = 6;
+  optional string group = 7;
+}
+
+message HubCommand {
+  string id = 1;
+  string display_name = 2;
+  string name = 3;
+  repeated double params = 4;
+}
+
+message HubRecipe {
+  string id = 1;
+  string name = 2;
+  repeated HubRecipeStep steps = 3;
+}
+
+message HubRecipeStep {
+  string id = 1;
+  optional string command_id = 2;
+  optional string subrecipe_id = 3;
+  int32 cycles = 4;
+  int32 order = 5;
+}
+
+message HubDeviceControl {
+  string id = 1;
+  string name = 2;
+  string color = 3;
+  int32 type = 4;
+  optional string recipe_id = 5;
+  int32 cycles = 6;
+  bool is_infinite = 7;
+  int32 order = 8;
+  optional string recipe_on_id = 9;
+  optional string recipe_off_id = 10;
+  optional string sensor_id = 11;
+}
+
+message HubFirmware {
+  string id = 1;
+  string version_number = 2;
+  bool is_active = 3;
+  string original_file_name = 4;
+  string stored_file_name = 5;
+}
+
+message HubDevice {
+  string id = 1;
+  string owner_email = 2;
+  string name = 3;
+  string access_token = 4;
+  optional string template_id = 5;
+  int32 protocol = 6;
+  optional int32 data_point_retention_days = 7;
+  optional float sample_rate_seconds = 8;
+  optional string current_firmware_version = 9;
+  optional string mac = 10;
+}
+
+message DownloadFirmwareRequest {
+  string template_id = 1;
+  string firmware_id = 2;
+}
+
+message FirmwareChunk {
+  bytes data = 1;
+}

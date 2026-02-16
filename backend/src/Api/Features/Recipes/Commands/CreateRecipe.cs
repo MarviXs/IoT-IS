@@ -4,6 +4,7 @@ using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
+using Fei.Is.Api.Features.DeviceTemplates.Extensions;
 using FluentResults;
 using FluentValidation;
 using MediatR;
@@ -21,7 +22,11 @@ public static class CreateRecipe
         {
             app.MapPost(
                     "recipes",
-                    async Task<Results<Created<Guid>, NotFound, ValidationProblem>> (IMediator mediator, ClaimsPrincipal user, Request request) =>
+                    async Task<Results<Created<Guid>, NotFound, ValidationProblem, ForbidHttpResult>> (
+                        IMediator mediator,
+                        ClaimsPrincipal user,
+                        Request request
+                    ) =>
                     {
                         var command = new Command(request, user);
 
@@ -30,6 +35,10 @@ public static class CreateRecipe
                         if (result.HasError<NotFoundError>())
                         {
                             return TypedResults.NotFound();
+                        }
+                        else if (result.HasError<ForbiddenError>())
+                        {
+                            return TypedResults.Forbid();
                         }
                         else if (result.HasError<ValidationError>())
                         {
@@ -65,6 +74,10 @@ public static class CreateRecipe
             if (deviceTemplate == null)
             {
                 return Result.Fail(new NotFoundError());
+            }
+            if (!deviceTemplate.CanEdit(message.User))
+            {
+                return Result.Fail(new ForbiddenError());
             }
 
             var recipe = new Recipe { Name = message.Request.Name, DeviceTemplateId = message.Request.DeviceTemplateId };
