@@ -1,9 +1,9 @@
+using System.Net;
+using System.Net.Http.Json;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
-using Fei.Is.Api.Grpc;
 using Fei.Is.Api.Services.DeviceFirmwares;
-using Grpc.Core;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fei.Is.Api.Features.System.Services;
@@ -22,12 +22,10 @@ public sealed record EdgeSnapshotSyncSummary(
 
 public class EdgeHubSnapshotSyncService(
     AppDbContext context,
-    HubGrpcClientFactory clientFactory,
+    HubApiClientFactory clientFactory,
     IDeviceFirmwareFileService firmwareFileService
 )
 {
-    private const string EdgeTokenHeader = "x-edge-token";
-
     public async Task<EdgeSnapshotSyncSummary> SyncFromHubAsync(CancellationToken cancellationToken)
     {
         var settings = await context.SystemNodeSettings.OrderBy(setting => setting.CreatedAt).FirstOrDefaultAsync(cancellationToken);
@@ -41,23 +39,27 @@ public class EdgeHubSnapshotSyncService(
             throw new InvalidOperationException("Hub URL or token is not configured.");
         }
 
-        var (channel, client) = clientFactory.Create(settings.HubUrl);
-        try
+        var client = clientFactory.Create(settings.HubUrl, settings.HubToken);
+        using var snapshotResponse = await client.GetAsync("system/hub-sync/snapshot", cancellationToken);
+
+        if (snapshotResponse.StatusCode == HttpStatusCode.Unauthorized)
         {
-            var headers = new Metadata { { EdgeTokenHeader, settings.HubToken.Trim() } };
-            var snapshot = await client.GetHubSnapshotAsync(new GetHubSnapshotRequest(), headers, cancellationToken: cancellationToken);
-            return await ApplySnapshotAsync(snapshot, client, headers, cancellationToken);
+            throw new InvalidOperationException("Hub rejected edge token.");
         }
-        finally
+
+        snapshotResponse.EnsureSuccessStatusCode();
+        var snapshot = await snapshotResponse.Content.ReadFromJsonAsync<GetHubSnapshotResponse>(cancellationToken: cancellationToken);
+        if (snapshot == null)
         {
-            channel.Dispose();
+            throw new InvalidOperationException("Hub snapshot response is empty.");
         }
+
+        return await ApplySnapshotAsync(snapshot, client, cancellationToken);
     }
 
     private async Task<EdgeSnapshotSyncSummary> ApplySnapshotAsync(
         GetHubSnapshotResponse snapshot,
-        EdgeHubSync.EdgeHubSyncClient client,
-        Metadata headers,
+        HttpClient client,
         CancellationToken cancellationToken
     )
     {
@@ -130,30 +132,20 @@ public class EdgeHubSnapshotSyncService(
         {
             try
             {
-                using var memoryStream = new MemoryStream();
-                var call = client.DownloadFirmware(
-                    new DownloadFirmwareRequest
-                    {
-                        TemplateId = firmwareDownload.TemplateId.ToString(),
-                        FirmwareId = firmwareDownload.FirmwareId.ToString()
-                    },
-                    headers,
-                    cancellationToken: cancellationToken
-                );
+                var path = $"system/hub-sync/firmwares/{firmwareDownload.TemplateId}/{firmwareDownload.FirmwareId}";
+                using var downloadResponse = await client.GetAsync(path, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
 
-                await foreach (var chunk in call.ResponseStream.ReadAllAsync(cancellationToken))
+                if (downloadResponse.StatusCode == HttpStatusCode.NotFound)
                 {
-                    if (chunk.Data.Length == 0)
-                    {
-                        continue;
-                    }
-                    await memoryStream.WriteAsync(chunk.Data.Memory, cancellationToken);
+                    continue;
                 }
 
-                await firmwareFileService.SaveStreamAsAsync(memoryStream, firmwareDownload.StoredFileName, cancellationToken);
+                downloadResponse.EnsureSuccessStatusCode();
+                await using var contentStream = await downloadResponse.Content.ReadAsStreamAsync(cancellationToken);
+                await firmwareFileService.SaveStreamAsAsync(contentStream, firmwareDownload.StoredFileName, cancellationToken);
                 firmwareFilesDownloaded++;
             }
-            catch (RpcException)
+            catch (HttpRequestException)
             {
                 // Keep metadata synced even if file transfer failed for a subset.
             }
@@ -174,7 +166,7 @@ public class EdgeHubSnapshotSyncService(
                 continue;
             }
 
-            var templateId = remoteDevice.HasTemplateId ? ParseGuid(remoteDevice.TemplateId) : null;
+            var templateId = remoteDevice.HasTemplateId ? ParseGuid(remoteDevice.TemplateId!) : null;
             Guid? templateLinkId = null;
             if (templateId.HasValue)
             {
@@ -330,6 +322,7 @@ public class EdgeHubSnapshotSyncService(
             {
                 firmwareFileService.Delete(firmware.StoredFileName);
             }
+
             context.DeviceFirmwares.RemoveRange(existingFirmwares);
         }
 
@@ -389,8 +382,8 @@ public class EdgeHubSnapshotSyncService(
                     {
                         Id = ParseGuid(remoteStep.Id) ?? Guid.NewGuid(),
                         RecipeId = recipeId.Value,
-                        CommandId = remoteStep.HasCommandId ? ParseGuid(remoteStep.CommandId) : null,
-                        SubrecipeId = remoteStep.HasSubrecipeId ? ParseGuid(remoteStep.SubrecipeId) : null,
+                        CommandId = remoteStep.HasCommandId ? ParseGuid(remoteStep.CommandId!) : null,
+                        SubrecipeId = remoteStep.HasSubrecipeId ? ParseGuid(remoteStep.SubrecipeId!) : null,
                         Cycles = remoteStep.Cycles,
                         Order = remoteStep.Order
                     },
@@ -409,13 +402,13 @@ public class EdgeHubSnapshotSyncService(
                     Name = remoteControl.Name,
                     Color = remoteControl.Color,
                     Type = (DeviceControlType)remoteControl.Type,
-                    RecipeId = remoteControl.HasRecipeId ? ParseGuid(remoteControl.RecipeId) : null,
+                    RecipeId = remoteControl.HasRecipeId ? ParseGuid(remoteControl.RecipeId!) : null,
                     Cycles = remoteControl.Cycles,
                     IsInfinite = remoteControl.IsInfinite,
                     Order = remoteControl.Order,
-                    RecipeOnId = remoteControl.HasRecipeOnId ? ParseGuid(remoteControl.RecipeOnId) : null,
-                    RecipeOffId = remoteControl.HasRecipeOffId ? ParseGuid(remoteControl.RecipeOffId) : null,
-                    SensorId = remoteControl.HasSensorId ? ParseGuid(remoteControl.SensorId) : null
+                    RecipeOnId = remoteControl.HasRecipeOnId ? ParseGuid(remoteControl.RecipeOnId!) : null,
+                    RecipeOffId = remoteControl.HasRecipeOffId ? ParseGuid(remoteControl.RecipeOffId!) : null,
+                    SensorId = remoteControl.HasSensorId ? ParseGuid(remoteControl.SensorId!) : null
                 },
                 cancellationToken
             );

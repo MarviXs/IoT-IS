@@ -46,7 +46,6 @@ public class Startup(IConfiguration configuration)
         services.ConfigureCors(Configuration);
         services.ConfigureProblemDetails();
         services.AddCarter();
-        services.AddGrpc();
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Startup>());
         services.AddSignalR();
         services.AddQuartz(q =>
@@ -108,9 +107,11 @@ public class Startup(IConfiguration configuration)
         services.AddScoped<IDeviceFirmwareFileService, DeviceFirmwareFileService>();
         services.AddHostedService<SceneEvaluateService>();
         services.AddHttpClient<IDiscordNotificationService, DiscordNotificationService>();
+        services.AddHttpClient(nameof(HubApiClientFactory));
 
         services.AddScoped<IFileSystemService, LocalFileSystem>();
-        services.AddSingleton<HubGrpcClientFactory>();
+        services.AddScoped<HubApiClientFactory>();
+        services.AddScoped<HubEdgeSyncService>();
         services.AddScoped<EdgeHubSnapshotSyncService>();
 
         //MQTT Services
@@ -152,7 +153,6 @@ public class Startup(IConfiguration configuration)
 
         app.UseEndpoints(endpoints =>
         {
-            endpoints.MapGrpcService<EdgeHubSyncGrpcService>();
             endpoints.MapCarter();
             endpoints.MapHub<IsHub>("/is-hub");
         });

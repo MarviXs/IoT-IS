@@ -1,10 +1,10 @@
 using System.Globalization;
+using System.Net;
+using System.Net.Http.Json;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Features.System.Services;
-using Fei.Is.Api.Grpc;
 using Fei.Is.Api.Redis;
-using Grpc.Core;
 using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
 
@@ -24,12 +24,13 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
         while (!stoppingToken.IsCancellationRequested)
         {
             var delaySeconds = DefaultSyncSeconds;
+
             try
             {
                 using var scope = serviceProvider.CreateScope();
                 var appContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
                 var redis = scope.ServiceProvider.GetRequiredService<RedisService>();
-                var grpcClientFactory = scope.ServiceProvider.GetRequiredService<HubGrpcClientFactory>();
+                var hubApiClientFactory = scope.ServiceProvider.GetRequiredService<HubApiClientFactory>();
 
                 var settings = await appContext.SystemNodeSettings.OrderBy(setting => setting.CreatedAt).FirstOrDefaultAsync(stoppingToken);
                 if (
@@ -116,42 +117,54 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
                                 timestampUnixMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                             }
 
+                            double? latitude = null;
+                            double? longitude = null;
+                            int? gridX = null;
+                            int? gridY = null;
+
+                            if (
+                                parsed.TryGetValue("latitude", out var rawLatitude)
+                                && double.TryParse(rawLatitude, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsedLatitude)
+                            )
+                            {
+                                latitude = parsedLatitude;
+                            }
+
+                            if (
+                                parsed.TryGetValue("longitude", out var rawLongitude)
+                                && double.TryParse(rawLongitude, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsedLongitude)
+                            )
+                            {
+                                longitude = parsedLongitude;
+                            }
+
+                            if (
+                                parsed.TryGetValue("grid_x", out var rawGridX)
+                                && int.TryParse(rawGridX, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsedGridX)
+                            )
+                            {
+                                gridX = parsedGridX;
+                            }
+
+                            if (
+                                parsed.TryGetValue("grid_y", out var rawGridY)
+                                && int.TryParse(rawGridY, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsedGridY)
+                            )
+                            {
+                                gridY = parsedGridY;
+                            }
+
                             var dataPoint = new HubDataPoint
                             {
                                 DeviceId = deviceId.ToString(),
                                 SensorTag = sensorTag,
                                 Value = value,
-                                TimestampUnixMs = timestampUnixMs
+                                TimestampUnixMs = timestampUnixMs,
+                                Latitude = latitude,
+                                Longitude = longitude,
+                                GridX = gridX,
+                                GridY = gridY
                             };
-
-                            if (
-                                parsed.TryGetValue("latitude", out var rawLatitude)
-                                && double.TryParse(rawLatitude, NumberStyles.Float, CultureInfo.InvariantCulture, out var latitude)
-                            )
-                            {
-                                dataPoint.Latitude = latitude;
-                            }
-                            if (
-                                parsed.TryGetValue("longitude", out var rawLongitude)
-                                && double.TryParse(rawLongitude, NumberStyles.Float, CultureInfo.InvariantCulture, out var longitude)
-                            )
-                            {
-                                dataPoint.Longitude = longitude;
-                            }
-                            if (
-                                parsed.TryGetValue("grid_x", out var rawGridX)
-                                && int.TryParse(rawGridX, NumberStyles.Integer, CultureInfo.InvariantCulture, out var gridX)
-                            )
-                            {
-                                dataPoint.GridX = gridX;
-                            }
-                            if (
-                                parsed.TryGetValue("grid_y", out var rawGridY)
-                                && int.TryParse(rawGridY, NumberStyles.Integer, CultureInfo.InvariantCulture, out var gridY)
-                            )
-                            {
-                                dataPoint.GridY = gridY;
-                            }
 
                             request.Datapoints.Add(dataPoint);
                         }
@@ -162,11 +175,22 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
                     }
                 }
 
-                var (channel, client) = grpcClientFactory.Create(settings.HubUrl!);
-                try
+                var client = hubApiClientFactory.Create(settings.HubUrl!, settings.HubToken!);
+                using var responseMessage = await client.PostAsJsonAsync("system/hub-sync/datapoints", request, stoppingToken);
+
+                if (responseMessage.StatusCode == HttpStatusCode.Unauthorized)
                 {
-                    var headers = new Metadata { { "x-edge-token", settings.HubToken!.Trim() } };
-                    var response = await client.SyncDataPointsAsync(request, headers, cancellationToken: stoppingToken);
+                    logger.LogWarning("Edge datapoint sync request unauthorized by hub endpoint");
+                }
+                else
+                {
+                    responseMessage.EnsureSuccessStatusCode();
+                    var response = await responseMessage.Content.ReadFromJsonAsync<SyncDataPointsResponse>(cancellationToken: stoppingToken);
+                    if (response is null)
+                    {
+                        throw new InvalidOperationException("Hub datapoint sync response is empty.");
+                    }
+
                     delaySeconds = response.NextSyncSeconds > 0 ? response.NextSyncSeconds : DefaultSyncSeconds;
 
                     await redis.Db.StringSetAsync(
@@ -187,19 +211,10 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
                         await redis.Db.StreamAcknowledgeAsync(StreamName, GroupName, [.. ackIds]);
                     }
                 }
-                finally
-                {
-                    channel.Dispose();
-                }
             }
-            catch (RpcException rpcException)
+            catch (HttpRequestException requestException)
             {
-                logger.LogWarning(
-                    rpcException,
-                    "Edge datapoint sync RPC failed with status {StatusCode}: {StatusDetail}",
-                    rpcException.StatusCode,
-                    rpcException.Status.Detail
-                );
+                logger.LogWarning(requestException, "Edge datapoint sync HTTP request failed: {Message}", requestException.Message);
             }
             catch (Exception exception)
             {
