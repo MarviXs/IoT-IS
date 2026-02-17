@@ -7,6 +7,13 @@
       </q-card-section>
       <q-separator />
       <q-card-section class="column q-gutter-sm">
+        <div class="text-subtitle1">v1.2</div>
+        <ul class="q-pl-md q-my-none">
+          <li>Added node system</li>
+        </ul>
+      </q-card-section>
+      <q-separator spaced inset />
+      <q-card-section class="column q-gutter-sm">
         <div class="text-subtitle1">v1.1</div>
         <ul class="q-pl-md q-my-none">
           <li>Added experiments</li>

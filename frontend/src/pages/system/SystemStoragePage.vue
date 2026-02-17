@@ -5,7 +5,7 @@
         <q-card-section class="row items-center justify-between">
           <div>
             <div class="text-h6">{{ t('system.version.label') }}</div>
-            <div class="text-subtitle2 text-secondary">1.1</div>
+            <div class="text-subtitle2 text-secondary">1.2</div>
           </div>
           <q-btn flat color="primary" label="Changelog" @click="isChangelogOpen = true" />
         </q-card-section>
