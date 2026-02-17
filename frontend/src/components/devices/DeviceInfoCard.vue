@@ -20,6 +20,10 @@
             <span v-else>-</span>
           </div>
         </div>
+        <div v-if="props.device.syncedFromEdge" class="row">
+          <div class="col-4 text-grey-color">{{ t('device.synced_from_edge') }}</div>
+          <div class="col-8">{{ props.device.syncedFromEdgeNodeName ?? '-' }}</div>
+        </div>
         <!-- <div class="row">
           <div class="col-4 text-grey-color">{{ t('device.mac_address') }}</div>
           <div class="col-8">{{ props.device.mac ?? '-' }}</div>

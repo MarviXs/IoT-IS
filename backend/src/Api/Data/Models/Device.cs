@@ -17,7 +17,9 @@ public class Device : BaseModel
     public int? DataPointRetentionDays { get; set; }
     public string? CurrentFirmwareVersion { get; set; }
     public float? SampleRateSeconds { get; set; } = null;
-    public bool IsSyncedFromHub { get; set; }
+    public bool SyncedFromEdge { get; set; }
+    public Guid? SyncedFromEdgeNodeId { get; set; }
+    public EdgeNode? SyncedFromEdgeNode { get; set; }
     public ICollection<Job> Jobs { get; set; } = [];
     public ICollection<JobSchedule> JobSchedules { get; set; } = [];
     public ICollection<CollectionItem> CollectionItems { get; set; } = [];

@@ -20,6 +20,7 @@
         :icon="mdiListStatus"
       />
       <q-btn
+        v-if="!device.syncedFromEdge"
         class="shadow bg-white col-12 col-md-auto"
         :to="`/devices/${device.id}/schedules`"
         text-color="grey-color"
@@ -62,6 +63,7 @@
         :icon="mdiViewGridOutline"
       />
       <q-btn
+        v-if="!device.syncedFromEdge"
         class="shadow col-grow col-lg-auto device-edit-action"
         color="primary"
         unelevated

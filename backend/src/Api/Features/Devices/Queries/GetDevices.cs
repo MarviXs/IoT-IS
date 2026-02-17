@@ -58,6 +58,7 @@ public static class GetDevices
             var query = context
                 .Devices.AsNoTracking()
                 .WhereOwnedOrShared(message.User.GetUserId())
+                .Include(device => device.SyncedFromEdgeNode)
                 .Where(d => d.Name.ToLower().Contains(StringUtils.Normalized(deviceParameters.SearchTerm)))
                 .Sort(sortByStatus || sortByLastActivity ? null : sortBy ?? nameof(Device.UpdatedAt), deviceParameters.Descending);
 
@@ -95,7 +96,9 @@ public static class GetDevices
                                 online,
                                 connectionState,
                                 device.GetPermission(message.User),
-                                device.IsSyncedFromHub,
+                                device.SyncedFromEdge,
+                                device.SyncedFromEdgeNodeId,
+                                device.SyncedFromEdgeNode?.Name,
                                 lastSeen
                             );
                         }
@@ -206,7 +209,9 @@ public static class GetDevices
                         state.Online,
                         state.State,
                         device.GetPermission(message.User),
-                        device.IsSyncedFromHub,
+                        device.SyncedFromEdge,
+                        device.SyncedFromEdgeNodeId,
+                        device.SyncedFromEdgeNode?.Name,
                         state.LastSeen
                     );
                 })
@@ -222,7 +227,9 @@ public static class GetDevices
         bool Connected,
         DeviceConnectionState ConnectionState,
         DevicePermission Permission,
-        bool IsSyncedFromHub,
+        bool SyncedFromEdge,
+        Guid? SyncedFromEdgeNodeId,
+        string? SyncedFromEdgeNodeName,
         DateTimeOffset? LastSeen = null
     );
 }

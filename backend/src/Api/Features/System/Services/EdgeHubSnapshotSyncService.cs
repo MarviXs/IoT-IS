@@ -79,21 +79,15 @@ public class EdgeHubSnapshotSyncService(
             .ToDictionaryAsync(user => user.Email!.Trim().ToLowerInvariant(), user => user.Id, cancellationToken);
 
         var templateIdsFromHub = snapshot.Templates.Select(template => ParseGuid(template.Id)).Where(id => id.HasValue).Select(id => id!.Value).ToHashSet();
-        var deviceIdsFromHub = snapshot.Devices.Select(device => ParseGuid(device.Id)).Where(id => id.HasValue).Select(id => id!.Value).ToHashSet();
 
         var templatesDeleted = await DeleteStaleSyncedTemplatesAsync(templateIdsFromHub, cancellationToken);
-        var devicesDeleted = await DeleteStaleSyncedDevicesAsync(deviceIdsFromHub, cancellationToken);
 
         var templatesCreated = 0;
         var templatesUpdated = 0;
-        var devicesCreated = 0;
-        var devicesUpdated = 0;
         var skippedOwnerNotFound = 0;
         var firmwareFilesDownloaded = 0;
-        var unresolvedTemplateReferences = 0;
 
         var firmwareToDownload = new List<(Guid TemplateId, Guid FirmwareId, string StoredFileName)>();
-        var syncedTemplateIds = new HashSet<Guid>();
 
         foreach (var remoteTemplate in snapshot.Templates)
         {
@@ -133,7 +127,6 @@ public class EdgeHubSnapshotSyncService(
             localTemplate.IsSyncedFromHub = true;
 
             await ReplaceTemplateChildrenAsync(remoteTemplate, templateId.Value, firmwareToDownload, cancellationToken);
-            syncedTemplateIds.Add(templateId.Value);
         }
 
         await context.SaveChangesAsync(cancellationToken);
@@ -161,88 +154,16 @@ public class EdgeHubSnapshotSyncService(
             }
         }
 
-        foreach (var remoteDevice in snapshot.Devices)
-        {
-            var deviceId = ParseGuid(remoteDevice.Id);
-            if (!deviceId.HasValue)
-            {
-                continue;
-            }
-
-            var ownerEmail = remoteDevice.OwnerEmail.Trim().ToLowerInvariant();
-            if (string.IsNullOrWhiteSpace(ownerEmail) || !usersByEmail.TryGetValue(ownerEmail, out var ownerId))
-            {
-                skippedOwnerNotFound++;
-                continue;
-            }
-
-            var templateId = remoteDevice.HasTemplateId ? ParseGuid(remoteDevice.TemplateId!) : null;
-            Guid? templateLinkId = null;
-            if (templateId.HasValue)
-            {
-                if (syncedTemplateIds.Contains(templateId.Value))
-                {
-                    templateLinkId = templateId.Value;
-                }
-                else
-                {
-                    var exists = await context.DeviceTemplates.AnyAsync(
-                        template => template.Id == templateId.Value && template.IsSyncedFromHub,
-                        cancellationToken
-                    );
-                    if (exists)
-                    {
-                        templateLinkId = templateId.Value;
-                    }
-                    else
-                    {
-                        unresolvedTemplateReferences++;
-                    }
-                }
-            }
-
-            var localDevice = await context.Devices.FirstOrDefaultAsync(device => device.Id == deviceId.Value, cancellationToken);
-            if (localDevice == null)
-            {
-                localDevice = new Device
-                {
-                    Id = deviceId.Value,
-                    Name = remoteDevice.Name,
-                    AccessToken = remoteDevice.AccessToken,
-                    OwnerId = ownerId
-                };
-                await context.Devices.AddAsync(localDevice, cancellationToken);
-                devicesCreated++;
-            }
-            else
-            {
-                devicesUpdated++;
-            }
-
-            localDevice.OwnerId = ownerId;
-            localDevice.Name = remoteDevice.Name;
-            localDevice.AccessToken = remoteDevice.AccessToken;
-            localDevice.DeviceTemplateId = templateLinkId;
-            localDevice.Protocol = (DeviceConnectionProtocol)remoteDevice.Protocol;
-            localDevice.DataPointRetentionDays = remoteDevice.HasDataPointRetentionDays ? remoteDevice.DataPointRetentionDays : null;
-            localDevice.SampleRateSeconds = remoteDevice.HasSampleRateSeconds ? remoteDevice.SampleRateSeconds : null;
-            localDevice.CurrentFirmwareVersion = remoteDevice.HasCurrentFirmwareVersion ? remoteDevice.CurrentFirmwareVersion : null;
-            localDevice.Mac = remoteDevice.HasMac ? remoteDevice.Mac : null;
-            localDevice.IsSyncedFromHub = true;
-        }
-
-        await context.SaveChangesAsync(cancellationToken);
-
         return new EdgeSnapshotSyncSummary(
-            devicesCreated,
-            devicesUpdated,
-            devicesDeleted,
+            0,
+            0,
+            0,
             templatesCreated,
             templatesUpdated,
             templatesDeleted,
             skippedOwnerNotFound,
             firmwareFilesDownloaded,
-            unresolvedTemplateReferences
+            0
         );
     }
 
@@ -266,22 +187,6 @@ public class EdgeHubSnapshotSyncService(
         context.DeviceTemplates.RemoveRange(staleTemplates);
         await context.SaveChangesAsync(cancellationToken);
         return staleTemplates.Count;
-    }
-
-    private async Task<int> DeleteStaleSyncedDevicesAsync(HashSet<Guid> deviceIdsFromHub, CancellationToken cancellationToken)
-    {
-        var staleDevices = await context
-            .Devices.Where(device => device.IsSyncedFromHub && !deviceIdsFromHub.Contains(device.Id))
-            .ToListAsync(cancellationToken);
-
-        if (staleDevices.Count == 0)
-        {
-            return 0;
-        }
-
-        context.Devices.RemoveRange(staleDevices);
-        await context.SaveChangesAsync(cancellationToken);
-        return staleDevices.Count;
     }
 
     private async Task ReplaceTemplateChildrenAsync(

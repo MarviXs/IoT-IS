@@ -29,9 +29,9 @@ public static class UpdateDevice
     {
         public void AddRoutes(IEndpointRouteBuilder app)
         {
-            app.MapPut(
+                app.MapPut(
                     "devices/{id:guid}",
-                    async Task<Results<NoContent, NotFound, ValidationProblem, Conflict>> (
+                    async Task<Results<NoContent, NotFound, ValidationProblem, Conflict, ForbidHttpResult>> (
                         IMediator mediator,
                         ClaimsPrincipal user,
                         Guid id,
@@ -53,6 +53,10 @@ public static class UpdateDevice
                         else if (result.HasError<ConcurrencyError>())
                         {
                             return TypedResults.Conflict();
+                        }
+                        else if (result.HasError<ForbiddenError>())
+                        {
+                            return TypedResults.Forbid();
                         }
 
                         return TypedResults.NoContent();
@@ -85,7 +89,7 @@ public static class UpdateDevice
             {
                 return Result.Fail(new NotFoundError());
             }
-            if (device.IsSyncedFromHub)
+            if (device.SyncedFromEdge)
             {
                 return Result.Fail(new ForbiddenError());
             }

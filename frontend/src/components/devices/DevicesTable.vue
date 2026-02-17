@@ -41,9 +41,9 @@
                 <StatusDot :status="device.connectionState" />
                 <span class="q-ml-sm">{{ getStatusLabel(device.connectionState) }}</span>
               </div>
-              <div v-if="isSyncedFromHub(device)" class="device-card__synced row items-center text-caption text-grey-7">
+              <div v-if="isSyncedFromEdge(device)" class="device-card__synced row items-center text-caption text-grey-7">
                 <q-icon :name="mdiLock" size="16px" class="q-mr-xs" />
-                <span>{{ t('device.synced_from_hub') }}</span>
+                <span>{{ getSyncedFromEdgeLabel(device) }}</span>
               </div>
               <div class="device-card__activity text-caption text-grey-7">
                 {{ t('device.last_activity') }}: {{ formatTimeToDistance(device.lastSeen) }}
@@ -142,8 +142,8 @@
           <router-link :to="`/devices/${propsCell.row.id}`" class="text-weight-medium">
             {{ propsCell.row.name }}
           </router-link>
-          <q-badge v-if="isSyncedFromHub(propsCell.row)" class="q-ml-sm" color="grey-6" text-color="white">
-            {{ t('device.synced_from_hub') }}
+          <q-badge v-if="isSyncedFromEdge(propsCell.row)" class="q-ml-sm" color="grey-6" text-color="white">
+            {{ getSyncedFromEdgeLabel(propsCell.row) }}
           </q-badge>
         </q-td>
       </template>
@@ -489,20 +489,32 @@ function getStatusLabel(state?: DeviceConnectionStateValue) {
   return t('device.disconnected');
 }
 
-function isSyncedFromHub(device: DeviceListItem): boolean {
-  return device.isSyncedFromHub === true;
+function isSyncedFromEdge(device: DeviceListItem): boolean {
+  return device.syncedFromEdge === true;
+}
+
+function getSyncedFromEdgeLabel(device: DeviceListItem): string {
+  if (!isSyncedFromEdge(device)) {
+    return '';
+  }
+
+  if (device.syncedFromEdgeNodeName) {
+    return t('device.synced_from_edge_with_name', { name: device.syncedFromEdgeNodeName });
+  }
+
+  return t('device.synced_from_edge');
 }
 
 function canMutateDevice(device: DeviceListItem): boolean {
-  return !isSyncedFromHub(device) && (device.permission == 'Owner' || props.adminView);
+  return !isSyncedFromEdge(device) && (device.permission == 'Owner' || props.adminView);
 }
 
 function canUnshareDevice(device: DeviceListItem): boolean {
-  return !isSyncedFromHub(device) && !props.adminView && device.permission !== 'Owner';
+  return !isSyncedFromEdge(device) && !props.adminView && device.permission !== 'Owner';
 }
 
 function canChangeOwner(device: DeviceListItem): boolean {
-  return props.adminView && !isSyncedFromHub(device);
+  return props.adminView && !isSyncedFromEdge(device);
 }
 
 function hasMenuActions(device: DeviceListItem): boolean {

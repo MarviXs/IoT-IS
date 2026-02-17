@@ -87,6 +87,32 @@ public static class UpdateScene
                 return Result.Fail(new ForbiddenError());
             }
 
+            var parsedCondition = SceneConditionUtils.ParseCondition(message.Request.Condition);
+            if (parsedCondition.IsFailed)
+            {
+                return Result.Fail(parsedCondition.Errors);
+            }
+
+            var triggers = parsedCondition.Value;
+            var referencedDeviceIds = message
+                .Request.Actions.Where(action => action.DeviceId.HasValue)
+                .Select(action => action.DeviceId!.Value)
+                .Concat(triggers.Select(trigger => trigger.DeviceId))
+                .Distinct()
+                .ToList();
+
+            if (referencedDeviceIds.Count != 0)
+            {
+                var hasSyncedFromEdgeDevice = await context
+                    .Devices.AsNoTracking()
+                    .AnyAsync(device => referencedDeviceIds.Contains(device.Id) && device.SyncedFromEdge, cancellationToken);
+
+                if (hasSyncedFromEdgeDevice)
+                {
+                    return Result.Fail(new ValidationError("DeviceId", "Devices synced from edge cannot be used in scenes."));
+                }
+            }
+
             scene.Name = message.Request.Name;
             scene.Description = message.Request.Description;
             scene.IsEnabled = message.Request.IsEnabled;
@@ -108,7 +134,6 @@ public static class UpdateScene
             var existingTriggers = context.SceneSensorTriggers.Where(x => x.SceneId == scene.Id).ToList();
             context.SceneSensorTriggers.RemoveRange(existingTriggers);
 
-            var triggers = SceneConditionUtils.ParseCondition(message.Request.Condition).Value;
             foreach (var trigger in triggers)
             {
                 var sceneSensorTrigger = new SceneSensorTrigger

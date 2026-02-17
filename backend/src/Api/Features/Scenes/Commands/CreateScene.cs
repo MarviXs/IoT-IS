@@ -10,6 +10,7 @@ using FluentResults;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
 
 namespace Fei.Is.Api.Features.Scenes.Commands;
 
@@ -76,6 +77,32 @@ public static class CreateScene
                 return Result.Fail(new ValidationError(result));
             }
 
+            var parsedCondition = SceneConditionUtils.ParseCondition(message.Request.Condition);
+            if (parsedCondition.IsFailed)
+            {
+                return Result.Fail(parsedCondition.Errors);
+            }
+
+            var triggers = parsedCondition.Value;
+            var referencedDeviceIds = message
+                .Request.Actions.Where(action => action.DeviceId.HasValue)
+                .Select(action => action.DeviceId!.Value)
+                .Concat(triggers.Select(trigger => trigger.DeviceId))
+                .Distinct()
+                .ToList();
+
+            if (referencedDeviceIds.Count != 0)
+            {
+                var hasSyncedFromEdgeDevice = await context
+                    .Devices.AsNoTracking()
+                    .AnyAsync(device => referencedDeviceIds.Contains(device.Id) && device.SyncedFromEdge, cancellationToken);
+
+                if (hasSyncedFromEdgeDevice)
+                {
+                    return Result.Fail(new ValidationError("DeviceId", "Devices synced from edge cannot be used in scenes."));
+                }
+            }
+
             var createdScene = new Scene
             {
                 OwnerId = message.User.GetUserId(),
@@ -102,7 +129,6 @@ public static class CreateScene
             var existingTriggers = context.SceneSensorTriggers.Where(x => x.SceneId == createdScene.Id).ToList();
             context.SceneSensorTriggers.RemoveRange(existingTriggers);
 
-            var triggers = SceneConditionUtils.ParseCondition(message.Request.Condition).Value;
             foreach (var trigger in triggers)
             {
                 var sceneSensorTrigger = new SceneSensorTrigger

@@ -49,14 +49,25 @@
           <template v-if="isHubNodeMode">
             <div class="row items-center justify-between">
               <div class="text-subtitle1">{{ t('system.node_settings.edge_nodes_title') }}</div>
-              <q-btn
-                flat
-                color="primary"
-                :icon="mdiPlus"
-                :label="t('system.node_settings.add_edge_node')"
-                :disable="isNodeSettingsLoading || isEdgeNodeSubmitting"
-                @click="openCreateEdgeNodeDialog"
-              />
+              <div class="row items-center q-gutter-sm">
+                <q-btn
+                  flat
+                  color="secondary"
+                  :icon="mdiRefresh"
+                  :label="t('system.node_settings.sync_all_now')"
+                  :loading="isSyncingAllEdgeNodes"
+                  :disable="isNodeSettingsLoading || isSyncingAllEdgeNodes || isEdgeNodeSubmitting"
+                  @click="syncAllEdgeNodesNow"
+                />
+                <q-btn
+                  flat
+                  color="primary"
+                  :icon="mdiPlus"
+                  :label="t('system.node_settings.add_edge_node')"
+                  :disable="isNodeSettingsLoading || isEdgeNodeSubmitting || isSyncingAllEdgeNodes"
+                  @click="openCreateEdgeNodeDialog"
+                />
+              </div>
             </div>
 
             <div v-if="isNodeSettingsLoading" class="text-secondary">{{ t('system.node_settings.loading') }}</div>
@@ -96,6 +107,17 @@
                 </q-item-section>
                 <q-item-section side class="edge-node-actions">
                   <div class="row items-center q-gutter-xs">
+                    <q-btn
+                      flat
+                      round
+                      dense
+                      color="secondary"
+                      :icon="mdiRefresh"
+                      :loading="isSyncingEdgeNode(edgeNode.id)"
+                      :disable="isNodeSettingsLoading || isSyncingAllEdgeNodes || isSyncingEdgeNode(edgeNode.id)"
+                      :aria-label="t('system.node_settings.sync_now')"
+                      @click="syncEdgeNodeNow(edgeNode)"
+                    />
                     <q-btn
                       flat
                       round
@@ -158,17 +180,7 @@
                   }}
                 </span>
               </div>
-              <div class="row items-center justify-between q-gutter-sm">
-                <q-btn
-                  color="secondary"
-                  :label="t('system.node_settings.sync_from_hub')"
-                  :loading="isSyncingFromHub"
-                  :disable="isNodeSettingsLoading || isNodeSettingsSaving || isSyncingFromHub"
-                  no-caps
-                  unelevated
-                  padding="8px 20px"
-                  @click="syncDevicesFromHub"
-                />
+              <div class="row items-center justify-start q-gutter-sm">
                 <q-btn
                   color="primary"
                   :label="t('global.save')"
@@ -357,7 +369,8 @@ const isVacuuming = ref(false);
 const isChangelogOpen = ref(false);
 const isNodeSettingsLoading = ref(false);
 const isNodeSettingsSaving = ref(false);
-const isSyncingFromHub = ref(false);
+const isSyncingAllEdgeNodes = ref(false);
+const syncingEdgeNodeIds = ref<Record<string, boolean>>({});
 const nodeType = ref<SystemNodeType>(0);
 const hubUrl = ref('');
 const hubToken = ref('');
@@ -473,6 +486,7 @@ async function loadNodeSettings() {
     edgeNodeTokenVisibility.value = {};
     edgeNodes.value = response.edgeNodes;
     hubConnectionStatus.value = response.hubConnectionStatus ?? null;
+    syncingEdgeNodeIds.value = {};
   } catch (error) {
     console.error('Failed to load node settings', error);
     toast.error(t('system.node_settings.load_error'));
@@ -503,43 +517,41 @@ function formatLastSyncAt(value?: string | null): string {
   return parsed.toLocaleString();
 }
 
-function buildSyncSummaryLabel(summary: Awaited<ReturnType<typeof SystemService.syncFromHub>>) {
-  return t('system.node_settings.sync_from_hub_summary', {
-    devicesCreated: summary.devicesCreated,
-    devicesUpdated: summary.devicesUpdated,
-    devicesDeleted: summary.devicesDeleted,
-    templatesCreated: summary.templatesCreated,
-    templatesUpdated: summary.templatesUpdated,
-    templatesDeleted: summary.templatesDeleted,
-    skippedOwners: summary.skippedOwnerNotFound,
-    firmwareFiles: summary.firmwareFilesDownloaded,
-    unresolvedTemplates: summary.unresolvedTemplateReferences,
-  });
+function isSyncingEdgeNode(edgeNodeId: string): boolean {
+  return syncingEdgeNodeIds.value[edgeNodeId] === true;
 }
 
-async function syncDevicesFromHub() {
-  if (isHubNodeMode.value) {
-    return;
-  }
-
-  const trimmedHubUrl = hubUrl.value.trim();
-  const trimmedHubToken = hubToken.value.trim();
-  if (!trimmedHubUrl || !trimmedHubToken) {
-    toast.error(t('system.node_settings.hub_connection_required'));
-    return;
-  }
-
-  isSyncingFromHub.value = true;
+async function syncEdgeNodeNow(edgeNode: EdgeNodeResponse) {
+  const edgeNodeId = edgeNode.id;
+  syncingEdgeNodeIds.value = {
+    ...syncingEdgeNodeIds.value,
+    [edgeNodeId]: true,
+  };
 
   try {
-    const summary = await SystemService.syncFromHub();
-    toast.success(buildSyncSummaryLabel(summary));
-    await loadNodeSettings();
+    await SystemService.syncEdgeNodeNow(edgeNodeId);
+    toast.success(t('system.node_settings.sync_now_success', { name: edgeNode.name }));
   } catch (error) {
-    console.error('Hub sync failed', error);
-    toast.error(t('system.node_settings.sync_from_hub_error'));
+    console.error('Failed to request sync for edge node', error);
+    toast.error(t('system.node_settings.sync_now_error'));
   } finally {
-    isSyncingFromHub.value = false;
+    syncingEdgeNodeIds.value = {
+      ...syncingEdgeNodeIds.value,
+      [edgeNodeId]: false,
+    };
+  }
+}
+
+async function syncAllEdgeNodesNow() {
+  isSyncingAllEdgeNodes.value = true;
+  try {
+    const response = await SystemService.syncAllEdgeNodesNow();
+    toast.success(t('system.node_settings.sync_all_now_success', { count: response.requestedEdges }));
+  } catch (error) {
+    console.error('Failed to request sync for all edge nodes', error);
+    toast.error(t('system.node_settings.sync_all_now_error'));
+  } finally {
+    isSyncingAllEdgeNodes.value = false;
   }
 }
 

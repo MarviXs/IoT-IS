@@ -72,7 +72,7 @@ public static class ChangeDeviceOwner
             {
                 return Result.Fail(new NotFoundError());
             }
-            if (device.IsSyncedFromHub)
+            if (device.SyncedFromEdge)
             {
                 return Result.Fail(new ForbiddenError());
             }

@@ -32,6 +32,7 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
                 var appContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
                 var redis = scope.ServiceProvider.GetRequiredService<RedisService>();
                 var hubApiClientFactory = scope.ServiceProvider.GetRequiredService<HubApiClientFactory>();
+                var edgeHubSnapshotSyncService = scope.ServiceProvider.GetRequiredService<EdgeHubSnapshotSyncService>();
 
                 var settings = await appContext.SystemNodeSettings.OrderBy(setting => setting.CreatedAt).FirstOrDefaultAsync(stoppingToken);
                 if (
@@ -72,12 +73,12 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
                         }
                     }
 
-                    var syncedDeviceIds = await appContext
+                    var existingDeviceIds = await appContext
                         .Devices.AsNoTracking()
-                        .Where(device => device.IsSyncedFromHub && candidateDeviceIds.Contains(device.Id))
+                        .Where(device => candidateDeviceIds.Contains(device.Id))
                         .Select(device => device.Id)
                         .ToListAsync(stoppingToken);
-                    var syncedSet = syncedDeviceIds.ToHashSet();
+                    var existingDeviceSet = existingDeviceIds.ToHashSet();
 
                     foreach (var message in messages)
                     {
@@ -89,7 +90,7 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
                             if (
                                 !parsed.TryGetValue("device_id", out var rawDeviceId)
                                 || !Guid.TryParse(rawDeviceId, out var deviceId)
-                                || !syncedSet.Contains(deviceId)
+                                || !existingDeviceSet.Contains(deviceId)
                             )
                             {
                                 continue;
@@ -219,6 +220,18 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
                     if (ackIds.Count > 0)
                     {
                         await redis.Db.StreamAcknowledgeAsync(StreamName, GroupName, [.. ackIds]);
+                    }
+
+                    if (response.ForceFullSync)
+                    {
+                        try
+                        {
+                            await edgeHubSnapshotSyncService.SyncFromHubAsync(stoppingToken);
+                        }
+                        catch (Exception syncException)
+                        {
+                            logger.LogWarning(syncException, "Forced full sync requested by hub failed");
+                        }
                     }
                 }
             }

@@ -61,6 +61,7 @@ public static class GetDeviceById
                 .Include(d => d.SharedWithUsers)
                 .Include(d => d.DeviceTemplate)
                 .ThenInclude(deviceTemplate => deviceTemplate!.Sensors)
+                .Include(d => d.SyncedFromEdgeNode)
                 .FirstOrDefaultAsync(device => device.Id == request.DeviceId, cancellationToken);
 
             if (device == null)
@@ -122,7 +123,9 @@ public static class GetDeviceById
                 device.Protocol,
                 device.DataPointRetentionDays,
                 device.SampleRateSeconds,
-                device.IsSyncedFromHub
+                device.SyncedFromEdge,
+                device.SyncedFromEdgeNodeId,
+                device.SyncedFromEdgeNode?.Name
             );
 
             return Result.Ok(response);
@@ -157,6 +160,8 @@ public static class GetDeviceById
         DeviceConnectionProtocol Protocol,
         int? DataPointRetentionDays,
         float? SampleRateSeconds,
-        bool IsSyncedFromHub
+        bool SyncedFromEdge,
+        Guid? SyncedFromEdgeNodeId,
+        string? SyncedFromEdgeNodeName
     );
 }

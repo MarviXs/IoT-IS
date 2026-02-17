@@ -60,6 +60,7 @@ public static class GetAdminDevices
             var query = context
                 .Devices.AsNoTracking()
                 .Include(device => device.Owner)
+                .Include(device => device.SyncedFromEdgeNode)
                 .Where(
                     device =>
                         device.Name.ToLower().Contains(normalizedSearch)
@@ -103,7 +104,9 @@ public static class GetAdminDevices
                                 online,
                                 connectionState,
                                 device.GetPermission(message.User),
-                                device.IsSyncedFromHub,
+                                device.SyncedFromEdge,
+                                device.SyncedFromEdgeNodeId,
+                                device.SyncedFromEdgeNode?.Name,
                                 lastSeen
                             );
                         }
@@ -219,7 +222,9 @@ public static class GetAdminDevices
                             state.Online,
                             state.State,
                             device.GetPermission(message.User),
-                            device.IsSyncedFromHub,
+                            device.SyncedFromEdge,
+                            device.SyncedFromEdgeNodeId,
+                            device.SyncedFromEdgeNode?.Name,
                             state.LastSeen
                         );
                     }
@@ -238,7 +243,9 @@ public static class GetAdminDevices
         bool Connected,
         DeviceConnectionState ConnectionState,
         DevicePermission Permission,
-        bool IsSyncedFromHub,
+        bool SyncedFromEdge,
+        Guid? SyncedFromEdgeNodeId,
+        string? SyncedFromEdgeNodeName,
         DateTimeOffset? LastSeen = null
     );
 }

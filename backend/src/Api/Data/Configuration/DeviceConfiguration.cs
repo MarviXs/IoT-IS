@@ -9,7 +9,12 @@ public class DeviceConfiguration : IEntityTypeConfiguration<Device>
     public void Configure(EntityTypeBuilder<Device> builder)
     {
         builder.HasIndex(device => device.AccessToken).IsUnique();
-        builder.Property(device => device.IsSyncedFromHub).IsRequired().HasDefaultValue(false);
+        builder.Property(device => device.SyncedFromEdge).IsRequired().HasDefaultValue(false);
+        builder
+            .HasOne(device => device.SyncedFromEdgeNode)
+            .WithMany(edgeNode => edgeNode.SyncedDevices)
+            .HasForeignKey(device => device.SyncedFromEdgeNodeId)
+            .OnDelete(DeleteBehavior.SetNull);
         builder
             .HasMany(device => device.SharedWithUsers)
             .WithOne(share => share.Device)

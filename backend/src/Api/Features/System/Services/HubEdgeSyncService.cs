@@ -42,6 +42,7 @@ public class HubEdgeSyncService(
         }
 
         var nextSyncSeconds = edgeNode.UpdateRateSeconds > 0 ? edgeNode.UpdateRateSeconds : DefaultNextSyncSeconds;
+        var forceFullSync = await ConsumeForceFullSyncRequestAsync(edgeNode.Id);
         var now = DateTimeOffset.UtcNow;
         if (request.Datapoints.Count == 0)
         {
@@ -50,7 +51,8 @@ public class HubEdgeSyncService(
                 NextSyncSeconds = nextSyncSeconds,
                 AcceptedCount = 0,
                 SkippedCount = 0,
-                Hash = await BuildHubSyncHashAsync(cancellationToken)
+                Hash = await BuildHubSyncHashAsync(cancellationToken),
+                ForceFullSync = forceFullSync
             };
         }
 
@@ -60,12 +62,24 @@ public class HubEdgeSyncService(
             .Distinct()
             .ToList();
 
-        var existingIds = await appContext
-            .Devices.AsNoTracking()
-            .Where(device => candidateIds.Contains(device.Id))
-            .Select(device => device.Id)
-            .ToListAsync(cancellationToken);
-        var existingIdSet = existingIds.ToHashSet();
+        var existingDevices = await appContext.Devices.Where(device => candidateIds.Contains(device.Id)).ToListAsync(cancellationToken);
+        var existingIdSet = existingDevices.Select(device => device.Id).ToHashSet();
+
+        var hasSourceMarkerChanges = false;
+        foreach (var device in existingDevices)
+        {
+            if (!device.SyncedFromEdge || device.SyncedFromEdgeNodeId != edgeNode.Id)
+            {
+                device.SyncedFromEdge = true;
+                device.SyncedFromEdgeNodeId = edgeNode.Id;
+                hasSourceMarkerChanges = true;
+            }
+        }
+
+        if (hasSourceMarkerChanges)
+        {
+            await appContext.SaveChangesAsync(cancellationToken);
+        }
 
         var accepted = 0;
         var skipped = 0;
@@ -169,7 +183,8 @@ public class HubEdgeSyncService(
             NextSyncSeconds = nextSyncSeconds,
             AcceptedCount = accepted,
             SkippedCount = skipped,
-            Hash = await BuildHubSyncHashAsync(cancellationToken)
+            Hash = await BuildHubSyncHashAsync(cancellationToken),
+            ForceFullSync = forceFullSync
         };
     }
 
@@ -335,8 +350,7 @@ public class HubEdgeSyncService(
             await BuildTableSignatureAsync(appContext.Recipes.AsNoTracking(), cancellationToken),
             await BuildTableSignatureAsync(appContext.RecipeSteps.AsNoTracking(), cancellationToken),
             await BuildTableSignatureAsync(appContext.DeviceControls.AsNoTracking(), cancellationToken),
-            await BuildTableSignatureAsync(appContext.DeviceFirmwares.AsNoTracking(), cancellationToken),
-            await BuildTableSignatureAsync(appContext.Devices.AsNoTracking(), cancellationToken)
+            await BuildTableSignatureAsync(appContext.DeviceFirmwares.AsNoTracking(), cancellationToken)
         };
 
         return ComputeHash(signatures);
@@ -390,6 +404,19 @@ public class HubEdgeSyncService(
         );
 
         return edgeNode;
+    }
+
+    private async Task<bool> ConsumeForceFullSyncRequestAsync(Guid edgeNodeId)
+    {
+        var key = EdgeSyncNowRedisKeys.BuildForceFullSyncKey(edgeNodeId);
+        var value = await redis.Db.StringGetAsync(key);
+        if (!value.HasValue)
+        {
+            return false;
+        }
+
+        _ = redis.Db.KeyDeleteAsync(key, flags: CommandFlags.FireAndForget);
+        return true;
     }
 
     private static async Task<TableSignature> BuildTableSignatureAsync<TEntity>(IQueryable<TEntity> query, CancellationToken cancellationToken)

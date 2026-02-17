@@ -53,6 +53,7 @@ public static class GetDevicesWithSensors
             var query = context
                 .Devices.AsNoTracking()
                 .WhereOwnedOrShared(message.User.GetUserId())
+                .Where(d => !d.SyncedFromEdge)
                 .Where(d => d.Name.ToLower().Contains(StringUtils.Normalized(deviceParameters.SearchTerm)))
                 .Include(d => d.DeviceTemplate)
                 .ThenInclude(dt => dt.Sensors)
