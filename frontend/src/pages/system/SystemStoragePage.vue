@@ -522,23 +522,20 @@ async function saveNodeSettings(options: { showSuccessToast?: boolean } = {}): P
   const trimmedHubUrl = hubUrl.value.trim();
   const trimmedHubToken = hubToken.value.trim();
 
-  if (!isHubNodeMode.value && (!trimmedHubUrl || !trimmedHubToken)) {
-    toast.error(t('system.node_settings.hub_connection_required'));
-    return false;
-  }
-
   isNodeSettingsSaving.value = true;
 
   try {
     const normalizedHubUrl = normalizeHubUrl(trimmedHubUrl);
+    const hubUrlPayload = normalizedHubUrl ? normalizedHubUrl : null;
+    const hubTokenPayload = trimmedHubToken ? trimmedHubToken : null;
     if (!isHubNodeMode.value) {
       hubUrl.value = normalizedHubUrl;
     }
 
     await SystemService.updateNodeSettings({
       nodeType: nodeType.value,
-      hubUrl: isHubNodeMode.value ? null : normalizedHubUrl,
-      hubToken: isHubNodeMode.value ? null : trimmedHubToken,
+      hubUrl: isHubNodeMode.value ? null : hubUrlPayload,
+      hubToken: isHubNodeMode.value ? null : hubTokenPayload,
     });
     if (showSuccessToast) {
       toast.success(t('system.node_settings.save_success'));
@@ -771,13 +768,6 @@ watch(nodeType, async (nextType, previousType) => {
   }
 
   if (loadedNodeType.value === nextType) {
-    return;
-  }
-
-  const trimmedHubUrl = hubUrl.value.trim();
-  const trimmedHubToken = hubToken.value.trim();
-  const isSwitchingToEdgeWithoutHubConnection = nextType === 1 && (!trimmedHubUrl || !trimmedHubToken);
-  if (isSwitchingToEdgeWithoutHubConnection) {
     return;
   }
 

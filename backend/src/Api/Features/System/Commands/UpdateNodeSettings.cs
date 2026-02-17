@@ -72,7 +72,7 @@ public static class UpdateNodeSettings
             if (message.Request.NodeType == SystemNodeType.Edge)
             {
                 settings.HubUrl = NormalizeHubUrl(message.Request.HubUrl);
-                settings.HubToken = message.Request.HubToken?.Trim();
+                settings.HubToken = NormalizeHubToken(message.Request.HubToken);
             }
             else
             {
@@ -90,7 +90,7 @@ public static class UpdateNodeSettings
             var trimmed = hubUrl?.Trim();
             if (string.IsNullOrWhiteSpace(trimmed))
             {
-                return trimmed;
+                return null;
             }
 
             if (Uri.TryCreate(trimmed, UriKind.Absolute, out _))
@@ -105,6 +105,12 @@ public static class UpdateNodeSettings
 
             return trimmed;
         }
+
+        private static string? NormalizeHubToken(string? hubToken)
+        {
+            var trimmed = hubToken?.Trim();
+            return string.IsNullOrWhiteSpace(trimmed) ? null : trimmed;
+        }
     }
 
     public sealed class Validator : AbstractValidator<Command>
@@ -114,16 +120,12 @@ public static class UpdateNodeSettings
             RuleFor(command => command.Request.NodeType).IsInEnum();
 
             RuleFor(command => command.Request.HubUrl)
-                .NotEmpty()
                 .MaximumLength(1024)
-                .Must(hubUrl => Uri.TryCreate(NormalizeHubUrl(hubUrl), UriKind.Absolute, out _))
+                .Must(hubUrl => string.IsNullOrWhiteSpace(hubUrl) || Uri.TryCreate(NormalizeHubUrl(hubUrl), UriKind.Absolute, out _))
                 .WithMessage("Hub URL must be a valid absolute URL")
                 .When(command => command.Request.NodeType == SystemNodeType.Edge);
 
-            RuleFor(command => command.Request.HubToken)
-                .NotEmpty()
-                .MaximumLength(256)
-                .When(command => command.Request.NodeType == SystemNodeType.Edge);
+            RuleFor(command => command.Request.HubToken).MaximumLength(256).When(command => command.Request.NodeType == SystemNodeType.Edge);
         }
 
         private static string? NormalizeHubUrl(string? hubUrl)
