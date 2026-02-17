@@ -26,35 +26,45 @@ public class EdgeHubSnapshotSyncService(
     IDeviceFirmwareFileService firmwareFileService
 )
 {
+    private static readonly SemaphoreSlim SyncLock = new(1, 1);
+
     public async Task<EdgeSnapshotSyncSummary> SyncFromHubAsync(CancellationToken cancellationToken)
     {
-        var settings = await context.SystemNodeSettings.OrderBy(setting => setting.CreatedAt).FirstOrDefaultAsync(cancellationToken);
-        if (settings == null || settings.NodeType != SystemNodeType.Edge)
+        await SyncLock.WaitAsync(cancellationToken);
+        try
         {
-            throw new InvalidOperationException("Node is not configured as edge.");
-        }
+            var settings = await context.SystemNodeSettings.OrderBy(setting => setting.CreatedAt).FirstOrDefaultAsync(cancellationToken);
+            if (settings == null || settings.NodeType != SystemNodeType.Edge)
+            {
+                throw new InvalidOperationException("Node is not configured as edge.");
+            }
 
-        if (string.IsNullOrWhiteSpace(settings.HubUrl) || string.IsNullOrWhiteSpace(settings.HubToken))
+            if (string.IsNullOrWhiteSpace(settings.HubUrl) || string.IsNullOrWhiteSpace(settings.HubToken))
+            {
+                throw new InvalidOperationException("Hub URL or token is not configured.");
+            }
+
+            var client = clientFactory.Create(settings.HubUrl, settings.HubToken);
+            using var snapshotResponse = await client.GetAsync("system/hub-sync/snapshot", cancellationToken);
+
+            if (snapshotResponse.StatusCode == HttpStatusCode.Unauthorized)
+            {
+                throw new InvalidOperationException("Hub rejected edge token.");
+            }
+
+            snapshotResponse.EnsureSuccessStatusCode();
+            var snapshot = await snapshotResponse.Content.ReadFromJsonAsync<GetHubSnapshotResponse>(cancellationToken: cancellationToken);
+            if (snapshot == null)
+            {
+                throw new InvalidOperationException("Hub snapshot response is empty.");
+            }
+
+            return await ApplySnapshotAsync(snapshot, client, cancellationToken);
+        }
+        finally
         {
-            throw new InvalidOperationException("Hub URL or token is not configured.");
+            SyncLock.Release();
         }
-
-        var client = clientFactory.Create(settings.HubUrl, settings.HubToken);
-        using var snapshotResponse = await client.GetAsync("system/hub-sync/snapshot", cancellationToken);
-
-        if (snapshotResponse.StatusCode == HttpStatusCode.Unauthorized)
-        {
-            throw new InvalidOperationException("Hub rejected edge token.");
-        }
-
-        snapshotResponse.EnsureSuccessStatusCode();
-        var snapshot = await snapshotResponse.Content.ReadFromJsonAsync<GetHubSnapshotResponse>(cancellationToken: cancellationToken);
-        if (snapshot == null)
-        {
-            throw new InvalidOperationException("Hub snapshot response is empty.");
-        }
-
-        return await ApplySnapshotAsync(snapshot, client, cancellationToken);
     }
 
     private async Task<EdgeSnapshotSyncSummary> ApplySnapshotAsync(

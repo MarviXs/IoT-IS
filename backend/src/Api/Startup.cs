@@ -99,6 +99,7 @@ public class Startup(IConfiguration configuration)
 
         services.AddHostedService<StoreDataPointsBatchService>();
         services.AddHostedService<EdgeHubDataSyncBackgroundService>();
+        services.AddHostedService<EdgeHubMetadataAutoSyncBackgroundService>();
         services.AddHostedService<JobTimeOutService>();
         services.AddHostedService<JobScheduleBootstrapper>();
 

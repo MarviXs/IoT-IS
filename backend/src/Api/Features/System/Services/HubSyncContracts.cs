@@ -36,6 +36,7 @@ public sealed class SyncDataPointsResponse
     public int NextSyncSeconds { get; init; }
     public int AcceptedCount { get; init; }
     public int SkippedCount { get; init; }
+    public string Hash { get; init; } = string.Empty;
 }
 
 public sealed class GetHubSnapshotResponse

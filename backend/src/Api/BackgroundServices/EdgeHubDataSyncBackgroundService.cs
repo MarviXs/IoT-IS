@@ -14,6 +14,7 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
 {
     private const string StreamName = "datapoints";
     private const string GroupName = "edge_hub_sync";
+    private const string LastAnnouncedHubHashKey = "edge:hub:last-announced-hash";
     private const int MaxPendingTimeUnclaimed = 20000;
     private const int DefaultSyncSeconds = 5;
 
@@ -205,6 +206,15 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
                         TimeSpan.FromDays(7),
                         flags: CommandFlags.FireAndForget
                     );
+                    if (!string.IsNullOrWhiteSpace(response.Hash))
+                    {
+                        await redis.Db.StringSetAsync(
+                            LastAnnouncedHubHashKey,
+                            response.Hash.Trim(),
+                            TimeSpan.FromDays(30),
+                            flags: CommandFlags.FireAndForget
+                        );
+                    }
 
                     if (ackIds.Count > 0)
                     {

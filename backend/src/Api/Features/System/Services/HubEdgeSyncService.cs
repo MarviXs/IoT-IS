@@ -1,4 +1,7 @@
 using System.Globalization;
+using System.Buffers.Binary;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models;
@@ -38,14 +41,16 @@ public class HubEdgeSyncService(
             return null;
         }
 
+        var nextSyncSeconds = edgeNode.UpdateRateSeconds > 0 ? edgeNode.UpdateRateSeconds : DefaultNextSyncSeconds;
         var now = DateTimeOffset.UtcNow;
         if (request.Datapoints.Count == 0)
         {
             return new SyncDataPointsResponse
             {
-                NextSyncSeconds = edgeNode.UpdateRateSeconds > 0 ? edgeNode.UpdateRateSeconds : DefaultNextSyncSeconds,
+                NextSyncSeconds = nextSyncSeconds,
                 AcceptedCount = 0,
-                SkippedCount = 0
+                SkippedCount = 0,
+                Hash = await BuildHubSyncHashAsync(cancellationToken)
             };
         }
 
@@ -161,9 +166,10 @@ public class HubEdgeSyncService(
 
         return new SyncDataPointsResponse
         {
-            NextSyncSeconds = edgeNode.UpdateRateSeconds > 0 ? edgeNode.UpdateRateSeconds : DefaultNextSyncSeconds,
+            NextSyncSeconds = nextSyncSeconds,
             AcceptedCount = accepted,
-            SkippedCount = skipped
+            SkippedCount = skipped,
+            Hash = await BuildHubSyncHashAsync(cancellationToken)
         };
     }
 
@@ -319,6 +325,23 @@ public class HubEdgeSyncService(
         return response;
     }
 
+    private async Task<string> BuildHubSyncHashAsync(CancellationToken cancellationToken)
+    {
+        var signatures = new[]
+        {
+            await BuildTableSignatureAsync(appContext.DeviceTemplates.AsNoTracking(), cancellationToken),
+            await BuildTableSignatureAsync(appContext.Sensors.AsNoTracking(), cancellationToken),
+            await BuildTableSignatureAsync(appContext.Commands.AsNoTracking(), cancellationToken),
+            await BuildTableSignatureAsync(appContext.Recipes.AsNoTracking(), cancellationToken),
+            await BuildTableSignatureAsync(appContext.RecipeSteps.AsNoTracking(), cancellationToken),
+            await BuildTableSignatureAsync(appContext.DeviceControls.AsNoTracking(), cancellationToken),
+            await BuildTableSignatureAsync(appContext.DeviceFirmwares.AsNoTracking(), cancellationToken),
+            await BuildTableSignatureAsync(appContext.Devices.AsNoTracking(), cancellationToken)
+        };
+
+        return ComputeHash(signatures);
+    }
+
     public async Task<(HubEdgeFirmwareDownloadStatus Status, Stream? Stream, string? FileName)> DownloadFirmwareAsync(
         Guid templateId,
         Guid firmwareId,
@@ -368,4 +391,40 @@ public class HubEdgeSyncService(
 
         return edgeNode;
     }
+
+    private static async Task<TableSignature> BuildTableSignatureAsync<TEntity>(IQueryable<TEntity> query, CancellationToken cancellationToken)
+        where TEntity : BaseModel
+    {
+        var aggregate = await query
+            .GroupBy(_ => 1)
+            .Select(group => new { Count = group.Count(), MaxUpdatedAt = (DateTime?)group.Max(item => item.UpdatedAt) })
+            .FirstOrDefaultAsync(cancellationToken);
+
+        return new TableSignature(typeof(TEntity).Name, aggregate?.Count ?? 0, aggregate?.MaxUpdatedAt?.Ticks ?? 0);
+    }
+
+    private static string ComputeHash(IEnumerable<TableSignature> signatures)
+    {
+        using var hasher = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+        Span<byte> intBuffer = stackalloc byte[4];
+        Span<byte> longBuffer = stackalloc byte[8];
+        foreach (var signature in signatures)
+        {
+            var tableNameBytes = Encoding.UTF8.GetBytes(signature.TableName);
+
+            BinaryPrimitives.WriteInt32LittleEndian(intBuffer, tableNameBytes.Length);
+            hasher.AppendData(intBuffer);
+            hasher.AppendData(tableNameBytes);
+
+            BinaryPrimitives.WriteInt32LittleEndian(intBuffer, signature.Count);
+            hasher.AppendData(intBuffer);
+
+            BinaryPrimitives.WriteInt64LittleEndian(longBuffer, signature.MaxUpdatedAtTicks);
+            hasher.AppendData(longBuffer);
+        }
+
+        return Convert.ToHexString(hasher.GetHashAndReset()).ToLowerInvariant();
+    }
+
+    private sealed record TableSignature(string TableName, int Count, long MaxUpdatedAtTicks);
 }
