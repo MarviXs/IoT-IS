@@ -114,6 +114,7 @@ public class Startup(IConfiguration configuration)
         services.AddScoped<HubEdgeSyncService>();
         services.AddScoped<EdgeHubMetadataSnapshotService>();
         services.AddSingleton<EdgeMetadataVersionService>();
+        services.AddSingleton<EdgeMetadataDeltaTrackerService>();
 
         //MQTT Services
         services.AddScoped<JobStatusReceived>();

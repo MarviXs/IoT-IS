@@ -64,8 +64,9 @@ public static class HubSyncApi
                 .WithTags("System")
                 .WithOpenApi(o =>
                 {
-                    o.Summary = "Accept edge metadata snapshot payload";
-                    o.Description = "Hub-only internal endpoint for edge authoritative device/template metadata synchronization.";
+                    o.Summary = "Accept edge metadata sync payload";
+                    o.Description =
+                        "Hub-only internal endpoint for edge authoritative device/template synchronization (full snapshot or delta updates).";
                     return o;
                 });
         }

@@ -28,12 +28,19 @@ public class AppDbContext
 {
     private readonly IMediator _mediator;
     private readonly EdgeMetadataVersionService _edgeMetadataVersionService;
+    private readonly EdgeMetadataDeltaTrackerService _edgeMetadataDeltaTrackerService;
 
-    public AppDbContext(DbContextOptions<AppDbContext> options, IMediator mediator, EdgeMetadataVersionService edgeMetadataVersionService)
+    public AppDbContext(
+        DbContextOptions<AppDbContext> options,
+        IMediator mediator,
+        EdgeMetadataVersionService edgeMetadataVersionService,
+        EdgeMetadataDeltaTrackerService edgeMetadataDeltaTrackerService
+    )
         : base(options)
     {
         _mediator = mediator;
         _edgeMetadataVersionService = edgeMetadataVersionService;
+        _edgeMetadataDeltaTrackerService = edgeMetadataDeltaTrackerService;
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -140,11 +147,11 @@ public class AppDbContext
     public override int SaveChanges()
     {
         UpdateTimestamps();
-        var hasRelevantEdgeMetadataChanges = HasRelevantEdgeMetadataChanges();
+        var edgeMetadataChanges = CaptureEdgeMetadataChangesAsync(CancellationToken.None).GetAwaiter().GetResult();
         var result = base.SaveChanges();
-        if (result > 0 && hasRelevantEdgeMetadataChanges)
+        if (result > 0 && edgeMetadataChanges.HasChanges)
         {
-            TryIncrementEdgeMetadataVersion(CancellationToken.None).GetAwaiter().GetResult();
+            TrySyncEdgeMetadataChangesAsync(edgeMetadataChanges, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         return result;
@@ -153,11 +160,11 @@ public class AppDbContext
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
     {
         UpdateTimestamps();
-        var hasRelevantEdgeMetadataChanges = HasRelevantEdgeMetadataChanges();
+        var edgeMetadataChanges = CaptureEdgeMetadataChangesAsync(CancellationToken.None).GetAwaiter().GetResult();
         var result = base.SaveChanges(acceptAllChangesOnSuccess);
-        if (result > 0 && hasRelevantEdgeMetadataChanges)
+        if (result > 0 && edgeMetadataChanges.HasChanges)
         {
-            TryIncrementEdgeMetadataVersion(CancellationToken.None).GetAwaiter().GetResult();
+            TrySyncEdgeMetadataChangesAsync(edgeMetadataChanges, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         return result;
@@ -167,21 +174,21 @@ public class AppDbContext
     {
         UpdateTimestamps();
         await _mediator.DispatchDomainEventsAsync(this);
-        var hasRelevantEdgeMetadataChanges = HasRelevantEdgeMetadataChanges();
+        var edgeMetadataChanges = await CaptureEdgeMetadataChangesAsync(cancellationToken);
         var result = await base.SaveChangesAsync(cancellationToken);
-        if (result > 0 && hasRelevantEdgeMetadataChanges)
+        if (result > 0 && edgeMetadataChanges.HasChanges)
         {
-            await TryIncrementEdgeMetadataVersion(cancellationToken);
+            await TrySyncEdgeMetadataChangesAsync(edgeMetadataChanges, cancellationToken);
         }
 
         return result;
     }
 
-    public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+    public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {
         UpdateTimestamps();
-        var hasRelevantEdgeMetadataChanges = HasRelevantEdgeMetadataChanges();
-        return SaveChangesAndIncrementAsync(acceptAllChangesOnSuccess, hasRelevantEdgeMetadataChanges, cancellationToken);
+        var edgeMetadataChanges = await CaptureEdgeMetadataChangesAsync(cancellationToken);
+        return await SaveChangesAndSyncMetadataAsync(acceptAllChangesOnSuccess, edgeMetadataChanges, cancellationToken);
     }
 
     private void UpdateTimestamps()
@@ -193,46 +200,165 @@ public class AppDbContext
         }
     }
 
-    private bool HasRelevantEdgeMetadataChanges()
-    {
-        return ChangeTracker
-            .Entries()
-            .Any(entry =>
-                entry.State is EntityState.Added or EntityState.Modified or EntityState.Deleted
-                && entry.Entity is Device or DeviceTemplate or Sensor or Command or Recipe or RecipeStep or DeviceControl or DeviceFirmware
-            );
-    }
-
-    private async Task<int> SaveChangesAndIncrementAsync(
+    private async Task<int> SaveChangesAndSyncMetadataAsync(
         bool acceptAllChangesOnSuccess,
-        bool hasRelevantEdgeMetadataChanges,
+        EdgeMetadataChangeSet edgeMetadataChanges,
         CancellationToken cancellationToken
     )
     {
         var result = await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
-        if (result > 0 && hasRelevantEdgeMetadataChanges)
+        if (result > 0 && edgeMetadataChanges.HasChanges)
         {
-            await TryIncrementEdgeMetadataVersion(cancellationToken);
+            await TrySyncEdgeMetadataChangesAsync(edgeMetadataChanges, cancellationToken);
         }
 
         return result;
     }
 
-    private async Task TryIncrementEdgeMetadataVersion(CancellationToken cancellationToken)
+    private async Task<EdgeMetadataChangeSet> CaptureEdgeMetadataChangesAsync(CancellationToken cancellationToken)
+    {
+        var changes = new EdgeMetadataChangeSet();
+        var recipeIdsToResolve = new HashSet<Guid>();
+
+        foreach (var entry in ChangeTracker.Entries())
+        {
+            if (entry.State is not (EntityState.Added or EntityState.Modified or EntityState.Deleted))
+            {
+                continue;
+            }
+
+            switch (entry.Entity)
+            {
+                case Device device:
+                    RegisterDeviceChange(changes, device.Id, entry.State);
+                    break;
+                case DeviceTemplate template:
+                    RegisterTemplateChange(changes, template.Id, entry.State);
+                    break;
+                case Sensor sensor:
+                    RegisterTemplateChange(changes, sensor.DeviceTemplateId, EntityState.Modified);
+                    break;
+                case Command command:
+                    RegisterTemplateChange(changes, command.DeviceTemplateId, EntityState.Modified);
+                    break;
+                case Recipe recipe:
+                    RegisterTemplateChange(changes, recipe.DeviceTemplateId, EntityState.Modified);
+                    break;
+                case DeviceControl control:
+                    RegisterTemplateChange(changes, control.DeviceTemplateId, EntityState.Modified);
+                    break;
+                case DeviceFirmware firmware:
+                    RegisterTemplateChange(changes, firmware.DeviceTemplateId, EntityState.Modified);
+                    break;
+                case RecipeStep recipeStep:
+                    if (recipeStep.Recipe?.DeviceTemplateId is { } trackedTemplateId && trackedTemplateId != Guid.Empty)
+                    {
+                        RegisterTemplateChange(changes, trackedTemplateId, EntityState.Modified);
+                    }
+                    else if (recipeStep.RecipeId != Guid.Empty)
+                    {
+                        recipeIdsToResolve.Add(recipeStep.RecipeId);
+                    }
+
+                    break;
+            }
+        }
+
+        if (recipeIdsToResolve.Count == 0)
+        {
+            return changes;
+        }
+
+        var trackedRecipes = ChangeTracker
+            .Entries<Recipe>()
+            .Where(entry => entry.State != EntityState.Detached && recipeIdsToResolve.Contains(entry.Entity.Id))
+            .Select(entry => entry.Entity)
+            .ToList();
+
+        foreach (var trackedRecipe in trackedRecipes)
+        {
+            if (trackedRecipe.DeviceTemplateId != Guid.Empty)
+            {
+                RegisterTemplateChange(changes, trackedRecipe.DeviceTemplateId, EntityState.Modified);
+            }
+        }
+
+        recipeIdsToResolve.ExceptWith(trackedRecipes.Select(recipe => recipe.Id));
+        if (recipeIdsToResolve.Count == 0)
+        {
+            return changes;
+        }
+
+        var resolvedTemplateIds = await Recipes
+            .AsNoTracking()
+            .Where(recipe => recipeIdsToResolve.Contains(recipe.Id))
+            .Select(recipe => recipe.DeviceTemplateId)
+            .ToListAsync(cancellationToken);
+
+        foreach (var templateId in resolvedTemplateIds)
+        {
+            RegisterTemplateChange(changes, templateId, EntityState.Modified);
+        }
+
+        return changes;
+    }
+
+    private async Task TrySyncEdgeMetadataChangesAsync(EdgeMetadataChangeSet edgeMetadataChanges, CancellationToken cancellationToken)
     {
         try
         {
-            if (!await IsEdgeNodeModeAsync(cancellationToken))
+            if (!edgeMetadataChanges.HasChanges || !await IsEdgeNodeModeAsync(cancellationToken))
             {
                 return;
             }
 
+            await _edgeMetadataDeltaTrackerService.RecordChangesAsync(edgeMetadataChanges, cancellationToken);
             await _edgeMetadataVersionService.IncrementVersionAsync(cancellationToken);
         }
         catch
         {
             // Metadata version sync failures should not break primary database writes.
         }
+    }
+
+    private static void RegisterTemplateChange(EdgeMetadataChangeSet changes, Guid templateId, EntityState state)
+    {
+        if (templateId == Guid.Empty)
+        {
+            return;
+        }
+
+        if (state == EntityState.Deleted)
+        {
+            changes.DeletedTemplateIds.Add(templateId);
+            changes.ChangedTemplateIds.Remove(templateId);
+            return;
+        }
+
+        if (changes.DeletedTemplateIds.Contains(templateId))
+        {
+            return;
+        }
+
+        changes.ChangedTemplateIds.Add(templateId);
+    }
+
+    private static void RegisterDeviceChange(EdgeMetadataChangeSet changes, Guid deviceId, EntityState state)
+    {
+        if (deviceId == Guid.Empty)
+        {
+            return;
+        }
+
+        if (state == EntityState.Deleted)
+        {
+            changes.DeletedDeviceIds.Add(deviceId);
+            changes.ChangedDeviceIds.Remove(deviceId);
+            return;
+        }
+
+        changes.ChangedDeviceIds.Add(deviceId);
+        changes.DeletedDeviceIds.Remove(deviceId);
     }
 
     private async Task<bool> IsEdgeNodeModeAsync(CancellationToken cancellationToken)

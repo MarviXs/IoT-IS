@@ -198,12 +198,18 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
 
                 if (datapointResponse.RequiresMetadataSync)
                 {
-                    var metadataRequest = await metadataSnapshotService.BuildSnapshotAsync(edgeMetadataVersion, stoppingToken);
+                    var metadataRequest = await metadataSnapshotService.BuildSnapshotAsync(
+                        edgeMetadataVersion,
+                        datapointResponse.RequiresFullMetadataSync,
+                        stoppingToken
+                    );
                     var metadataSyncSucceeded = await SendMetadataSyncRequestAsync(client, metadataRequest, stoppingToken);
                     if (!metadataSyncSucceeded)
                     {
                         continue;
                     }
+
+                    await metadataSnapshotService.MarkMetadataSyncAppliedAsync(metadataRequest.EdgeMetadataVersion, stoppingToken);
 
                     datapointResponse = await SendDatapointSyncRequestAsync(client, request, stoppingToken);
                     if (datapointResponse == null)

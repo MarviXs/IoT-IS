@@ -33,7 +33,7 @@ public class HubEdgeSyncService(
         var nextSyncSeconds = edgeNode.UpdateRateSeconds > 0 ? edgeNode.UpdateRateSeconds : DefaultNextSyncSeconds;
         var incomingVersion = NormalizeVersion(request.EdgeMetadataVersion);
         var appliedVersion = await GetAppliedMetadataVersionAsync(edgeNode.Id);
-        if (!appliedVersion.HasValue || incomingVersion != appliedVersion.Value)
+        if (!appliedVersion.HasValue)
         {
             return new SyncDataPointsResponse
             {
@@ -41,6 +41,20 @@ public class HubEdgeSyncService(
                 AcceptedCount = 0,
                 SkippedCount = 0,
                 RequiresMetadataSync = true,
+                RequiresFullMetadataSync = true,
+                DatapointsProcessed = false
+            };
+        }
+
+        if (incomingVersion != appliedVersion.Value)
+        {
+            return new SyncDataPointsResponse
+            {
+                NextSyncSeconds = nextSyncSeconds,
+                AcceptedCount = 0,
+                SkippedCount = 0,
+                RequiresMetadataSync = true,
+                RequiresFullMetadataSync = false,
                 DatapointsProcessed = false
             };
         }
@@ -189,8 +203,12 @@ public class HubEdgeSyncService(
         var incomingVersion = NormalizeVersion(request.EdgeMetadataVersion);
 
         var summary = new MetadataSummaryAccumulator();
+        var isFullSnapshot = request.IsFullSnapshot;
         var incomingTemplateIds = request.Templates.Select(template => template.Id).ToHashSet();
         var incomingDeviceIds = request.Devices.Select(device => device.Id).ToHashSet();
+        var deletedTemplateIds = request.DeletedTemplateIds.ToHashSet();
+        var deletedDeviceIds = request.DeletedDeviceIds.ToHashSet();
+        var templateIdsToLoad = isFullSnapshot ? incomingTemplateIds : incomingTemplateIds.Concat(deletedTemplateIds).ToHashSet();
 
         await using var transaction = await appContext.Database.BeginTransactionAsync(cancellationToken);
 
@@ -202,7 +220,10 @@ public class HubEdgeSyncService(
             .Include(template => template.Controls)
             .Include(template => template.Recipes)
             .ThenInclude(recipe => recipe.Steps)
-            .Where(template => incomingTemplateIds.Contains(template.Id) || (template.SyncedFromEdge && template.SyncedFromEdgeNodeId == edgeNode.Id))
+            .Where(template =>
+                templateIdsToLoad.Contains(template.Id)
+                || (isFullSnapshot && template.SyncedFromEdge && template.SyncedFromEdgeNodeId == edgeNode.Id)
+            )
             .ToListAsync(cancellationToken);
         var templateById = trackedTemplates.ToDictionary(template => template.Id);
         var syncedTemplatesFromEdge = trackedTemplates
@@ -417,26 +438,53 @@ public class HubEdgeSyncService(
             appliedTemplateIds.Add(template.Id);
         }
 
-        var staleTemplateIds = syncedTemplatesFromEdge.Keys.Where(id => !incomingTemplateIds.Contains(id)).ToList();
-        if (staleTemplateIds.Count > 0)
+        var templatesToDelete = isFullSnapshot
+            ? syncedTemplatesFromEdge.Values.Where(template => !incomingTemplateIds.Contains(template.Id)).ToList()
+            : syncedTemplatesFromEdge.Values.Where(template => deletedTemplateIds.Contains(template.Id)).ToList();
+        if (templatesToDelete.Count > 0)
         {
-            var staleTemplates = syncedTemplatesFromEdge.Values.Where(template => staleTemplateIds.Contains(template.Id)).ToList();
-            summary.TemplatesDeleted += staleTemplates.Count;
-            summary.SensorsDeleted += staleTemplates.Sum(template => template.Sensors.Count);
-            summary.CommandsDeleted += staleTemplates.Sum(template => template.Commands.Count);
-            summary.ControlsDeleted += staleTemplates.Sum(template => template.Controls.Count);
-            summary.RecipeStepsDeleted += staleTemplates.Sum(template => template.Recipes.Sum(recipe => recipe.Steps.Count));
-            summary.RecipesDeleted += staleTemplates.Sum(template => template.Recipes.Count);
-            appContext.DeviceTemplates.RemoveRange(staleTemplates);
+            summary.TemplatesDeleted += templatesToDelete.Count;
+            summary.SensorsDeleted += templatesToDelete.Sum(template => template.Sensors.Count);
+            summary.CommandsDeleted += templatesToDelete.Sum(template => template.Commands.Count);
+            summary.ControlsDeleted += templatesToDelete.Sum(template => template.Controls.Count);
+            summary.RecipeStepsDeleted += templatesToDelete.Sum(template => template.Recipes.Sum(recipe => recipe.Steps.Count));
+            summary.RecipesDeleted += templatesToDelete.Sum(template => template.Recipes.Count);
+            appContext.DeviceTemplates.RemoveRange(templatesToDelete);
         }
 
+        var deviceIdsToLoad = isFullSnapshot ? incomingDeviceIds : incomingDeviceIds.Concat(deletedDeviceIds).ToHashSet();
         var trackedDevices = await appContext
-            .Devices.Where(device => incomingDeviceIds.Contains(device.Id) || (device.SyncedFromEdge && device.SyncedFromEdgeNodeId == edgeNode.Id))
+            .Devices.Where(device => deviceIdsToLoad.Contains(device.Id) || (isFullSnapshot && device.SyncedFromEdge && device.SyncedFromEdgeNodeId == edgeNode.Id))
             .ToListAsync(cancellationToken);
         var deviceById = trackedDevices.ToDictionary(device => device.Id);
         var syncedDevicesFromEdge = trackedDevices
             .Where(device => device.SyncedFromEdge && device.SyncedFromEdgeNodeId == edgeNode.Id)
             .ToDictionary(device => device.Id);
+
+        var existingTemplateReferenceIds = new HashSet<Guid>();
+        if (!isFullSnapshot)
+        {
+            var referencedTemplateIds = request
+                .Devices.Where(device => device.DeviceTemplateId.HasValue && !appliedTemplateIds.Contains(device.DeviceTemplateId.Value))
+                .Select(device => device.DeviceTemplateId!.Value)
+                .Distinct()
+                .ToList();
+
+            if (referencedTemplateIds.Count > 0)
+            {
+                existingTemplateReferenceIds = (
+                    await appContext
+                        .DeviceTemplates.AsNoTracking()
+                        .Where(template =>
+                            referencedTemplateIds.Contains(template.Id)
+                            && template.SyncedFromEdge
+                            && template.SyncedFromEdgeNodeId == edgeNode.Id
+                        )
+                        .Select(template => template.Id)
+                        .ToListAsync(cancellationToken)
+                ).ToHashSet();
+            }
+        }
 
         foreach (var payload in request.Devices)
         {
@@ -448,7 +496,11 @@ public class HubEdgeSyncService(
                 continue;
             }
 
-            if (payload.DeviceTemplateId.HasValue && !appliedTemplateIds.Contains(payload.DeviceTemplateId.Value))
+            if (
+                payload.DeviceTemplateId.HasValue
+                && !appliedTemplateIds.Contains(payload.DeviceTemplateId.Value)
+                && (isFullSnapshot || !existingTemplateReferenceIds.Contains(payload.DeviceTemplateId.Value))
+            )
             {
                 summary.DevicesSkipped++;
                 summary.MissingTemplateReferences++;
@@ -512,11 +564,13 @@ public class HubEdgeSyncService(
             device.SyncedFromEdgeNodeId = edgeNode.Id;
         }
 
-        var staleDevices = syncedDevicesFromEdge.Values.Where(device => !incomingDeviceIds.Contains(device.Id)).ToList();
-        if (staleDevices.Count > 0)
+        var devicesToDelete = isFullSnapshot
+            ? syncedDevicesFromEdge.Values.Where(device => !incomingDeviceIds.Contains(device.Id)).ToList()
+            : syncedDevicesFromEdge.Values.Where(device => deletedDeviceIds.Contains(device.Id)).ToList();
+        if (devicesToDelete.Count > 0)
         {
-            summary.DevicesDeleted += staleDevices.Count;
-            appContext.Devices.RemoveRange(staleDevices);
+            summary.DevicesDeleted += devicesToDelete.Count;
+            appContext.Devices.RemoveRange(devicesToDelete);
         }
 
         await appContext.SaveChangesAsync(cancellationToken);

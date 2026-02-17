@@ -39,14 +39,18 @@ public sealed class SyncDataPointsResponse
     public int AcceptedCount { get; init; }
     public int SkippedCount { get; init; }
     public bool RequiresMetadataSync { get; init; }
+    public bool RequiresFullMetadataSync { get; init; }
     public bool DatapointsProcessed { get; init; }
 }
 
 public sealed class SyncMetadataRequest
 {
     public int EdgeMetadataVersion { get; init; }
+    public bool IsFullSnapshot { get; init; } = true;
     public List<SyncedTemplatePayload> Templates { get; init; } = [];
     public List<SyncedDevicePayload> Devices { get; init; } = [];
+    public List<Guid> DeletedTemplateIds { get; init; } = [];
+    public List<Guid> DeletedDeviceIds { get; init; } = [];
 }
 
 public sealed class SyncedTemplatePayload
