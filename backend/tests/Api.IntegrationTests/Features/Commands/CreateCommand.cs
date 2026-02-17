@@ -36,6 +36,24 @@ public class CreateCommandTests(IntegrationTestWebAppFactory factory) : BaseInte
         createdCommand!.DisplayName.Should().Be(commandRequest.DisplayName);
         createdCommand.Params.Should().Equal(commandRequest.Params);
     }
+
+    [Fact]
+    public async Task CreateCommand_ShouldReturnForbidden_WhenTemplateIsSyncedFromEdge()
+    {
+        // Arrange
+        var deviceTemplate = new DeviceTemplateFake(factory.DefaultUserId).Generate();
+        deviceTemplate.SyncedFromEdge = true;
+        AppDbContext.DeviceTemplates.Add(deviceTemplate);
+        await AppDbContext.SaveChangesAsync();
+
+        var commandRequest = new CreateCommandRequestFake(deviceTemplate.Id).Generate();
+
+        // Act
+        var response = await Client.PostAsJsonAsync("commands", commandRequest);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
 }
 
 public class CreateCommandRequestFake : Faker<CreateCommand.Request>

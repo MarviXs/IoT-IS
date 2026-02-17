@@ -32,7 +32,9 @@ public class GetDevicesTests(IntegrationTestWebAppFactory factory) : BaseIntegra
         // Assert
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
 
-        var devicesResponse = await response.Content.ReadFromJsonAsync<PagedList<GetDevices.Response>>();
+        var jsonSerializerOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+        jsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        var devicesResponse = await response.Content.ReadFromJsonAsync<PagedList<GetDevices.Response>>(jsonSerializerOptions);
         devicesResponse.Should().NotBeNull();
         devicesResponse!.Items.Should().NotBeEmpty();
 

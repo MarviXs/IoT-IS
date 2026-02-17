@@ -35,7 +35,37 @@ public static class HubSyncApi
                 .WithOpenApi(o =>
                 {
                     o.Summary = "Accept edge datapoint sync payload";
-                    o.Description = "Hub-only internal endpoint for edge datapoint sync with token authentication.";
+                    o.Description =
+                        "Hub-only internal endpoint for edge datapoint sync with token authentication. Can request metadata resync via response flag.";
+                    return o;
+                });
+
+            app.MapPost(
+                    "system/hub-sync/metadata",
+                    async Task<Results<Ok<SyncMetadataResponse>, UnauthorizedHttpResult>> (
+                        HttpContext httpContext,
+                        SyncMetadataRequest request,
+                        HubEdgeSyncService service,
+                        CancellationToken cancellationToken
+                    ) =>
+                    {
+                        var token = httpContext.Request.Headers["x-edge-token"].ToString();
+                        if (string.IsNullOrWhiteSpace(token))
+                        {
+                            return TypedResults.Unauthorized();
+                        }
+
+                        var result = await service.SyncMetadataAsync(request, token, cancellationToken);
+                        return result is null ? TypedResults.Unauthorized() : TypedResults.Ok(result);
+                    }
+                )
+                .AllowAnonymous()
+                .WithName("HubSyncMetadata")
+                .WithTags("System")
+                .WithOpenApi(o =>
+                {
+                    o.Summary = "Accept edge metadata snapshot payload";
+                    o.Description = "Hub-only internal endpoint for edge authoritative device/template metadata synchronization.";
                     return o;
                 });
         }

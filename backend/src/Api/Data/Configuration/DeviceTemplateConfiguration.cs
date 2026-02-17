@@ -8,7 +8,12 @@ public class DeviceTemplateConfiguration : IEntityTypeConfiguration<DeviceTempla
 {
     public void Configure(EntityTypeBuilder<DeviceTemplate> builder)
     {
-        builder.Property(template => template.IsSyncedFromHub).IsRequired().HasDefaultValue(false);
+        builder.Property(template => template.SyncedFromEdge).IsRequired().HasDefaultValue(false);
+        builder
+            .HasOne(template => template.SyncedFromEdgeNode)
+            .WithMany(edgeNode => edgeNode.SyncedTemplates)
+            .HasForeignKey(template => template.SyncedFromEdgeNodeId)
+            .OnDelete(DeleteBehavior.SetNull);
         builder
             .HasMany(template => template.Sensors)
             .WithOne(sensor => sensor.DeviceTemplate)

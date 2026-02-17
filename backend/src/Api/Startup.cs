@@ -112,6 +112,8 @@ public class Startup(IConfiguration configuration)
         services.AddScoped<IFileSystemService, LocalFileSystem>();
         services.AddScoped<HubApiClientFactory>();
         services.AddScoped<HubEdgeSyncService>();
+        services.AddScoped<EdgeHubMetadataSnapshotService>();
+        services.AddSingleton<EdgeMetadataVersionService>();
 
         //MQTT Services
         services.AddScoped<JobStatusReceived>();

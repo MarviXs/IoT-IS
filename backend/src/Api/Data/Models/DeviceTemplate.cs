@@ -9,7 +9,9 @@ public class DeviceTemplate : BaseModel
     public required string Name { get; set; }
     public DeviceType DeviceType { get; set; } = DeviceType.Generic;
     public bool IsGlobal { get; set; }
-    public bool IsSyncedFromHub { get; set; }
+    public bool SyncedFromEdge { get; set; }
+    public Guid? SyncedFromEdgeNodeId { get; set; }
+    public EdgeNode? SyncedFromEdgeNode { get; set; }
     public bool EnableMap { get; set; }
     public bool EnableGrid { get; set; }
     public ICollection<Sensor> Sensors { get; set; } = [];

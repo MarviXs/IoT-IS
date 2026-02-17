@@ -79,7 +79,7 @@ public static class GetAdminDeviceTemplates
                             template.GridRowSpan,
                             template.GridColumnSpan,
                             template.IsGlobal,
-                            !template.IsSyncedFromHub
+                            !template.SyncedFromEdge
                         )
                 )
                 .ToList();

@@ -75,7 +75,7 @@ public static class ChangeDeviceTemplateOwner
             {
                 return Result.Fail(new NotFoundError());
             }
-            if (template.IsSyncedFromHub)
+            if (template.SyncedFromEdge)
             {
                 return Result.Fail(new ForbiddenError());
             }

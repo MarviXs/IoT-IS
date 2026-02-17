@@ -10,7 +10,8 @@ using StackExchange.Redis;
 
 namespace Fei.Is.Api.BackgroundServices;
 
-public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, ILogger<EdgeHubDataSyncBackgroundService> logger) : BackgroundService
+public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, ILogger<EdgeHubDataSyncBackgroundService> logger)
+    : BackgroundService
 {
     private const string StreamName = "datapoints";
     private const string GroupName = "edge_hub_sync";
@@ -31,6 +32,8 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
                 var appContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
                 var redis = scope.ServiceProvider.GetRequiredService<RedisService>();
                 var hubApiClientFactory = scope.ServiceProvider.GetRequiredService<HubApiClientFactory>();
+                var metadataVersionService = scope.ServiceProvider.GetRequiredService<EdgeMetadataVersionService>();
+                var metadataSnapshotService = scope.ServiceProvider.GetRequiredService<EdgeHubMetadataSnapshotService>();
 
                 var settings = await appContext.SystemNodeSettings.OrderBy(setting => setting.CreatedAt).FirstOrDefaultAsync(stoppingToken);
                 if (
@@ -52,11 +55,22 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
                     await redis.Db.StreamCreateConsumerGroupAsync(StreamName, GroupName, "$", true);
                 }
 
-                var autoClaimResult = await redis.Db.StreamAutoClaimAsync(StreamName, GroupName, consumerName, MaxPendingTimeUnclaimed, "0-0", 5000);
+                var autoClaimResult = await redis.Db.StreamAutoClaimAsync(
+                    StreamName,
+                    GroupName,
+                    consumerName,
+                    MaxPendingTimeUnclaimed,
+                    "0-0",
+                    5000
+                );
                 var messages = await redis.Db.StreamReadGroupAsync(StreamName, GroupName, consumerName, ">");
                 messages = [.. messages, .. autoClaimResult.ClaimedEntries];
 
-                var request = new SyncDataPointsRequest();
+                var edgeMetadataVersion = await metadataVersionService.GetCurrentVersionAsync(stoppingToken);
+                var request = new SyncDataPointsRequest
+                {
+                    EdgeMetadataVersion = edgeMetadataVersion
+                };
                 var ackIds = new List<RedisValue>();
 
                 if (messages.Length > 0)
@@ -154,19 +168,19 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
                                 gridY = parsedGridY;
                             }
 
-                            var dataPoint = new HubDataPoint
-                            {
-                                DeviceId = deviceId.ToString(),
-                                SensorTag = sensorTag,
-                                Value = value,
-                                TimestampUnixMs = timestampUnixMs,
-                                Latitude = latitude,
-                                Longitude = longitude,
-                                GridX = gridX,
-                                GridY = gridY
-                            };
-
-                            request.Datapoints.Add(dataPoint);
+                            request.Datapoints.Add(
+                                new HubDataPoint
+                                {
+                                    DeviceId = deviceId.ToString(),
+                                    SensorTag = sensorTag,
+                                    Value = value,
+                                    TimestampUnixMs = timestampUnixMs,
+                                    Latitude = latitude,
+                                    Longitude = longitude,
+                                    GridX = gridX,
+                                    GridY = gridY
+                                }
+                            );
                         }
                         catch (Exception parseException)
                         {
@@ -176,40 +190,51 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
                 }
 
                 var client = hubApiClientFactory.Create(settings.HubUrl!, settings.HubToken!);
-                using var responseMessage = await client.PostAsJsonAsync("system/hub-sync/datapoints", request, stoppingToken);
-
-                if (responseMessage.StatusCode == HttpStatusCode.Unauthorized)
+                var datapointResponse = await SendDatapointSyncRequestAsync(client, request, stoppingToken);
+                if (datapointResponse == null)
                 {
-                    logger.LogWarning("Edge datapoint sync request unauthorized by hub endpoint");
+                    continue;
                 }
-                else
+
+                if (datapointResponse.RequiresMetadataSync)
                 {
-                    responseMessage.EnsureSuccessStatusCode();
-                    var response = await responseMessage.Content.ReadFromJsonAsync<SyncDataPointsResponse>(cancellationToken: stoppingToken);
-                    if (response is null)
+                    var metadataRequest = await metadataSnapshotService.BuildSnapshotAsync(edgeMetadataVersion, stoppingToken);
+                    var metadataSyncSucceeded = await SendMetadataSyncRequestAsync(client, metadataRequest, stoppingToken);
+                    if (!metadataSyncSucceeded)
                     {
-                        throw new InvalidOperationException("Hub datapoint sync response is empty.");
+                        continue;
                     }
 
-                    delaySeconds = response.NextSyncSeconds > 0 ? response.NextSyncSeconds : DefaultSyncSeconds;
-
-                    await redis.Db.StringSetAsync(
-                        "edge:hub:last-sync",
-                        DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture),
-                        TimeSpan.FromDays(7),
-                        flags: CommandFlags.FireAndForget
-                    );
-                    await redis.Db.StringSetAsync(
-                        "edge:hub:expected-sync-seconds",
-                        delaySeconds.ToString(CultureInfo.InvariantCulture),
-                        TimeSpan.FromDays(7),
-                        flags: CommandFlags.FireAndForget
-                    );
-
-                    if (ackIds.Count > 0)
+                    datapointResponse = await SendDatapointSyncRequestAsync(client, request, stoppingToken);
+                    if (datapointResponse == null)
                     {
-                        await redis.Db.StreamAcknowledgeAsync(StreamName, GroupName, [.. ackIds]);
+                        continue;
                     }
+                }
+
+                delaySeconds = datapointResponse.NextSyncSeconds > 0 ? datapointResponse.NextSyncSeconds : DefaultSyncSeconds;
+
+                if (!datapointResponse.DatapointsProcessed)
+                {
+                    continue;
+                }
+
+                await redis.Db.StringSetAsync(
+                    "edge:hub:last-sync",
+                    DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture),
+                    TimeSpan.FromDays(7),
+                    flags: CommandFlags.FireAndForget
+                );
+                await redis.Db.StringSetAsync(
+                    "edge:hub:expected-sync-seconds",
+                    delaySeconds.ToString(CultureInfo.InvariantCulture),
+                    TimeSpan.FromDays(7),
+                    flags: CommandFlags.FireAndForget
+                );
+
+                if (ackIds.Count > 0)
+                {
+                    await redis.Db.StreamAcknowledgeAsync(StreamName, GroupName, [.. ackIds]);
                 }
             }
             catch (HttpRequestException requestException)
@@ -223,6 +248,49 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
 
             await Task.Delay(TimeSpan.FromSeconds(delaySeconds), stoppingToken);
         }
+    }
+
+    private async Task<SyncDataPointsResponse?> SendDatapointSyncRequestAsync(
+        HttpClient client,
+        SyncDataPointsRequest request,
+        CancellationToken cancellationToken
+    )
+    {
+        using var responseMessage = await client.PostAsJsonAsync("system/hub-sync/datapoints", request, cancellationToken);
+        if (responseMessage.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            logger.LogWarning("Edge datapoint sync request unauthorized by hub endpoint");
+            return null;
+        }
+
+        responseMessage.EnsureSuccessStatusCode();
+
+        var response = await responseMessage.Content.ReadFromJsonAsync<SyncDataPointsResponse>(cancellationToken: cancellationToken);
+        if (response is null)
+        {
+            throw new InvalidOperationException("Hub datapoint sync response is empty.");
+        }
+
+        return response;
+    }
+
+    private async Task<bool> SendMetadataSyncRequestAsync(HttpClient client, SyncMetadataRequest request, CancellationToken cancellationToken)
+    {
+        using var responseMessage = await client.PostAsJsonAsync("system/hub-sync/metadata", request, cancellationToken);
+        if (responseMessage.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            logger.LogWarning("Edge metadata sync request unauthorized by hub endpoint");
+            return false;
+        }
+
+        responseMessage.EnsureSuccessStatusCode();
+        var response = await responseMessage.Content.ReadFromJsonAsync<SyncMetadataResponse>(cancellationToken: cancellationToken);
+        if (response is null)
+        {
+            throw new InvalidOperationException("Hub metadata sync response is empty.");
+        }
+
+        return true;
     }
 
     private static Dictionary<string, string> ParseResult(StreamEntry entry)

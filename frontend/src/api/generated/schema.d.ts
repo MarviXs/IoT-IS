@@ -2075,7 +2075,7 @@ export interface paths {
         put?: never;
         /**
          * Accept edge datapoint sync payload
-         * @description Hub-only internal endpoint for edge datapoint sync with token authentication.
+         * @description Hub-only internal endpoint for edge datapoint sync with token authentication. Can request metadata resync via response flag.
          */
         post: operations["HubSyncDataPoints"];
         delete?: never;
@@ -2084,47 +2084,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/system/hub-sync/snapshot": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get hub metadata snapshot for edge sync
-         * @description Hub-only internal endpoint returning devices and templates for edge synchronization.
-         */
-        get: operations["HubSyncGetSnapshot"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/system/hub-sync/firmwares/{templateId}/{firmwareId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Download firmware binary for edge sync
-         * @description Hub-only internal endpoint for downloading firmware binary data.
-         */
-        get: operations["HubSyncDownloadFirmware"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/system/edge-nodes/{id}/sync-now": {
+    "/system/hub-sync/metadata": {
         parameters: {
             query?: never;
             header?: never;
@@ -2134,10 +2094,10 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Request immediate sync for one edge node
-         * @description Queues a force sync signal for a specific edge node. It is consumed by the node on next datapoint sync.
+         * Accept edge metadata snapshot payload
+         * @description Hub-only internal endpoint for edge authoritative device/template metadata synchronization.
          */
-        post: operations["SyncEdgeNodeNow"];
+        post: operations["HubSyncMetadata"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2154,8 +2114,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Request immediate sync for all edge nodes
-         * @description Queues force sync signals for all configured edge nodes.
+         * Force sync for all edge nodes
+         * @description Invalidates metadata version for all configured edge nodes.
          */
         post: operations["SyncAllEdgeNodesNow"];
         delete?: never;
@@ -2164,7 +2124,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/system/edge/sync-from-hub": {
+    "/system/edge-nodes/{id}/sync-now": {
         parameters: {
             query?: never;
             header?: never;
@@ -2174,10 +2134,10 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Synchronize edge metadata from hub
-         * @description For edge nodes, synchronizes templates, devices, and firmware metadata/files from the configured hub.
+         * Force sync for one edge node
+         * @description Invalidates node metadata version so the node performs metadata sync on next heartbeat.
          */
-        post: operations["SyncFromHub"];
+        post: operations["SyncEdgeNodeNow"];
         delete?: never;
         options?: never;
         head?: never;
@@ -4272,27 +4232,7 @@ export interface components {
         };
         "Fei.Is.Api.Features.System.Commands.SyncAllEdgeNodesNow.Response": {
             /** Format: int32 */
-            requestedEdges: number;
-        };
-        "Fei.Is.Api.Features.System.Commands.SyncFromHub.Response": {
-            /** Format: int32 */
-            devicesCreated: number;
-            /** Format: int32 */
-            devicesUpdated: number;
-            /** Format: int32 */
-            devicesDeleted: number;
-            /** Format: int32 */
-            templatesCreated: number;
-            /** Format: int32 */
-            templatesUpdated: number;
-            /** Format: int32 */
-            templatesDeleted: number;
-            /** Format: int32 */
-            skippedOwnerNotFound: number;
-            /** Format: int32 */
-            firmwareFilesDownloaded: number;
-            /** Format: int32 */
-            unresolvedTemplateReferences: number;
+            queuedCount: number;
         };
         "Fei.Is.Api.Features.System.Commands.UpdateEdgeNode.Request": {
             name: string;
@@ -4338,16 +4278,6 @@ export interface components {
             /** Format: int64 */
             totalColumnstoreSizeBytes: number;
         };
-        "Fei.Is.Api.Features.System.Services.GetHubSnapshotResponse": {
-            templates: components["schemas"]["Fei.Is.Api.Features.System.Services.HubTemplate"][];
-            devices: components["schemas"]["Fei.Is.Api.Features.System.Services.HubDevice"][];
-        };
-        "Fei.Is.Api.Features.System.Services.HubCommand": {
-            id: string;
-            displayName: string;
-            name: string;
-            params: number[];
-        };
         "Fei.Is.Api.Features.System.Services.HubDataPoint": {
             deviceId: string;
             sensorTag: string;
@@ -4364,89 +4294,9 @@ export interface components {
             /** Format: int32 */
             gridY?: number | null;
         };
-        "Fei.Is.Api.Features.System.Services.HubDevice": {
-            id: string;
-            ownerEmail: string;
-            name: string;
-            accessToken: string;
-            templateId?: string | null;
-            /** Format: int32 */
-            protocol: number;
-            /** Format: int32 */
-            dataPointRetentionDays?: number | null;
-            /** Format: float */
-            sampleRateSeconds?: number | null;
-            currentFirmwareVersion?: string | null;
-            mac?: string | null;
-        };
-        "Fei.Is.Api.Features.System.Services.HubDeviceControl": {
-            id: string;
-            name: string;
-            color: string;
-            /** Format: int32 */
-            type: number;
-            recipeId?: string | null;
-            /** Format: int32 */
-            cycles: number;
-            isInfinite: boolean;
-            /** Format: int32 */
-            order: number;
-            recipeOnId?: string | null;
-            recipeOffId?: string | null;
-            sensorId?: string | null;
-        };
-        "Fei.Is.Api.Features.System.Services.HubFirmware": {
-            id: string;
-            versionNumber: string;
-            isActive: boolean;
-            originalFileName: string;
-            storedFileName: string;
-        };
-        "Fei.Is.Api.Features.System.Services.HubRecipe": {
-            id: string;
-            name: string;
-            steps: components["schemas"]["Fei.Is.Api.Features.System.Services.HubRecipeStep"][];
-        };
-        "Fei.Is.Api.Features.System.Services.HubRecipeStep": {
-            id: string;
-            commandId?: string | null;
-            subrecipeId?: string | null;
-            /** Format: int32 */
-            cycles: number;
-            /** Format: int32 */
-            order: number;
-        };
-        "Fei.Is.Api.Features.System.Services.HubSensor": {
-            id: string;
-            tag: string;
-            name: string;
-            unit?: string | null;
-            /** Format: int32 */
-            accuracyDecimals?: number | null;
-            /** Format: int32 */
-            order: number;
-            group?: string | null;
-        };
-        "Fei.Is.Api.Features.System.Services.HubTemplate": {
-            id: string;
-            ownerEmail: string;
-            name: string;
-            /** Format: int32 */
-            deviceType: number;
-            isGlobal: boolean;
-            enableMap: boolean;
-            enableGrid: boolean;
-            /** Format: int32 */
-            gridRowSpan?: number | null;
-            /** Format: int32 */
-            gridColumnSpan?: number | null;
-            sensors: components["schemas"]["Fei.Is.Api.Features.System.Services.HubSensor"][];
-            commands: components["schemas"]["Fei.Is.Api.Features.System.Services.HubCommand"][];
-            recipes: components["schemas"]["Fei.Is.Api.Features.System.Services.HubRecipe"][];
-            controls: components["schemas"]["Fei.Is.Api.Features.System.Services.HubDeviceControl"][];
-            firmwares: components["schemas"]["Fei.Is.Api.Features.System.Services.HubFirmware"][];
-        };
         "Fei.Is.Api.Features.System.Services.SyncDataPointsRequest": {
+            /** Format: int32 */
+            edgeMetadataVersion: number;
             datapoints: components["schemas"]["Fei.Is.Api.Features.System.Services.HubDataPoint"][];
         };
         "Fei.Is.Api.Features.System.Services.SyncDataPointsResponse": {
@@ -4456,8 +4306,153 @@ export interface components {
             acceptedCount: number;
             /** Format: int32 */
             skippedCount: number;
-            hash: string;
-            forceFullSync: boolean;
+            requiresMetadataSync: boolean;
+            datapointsProcessed: boolean;
+        };
+        "Fei.Is.Api.Features.System.Services.SyncMetadataRequest": {
+            /** Format: int32 */
+            edgeMetadataVersion: number;
+            templates: components["schemas"]["Fei.Is.Api.Features.System.Services.SyncedTemplatePayload"][];
+            devices: components["schemas"]["Fei.Is.Api.Features.System.Services.SyncedDevicePayload"][];
+        };
+        "Fei.Is.Api.Features.System.Services.SyncMetadataResponse": {
+            /** Format: int32 */
+            templatesCreated: number;
+            /** Format: int32 */
+            templatesUpdated: number;
+            /** Format: int32 */
+            templatesDeleted: number;
+            /** Format: int32 */
+            templatesSkipped: number;
+            /** Format: int32 */
+            templatesConflicts: number;
+            /** Format: int32 */
+            devicesCreated: number;
+            /** Format: int32 */
+            devicesUpdated: number;
+            /** Format: int32 */
+            devicesDeleted: number;
+            /** Format: int32 */
+            devicesSkipped: number;
+            /** Format: int32 */
+            devicesConflicts: number;
+            /** Format: int32 */
+            sensorsUpserted: number;
+            /** Format: int32 */
+            sensorsDeleted: number;
+            /** Format: int32 */
+            commandsUpserted: number;
+            /** Format: int32 */
+            commandsDeleted: number;
+            /** Format: int32 */
+            recipesUpserted: number;
+            /** Format: int32 */
+            recipesDeleted: number;
+            /** Format: int32 */
+            recipeStepsUpserted: number;
+            /** Format: int32 */
+            recipeStepsDeleted: number;
+            /** Format: int32 */
+            controlsUpserted: number;
+            /** Format: int32 */
+            controlsDeleted: number;
+            /** Format: int32 */
+            skippedOwners: number;
+            /** Format: int32 */
+            missingTemplateReferences: number;
+            /** Format: int32 */
+            appliedEdgeMetadataVersion: number;
+        };
+        "Fei.Is.Api.Features.System.Services.SyncedCommandPayload": {
+            /** Format: uuid */
+            id: string;
+            displayName: string;
+            name: string;
+            params: number[];
+        };
+        "Fei.Is.Api.Features.System.Services.SyncedControlPayload": {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            color: string;
+            type: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceControlType"];
+            /** Format: uuid */
+            recipeId?: string | null;
+            /** Format: uuid */
+            recipeOnId?: string | null;
+            /** Format: uuid */
+            recipeOffId?: string | null;
+            /** Format: uuid */
+            sensorId?: string | null;
+            /** Format: int32 */
+            cycles: number;
+            isInfinite: boolean;
+            /** Format: int32 */
+            order: number;
+        };
+        "Fei.Is.Api.Features.System.Services.SyncedDevicePayload": {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            mac?: string | null;
+            accessToken: string;
+            protocol: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceConnectionProtocol"];
+            /** Format: int32 */
+            dataPointRetentionDays?: number | null;
+            currentFirmwareVersion?: string | null;
+            /** Format: float */
+            sampleRateSeconds?: number | null;
+            /** Format: uuid */
+            deviceTemplateId?: string | null;
+            ownerEmail?: string | null;
+        };
+        "Fei.Is.Api.Features.System.Services.SyncedRecipePayload": {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            steps: components["schemas"]["Fei.Is.Api.Features.System.Services.SyncedRecipeStepPayload"][];
+        };
+        "Fei.Is.Api.Features.System.Services.SyncedRecipeStepPayload": {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            commandId?: string | null;
+            /** Format: uuid */
+            subrecipeId?: string | null;
+            /** Format: int32 */
+            cycles: number;
+            /** Format: int32 */
+            order: number;
+        };
+        "Fei.Is.Api.Features.System.Services.SyncedSensorPayload": {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            tag: string;
+            unit?: string | null;
+            /** Format: int32 */
+            accuracyDecimals?: number | null;
+            /** Format: int32 */
+            order: number;
+            group?: string | null;
+        };
+        "Fei.Is.Api.Features.System.Services.SyncedTemplatePayload": {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            deviceType: components["schemas"]["Fei.Is.Api.Data.Enums.DeviceType"];
+            isGlobal: boolean;
+            enableMap: boolean;
+            enableGrid: boolean;
+            /** Format: int32 */
+            gridRowSpan?: number | null;
+            /** Format: int32 */
+            gridColumnSpan?: number | null;
+            ownerEmail?: string | null;
+            sensors: components["schemas"]["Fei.Is.Api.Features.System.Services.SyncedSensorPayload"][];
+            commands: components["schemas"]["Fei.Is.Api.Features.System.Services.SyncedCommandPayload"][];
+            recipes: components["schemas"]["Fei.Is.Api.Features.System.Services.SyncedRecipePayload"][];
+            controls: components["schemas"]["Fei.Is.Api.Features.System.Services.SyncedControlPayload"][];
         };
         "Fei.Is.Api.Features.Templates.Commands.UpdateTemplate.Request": {
             /** Format: binary */
@@ -9861,14 +9856,18 @@ export interface operations {
             };
         };
     };
-    HubSyncGetSnapshot: {
+    HubSyncMetadata: {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.System.Services.SyncMetadataRequest"];
+            };
+        };
         responses: {
             /** @description OK */
             200: {
@@ -9876,65 +9875,8 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Features.System.Services.GetHubSnapshotResponse"];
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.System.Services.SyncMetadataResponse"];
                 };
-            };
-        };
-    };
-    HubSyncDownloadFirmware: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                templateId: string;
-                firmwareId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    SyncEdgeNodeNow: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
@@ -9956,43 +9898,32 @@ export interface operations {
                     "application/json": components["schemas"]["Fei.Is.Api.Features.System.Commands.SyncAllEdgeNodesNow.Response"];
                 };
             };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
-                };
-            };
         };
     };
-    SyncFromHub: {
+    SyncEdgeNodeNow: {
         parameters: {
             query?: never;
             header?: never;
-            path?: never;
+            path: {
+                id: string;
+            };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description OK */
-            200: {
+            /** @description No Content */
+            204: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Features.System.Commands.SyncFromHub.Response"];
-                };
+                content?: never;
             };
-            /** @description Bad Request */
-            400: {
+            /** @description Not Found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
-                };
+                content?: never;
             };
         };
     };

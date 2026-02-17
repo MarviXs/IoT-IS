@@ -41,6 +41,28 @@ public class UpdateDeviceTests(IntegrationTestWebAppFactory factory) : BaseInteg
         updatedDevice.DataPointRetentionDays.Should().Be(updateDeviceRequest.DataPointRetentionDays);
         updatedDevice.SampleRateSeconds.Should().Be(updateDeviceRequest.SampleRateSeconds);
     }
+
+    [Fact]
+    public async Task UpdateDevice_ShouldReturnForbidden_WhenDeviceIsSyncedFromEdge()
+    {
+        // Arrange
+        var deviceTemplate = new DeviceTemplateFake(factory.DefaultUserId).Generate();
+        await AppDbContext.DeviceTemplates.AddAsync(deviceTemplate);
+        await AppDbContext.SaveChangesAsync();
+
+        var device = new DeviceFake(factory.DefaultUserId, deviceTemplate.Id).Generate();
+        device.SyncedFromEdge = true;
+        await AppDbContext.Devices.AddAsync(device);
+        await AppDbContext.SaveChangesAsync();
+
+        var updateDeviceRequest = new UpdateDeviceRequestFake(deviceTemplate.Id).Generate();
+
+        // Act
+        var updateResponse = await Client.PutAsJsonAsync($"devices/{device.Id}", updateDeviceRequest);
+
+        // Assert
+        updateResponse.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
 }
 
 public class UpdateDeviceRequestFake : Faker<UpdateDevice.Request>

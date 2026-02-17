@@ -18,7 +18,7 @@ public static class DeviceTemplateExtensions
 
     public static bool CanEdit(this DeviceTemplate template, ClaimsPrincipal user)
     {
-        if (template.IsSyncedFromHub)
+        if (template.SyncedFromEdge)
         {
             return false;
         }

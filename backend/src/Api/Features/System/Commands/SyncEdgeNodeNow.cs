@@ -1,25 +1,26 @@
 using Carter;
 using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
+using Fei.Is.Api.Redis;
 using FluentResults;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using StackExchange.Redis;
 
 namespace Fei.Is.Api.Features.System.Commands;
 
-public static class DeleteEdgeNode
+public static class SyncEdgeNodeNow
 {
     public sealed class Endpoint : ICarterModule
     {
         public void AddRoutes(IEndpointRouteBuilder app)
         {
-            app.MapDelete(
-                    "system/edge-nodes/{id:guid}",
+            app.MapPost(
+                    "system/edge-nodes/{id:guid}/sync-now",
                     async Task<Results<NoContent, NotFound>> (IMediator mediator, Guid id, CancellationToken cancellationToken) =>
                     {
                         var result = await mediator.Send(new Command(id), cancellationToken);
-
                         if (result.HasError<NotFoundError>())
                         {
                             return TypedResults.NotFound();
@@ -29,12 +30,12 @@ public static class DeleteEdgeNode
                     }
                 )
                 .RequireAuthorization("Admin")
-                .WithName(nameof(DeleteEdgeNode))
+                .WithName(nameof(SyncEdgeNodeNow))
                 .WithTags("System")
                 .WithOpenApi(o =>
                 {
-                    o.Summary = "Delete edge node setting";
-                    o.Description = "Removes edge node settings by id.";
+                    o.Summary = "Force sync for one edge node";
+                    o.Description = "Invalidates node metadata version so the node performs metadata sync on next heartbeat.";
                     return o;
                 });
         }
@@ -42,36 +43,23 @@ public static class DeleteEdgeNode
 
     public record Command(Guid EdgeNodeId) : IRequest<Result>;
 
-    public sealed class Handler(AppDbContext context) : IRequestHandler<Command, Result>
+    public sealed class Handler(AppDbContext context, RedisService redis) : IRequestHandler<Command, Result>
     {
         public async Task<Result> Handle(Command message, CancellationToken cancellationToken)
         {
-            var edgeNode = await context.EdgeNodes.FirstOrDefaultAsync(node => node.Id == message.EdgeNodeId, cancellationToken);
-            if (edgeNode == null)
+            var edgeNodeExists = await context.EdgeNodes.AsNoTracking().AnyAsync(edgeNode => edgeNode.Id == message.EdgeNodeId, cancellationToken);
+            if (!edgeNodeExists)
             {
                 return Result.Fail(new NotFoundError());
             }
 
-            var syncedDevices = await context
-                .Devices.Where(device => device.SyncedFromEdge && device.SyncedFromEdgeNodeId == message.EdgeNodeId)
-                .ToListAsync(cancellationToken);
-            if (syncedDevices.Count > 0)
-            {
-                context.Devices.RemoveRange(syncedDevices);
-            }
-
-            var syncedTemplates = await context
-                .DeviceTemplates.Where(template => template.SyncedFromEdge && template.SyncedFromEdgeNodeId == message.EdgeNodeId)
-                .ToListAsync(cancellationToken);
-            if (syncedTemplates.Count > 0)
-            {
-                context.DeviceTemplates.RemoveRange(syncedTemplates);
-            }
-
-            context.EdgeNodes.Remove(edgeNode);
-            await context.SaveChangesAsync(cancellationToken);
-
+            await redis.Db.KeyDeleteAsync(GetMetadataVersionKey(message.EdgeNodeId), CommandFlags.FireAndForget);
             return Result.Ok();
+        }
+
+        private static RedisKey GetMetadataVersionKey(Guid edgeNodeId)
+        {
+            return $"edge-node:{edgeNodeId}:metadata-version";
         }
     }
 }

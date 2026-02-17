@@ -53,9 +53,18 @@
                 <q-btn
                   flat
                   color="primary"
+                  :icon="mdiSync"
+                  :label="t('system.node_settings.sync_all_now')"
+                  :loading="isSyncingAllEdgeNodes"
+                  :disable="isNodeSettingsLoading || isEdgeNodeSubmitting || isDeletingEdgeNode || isSyncingAllEdgeNodes || edgeNodes.length === 0"
+                  @click="syncAllEdgeNodesNow"
+                />
+                <q-btn
+                  flat
+                  color="primary"
                   :icon="mdiPlus"
                   :label="t('system.node_settings.add_edge_node')"
-                  :disable="isNodeSettingsLoading || isEdgeNodeSubmitting"
+                  :disable="isNodeSettingsLoading || isEdgeNodeSubmitting || isSyncingAllEdgeNodes"
                   @click="openCreateEdgeNodeDialog"
                 />
               </div>
@@ -98,6 +107,17 @@
                 </q-item-section>
                 <q-item-section side class="edge-node-actions">
                   <div class="row items-center q-gutter-xs">
+                    <q-btn
+                      flat
+                      round
+                      dense
+                      color="primary"
+                      :icon="mdiSync"
+                      :loading="isSyncingEdgeNode(edgeNode.id)"
+                      :disable="isSyncingAllEdgeNodes || isSyncingEdgeNode(edgeNode.id)"
+                      :aria-label="t('system.node_settings.sync_now')"
+                      @click="syncEdgeNodeNow(edgeNode)"
+                    />
                     <q-btn
                       flat
                       round
@@ -328,6 +348,7 @@ import {
   mdiPencil,
   mdiPlus,
   mdiRefresh,
+  mdiSync,
 } from '@quasar/extras/mdi-v7';
 import SystemService, {
   type EdgeNodeResponse,
@@ -358,6 +379,8 @@ const isEdgeNodeDialogOpen = ref(false);
 const isDeleteEdgeNodeDialogOpen = ref(false);
 const isEdgeNodeSubmitting = ref(false);
 const isDeletingEdgeNode = ref(false);
+const isSyncingAllEdgeNodes = ref(false);
+const syncingEdgeNodeIds = ref<Record<string, boolean>>({});
 const deletingEdgeNodeId = ref<string | null>(null);
 const editingEdgeNodeId = ref<string | null>(null);
 const isEdgeNodeTokenCopied = ref(false);
@@ -666,6 +689,51 @@ function copyEdgeNodeToken() {
   setTimeout(() => {
     isEdgeNodeTokenCopied.value = false;
   }, 2000);
+}
+
+function isSyncingEdgeNode(edgeNodeId: string): boolean {
+  return !!syncingEdgeNodeIds.value[edgeNodeId];
+}
+
+async function syncEdgeNodeNow(edgeNode: EdgeNodeResponse) {
+  if (isSyncingAllEdgeNodes.value || isSyncingEdgeNode(edgeNode.id)) {
+    return;
+  }
+
+  syncingEdgeNodeIds.value = {
+    ...syncingEdgeNodeIds.value,
+    [edgeNode.id]: true,
+  };
+
+  try {
+    await SystemService.syncEdgeNodeNow(edgeNode.id);
+    toast.success(t('system.node_settings.sync_now_success', { name: edgeNode.name }));
+  } catch (error) {
+    console.error('Failed to queue sync request for edge node', error);
+    toast.error(t('system.node_settings.sync_now_error'));
+  } finally {
+    const current = { ...syncingEdgeNodeIds.value };
+    delete current[edgeNode.id];
+    syncingEdgeNodeIds.value = current;
+  }
+}
+
+async function syncAllEdgeNodesNow() {
+  if (isSyncingAllEdgeNodes.value || edgeNodes.value.length === 0) {
+    return;
+  }
+
+  isSyncingAllEdgeNodes.value = true;
+
+  try {
+    const response = await SystemService.syncAllEdgeNodesNow();
+    toast.success(t('system.node_settings.sync_all_now_success', { count: response.queuedCount }));
+  } catch (error) {
+    console.error('Failed to queue sync request for all edge nodes', error);
+    toast.error(t('system.node_settings.sync_all_now_error'));
+  } finally {
+    isSyncingAllEdgeNodes.value = false;
+  }
 }
 
 async function confirmDeleteEdgeNode() {

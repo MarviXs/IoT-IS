@@ -87,7 +87,7 @@ public static class GetDeviceTemplates
                     template.GridRowSpan,
                     template.GridColumnSpan,
                     template.IsGlobal,
-                    !template.IsSyncedFromHub && (template.OwnerId == userId || isAdmin)
+                    !template.SyncedFromEdge && (template.OwnerId == userId || isAdmin)
                 ))
                 .ToListAsync(cancellationToken);
 

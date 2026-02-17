@@ -1,10 +1,12 @@
 ﻿using Fei.Is.Api.Data.Configuration;
 using Fei.Is.Api.Data.Configuration.InformationSystem;
 using Fei.Is.Api.Data.Configuration.LifeCycleSystem;
+using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Data.Models.InformationSystem;
 using Fei.Is.Api.Data.Models.LifeCycleSystem;
 using Fei.Is.Api.Extensions;
+using Fei.Is.Api.Features.System.Services;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -25,11 +27,13 @@ public class AppDbContext
     >
 {
     private readonly IMediator _mediator;
+    private readonly EdgeMetadataVersionService _edgeMetadataVersionService;
 
-    public AppDbContext(DbContextOptions<AppDbContext> options, IMediator mediator)
+    public AppDbContext(DbContextOptions<AppDbContext> options, IMediator mediator, EdgeMetadataVersionService edgeMetadataVersionService)
         : base(options)
     {
         _mediator = mediator;
+        _edgeMetadataVersionService = edgeMetadataVersionService;
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -136,26 +140,48 @@ public class AppDbContext
     public override int SaveChanges()
     {
         UpdateTimestamps();
-        return base.SaveChanges();
+        var hasRelevantEdgeMetadataChanges = HasRelevantEdgeMetadataChanges();
+        var result = base.SaveChanges();
+        if (result > 0 && hasRelevantEdgeMetadataChanges)
+        {
+            TryIncrementEdgeMetadataVersion(CancellationToken.None).GetAwaiter().GetResult();
+        }
+
+        return result;
     }
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
     {
         UpdateTimestamps();
-        return base.SaveChanges(acceptAllChangesOnSuccess);
+        var hasRelevantEdgeMetadataChanges = HasRelevantEdgeMetadataChanges();
+        var result = base.SaveChanges(acceptAllChangesOnSuccess);
+        if (result > 0 && hasRelevantEdgeMetadataChanges)
+        {
+            TryIncrementEdgeMetadataVersion(CancellationToken.None).GetAwaiter().GetResult();
+        }
+
+        return result;
     }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         UpdateTimestamps();
         await _mediator.DispatchDomainEventsAsync(this);
-        return await base.SaveChangesAsync(cancellationToken);
+        var hasRelevantEdgeMetadataChanges = HasRelevantEdgeMetadataChanges();
+        var result = await base.SaveChangesAsync(cancellationToken);
+        if (result > 0 && hasRelevantEdgeMetadataChanges)
+        {
+            await TryIncrementEdgeMetadataVersion(cancellationToken);
+        }
+
+        return result;
     }
 
     public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {
         UpdateTimestamps();
-        return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+        var hasRelevantEdgeMetadataChanges = HasRelevantEdgeMetadataChanges();
+        return SaveChangesAndIncrementAsync(acceptAllChangesOnSuccess, hasRelevantEdgeMetadataChanges, cancellationToken);
     }
 
     private void UpdateTimestamps()
@@ -165,5 +191,68 @@ public class AppDbContext
         {
             entry.Entity.UpdatedAt = DateTime.UtcNow;
         }
+    }
+
+    private bool HasRelevantEdgeMetadataChanges()
+    {
+        return ChangeTracker
+            .Entries()
+            .Any(entry =>
+                entry.State is EntityState.Added or EntityState.Modified or EntityState.Deleted
+                && entry.Entity is Device or DeviceTemplate or Sensor or Command or Recipe or RecipeStep or DeviceControl or DeviceFirmware
+            );
+    }
+
+    private async Task<int> SaveChangesAndIncrementAsync(
+        bool acceptAllChangesOnSuccess,
+        bool hasRelevantEdgeMetadataChanges,
+        CancellationToken cancellationToken
+    )
+    {
+        var result = await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+        if (result > 0 && hasRelevantEdgeMetadataChanges)
+        {
+            await TryIncrementEdgeMetadataVersion(cancellationToken);
+        }
+
+        return result;
+    }
+
+    private async Task TryIncrementEdgeMetadataVersion(CancellationToken cancellationToken)
+    {
+        try
+        {
+            if (!await IsEdgeNodeModeAsync(cancellationToken))
+            {
+                return;
+            }
+
+            await _edgeMetadataVersionService.IncrementVersionAsync(cancellationToken);
+        }
+        catch
+        {
+            // Metadata version sync failures should not break primary database writes.
+        }
+    }
+
+    private async Task<bool> IsEdgeNodeModeAsync(CancellationToken cancellationToken)
+    {
+        var trackedNodeSetting = ChangeTracker
+            .Entries<SystemNodeSetting>()
+            .Where(entry => entry.State != EntityState.Deleted)
+            .Select(entry => (SystemNodeType?)entry.Entity.NodeType)
+            .FirstOrDefault();
+        if (trackedNodeSetting.HasValue)
+        {
+            return trackedNodeSetting.Value == SystemNodeType.Edge;
+        }
+
+        var persistedNodeType = await SystemNodeSettings
+            .AsNoTracking()
+            .OrderBy(setting => setting.CreatedAt)
+            .Select(setting => (SystemNodeType?)setting.NodeType)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        return (persistedNodeType ?? SystemNodeType.Hub) == SystemNodeType.Edge;
     }
 }
