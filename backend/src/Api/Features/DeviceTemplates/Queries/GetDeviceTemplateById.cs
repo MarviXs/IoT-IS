@@ -56,6 +56,7 @@ public static class GetDeviceTemplateById
         {
             var template = await context
                 .DeviceTemplates.AsNoTracking()
+                .Include(t => t.SyncedFromEdgeNode)
                 .FirstOrDefaultAsync(t => t.Id == message.TemplateId, cancellationToken);
 
             if (template == null)
@@ -77,7 +78,10 @@ public static class GetDeviceTemplateById
                 template.GridRowSpan,
                 template.GridColumnSpan,
                 template.IsGlobal,
-                canEdit
+                canEdit,
+                template.SyncedFromEdge,
+                template.SyncedFromEdgeNodeId,
+                template.SyncedFromEdgeNode?.Name
             );
 
             return Result.Ok(response);
@@ -93,6 +97,9 @@ public static class GetDeviceTemplateById
         int? GridRowSpan,
         int? GridColumnSpan,
         bool IsGlobal,
-        bool CanEdit
+        bool CanEdit,
+        bool SyncedFromEdge,
+        Guid? SyncedFromEdgeNodeId,
+        string? SyncedFromEdgeNodeName
     );
 }

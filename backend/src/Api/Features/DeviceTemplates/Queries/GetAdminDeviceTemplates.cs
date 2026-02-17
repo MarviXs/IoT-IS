@@ -52,6 +52,7 @@ public static class GetAdminDeviceTemplates
             var query = context
                 .DeviceTemplates.AsNoTracking()
                 .Include(template => template.Owner)
+                .Include(template => template.SyncedFromEdgeNode)
                 .Where(
                     template =>
                         template.Name.ToLower().Contains(normalizedSearch)
@@ -79,7 +80,10 @@ public static class GetAdminDeviceTemplates
                             template.GridRowSpan,
                             template.GridColumnSpan,
                             template.IsGlobal,
-                            !template.SyncedFromEdge
+                            !template.SyncedFromEdge,
+                            template.SyncedFromEdge,
+                            template.SyncedFromEdgeNodeId,
+                            template.SyncedFromEdgeNode?.Name
                         )
                 )
                 .ToList();
@@ -99,6 +103,9 @@ public static class GetAdminDeviceTemplates
         int? GridRowSpan,
         int? GridColumnSpan,
         bool IsGlobal,
-        bool CanEdit
+        bool CanEdit,
+        bool SyncedFromEdge,
+        Guid? SyncedFromEdgeNodeId,
+        string? SyncedFromEdgeNodeName
     );
 }

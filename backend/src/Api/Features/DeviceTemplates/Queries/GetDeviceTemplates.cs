@@ -87,7 +87,10 @@ public static class GetDeviceTemplates
                     template.GridRowSpan,
                     template.GridColumnSpan,
                     template.IsGlobal,
-                    !template.SyncedFromEdge && (template.OwnerId == userId || isAdmin)
+                    !template.SyncedFromEdge && (template.OwnerId == userId || isAdmin),
+                    template.SyncedFromEdge,
+                    template.SyncedFromEdgeNodeId,
+                    template.SyncedFromEdgeNode != null ? template.SyncedFromEdgeNode.Name : null
                 ))
                 .ToListAsync(cancellationToken);
 
@@ -104,7 +107,10 @@ public static class GetDeviceTemplates
         int? GridRowSpan,
         int? GridColumnSpan,
         bool IsGlobal,
-        bool CanEdit
+        bool CanEdit,
+        bool SyncedFromEdge,
+        Guid? SyncedFromEdgeNodeId,
+        string? SyncedFromEdgeNodeName
     );
 
     public sealed class ParametersValidator : AbstractValidator<QueryParameters>
