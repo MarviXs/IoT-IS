@@ -30,7 +30,22 @@ public class HubEdgeSyncService(
             return null;
         }
 
-        var nextSyncSeconds = edgeNode.UpdateRateSeconds > 0 ? edgeNode.UpdateRateSeconds : DefaultNextSyncSeconds;
+        var configuredSyncIntervalSeconds = await appContext
+            .SystemNodeSettings.AsNoTracking()
+            .OrderBy(setting => setting.CreatedAt)
+            .Select(setting => (int?)setting.SyncIntervalSeconds)
+            .FirstOrDefaultAsync(cancellationToken);
+        var nextSyncSeconds = configuredSyncIntervalSeconds.HasValue && configuredSyncIntervalSeconds.Value > 0
+            ? configuredSyncIntervalSeconds.Value
+            : DefaultNextSyncSeconds;
+
+        await redis.Db.StringSetAsync(
+            $"edge-node:{edgeNode.Id}:expected-sync-seconds",
+            nextSyncSeconds.ToString(CultureInfo.InvariantCulture),
+            TimeSpan.FromDays(7),
+            flags: CommandFlags.FireAndForget
+        );
+
         var incomingVersion = NormalizeVersion(request.EdgeMetadataVersion);
         var appliedVersion = await GetAppliedMetadataVersionAsync(edgeNode.Id);
         if (!appliedVersion.HasValue)

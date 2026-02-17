@@ -48,34 +48,44 @@ public static class GetNodeSettings
                 {
                     setting.NodeType,
                     setting.HubUrl,
-                    setting.HubToken
+                    setting.HubToken,
+                    setting.SyncIntervalSeconds
                 })
                 .FirstOrDefaultAsync(cancellationToken);
+            var configuredSyncIntervalSeconds = settings?.SyncIntervalSeconds > 0 ? settings.SyncIntervalSeconds : 5;
 
             var edgeNodeSnapshots = await context
                 .EdgeNodes.AsNoTracking()
                 .OrderBy(edgeNode => edgeNode.Name)
                 .ToListAsync(cancellationToken);
 
-            var edgeNodeStatusById = new Dictionary<Guid, (bool IsOnline, DateTimeOffset? LastSyncAt)>(edgeNodeSnapshots.Count);
+            var edgeNodeStatusById = new Dictionary<Guid, (bool IsOnline, DateTimeOffset? LastSyncAt, int? ExpectedSyncSeconds)>(edgeNodeSnapshots.Count);
             if (edgeNodeSnapshots.Count > 0)
             {
-                var keys = edgeNodeSnapshots.Select(edgeNode => (RedisKey)$"edge-node:{edgeNode.Id}:last-sync").ToArray();
-                var values = await redis.Db.StringGetAsync(keys);
+                var lastSyncKeys = edgeNodeSnapshots.Select(edgeNode => (RedisKey)$"edge-node:{edgeNode.Id}:last-sync").ToArray();
+                var expectedSyncKeys = edgeNodeSnapshots.Select(edgeNode => (RedisKey)$"edge-node:{edgeNode.Id}:expected-sync-seconds").ToArray();
+                var lastSyncValues = await redis.Db.StringGetAsync(lastSyncKeys);
+                var expectedSyncValues = await redis.Db.StringGetAsync(expectedSyncKeys);
                 var now = DateTimeOffset.UtcNow;
 
                 for (var index = 0; index < edgeNodeSnapshots.Count; index++)
                 {
                     var snapshot = edgeNodeSnapshots[index];
                     DateTimeOffset? lastSyncAt = null;
-                    if (values[index].HasValue && long.TryParse(values[index], out var unixSeconds))
+                    if (lastSyncValues[index].HasValue && long.TryParse(lastSyncValues[index], out var unixSeconds))
                     {
                         lastSyncAt = DateTimeOffset.FromUnixTimeSeconds(unixSeconds);
                     }
 
-                    var thresholdSeconds = Math.Max(1, (int)Math.Ceiling(snapshot.UpdateRateSeconds * 1.5d));
+                    int? expectedSyncSeconds = null;
+                    if (expectedSyncValues[index].HasValue && int.TryParse(expectedSyncValues[index], out var expected))
+                    {
+                        expectedSyncSeconds = expected;
+                    }
+
+                    var thresholdSeconds = Math.Max(1, (int)Math.Ceiling((expectedSyncSeconds ?? configuredSyncIntervalSeconds) * 1.5d));
                     var isOnline = lastSyncAt.HasValue && (now - lastSyncAt.Value) <= TimeSpan.FromSeconds(thresholdSeconds);
-                    edgeNodeStatusById[snapshot.Id] = (isOnline, lastSyncAt);
+                    edgeNodeStatusById[snapshot.Id] = (isOnline, lastSyncAt, expectedSyncSeconds);
                 }
             }
 
@@ -84,16 +94,16 @@ public static class GetNodeSettings
                 {
                     var status = edgeNodeStatusById.TryGetValue(snapshot.Id, out var resolvedStatus)
                         ? resolvedStatus
-                        : (IsOnline: false, LastSyncAt: (DateTimeOffset?)null);
+                        : (IsOnline: false, LastSyncAt: (DateTimeOffset?)null, ExpectedSyncSeconds: (int?)null);
                     return new EdgeNodeResponse(
                         snapshot.Id,
                         snapshot.Name,
                         snapshot.Token,
-                        snapshot.UpdateRateSeconds,
                         snapshot.CreatedAt,
                         snapshot.UpdatedAt,
                         status.IsOnline,
-                        status.LastSyncAt
+                        status.LastSyncAt,
+                        status.ExpectedSyncSeconds
                     );
                 })
                 .ToList();
@@ -116,16 +126,17 @@ public static class GetNodeSettings
                     expectedSyncSeconds = expected;
                 }
 
-                var thresholdSeconds = Math.Max(1, (int)Math.Ceiling((expectedSyncSeconds ?? 5) * 1.5d));
+                var thresholdSeconds = Math.Max(1, (int)Math.Ceiling((expectedSyncSeconds ?? configuredSyncIntervalSeconds) * 1.5d));
                 var isOnline = lastSyncAt.HasValue && (DateTimeOffset.UtcNow - lastSyncAt.Value) <= TimeSpan.FromSeconds(thresholdSeconds);
 
-                hubConnectionStatus = new HubConnectionStatusResponse(isOnline, lastSyncAt, expectedSyncSeconds);
+                hubConnectionStatus = new HubConnectionStatusResponse(isOnline, lastSyncAt);
             }
 
             return new Response(
                 settings?.NodeType ?? SystemNodeType.Hub,
                 settings?.HubUrl,
                 settings?.HubToken,
+                configuredSyncIntervalSeconds,
                 edgeNodes,
                 hubConnectionStatus
             );
@@ -136,6 +147,7 @@ public static class GetNodeSettings
         SystemNodeType NodeType,
         string? HubUrl,
         string? HubToken,
+        int SyncIntervalSeconds,
         IReadOnlyCollection<EdgeNodeResponse> EdgeNodes,
         HubConnectionStatusResponse? HubConnectionStatus
     );
@@ -144,12 +156,12 @@ public static class GetNodeSettings
         Guid Id,
         string Name,
         string Token,
-        int UpdateRateSeconds,
         DateTime CreatedAt,
         DateTime UpdatedAt,
         bool IsOnline,
-        DateTimeOffset? LastSyncAt
+        DateTimeOffset? LastSyncAt,
+        int? ExpectedSyncSeconds
     );
 
-    public record HubConnectionStatusResponse(bool IsOnline, DateTimeOffset? LastSyncAt, int? ExpectedSyncSeconds);
+    public record HubConnectionStatusResponse(bool IsOnline, DateTimeOffset? LastSyncAt);
 }

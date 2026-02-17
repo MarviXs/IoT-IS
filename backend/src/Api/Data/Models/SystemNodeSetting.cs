@@ -7,4 +7,5 @@ public class SystemNodeSetting : BaseModel
     public SystemNodeType NodeType { get; set; } = SystemNodeType.Hub;
     public string? HubUrl { get; set; }
     public string? HubToken { get; set; }
+    public int SyncIntervalSeconds { get; set; } = 5;
 }

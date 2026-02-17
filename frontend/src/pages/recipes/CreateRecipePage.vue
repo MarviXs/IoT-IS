@@ -107,21 +107,11 @@ async function createRecipe() {
 const deviceTemplate = ref<DeviceTemplateResponse>();
 async function getDeviceTemplate() {
   const { data, error } = await DeviceTemplateService.getDeviceTemplate(templateId);
-  if (error) {
+  if (error || !data) {
     handleError(error, 'Error fetching device template');
     return;
   }
-  deviceTemplate.value = {
-    id: data.id,
-    name: data.name,
-    deviceType: data.deviceType,
-    enableMap: data.enableMap,
-    enableGrid: data.enableGrid,
-    gridRowSpan: data.gridRowSpan,
-    gridColumnSpan: data.gridColumnSpan,
-    isGlobal: data.isGlobal,
-    canEdit: data.canEdit,
-  };
+  deviceTemplate.value = data;
 }
 getDeviceTemplate();
 </script>

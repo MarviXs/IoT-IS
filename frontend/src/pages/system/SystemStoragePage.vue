@@ -93,15 +93,19 @@
                       @click="toggleEdgeNodeTokenVisibility(edgeNode.id)"
                     />
                   </div>
-                  <div class="text-caption text-secondary q-mt-xs">
-                    {{ t('system.node_settings.update_rate_value', { value: edgeNode.updateRateSeconds ?? 5 }) }}
-                  </div>
                   <div class="row items-center q-gutter-sm q-mt-xs">
                     <q-badge :color="getStatusColor(edgeNode.isOnline)" text-color="white">
                       {{ getStatusLabel(edgeNode.isOnline) }}
                     </q-badge>
                     <span class="text-caption text-secondary">
                       {{ t('system.node_settings.last_sync_at', { value: formatLastSyncAt(edgeNode.lastSyncAt) }) }}
+                    </span>
+                    <span v-if="edgeNode.expectedSyncSeconds" class="text-caption text-secondary">
+                      {{
+                        t('system.node_settings.expected_sync_seconds', {
+                          value: edgeNode.expectedSyncSeconds,
+                        })
+                      }}
                     </span>
                   </div>
                 </q-item-section>
@@ -161,6 +165,18 @@
                 :label="t('system.node_settings.hub_token_label')"
                 :disable="isNodeSettingsLoading || isNodeSettingsSaving"
               />
+              <q-input
+                v-model.number="syncIntervalSeconds"
+                type="number"
+                min="1"
+                max="86400"
+                outlined
+                dense
+                :label="t('system.node_settings.sync_interval_label')"
+                :hint="t('system.node_settings.sync_interval_hint')"
+                persistent-hint
+                :disable="isNodeSettingsLoading || isNodeSettingsSaving"
+              />
               <div class="row items-center q-gutter-sm">
                 <q-badge :color="getStatusColor(hubConnectionStatus?.isOnline)" text-color="white">
                   {{ getStatusLabel(hubConnectionStatus?.isOnline) }}
@@ -169,13 +185,6 @@
                   {{
                     t('system.node_settings.last_sync_at', {
                       value: formatLastSyncAt(hubConnectionStatus?.lastSyncAt),
-                    })
-                  }}
-                </span>
-                <span v-if="hubConnectionStatus?.expectedSyncSeconds" class="text-caption text-secondary">
-                  {{
-                    t('system.node_settings.expected_sync_seconds', {
-                      value: hubConnectionStatus.expectedSyncSeconds,
                     })
                   }}
                 </span>
@@ -278,15 +287,6 @@
               </q-icon>
             </template>
           </q-input>
-          <q-input
-            v-model.number="edgeNodeForm.updateRateSeconds"
-            type="number"
-            min="1"
-            max="86400"
-            :label="t('system.node_settings.update_rate_label')"
-            :hint="t('system.node_settings.update_rate_hint')"
-            persistent-hint
-          />
         </q-card-section>
         <q-card-actions align="right">
           <q-btn
@@ -373,6 +373,7 @@ const isNodeSettingsSaving = ref(false);
 const nodeType = ref<SystemNodeType>(0);
 const hubUrl = ref('');
 const hubToken = ref('');
+const syncIntervalSeconds = ref(5);
 const edgeNodes = ref<EdgeNodeResponse[]>([]);
 const hubConnectionStatus = ref<HubConnectionStatusResponse | null>(null);
 const isEdgeNodeDialogOpen = ref(false);
@@ -388,7 +389,6 @@ const edgeNodeTokenVisibility = ref<Record<string, boolean>>({});
 const edgeNodeForm = ref({
   name: '',
   token: '',
-  updateRateSeconds: 5,
 });
 
 const nodeTypeOptions = computed<{ label: string; value: SystemNodeType }[]>(() => [
@@ -484,6 +484,7 @@ async function loadNodeSettings() {
     nodeType.value = normalizedNodeType;
     hubUrl.value = response.hubUrl ?? '';
     hubToken.value = response.hubToken ?? '';
+    syncIntervalSeconds.value = response.syncIntervalSeconds ?? 5;
     edgeNodeTokenVisibility.value = {};
     edgeNodes.value = response.edgeNodes;
     hubConnectionStatus.value = response.hubConnectionStatus ?? null;
@@ -521,6 +522,12 @@ async function saveNodeSettings(options: { showSuccessToast?: boolean } = {}): P
   const { showSuccessToast = true } = options;
   const trimmedHubUrl = hubUrl.value.trim();
   const trimmedHubToken = hubToken.value.trim();
+  const normalizedSyncIntervalSeconds = Number(syncIntervalSeconds.value);
+
+  if (!Number.isInteger(normalizedSyncIntervalSeconds) || normalizedSyncIntervalSeconds < 1 || normalizedSyncIntervalSeconds > 86400) {
+    toast.error(t('system.node_settings.sync_interval_invalid'));
+    return false;
+  }
 
   isNodeSettingsSaving.value = true;
 
@@ -536,6 +543,7 @@ async function saveNodeSettings(options: { showSuccessToast?: boolean } = {}): P
       nodeType: nodeType.value,
       hubUrl: isHubNodeMode.value ? null : hubUrlPayload,
       hubToken: isHubNodeMode.value ? null : hubTokenPayload,
+      syncIntervalSeconds: normalizedSyncIntervalSeconds,
     });
     if (showSuccessToast) {
       toast.success(t('system.node_settings.save_success'));
@@ -553,7 +561,7 @@ async function saveNodeSettings(options: { showSuccessToast?: boolean } = {}): P
 
 function openCreateEdgeNodeDialog() {
   editingEdgeNodeId.value = null;
-  edgeNodeForm.value = { name: '', token: generateToken(), updateRateSeconds: 5 };
+  edgeNodeForm.value = { name: '', token: generateToken() };
   isEdgeNodeTokenCopied.value = false;
   isEdgeNodeDialogOpen.value = true;
 }
@@ -563,7 +571,6 @@ function openEditEdgeNodeDialog(edgeNode: EdgeNodeResponse) {
   edgeNodeForm.value = {
     name: edgeNode.name,
     token: edgeNode.token,
-    updateRateSeconds: edgeNode.updateRateSeconds ?? 5,
   };
   isEdgeNodeTokenCopied.value = false;
   isEdgeNodeDialogOpen.value = true;
@@ -577,7 +584,6 @@ function openDeleteEdgeNodeDialog(edgeNode: EdgeNodeResponse) {
 async function submitEdgeNodeDialog() {
   const trimmedName = edgeNodeForm.value.name.trim();
   const trimmedToken = edgeNodeForm.value.token.trim();
-  const normalizedUpdateRateSeconds = Number(edgeNodeForm.value.updateRateSeconds);
 
   if (!trimmedName) {
     toast.error(t('system.node_settings.name_required'));
@@ -589,11 +595,6 @@ async function submitEdgeNodeDialog() {
     return;
   }
 
-  if (!Number.isInteger(normalizedUpdateRateSeconds) || normalizedUpdateRateSeconds < 1 || normalizedUpdateRateSeconds > 86400) {
-    toast.error(t('system.node_settings.update_rate_invalid'));
-    return;
-  }
-
   isEdgeNodeSubmitting.value = true;
 
   try {
@@ -601,14 +602,12 @@ async function submitEdgeNodeDialog() {
       await SystemService.updateEdgeNode(editingEdgeNodeId.value, {
         name: trimmedName,
         token: trimmedToken,
-        updateRateSeconds: normalizedUpdateRateSeconds,
       });
       toast.success(t('system.node_settings.update_edge_success'));
     } else {
       await SystemService.createEdgeNode({
         name: trimmedName,
         token: trimmedToken || undefined,
-        updateRateSeconds: normalizedUpdateRateSeconds,
       });
       toast.success(t('system.node_settings.create_edge_success'));
     }

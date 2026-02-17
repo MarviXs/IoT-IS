@@ -46,6 +46,8 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
                     await Task.Delay(TimeSpan.FromSeconds(DefaultSyncSeconds), stoppingToken);
                     continue;
                 }
+                var configuredSyncIntervalSeconds = settings.SyncIntervalSeconds > 0 ? settings.SyncIntervalSeconds : DefaultSyncSeconds;
+                delaySeconds = configuredSyncIntervalSeconds;
 
                 if (
                     !await redis.Db.KeyExistsAsync(StreamName)
@@ -218,7 +220,7 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
                     }
                 }
 
-                delaySeconds = datapointResponse.NextSyncSeconds > 0 ? datapointResponse.NextSyncSeconds : DefaultSyncSeconds;
+                delaySeconds = configuredSyncIntervalSeconds;
 
                 if (!datapointResponse.DatapointsProcessed)
                 {
