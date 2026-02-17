@@ -14,7 +14,6 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
 {
     private const string StreamName = "datapoints";
     private const string GroupName = "edge_hub_sync";
-    private const string LastAnnouncedHubHashKey = "edge:hub:last-announced-hash";
     private const int MaxPendingTimeUnclaimed = 20000;
     private const int DefaultSyncSeconds = 5;
 
@@ -32,7 +31,6 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
                 var appContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
                 var redis = scope.ServiceProvider.GetRequiredService<RedisService>();
                 var hubApiClientFactory = scope.ServiceProvider.GetRequiredService<HubApiClientFactory>();
-                var edgeHubSnapshotSyncService = scope.ServiceProvider.GetRequiredService<EdgeHubSnapshotSyncService>();
 
                 var settings = await appContext.SystemNodeSettings.OrderBy(setting => setting.CreatedAt).FirstOrDefaultAsync(stoppingToken);
                 if (
@@ -207,31 +205,10 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
                         TimeSpan.FromDays(7),
                         flags: CommandFlags.FireAndForget
                     );
-                    if (!string.IsNullOrWhiteSpace(response.Hash))
-                    {
-                        await redis.Db.StringSetAsync(
-                            LastAnnouncedHubHashKey,
-                            response.Hash.Trim(),
-                            TimeSpan.FromDays(30),
-                            flags: CommandFlags.FireAndForget
-                        );
-                    }
 
                     if (ackIds.Count > 0)
                     {
                         await redis.Db.StreamAcknowledgeAsync(StreamName, GroupName, [.. ackIds]);
-                    }
-
-                    if (response.ForceFullSync)
-                    {
-                        try
-                        {
-                            await edgeHubSnapshotSyncService.SyncFromHubAsync(stoppingToken);
-                        }
-                        catch (Exception syncException)
-                        {
-                            logger.LogWarning(syncException, "Forced full sync requested by hub failed");
-                        }
                     }
                 }
             }

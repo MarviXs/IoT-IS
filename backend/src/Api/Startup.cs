@@ -99,7 +99,6 @@ public class Startup(IConfiguration configuration)
 
         services.AddHostedService<StoreDataPointsBatchService>();
         services.AddHostedService<EdgeHubDataSyncBackgroundService>();
-        services.AddHostedService<EdgeHubMetadataAutoSyncBackgroundService>();
         services.AddHostedService<JobTimeOutService>();
         services.AddHostedService<JobScheduleBootstrapper>();
 
@@ -113,7 +112,6 @@ public class Startup(IConfiguration configuration)
         services.AddScoped<IFileSystemService, LocalFileSystem>();
         services.AddScoped<HubApiClientFactory>();
         services.AddScoped<HubEdgeSyncService>();
-        services.AddScoped<EdgeHubSnapshotSyncService>();
 
         //MQTT Services
         services.AddScoped<JobStatusReceived>();
