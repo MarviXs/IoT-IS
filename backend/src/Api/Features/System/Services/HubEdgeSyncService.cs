@@ -13,16 +13,16 @@ using StackExchange.Redis;
 
 namespace Fei.Is.Api.Features.System.Services;
 
-public class HubEdgeSyncService(
-    AppDbContext appContext,
-    RedisService redis,
-    IHubContext<IsHub, INotificationsClient> hubContext
-)
+public class HubEdgeSyncService(AppDbContext appContext, RedisService redis, IHubContext<IsHub, INotificationsClient> hubContext)
 {
     private const int DefaultNextSyncSeconds = 5;
     private const int MetadataVersionTtlDays = 30;
 
-    public async Task<SyncDataPointsResponse?> SyncDataPointsAsync(SyncDataPointsRequest request, string edgeToken, CancellationToken cancellationToken)
+    public async Task<SyncDataPointsResponse?> SyncDataPointsAsync(
+        SyncDataPointsRequest request,
+        string edgeToken,
+        CancellationToken cancellationToken
+    )
     {
         var edgeNode = await AuthorizeAndTouchHeartbeatAsync(edgeToken, cancellationToken);
         if (edgeNode == null)
@@ -35,9 +35,10 @@ public class HubEdgeSyncService(
             .OrderBy(setting => setting.CreatedAt)
             .Select(setting => (int?)setting.SyncIntervalSeconds)
             .FirstOrDefaultAsync(cancellationToken);
-        var nextSyncSeconds = configuredSyncIntervalSeconds.HasValue && configuredSyncIntervalSeconds.Value > 0
-            ? configuredSyncIntervalSeconds.Value
-            : DefaultNextSyncSeconds;
+        var nextSyncSeconds =
+            configuredSyncIntervalSeconds.HasValue && configuredSyncIntervalSeconds.Value > 0
+                ? configuredSyncIntervalSeconds.Value
+                : DefaultNextSyncSeconds;
 
         await redis.Db.StringSetAsync(
             $"edge-node:{edgeNode.Id}:expected-sync-seconds",
@@ -93,12 +94,13 @@ public class HubEdgeSyncService(
             .Distinct()
             .ToList();
 
-        var existingIdSet = (await appContext
+        var existingIdSet = (
+            await appContext
                 .Devices.AsNoTracking()
                 .Where(device => candidateIds.Contains(device.Id) && device.SyncedFromEdge && device.SyncedFromEdgeNodeId == edgeNode.Id)
                 .Select(device => device.Id)
-                .ToListAsync(cancellationToken))
-            .ToHashSet();
+                .ToListAsync(cancellationToken)
+        ).ToHashSet();
 
         var accepted = 0;
         var skipped = 0;
@@ -201,38 +203,21 @@ public class HubEdgeSyncService(
             foreach (var deviceIdString in touchedDevices)
             {
                 redisTasks.Add(
-                    redis.Db.StringSetAsync(
-                        $"device:{deviceIdString}:connected",
-                        "1",
-                        TimeSpan.FromMinutes(30),
-                        flags: CommandFlags.FireAndForget
-                    )
+                    redis.Db.StringSetAsync($"device:{deviceIdString}:connected", "1", TimeSpan.FromMinutes(30), flags: CommandFlags.FireAndForget)
                 );
-                redisTasks.Add(
-                    redis.Db.StringSetAsync(
-                        $"device:{deviceIdString}:lastSeen",
-                        nowUnixSeconds,
-                        flags: CommandFlags.FireAndForget
-                    )
-                );
+                redisTasks.Add(redis.Db.StringSetAsync($"device:{deviceIdString}:lastSeen", nowUnixSeconds, flags: CommandFlags.FireAndForget));
             }
 
             foreach (var latestEntry in latestBySensorKey)
             {
-                redisTasks.Add(
-                    redis.Db.StringSetAsync(
-                        latestEntry.Key,
-                        latestEntry.Value,
-                        TimeSpan.FromHours(1),
-                        flags: CommandFlags.FireAndForget
-                    )
-                );
+                redisTasks.Add(redis.Db.StringSetAsync(latestEntry.Key, latestEntry.Value, TimeSpan.FromHours(1), flags: CommandFlags.FireAndForget));
             }
 
             await Task.WhenAll(redisTasks);
 
-            await Task.WhenAll(notifications.Select(notification =>
-                hubContext.Clients.Group(notification.DeviceId).ReceiveSensorLastDataPoint(notification)));
+            await Task.WhenAll(
+                notifications.Select(notification => hubContext.Clients.Group(notification.DeviceId).ReceiveSensorLastDataPoint(notification))
+            );
         }
 
         return new SyncDataPointsResponse
@@ -274,8 +259,7 @@ public class HubEdgeSyncService(
             .Include(template => template.Recipes)
             .ThenInclude(recipe => recipe.Steps)
             .Where(template =>
-                templateIdsToLoad.Contains(template.Id)
-                || (isFullSnapshot && template.SyncedFromEdge && template.SyncedFromEdgeNodeId == edgeNode.Id)
+                templateIdsToLoad.Contains(template.Id) || (isFullSnapshot && template.SyncedFromEdge && template.SyncedFromEdgeNodeId == edgeNode.Id)
             )
             .ToListAsync(cancellationToken);
         var templateById = trackedTemplates.ToDictionary(template => template.Id);
@@ -310,11 +294,7 @@ public class HubEdgeSyncService(
             }
             else
             {
-                template = new DeviceTemplate
-                {
-                    Id = payload.Id,
-                    Name = payload.Name.Trim()
-                };
+                template = new DeviceTemplate { Id = payload.Id, Name = payload.Name.Trim() };
                 await appContext.DeviceTemplates.AddAsync(template, cancellationToken);
                 templateById[payload.Id] = template;
                 summary.TemplatesCreated++;
@@ -468,18 +448,18 @@ public class HubEdgeSyncService(
                     Name = controlPayload.Name.Trim(),
                     Color = controlPayload.Color.Trim(),
                     Type = controlPayload.Type,
-                    RecipeId = controlPayload.RecipeId.HasValue && recipesById.ContainsKey(controlPayload.RecipeId.Value)
-                        ? controlPayload.RecipeId
-                        : null,
-                    RecipeOnId = controlPayload.RecipeOnId.HasValue && recipesById.ContainsKey(controlPayload.RecipeOnId.Value)
-                        ? controlPayload.RecipeOnId
-                        : null,
-                    RecipeOffId = controlPayload.RecipeOffId.HasValue && recipesById.ContainsKey(controlPayload.RecipeOffId.Value)
-                        ? controlPayload.RecipeOffId
-                        : null,
-                    SensorId = controlPayload.SensorId.HasValue && sensorsById.ContainsKey(controlPayload.SensorId.Value)
-                        ? controlPayload.SensorId
-                        : null,
+                    RecipeId =
+                        controlPayload.RecipeId.HasValue && recipesById.ContainsKey(controlPayload.RecipeId.Value) ? controlPayload.RecipeId : null,
+                    RecipeOnId =
+                        controlPayload.RecipeOnId.HasValue && recipesById.ContainsKey(controlPayload.RecipeOnId.Value)
+                            ? controlPayload.RecipeOnId
+                            : null,
+                    RecipeOffId =
+                        controlPayload.RecipeOffId.HasValue && recipesById.ContainsKey(controlPayload.RecipeOffId.Value)
+                            ? controlPayload.RecipeOffId
+                            : null,
+                    SensorId =
+                        controlPayload.SensorId.HasValue && sensorsById.ContainsKey(controlPayload.SensorId.Value) ? controlPayload.SensorId : null,
                     Cycles = controlPayload.Cycles,
                     IsInfinite = controlPayload.IsInfinite,
                     Order = controlPayload.Order
@@ -507,7 +487,9 @@ public class HubEdgeSyncService(
 
         var deviceIdsToLoad = isFullSnapshot ? incomingDeviceIds : incomingDeviceIds.Concat(deletedDeviceIds).ToHashSet();
         var trackedDevices = await appContext
-            .Devices.Where(device => deviceIdsToLoad.Contains(device.Id) || (isFullSnapshot && device.SyncedFromEdge && device.SyncedFromEdgeNodeId == edgeNode.Id))
+            .Devices.Where(device =>
+                deviceIdsToLoad.Contains(device.Id) || (isFullSnapshot && device.SyncedFromEdge && device.SyncedFromEdgeNodeId == edgeNode.Id)
+            )
             .ToListAsync(cancellationToken);
         var deviceById = trackedDevices.ToDictionary(device => device.Id);
         var syncedDevicesFromEdge = trackedDevices
@@ -529,9 +511,7 @@ public class HubEdgeSyncService(
                     await appContext
                         .DeviceTemplates.AsNoTracking()
                         .Where(template =>
-                            referencedTemplateIds.Contains(template.Id)
-                            && template.SyncedFromEdge
-                            && template.SyncedFromEdgeNodeId == edgeNode.Id
+                            referencedTemplateIds.Contains(template.Id) && template.SyncedFromEdge && template.SyncedFromEdgeNodeId == edgeNode.Id
                         )
                         .Select(template => template.Id)
                         .ToListAsync(cancellationToken)
@@ -690,10 +670,7 @@ public class HubEdgeSyncService(
         return $"edge-node:{edgeNodeId}:metadata-version";
     }
 
-    private async Task<Dictionary<string, ApplicationUser>> BuildOwnerLookupAsync(
-        SyncMetadataRequest request,
-        CancellationToken cancellationToken
-    )
+    private async Task<Dictionary<string, ApplicationUser>> BuildOwnerLookupAsync(SyncMetadataRequest request, CancellationToken cancellationToken)
     {
         var ownerEmails = request
             .Templates.Select(template => template.OwnerEmail)

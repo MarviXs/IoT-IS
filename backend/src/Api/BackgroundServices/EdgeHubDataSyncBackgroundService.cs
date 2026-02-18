@@ -11,8 +11,7 @@ using StackExchange.Redis;
 
 namespace Fei.Is.Api.BackgroundServices;
 
-public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, ILogger<EdgeHubDataSyncBackgroundService> logger)
-    : BackgroundService
+public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, ILogger<EdgeHubDataSyncBackgroundService> logger) : BackgroundService
 {
     private const string StreamName = "datapoints";
     private const string GroupName = "edge_hub_sync";
@@ -105,11 +104,7 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
 
                         if (backfillBatch.LastTimestampUnixMs.HasValue)
                         {
-                            SaveBackfillCursor(
-                                settings,
-                                backfillBatch.LastTimestampUnixMs.Value,
-                                backfillBatch.NextTimestampOffset
-                            );
+                            SaveBackfillCursor(settings, backfillBatch.LastTimestampUnixMs.Value, backfillBatch.NextTimestampOffset);
                             await appContext.SaveChangesAsync(stoppingToken);
                         }
                     }
@@ -251,10 +246,7 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
                     {
                         var emptyBatchResponse = await SendDatapointBatchWithMetadataRetryAsync(
                             client,
-                            new SyncDataPointsRequest
-                            {
-                                EdgeMetadataVersion = edgeMetadataVersion
-                            },
+                            new SyncDataPointsRequest { EdgeMetadataVersion = edgeMetadataVersion },
                             edgeMetadataVersion,
                             metadataSnapshotService,
                             stoppingToken
@@ -461,9 +453,7 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
         var cursorOffset = Math.Max(0, settings.BackfillCursorOffset);
 
         var cutoffTimestamp = DateTimeOffset.FromUnixTimeMilliseconds(settings.BackfillCutoffUnixMs.Value);
-        var query = timescaleContext
-            .DataPoints.AsNoTracking()
-            .Where(dataPoint => dataPoint.TimeStamp <= cutoffTimestamp);
+        var query = timescaleContext.DataPoints.AsNoTracking().Where(dataPoint => dataPoint.TimeStamp <= cutoffTimestamp);
 
         if (cursorTimestamp.HasValue)
         {
@@ -508,17 +498,12 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
 
         var lastTimestamp = rawRows[^1].TimeStamp;
         var rowsAtLastTimestamp = rawRows.Count(row => row.TimeStamp == lastTimestamp);
-        var nextOffset = cursorTimestamp.HasValue && cursorTimestamp.Value == lastTimestamp
-            ? cursorOffset + rowsAtLastTimestamp
-            : rowsAtLastTimestamp;
+        var nextOffset =
+            cursorTimestamp.HasValue && cursorTimestamp.Value == lastTimestamp ? cursorOffset + rowsAtLastTimestamp : rowsAtLastTimestamp;
 
         return new BackfillBatchResult(
             HasRows: true,
-            Request: new SyncDataPointsRequest
-            {
-                EdgeMetadataVersion = edgeMetadataVersion,
-                Datapoints = datapoints
-            },
+            Request: new SyncDataPointsRequest { EdgeMetadataVersion = edgeMetadataVersion, Datapoints = datapoints },
             LastTimestampUnixMs: lastTimestamp.ToUnixTimeMilliseconds(),
             NextTimestampOffset: nextOffset,
             MarkCompleted: rawRows.Count < SyncBatchSize
@@ -544,7 +529,8 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
 
     private static bool ClearBackfillState(SystemNodeSetting settings)
     {
-        var hadState = settings.BackfillCutoffUnixMs.HasValue
+        var hadState =
+            settings.BackfillCutoffUnixMs.HasValue
             || settings.BackfillCursorTimestampUnixMs.HasValue
             || settings.BackfillCursorOffset != 0
             || settings.BackfillCompleted;
