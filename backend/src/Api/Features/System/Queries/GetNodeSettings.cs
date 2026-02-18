@@ -84,7 +84,7 @@ public static class GetNodeSettings
                         expectedSyncSeconds = expected;
                     }
 
-                    var thresholdSeconds = Math.Max(1, (int)Math.Ceiling((expectedSyncSeconds ?? configuredSyncIntervalSeconds) * 1.5d));
+                    var thresholdSeconds = Math.Max(1, (int)Math.Ceiling((expectedSyncSeconds ?? configuredSyncIntervalSeconds) * 2d));
                     var isOnline = lastSyncAt.HasValue && (now - lastSyncAt.Value) <= TimeSpan.FromSeconds(thresholdSeconds);
                     edgeNodeStatusById[snapshot.Id] = (isOnline, lastSyncAt, expectedSyncSeconds);
                 }
@@ -127,7 +127,7 @@ public static class GetNodeSettings
                     expectedSyncSeconds = expected;
                 }
 
-                var thresholdSeconds = Math.Max(1, (int)Math.Ceiling((expectedSyncSeconds ?? configuredSyncIntervalSeconds) * 1.5d));
+                var thresholdSeconds = Math.Max(1, (int)Math.Ceiling((expectedSyncSeconds ?? configuredSyncIntervalSeconds) * 2d));
                 var isOnline = lastSyncAt.HasValue && (DateTimeOffset.UtcNow - lastSyncAt.Value) <= TimeSpan.FromSeconds(thresholdSeconds);
 
                 hubConnectionStatus = new HubConnectionStatusResponse(isOnline, lastSyncAt);
