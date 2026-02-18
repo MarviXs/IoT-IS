@@ -17,6 +17,7 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
     private const string GroupName = "edge_hub_sync";
     private const int MaxPendingTimeUnclaimed = 20000;
     private const int DefaultSyncSeconds = 5;
+    private const int UnauthorizedRetryDelaySeconds = 20;
     private const int SyncBatchSize = 10000;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -79,6 +80,7 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
                 var client = hubApiClientFactory.Create(settings.HubUrl!, settings.HubToken!);
                 var syncCompleted = true;
                 var hasSuccessfulDatapointSync = false;
+                var unauthorizedSyncFailure = false;
 
                 if (dataPointSyncMode == EdgeDataPointSyncMode.AllDatapoints)
                 {
@@ -96,6 +98,9 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
                             );
                             if (backfillResponse == null || !backfillResponse.DatapointsProcessed)
                             {
+                                unauthorizedSyncFailure = backfillResponse == null;
+                                delaySeconds = ResolveFailureDelaySeconds(configuredSyncIntervalSeconds, unauthorizedSyncFailure);
+                                await Task.Delay(TimeSpan.FromSeconds(delaySeconds), stoppingToken);
                                 continue;
                             }
 
@@ -253,6 +258,9 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
                         );
                         if (emptyBatchResponse == null || !emptyBatchResponse.DatapointsProcessed)
                         {
+                            unauthorizedSyncFailure = emptyBatchResponse == null;
+                            delaySeconds = ResolveFailureDelaySeconds(configuredSyncIntervalSeconds, unauthorizedSyncFailure);
+                            await Task.Delay(TimeSpan.FromSeconds(delaySeconds), stoppingToken);
                             continue;
                         }
 
@@ -278,6 +286,7 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
                         );
                         if (batchResponse == null || !batchResponse.DatapointsProcessed)
                         {
+                            unauthorizedSyncFailure = batchResponse == null;
                             syncCompleted = false;
                             break;
                         }
@@ -291,6 +300,8 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
 
                 if (!syncCompleted || !hasSuccessfulDatapointSync)
                 {
+                    delaySeconds = ResolveFailureDelaySeconds(configuredSyncIntervalSeconds, unauthorizedSyncFailure);
+                    await Task.Delay(TimeSpan.FromSeconds(delaySeconds), stoppingToken);
                     continue;
                 }
 
@@ -425,6 +436,17 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
     private static EdgeDataPointSyncMode NormalizeSyncMode(EdgeDataPointSyncMode mode)
     {
         return mode == EdgeDataPointSyncMode.AllDatapoints ? EdgeDataPointSyncMode.AllDatapoints : EdgeDataPointSyncMode.OnlyNew;
+    }
+
+    private static int ResolveFailureDelaySeconds(int configuredSyncIntervalSeconds, bool unauthorizedSyncFailure)
+    {
+        var normalizedIntervalSeconds = configuredSyncIntervalSeconds > 0 ? configuredSyncIntervalSeconds : DefaultSyncSeconds;
+        if (!unauthorizedSyncFailure)
+        {
+            return normalizedIntervalSeconds;
+        }
+
+        return Math.Max(normalizedIntervalSeconds, UnauthorizedRetryDelaySeconds);
     }
 
     private async Task<BackfillBatchResult> BuildTimescaleBackfillBatchAsync(
