@@ -10,6 +10,7 @@
         <div class="text-subtitle1">v1.2</div>
         <ul class="q-pl-md q-my-none">
           <li>Added node system</li>
+          <li>Added option to delete TimescaleDB chunks directly</li>
         </ul>
       </q-card-section>
       <q-separator spaced inset />

@@ -2016,6 +2016,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/system/storage/chunks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get TimescaleDB datapoint chunks
+         * @description Returns datapoint chunk metadata including time ranges and storage sizes.
+         */
+        get: operations["GetTimescaleDataPointChunks"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/system/storage": {
         parameters: {
             query?: never;
@@ -2075,6 +2095,46 @@ export interface paths {
          * @description Removes edge node settings by id.
          */
         delete: operations["DeleteEdgeNode"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/system/storage/chunks/{chunkSchema}/{chunkName}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Delete a TimescaleDB datapoint chunk
+         * @description Deletes a single datapoint chunk selected by schema and chunk name.
+         */
+        delete: operations["DeleteTimescaleDataPointChunk"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/system/storage/chunks/drop": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Drop TimescaleDB datapoint chunks
+         * @description Drops full datapoint hypertable chunks in the requested time window for fast deletions.
+         */
+        post: operations["DropTimescaleDataPointChunks"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -4259,6 +4319,24 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
         };
+        "Fei.Is.Api.Features.System.Commands.DeleteTimescaleDataPointChunk.Response": {
+            chunkSchema: string;
+            chunkName: string;
+            /** Format: int32 */
+            droppedChunkCount: number;
+            droppedChunks: string[];
+        };
+        "Fei.Is.Api.Features.System.Commands.DropTimescaleDataPointChunks.Request": {
+            /** Format: date-time */
+            from: string | null;
+            /** Format: date-time */
+            to: string | null;
+        };
+        "Fei.Is.Api.Features.System.Commands.DropTimescaleDataPointChunks.Response": {
+            /** Format: int32 */
+            droppedChunkCount: number;
+            droppedChunks: string[];
+        };
         "Fei.Is.Api.Features.System.Commands.SyncAllEdgeNodesNow.Response": {
             /** Format: int32 */
             queuedCount: number;
@@ -4304,6 +4382,23 @@ export interface components {
             dataPointSyncMode: components["schemas"]["Fei.Is.Api.Data.Enums.EdgeDataPointSyncMode"];
             edgeNodes: components["schemas"]["Fei.Is.Api.Features.System.Queries.GetNodeSettings.EdgeNodeResponse"][];
             hubConnectionStatus: components["schemas"]["Fei.Is.Api.Features.System.Queries.GetNodeSettings.HubConnectionStatusResponse"];
+        };
+        "Fei.Is.Api.Features.System.Queries.GetTimescaleDataPointChunks.Response": {
+            chunkSchema: string;
+            chunkName: string;
+            /** Format: date-time */
+            rangeStart?: string | null;
+            /** Format: date-time */
+            rangeEnd?: string | null;
+            isCompressed: boolean;
+            /** Format: int64 */
+            totalBytes: number;
+            /** Format: int64 */
+            tableBytes: number;
+            /** Format: int64 */
+            indexBytes: number;
+            /** Format: int64 */
+            toastBytes: number;
         };
         "Fei.Is.Api.Features.System.Queries.GetTimescaleStorageUsage.Response": {
             /** Format: int64 */
@@ -9747,6 +9842,26 @@ export interface operations {
             };
         };
     };
+    GetTimescaleDataPointChunks: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.System.Queries.GetTimescaleDataPointChunks.Response"][];
+                };
+            };
+        };
+    };
     GetTimescaleStorageUsage: {
         parameters: {
             query?: never;
@@ -9864,6 +9979,78 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    DeleteTimescaleDataPointChunk: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chunkSchema: string;
+                chunkName: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.System.Commands.DeleteTimescaleDataPointChunk.Response"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DropTimescaleDataPointChunks: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.System.Commands.DropTimescaleDataPointChunks.Request"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.System.Commands.DropTimescaleDataPointChunks.Response"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
             };
         };
     };

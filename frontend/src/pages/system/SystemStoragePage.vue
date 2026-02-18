@@ -47,7 +47,7 @@
           <q-separator />
 
           <template v-if="isHubNodeMode">
-            <div class="column q-gutter-sm">
+            <div class="column q-gutter-y-sm">
               <div class="text-subtitle1">{{ t('system.node_settings.current_hub_api_url_title') }}</div>
               <q-input
                 :model-value="currentHubApiUrl || '-'"
@@ -89,7 +89,13 @@
                   :icon="mdiSync"
                   :label="t('system.node_settings.sync_all_now')"
                   :loading="isSyncingAllEdgeNodes"
-                  :disable="isNodeSettingsLoading || isEdgeNodeSubmitting || isDeletingEdgeNode || isSyncingAllEdgeNodes || edgeNodes.length === 0"
+                  :disable="
+                    isNodeSettingsLoading ||
+                    isEdgeNodeSubmitting ||
+                    isDeletingEdgeNode ||
+                    isSyncingAllEdgeNodes ||
+                    edgeNodes.length === 0
+                  "
                   @click="syncAllEdgeNodesNow"
                 />
                 <q-btn
@@ -182,7 +188,7 @@
           </template>
 
           <template v-else>
-            <div class="column q-gutter-sm">
+            <div class="column q-gutter-y-sm">
               <div class="text-subtitle1">{{ t('system.node_settings.hub_connection_title') }}</div>
               <q-input
                 v-model="hubUrl"
@@ -266,16 +272,16 @@
               :label="t('system.storage.force_reclaim')"
               color="primary"
               :loading="isVacuuming"
-              :disable="isVacuuming || isLoading"
+              :disable="isVacuuming || isLoading || isChunksLoading || isDroppingChunks || isDeletingChunk"
               @click="forceReclaimSpace"
             />
             <q-btn
               flat
               round
               :icon="mdiRefresh"
-              :loading="isLoading"
-              :disable="isLoading || isVacuuming"
-              @click="loadStats"
+              :loading="isLoading || isChunksLoading"
+              :disable="isLoading || isChunksLoading || isVacuuming || isDroppingChunks || isDeletingChunk"
+              @click="loadStorageData"
               :aria-label="t('global.refresh')"
             />
           </div>
@@ -295,6 +301,97 @@
           <q-banner v-if="errorMessage" class="q-mt-md" dense rounded color="negative" text-color="white">
             {{ errorMessage }}
           </q-banner>
+          <q-separator class="q-my-md" />
+          <div class="column q-gutter-sm">
+            <div class="text-subtitle1">{{ t('system.storage.chunk_delete_title') }}</div>
+            <div class="text-caption text-secondary">{{ t('system.storage.chunk_delete_hint') }}</div>
+            <div>
+              <div class="row q-col-gutter-sm">
+                <div class="col-12 col-md-4">
+                  <q-input
+                    v-model="chunkDeleteFrom"
+                    type="datetime-local"
+                    outlined
+                    dense
+                    stack-label
+                    :label="t('system.storage.chunk_delete_from_label')"
+                    :disable="isLoading || isVacuuming || isDroppingChunks"
+                  />
+                </div>
+                <div class="col-12 col-md-4">
+                  <q-input
+                    v-model="chunkDeleteTo"
+                    type="datetime-local"
+                    outlined
+                    dense
+                    stack-label
+                    :label="t('system.storage.chunk_delete_to_label')"
+                    :disable="isLoading || isVacuuming || isDroppingChunks"
+                  />
+                </div>
+                <div class="col-12 col-md-auto">
+                  <q-btn
+                    color="negative"
+                    no-caps
+                    :label="t('system.storage.chunk_delete_action')"
+                    :loading="isDroppingChunks"
+                    :disable="isLoading || isChunksLoading || isVacuuming || isDroppingChunks || isDeletingChunk"
+                    @click="openDropChunksDialog"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <q-separator class="q-my-md" />
+          <q-expansion-item
+            v-model="isChunkListExpanded"
+            expand-separator
+            switch-toggle-side
+            :label="t('system.storage.chunk_list_title')"
+          >
+            <div class="column q-gutter-sm q-mt-sm">
+              <div v-if="isChunksLoading" class="text-secondary">{{ t('system.storage.chunk_list_loading') }}</div>
+              <div v-else-if="chunkRows.length === 0" class="text-secondary">
+                {{ t('system.storage.chunk_list_empty') }}
+              </div>
+              <q-list v-else bordered separator class="rounded-borders">
+                <q-item v-for="chunk in chunkRows" :key="`${chunk.chunkSchema}.${chunk.chunkName}`">
+                  <q-item-section>
+                    <q-item-label class="text-weight-medium"
+                      >{{ chunk.chunkSchema }}.{{ chunk.chunkName }}</q-item-label
+                    >
+                    <q-item-label caption>
+                      {{
+                        t('system.storage.chunk_list_range', {
+                          from: formatChunkRange(chunk.rangeStart),
+                          to: formatChunkRange(chunk.rangeEnd),
+                        })
+                      }}
+                    </q-item-label>
+                    <q-item-label caption>
+                      {{
+                        t('system.storage.chunk_list_size', {
+                          size: formatBytes(chunk.totalBytes),
+                          bytes: chunk.totalBytes.toLocaleString(),
+                        })
+                      }}
+                    </q-item-label>
+                  </q-item-section>
+                  <q-item-section side>
+                    <q-btn
+                      flat
+                      round
+                      color="negative"
+                      :icon="mdiDelete"
+                      :disable="isDeletingChunk || isDroppingChunks || isVacuuming || isLoading || isChunksLoading"
+                      :aria-label="t('global.delete')"
+                      @click="openDeleteChunkDialog(chunk)"
+                    />
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </div>
+          </q-expansion-item>
         </q-card-section>
       </q-card>
     </div>
@@ -382,6 +479,89 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
+
+    <q-dialog v-model="isDropChunksDialogOpen">
+      <q-card style="min-width: 420px; max-width: 90vw">
+        <q-card-section>
+          <div class="text-h6">{{ t('system.storage.chunk_delete_confirm_title') }}</div>
+        </q-card-section>
+        <q-card-section class="column q-gutter-xs">
+          <div>{{ t('system.storage.chunk_delete_confirm_body') }}</div>
+          <div class="text-caption text-secondary">
+            {{
+              t('system.storage.chunk_delete_range_summary', {
+                from: chunkDeleteRangeSummary.from,
+                to: chunkDeleteRangeSummary.to,
+              })
+            }}
+          </div>
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn
+            flat
+            color="primary"
+            :label="t('global.cancel')"
+            :disable="isDroppingChunks"
+            no-caps
+            @click="isDropChunksDialogOpen = false"
+          />
+          <q-btn
+            color="negative"
+            :label="t('system.storage.chunk_delete_action')"
+            :loading="isDroppingChunks"
+            no-caps
+            @click="confirmDropChunks"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <q-dialog v-model="isDeleteChunkDialogOpen">
+      <q-card style="min-width: 420px; max-width: 90vw">
+        <q-card-section>
+          <div class="text-h6">{{ t('system.storage.chunk_delete_single_confirm_title') }}</div>
+        </q-card-section>
+        <q-card-section class="column q-gutter-xs">
+          <div>{{ t('system.storage.chunk_delete_single_confirm_body') }}</div>
+          <div v-if="selectedChunkToDelete" class="text-caption text-secondary">
+            {{ selectedChunkToDelete.chunkSchema }}.{{ selectedChunkToDelete.chunkName }}
+          </div>
+          <div v-if="selectedChunkToDelete" class="text-caption text-secondary">
+            {{
+              t('system.storage.chunk_list_range', {
+                from: formatChunkRange(selectedChunkToDelete.rangeStart),
+                to: formatChunkRange(selectedChunkToDelete.rangeEnd),
+              })
+            }}
+          </div>
+          <div v-if="selectedChunkToDelete" class="text-caption text-secondary">
+            {{
+              t('system.storage.chunk_list_size', {
+                size: formatBytes(selectedChunkToDelete.totalBytes),
+                bytes: selectedChunkToDelete.totalBytes.toLocaleString(),
+              })
+            }}
+          </div>
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn
+            flat
+            color="primary"
+            :label="t('global.cancel')"
+            :disable="isDeletingChunk"
+            no-caps
+            @click="isDeleteChunkDialogOpen = false"
+          />
+          <q-btn
+            color="negative"
+            :label="t('global.delete')"
+            :loading="isDeletingChunk"
+            no-caps
+            @click="confirmDeleteChunk"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
@@ -404,6 +584,7 @@ import SystemService, {
   type EdgeNodeResponse,
   type HubConnectionStatusResponse,
   type SystemNodeType,
+  type TimescaleChunksResponse,
 } from '@/api/services/SystemService';
 import { copyToClipboard } from 'quasar';
 import SystemChangelogDialog from '@/components/system/SystemChangelogDialog.vue';
@@ -415,8 +596,19 @@ const authStore = useAuthStore();
 
 const totalSizeBytes = ref<number | null>(null);
 const isLoading = ref(false);
+const isChunksLoading = ref(false);
 const errorMessage = ref<string | null>(null);
 const isVacuuming = ref(false);
+const isDroppingChunks = ref(false);
+const isDropChunksDialogOpen = ref(false);
+const isDeleteChunkDialogOpen = ref(false);
+const isDeletingChunk = ref(false);
+const isChunkListExpanded = ref(false);
+const chunkDeleteFrom = ref('');
+const chunkDeleteTo = ref('');
+type TimescaleChunkRow = TimescaleChunksResponse[number];
+const chunkRows = ref<TimescaleChunkRow[]>([]);
+const selectedChunkToDelete = ref<TimescaleChunkRow | null>(null);
 const isChangelogOpen = ref(false);
 const isNodeSettingsLoading = ref(false);
 const isNodeSettingsSaving = ref(false);
@@ -474,6 +666,11 @@ const formattedSize = computed(() => {
   return formatBytes(totalSizeBytes.value);
 });
 
+const chunkDeleteRangeSummary = computed(() => ({
+  from: formatChunkDeleteBoundary(chunkDeleteFrom.value),
+  to: formatChunkDeleteBoundary(chunkDeleteTo.value),
+}));
+
 function formatBytes(bytes: number): string {
   if (bytes === 0) {
     return '0 B';
@@ -507,6 +704,37 @@ async function loadStats() {
   }
 }
 
+async function loadChunks() {
+  if (!authStore.isAdmin) {
+    return;
+  }
+
+  if (isChunksLoading.value) {
+    return;
+  }
+
+  isChunksLoading.value = true;
+
+  try {
+    const response = await SystemService.getTimescaleDataPointChunks();
+    chunkRows.value = response;
+  } catch (error) {
+    console.error('Failed to load TimescaleDB datapoint chunks', error);
+    toast.error(t('system.storage.chunk_list_load_error'));
+  } finally {
+    isChunksLoading.value = false;
+  }
+}
+
+async function loadStorageData() {
+  if (isChunkListExpanded.value) {
+    await Promise.all([loadStats(), loadChunks()]);
+    return;
+  }
+
+  await loadStats();
+}
+
 async function forceReclaimSpace() {
   if (!authStore.isAdmin) {
     return;
@@ -523,6 +751,136 @@ async function forceReclaimSpace() {
     toast.error(t('system.storage.vacuum_error'));
   } finally {
     isVacuuming.value = false;
+  }
+}
+
+function formatChunkRange(value?: string | null): string {
+  if (!value) {
+    return t('system.storage.chunk_delete_unbounded');
+  }
+
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.valueOf())) {
+    return t('system.storage.chunk_delete_invalid_boundary');
+  }
+
+  return parsed.toLocaleString();
+}
+
+function formatChunkDeleteBoundary(value: string): string {
+  if (!value) {
+    return t('system.storage.chunk_delete_unbounded');
+  }
+
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.valueOf())) {
+    return t('system.storage.chunk_delete_invalid_boundary');
+  }
+
+  return parsed.toLocaleString();
+}
+
+function parseChunkDeleteBoundaryToIso(value: string): string | null {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  const parsed = new Date(trimmed);
+  if (Number.isNaN(parsed.valueOf())) {
+    return null;
+  }
+
+  return parsed.toISOString();
+}
+
+function validateChunkDeleteRange(): { from: string | null; to: string | null } | null {
+  const fromIso = parseChunkDeleteBoundaryToIso(chunkDeleteFrom.value);
+  const toIso = parseChunkDeleteBoundaryToIso(chunkDeleteTo.value);
+
+  if (!fromIso && !toIso) {
+    toast.error(t('system.storage.chunk_delete_range_required'));
+    return null;
+  }
+
+  if ((chunkDeleteFrom.value && !fromIso) || (chunkDeleteTo.value && !toIso)) {
+    toast.error(t('system.storage.chunk_delete_range_invalid'));
+    return null;
+  }
+
+  if (fromIso && toIso && new Date(fromIso).valueOf() >= new Date(toIso).valueOf()) {
+    toast.error(t('system.storage.chunk_delete_range_invalid'));
+    return null;
+  }
+
+  return { from: fromIso, to: toIso };
+}
+
+function openDropChunksDialog() {
+  if (!validateChunkDeleteRange()) {
+    return;
+  }
+
+  isDropChunksDialogOpen.value = true;
+}
+
+async function confirmDropChunks() {
+  if (!authStore.isAdmin) {
+    return;
+  }
+
+  const range = validateChunkDeleteRange();
+  if (!range) {
+    return;
+  }
+
+  isDroppingChunks.value = true;
+
+  try {
+    const response = await SystemService.dropTimescaleDataPointChunks({
+      from: range.from,
+      to: range.to,
+    });
+    toast.success(t('system.storage.chunk_delete_success', { count: response.droppedChunkCount }));
+    isDropChunksDialogOpen.value = false;
+    await loadStorageData();
+  } catch (error) {
+    console.error('Failed to drop TimescaleDB datapoint chunks', error);
+    toast.error(t('system.storage.chunk_delete_error'));
+  } finally {
+    isDroppingChunks.value = false;
+  }
+}
+
+function openDeleteChunkDialog(chunk: TimescaleChunkRow) {
+  selectedChunkToDelete.value = chunk;
+  isDeleteChunkDialogOpen.value = true;
+}
+
+async function confirmDeleteChunk() {
+  if (!authStore.isAdmin || !selectedChunkToDelete.value) {
+    return;
+  }
+
+  isDeletingChunk.value = true;
+
+  try {
+    const chunk = selectedChunkToDelete.value;
+    const response = await SystemService.deleteTimescaleDataPointChunk(chunk.chunkSchema, chunk.chunkName);
+    toast.success(
+      t('system.storage.chunk_delete_single_success', {
+        chunk: `${chunk.chunkSchema}.${chunk.chunkName}`,
+        count: response.droppedChunkCount,
+      }),
+    );
+    isDeleteChunkDialogOpen.value = false;
+    selectedChunkToDelete.value = null;
+    await loadStorageData();
+  } catch (error) {
+    console.error('Failed to delete TimescaleDB datapoint chunk', error);
+    toast.error(t('system.storage.chunk_delete_single_error'));
+  } finally {
+    isDeletingChunk.value = false;
   }
 }
 
@@ -582,7 +940,11 @@ async function saveNodeSettings(options: { showSuccessToast?: boolean } = {}): P
   const trimmedHubToken = hubToken.value.trim();
   const normalizedSyncIntervalSeconds = Number(syncIntervalSeconds.value);
 
-  if (!Number.isInteger(normalizedSyncIntervalSeconds) || normalizedSyncIntervalSeconds < 1 || normalizedSyncIntervalSeconds > 86400) {
+  if (
+    !Number.isInteger(normalizedSyncIntervalSeconds) ||
+    normalizedSyncIntervalSeconds < 1 ||
+    normalizedSyncIntervalSeconds > 86400
+  ) {
     toast.error(t('system.node_settings.sync_interval_invalid'));
     return false;
   }
@@ -838,6 +1200,14 @@ onMounted(() => {
   }
 
   void loadNodeSettings();
+});
+
+watch(isChunkListExpanded, (expanded) => {
+  if (!expanded) {
+    return;
+  }
+
+  void loadChunks();
 });
 
 watch(nodeType, async (nextType, previousType) => {

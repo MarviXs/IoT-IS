@@ -2,6 +2,13 @@ import { client } from '@/api/client';
 import type { paths } from '@/api/generated/schema.d.ts';
 
 export type TimescaleStorageResponse = paths['/system/storage']['get']['responses']['200']['content']['application/json'];
+export type TimescaleChunksResponse = paths['/system/storage/chunks']['get']['responses']['200']['content']['application/json'];
+export type DropTimescaleDataPointChunksRequest =
+  paths['/system/storage/chunks/drop']['post']['requestBody']['content']['application/json'];
+export type DropTimescaleDataPointChunksResponse =
+  paths['/system/storage/chunks/drop']['post']['responses']['200']['content']['application/json'];
+export type DeleteTimescaleDataPointChunkResponse =
+  paths['/system/storage/chunks/{chunkSchema}/{chunkName}']['delete']['responses']['200']['content']['application/json'];
 export type SyncAllEdgeNodesNowResponse =
   paths['/system/edge-nodes/sync-all-now']['post']['responses']['200']['content']['application/json'];
 export type NodeSettingsResponse = paths['/system/node-settings']['get']['responses']['200']['content']['application/json'];
@@ -24,11 +31,45 @@ class SystemService {
     return data;
   }
 
+  async getTimescaleDataPointChunks(): Promise<TimescaleChunksResponse> {
+    const { data, error } = await client.GET('/system/storage/chunks');
+    if (error || !data) {
+      throw new Error('Failed to load TimescaleDB datapoint chunks');
+    }
+
+    return data;
+  }
+
   async forceReclaimTimescaleSpace(): Promise<void> {
     const { error } = await client.POST('/system/storage/vacuum');
     if (error) {
       throw new Error('Failed to run VACUUM on TimescaleDB datapoints table');
     }
+  }
+
+  async dropTimescaleDataPointChunks(request: DropTimescaleDataPointChunksRequest): Promise<DropTimescaleDataPointChunksResponse> {
+    const { data, error } = await client.POST('/system/storage/chunks/drop', { body: request });
+    if (error || !data) {
+      throw new Error('Failed to drop TimescaleDB datapoint chunks');
+    }
+
+    return data;
+  }
+
+  async deleteTimescaleDataPointChunk(chunkSchema: string, chunkName: string): Promise<DeleteTimescaleDataPointChunkResponse> {
+    const { data, error } = await client.DELETE('/system/storage/chunks/{chunkSchema}/{chunkName}', {
+      params: {
+        path: {
+          chunkSchema,
+          chunkName,
+        },
+      },
+    });
+    if (error || !data) {
+      throw new Error('Failed to delete TimescaleDB datapoint chunk');
+    }
+
+    return data;
   }
 
   async getNodeSettings(): Promise<NodeSettingsResponse> {
