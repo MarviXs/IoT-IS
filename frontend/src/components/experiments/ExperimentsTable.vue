@@ -41,6 +41,19 @@
     <template #body-cell-actions="propsActions">
       <q-td auto-width :props="propsActions">
         <q-btn
+          :disable="!getGraphRoute(propsActions.row)"
+          :icon="mdiChartLine"
+          color="grey-color"
+          flat
+          round
+          :to="getGraphRoute(propsActions.row)"
+        >
+          <q-tooltip content-style="font-size: 11px" :offset="[0, 4]">
+            <span v-if="getGraphRoute(propsActions.row)">{{ t('job.view_graph') }}</span>
+            <span v-else>{{ t('job.graph_unavailable') }}</span>
+          </q-tooltip>
+        </q-btn>
+        <q-btn
           v-if="canEdit(propsActions.row.ownerId)"
           :icon="mdiPencil"
           color="grey-color"
@@ -80,7 +93,7 @@
 import type { QTableProps } from 'quasar';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { mdiFileSearchOutline, mdiPencil, mdiTrashCan } from '@quasar/extras/mdi-v7';
+import { mdiChartLine, mdiFileSearchOutline, mdiPencil, mdiTrashCan } from '@quasar/extras/mdi-v7';
 import type { PaginationClient } from '@/models/Pagination';
 import type { ExperimentsResponse } from '@/api/services/ExperimentService';
 import type { PropType } from 'vue';
@@ -106,6 +119,7 @@ const { t, locale } = useI18n();
 const authStore = useAuthStore();
 
 const rows = computed(() => props.experiments?.items ?? []);
+type ExperimentTableRow = NonNullable<ExperimentsResponse['items']>[number];
 
 function formatDateTime(value?: string | null) {
   if (!value) {
@@ -134,6 +148,16 @@ function canEdit(ownerId?: string) {
   }
 
   return authStore.isAdmin || authStore.user?.id === ownerId;
+}
+
+function getGraphRoute(experiment: ExperimentTableRow) {
+  if (!experiment.ranJobId || !experiment.finishedAt) {
+    return undefined;
+  }
+
+  return {
+    path: `/jobs/${experiment.ranJobId}/graph`,
+  };
 }
 
 const columns = computed<QTableProps['columns']>(() => [

@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using System.Globalization;
 using Carter;
 using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
@@ -124,42 +123,20 @@ public static class CreateExperiment
             {
                 var startedAt = message.Request.StartedAt.Value;
                 var finishedAt = message.Request.FinishedAt.Value;
-                var tolerance = TimeSpan.FromMinutes(1);
-
-                var candidates = await context.Jobs
-                    .Where(j =>
-                        j.DeviceId == device.Id
-                        && j.StartedAt.HasValue
-                        && j.FinishedAt.HasValue
-                        && j.Status != JobStatusEnum.JOB_QUEUED
-                        && j.Status != JobStatusEnum.JOB_IN_PROGRESS
-                        && j.Status != JobStatusEnum.JOB_PAUSED
-                        && j.StartedAt >= startedAt - tolerance
-                        && j.StartedAt <= startedAt + tolerance
-                        && j.FinishedAt >= finishedAt - tolerance
-                        && j.FinishedAt <= finishedAt + tolerance
-                    )
-                    .ToListAsync(cancellationToken);
-
-                job = candidates
-                    .OrderBy(j =>
-                        Math.Abs((j.StartedAt!.Value - startedAt).TotalMilliseconds)
-                        + Math.Abs((j.FinishedAt!.Value - finishedAt).TotalMilliseconds)
-                    )
-                    .FirstOrDefault();
-
-                if (job == null)
+                job = new Job
                 {
-                    if (!message.Request.AllowCreateWithoutMatchedJob)
-                    {
-                        return Result.Fail(
-                            new ValidationError(
-                                "StartedAt",
-                                $"No finished job found for selected device around StartedAt={startedAt.ToString("O", CultureInfo.InvariantCulture)} and FinishedAt={finishedAt.ToString("O", CultureInfo.InvariantCulture)}."
-                            )
-                        );
-                    }
-                }
+                    DeviceId = device.Id,
+                    Name = $"Manual {startedAt:yyyy-MM-dd HH:mm:ss}",
+                    Status = JobStatusEnum.JOB_SUCCEEDED,
+                    CurrentStep = 0,
+                    TotalSteps = 0,
+                    CurrentCycle = 1,
+                    TotalCycles = 1,
+                    StartedAt = startedAt,
+                    FinishedAt = finishedAt
+                };
+
+                await context.Jobs.AddAsync(job, cancellationToken);
             }
 
             var experiment = new Experiment
