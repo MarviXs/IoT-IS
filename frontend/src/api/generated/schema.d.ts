@@ -362,11 +362,7 @@ export interface paths {
         get: operations["GetSensorDataPoints"];
         put?: never;
         post?: never;
-        /**
-         * Delete stored data points for a sensor
-         * @description Delete stored data points for a sensor within an optional time range and return the number of removed records.
-         */
-        delete: operations["DeleteSensorDataPoints"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -407,6 +403,26 @@ export interface paths {
          */
         post: operations["CreateDataPoints"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/devices/{deviceId}/data": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Delete stored data points for sensors
+         * @description Delete stored data points for selected sensors within an optional time range and return the number of removed records.
+         */
+        delete: operations["DeleteSensorDataPoints"];
         options?: never;
         head?: never;
         patch?: never;
@@ -2541,6 +2557,11 @@ export interface components {
         "Fei.Is.Api.Data.Enums.DeviceSharePermission": "Editor" | "Viewer";
         /** @enum {string} */
         "Fei.Is.Api.Data.Enums.DeviceType": "Generic" | "NuviaMSU";
+        /**
+         * Format: int32
+         * @enum {integer}
+         */
+        "Fei.Is.Api.Data.Enums.EdgeDataPointSyncMode": 0 | 1;
         /** @enum {string} */
         "Fei.Is.Api.Data.Enums.JobScheduleIntervalEnum": "Second" | "Minute" | "Hour" | "Day" | "Week";
         /** @enum {string} */
@@ -2555,11 +2576,6 @@ export interface components {
         "Fei.Is.Api.Data.Enums.Role": "Admin" | "User";
         /** @enum {string} */
         "Fei.Is.Api.Data.Enums.SceneActionType": "JOB" | "NOTIFICATION" | "DISCORD_NOTIFICATION";
-        /**
-         * Format: int32
-         * @enum {integer}
-         */
-        "Fei.Is.Api.Data.Enums.EdgeDataPointSyncMode": 0 | 1;
         /**
          * Format: int32
          * @enum {integer}
@@ -5416,48 +5432,6 @@ export interface operations {
             };
         };
     };
-    DeleteSensorDataPoints: {
-        parameters: {
-            query?: {
-                From?: string;
-                To?: string;
-            };
-            header?: never;
-            path: {
-                deviceId: string;
-                sensorTag: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Fei.Is.Api.Features.DataPoints.Commands.DeleteSensorDataPoints.Response"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     GetSensorDataPointsCount: {
         parameters: {
             query?: {
@@ -5521,6 +5495,48 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DeleteSensorDataPoints: {
+        parameters: {
+            query?: {
+                SensorTags?: string[];
+                From?: string;
+                To?: string;
+            };
+            header?: never;
+            path: {
+                deviceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fei.Is.Api.Features.DataPoints.Commands.DeleteSensorDataPoints.Response"];
+                };
             };
             /** @description Bad Request */
             400: {

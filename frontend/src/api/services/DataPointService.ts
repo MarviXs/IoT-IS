@@ -37,9 +37,9 @@ class DataPointService {
     });
   }
 
-  async deleteDataPoints(deviceId: string, sensorTag: string, query?: DeleteDataPointsQuery) {
-    return await client.DELETE('/devices/{deviceId}/sensors/{sensorTag}/data', {
-      params: { path: { deviceId, sensorTag }, query },
+  async deleteDataPoints(deviceId: string, sensorTags: string[], query?: { From?: string; To?: string }) {
+    return await client.DELETE('/devices/{deviceId}/data', {
+      params: { path: { deviceId }, query: { ...query, SensorTags: sensorTags } satisfies DeleteDataPointsQuery },
     });
   }
 }

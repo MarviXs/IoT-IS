@@ -815,23 +815,31 @@ async function submitDelete() {
   deleteLoading.value = true;
 
   try {
-    const deletions = sensors.map(async (sensor) => {
-      const query: DeleteDataPointsQuery = {};
+    const query: DeleteDataPointsQuery = {};
 
-      if (range !== 'all') {
-        if (range.from) {
-          query.From = new Date(range.from).toISOString();
-        }
-
-        if (range.to) {
-          query.To = new Date(range.to).toISOString();
-        }
+    if (range !== 'all') {
+      if (range.from) {
+        query.From = new Date(range.from).toISOString();
       }
 
-      const { data, error } = await DataPointService.deleteDataPoints(sensor.deviceId, sensor.tag, query);
+      if (range.to) {
+        query.To = new Date(range.to).toISOString();
+      }
+    }
+
+    const sensorTagsByDevice = new Map<string, Set<string>>();
+    for (const sensor of sensors) {
+      const tags = sensorTagsByDevice.get(sensor.deviceId) ?? new Set<string>();
+      tags.add(sensor.tag);
+      sensorTagsByDevice.set(sensor.deviceId, tags);
+    }
+
+    const deletions = Array.from(sensorTagsByDevice.entries()).map(async ([deviceId, sensorTags]) => {
+      const { data, error } = await DataPointService.deleteDataPoints(deviceId, Array.from(sensorTags), query);
 
       if (error) {
-        return -1;
+        console.error(error);
+        throw new Error(`Failed to delete datapoints for device ${deviceId}`);
       }
 
       return data?.deletedCount ?? 0;
@@ -1200,8 +1208,9 @@ watch(
 );
 
 watch(
-  () => props.sensors.map((sensor) => getSensorUniqueId(sensor)),
-  (currentKeys) => {
+  () => props.sensors.map((sensor) => getSensorUniqueId(sensor)).join(','),
+  (currentKeysCsv) => {
+    const currentKeys = currentKeysCsv ? currentKeysCsv.split(',') : [];
     deleteSelectedSensors.value = deleteSelectedSensors.value.filter((key) => currentKeys.includes(key));
 
     if (isDeleteDialogOpen.value) {
