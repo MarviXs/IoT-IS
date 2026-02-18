@@ -47,6 +47,39 @@
           <q-separator />
 
           <template v-if="isHubNodeMode">
+            <div class="column q-gutter-sm">
+              <div class="text-subtitle1">{{ t('system.node_settings.current_hub_api_url_title') }}</div>
+              <q-input
+                :model-value="currentHubApiUrl || '-'"
+                outlined
+                dense
+                readonly
+                :label="t('system.node_settings.current_hub_api_url_label')"
+              >
+                <template #append>
+                  <q-btn
+                    flat
+                    round
+                    dense
+                    color="primary"
+                    :icon="mdiContentCopy"
+                    :disable="!currentHubApiUrl"
+                    @click="copyCurrentHubApiUrl"
+                  >
+                    <q-tooltip>
+                      {{
+                        isCurrentHubApiUrlCopied
+                          ? t('system.node_settings.current_hub_api_url_copied')
+                          : t('system.node_settings.current_hub_api_url_copy')
+                      }}
+                    </q-tooltip>
+                  </q-btn>
+                </template>
+              </q-input>
+            </div>
+
+            <q-separator />
+
             <div class="row items-center justify-between">
               <div class="text-subtitle1">{{ t('system.node_settings.edge_nodes_title') }}</div>
               <div class="row items-center q-gutter-sm">
@@ -394,6 +427,7 @@ const syncIntervalSeconds = ref(10);
 const dataPointSyncMode = ref<EdgeDataPointSyncMode>(0);
 const edgeNodes = ref<EdgeNodeResponse[]>([]);
 const hubConnectionStatus = ref<HubConnectionStatusResponse | null>(null);
+const currentHubApiUrl = computed(() => (process.env.VITE_API_URL ?? '').trim());
 const isEdgeNodeDialogOpen = ref(false);
 const isDeleteEdgeNodeDialogOpen = ref(false);
 const isEdgeNodeSubmitting = ref(false);
@@ -403,6 +437,7 @@ const syncingEdgeNodeIds = ref<Record<string, boolean>>({});
 const deletingEdgeNodeId = ref<string | null>(null);
 const editingEdgeNodeId = ref<string | null>(null);
 const isEdgeNodeTokenCopied = ref(false);
+const isCurrentHubApiUrlCopied = ref(false);
 const edgeNodeTokenVisibility = ref<Record<string, boolean>>({});
 const edgeNodeForm = ref({
   name: '',
@@ -716,6 +751,18 @@ function copyEdgeNodeToken() {
   isEdgeNodeTokenCopied.value = true;
   setTimeout(() => {
     isEdgeNodeTokenCopied.value = false;
+  }, 2000);
+}
+
+function copyCurrentHubApiUrl() {
+  if (!currentHubApiUrl.value) {
+    return;
+  }
+
+  copyToClipboard(currentHubApiUrl.value);
+  isCurrentHubApiUrlCopied.value = true;
+  setTimeout(() => {
+    isCurrentHubApiUrlCopied.value = false;
   }, 2000);
 }
 
