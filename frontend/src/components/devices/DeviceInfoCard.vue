@@ -28,7 +28,7 @@
           <div class="col-4 text-grey-color">{{ t('device.mac_address') }}</div>
           <div class="col-8">{{ props.device.mac ?? '-' }}</div>
         </div> -->
-        <div class="row items-center q-mt-none">
+        <div v-if="!props.device.syncedFromEdge" class="row items-center q-mt-none">
           <div class="col-4 text-grey-color">{{ t('device.access_token') }}</div>
           <div class="col-8 row items-center">
             <div class="token-container">{{ isTokenVisible ? props.device.accessToken : maskedToken }}</div>

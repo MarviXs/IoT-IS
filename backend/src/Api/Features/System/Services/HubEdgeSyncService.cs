@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Security.Cryptography;
 using System.Text.Json;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models;
@@ -519,6 +520,8 @@ public class HubEdgeSyncService(AppDbContext appContext, RedisService redis, IHu
             }
         }
 
+        var reservedAccessTokens = new HashSet<string>(StringComparer.Ordinal);
+
         foreach (var payload in request.Devices)
         {
             var owner = ResolveOwner(payload.OwnerEmail, ownerLookup);
@@ -549,34 +552,21 @@ public class HubEdgeSyncService(AppDbContext appContext, RedisService redis, IHu
                     continue;
                 }
 
-                var accessTokenConflict = await appContext
-                    .Devices.AsNoTracking()
-                    .AnyAsync(candidate => candidate.Id != payload.Id && candidate.AccessToken == payload.AccessToken, cancellationToken);
-                if (accessTokenConflict)
+                device = existingDevice;
+                if (string.IsNullOrWhiteSpace(device.AccessToken))
                 {
-                    summary.DevicesConflicts++;
-                    continue;
+                    device.AccessToken = await GenerateUniqueDeviceAccessTokenAsync(reservedAccessTokens, cancellationToken);
                 }
 
-                device = existingDevice;
                 summary.DevicesUpdated++;
             }
             else
             {
-                var accessTokenConflict = await appContext
-                    .Devices.AsNoTracking()
-                    .AnyAsync(candidate => candidate.AccessToken == payload.AccessToken && candidate.Id != payload.Id, cancellationToken);
-                if (accessTokenConflict)
-                {
-                    summary.DevicesConflicts++;
-                    continue;
-                }
-
                 device = new Device
                 {
                     Id = payload.Id,
                     Name = payload.Name.Trim(),
-                    AccessToken = payload.AccessToken
+                    AccessToken = await GenerateUniqueDeviceAccessTokenAsync(reservedAccessTokens, cancellationToken)
                 };
                 await appContext.Devices.AddAsync(device, cancellationToken);
                 deviceById[device.Id] = device;
@@ -587,7 +577,6 @@ public class HubEdgeSyncService(AppDbContext appContext, RedisService redis, IHu
             device.Owner = owner;
             device.Name = payload.Name.Trim();
             device.Mac = payload.Mac;
-            device.AccessToken = payload.AccessToken;
             device.Protocol = payload.Protocol;
             device.DataPointRetentionDays = payload.DataPointRetentionDays;
             device.CurrentFirmwareVersion = payload.CurrentFirmwareVersion;
@@ -636,6 +625,27 @@ public class HubEdgeSyncService(AppDbContext appContext, RedisService redis, IHu
         );
 
         return edgeNode;
+    }
+
+    private async Task<string> GenerateUniqueDeviceAccessTokenAsync(HashSet<string> reservedTokens, CancellationToken cancellationToken)
+    {
+        while (true)
+        {
+            var token = Convert.ToHexString(RandomNumberGenerator.GetBytes(32)).ToLowerInvariant();
+            if (reservedTokens.Contains(token))
+            {
+                continue;
+            }
+
+            var exists = await appContext.Devices.AsNoTracking().AnyAsync(device => device.AccessToken == token, cancellationToken);
+            if (exists)
+            {
+                continue;
+            }
+
+            reservedTokens.Add(token);
+            return token;
+        }
     }
 
     private static int NormalizeVersion(int version)
