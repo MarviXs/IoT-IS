@@ -24,8 +24,8 @@ public class PublishJobControl(MqttClientService mqttClient, ILogger<PublishJobC
         builder.Finish(jobControl.Value);
         var buffer = builder.SizedByteArray();
 
-        var result = await mqttClient.PublishAsync(topic, buffer, MQTTnet.Protocol.MqttQualityOfServiceLevel.ExactlyOnce);
-        if (result.IsSuccess)
+        var isPublished = await mqttClient.TryPublishAsync(topic, buffer, MQTTnet.Protocol.MqttQualityOfServiceLevel.ExactlyOnce);
+        if (isPublished)
         {
             return Result.Ok();
         }

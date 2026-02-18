@@ -1,21 +1,22 @@
 using Fei.Is.Api.MqttClient.Subscribe;
 using MQTTnet;
 using MQTTnet.Client;
+using MQTTnet.Exceptions;
 using MQTTnet.Formatter;
 using MQTTnet.Protocol;
-using Org.BouncyCastle.Asn1.IsisMtt;
 
 namespace Fei.Is.Api.MqttClient;
 
 public class MqttClientService : IHostedService
 {
-    private readonly IMqttClient _mqttClient;
-    private readonly MqttClientOptions _mqttOptions;
+    private readonly IMqttClient? _mqttClient;
+    private readonly MqttClientOptions? _mqttOptions;
     private readonly IServiceScopeFactory _serviceScopeFactory;
 
     private readonly ILogger<MqttClientService> _logger;
 
     private readonly bool _isMqttEnabled = true;
+    private readonly TimeSpan _reconnectDelay = TimeSpan.FromSeconds(5);
 
     private CancellationTokenSource? _reconnectCancellationTokenSource;
     private Task? _reconnectTask;
@@ -55,12 +56,22 @@ public class MqttClientService : IHostedService
 
     private void ConfigureMqttClient()
     {
+        if (_mqttClient == null)
+        {
+            return;
+        }
+
         _mqttClient.ApplicationMessageReceivedAsync += ProcessMessageAsync;
         _mqttClient.DisconnectedAsync += args =>
         {
+            if (!args.ClientWasConnected)
+            {
+                return Task.CompletedTask;
+            }
+
             if (args.Exception != null)
             {
-                _logger.LogWarning(args.Exception, "MQTT client disconnected from broker. Attempting to reconnect...");
+                _logger.LogWarning("MQTT client disconnected from broker. Attempting to reconnect. Reason: {Reason}", args.Exception.Message);
             }
             else
             {
@@ -71,8 +82,13 @@ public class MqttClientService : IHostedService
         };
     }
 
-    public void Reconnect_Using_Timer(CancellationToken cancellationToken)
+    public void ReconnectUsingTimer(CancellationToken cancellationToken)
     {
+        if (_mqttClient == null || _mqttOptions == null)
+        {
+            return;
+        }
+
         _reconnectCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         var token = _reconnectCancellationTokenSource.Token;
 
@@ -86,23 +102,32 @@ public class MqttClientService : IHostedService
                         if (!_mqttClient.IsConnected)
                         {
                             await _mqttClient.ConnectAsync(_mqttOptions, token);
-                            await SubscribeToTopics();
+                            await SubscribeToTopics(token);
+                            _logger.LogInformation("Connected to MQTT broker.");
                         }
                     }
                     catch (OperationCanceledException) when (token.IsCancellationRequested)
                     {
                         break;
                     }
+                    catch (MqttCommunicationException ex)
+                    {
+                        _logger.LogWarning(
+                            "Failed to connect to MQTT broker. Retrying in {RetryDelaySeconds} seconds. Reason: {Reason}",
+                            _reconnectDelay.TotalSeconds,
+                            ex.Message
+                        );
+                    }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "Failed to connect to MQTT broker. Retrying in 5 seconds...");
+                        _logger.LogWarning(ex, "Unexpected error while connecting to MQTT broker. Retrying in {RetryDelaySeconds} seconds...", _reconnectDelay.TotalSeconds);
                     }
 
                     try
                     {
-                        await Task.Delay(TimeSpan.FromSeconds(5), token);
+                        await Task.Delay(_reconnectDelay, token);
                     }
-                    catch (TaskCanceledException)
+                    catch (OperationCanceledException)
                     {
                         break;
                     }
@@ -160,13 +185,14 @@ public class MqttClientService : IHostedService
             _logger.LogWarning("MQTT is disabled. Skipping MQTT client startup.");
             return Task.CompletedTask;
         }
-        Reconnect_Using_Timer(cancellationToken);
+
+        ReconnectUsingTimer(cancellationToken);
         return Task.CompletedTask;
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        if (!_isMqttEnabled)
+        if (!_isMqttEnabled || _mqttClient == null)
         {
             return;
         }
@@ -178,15 +204,43 @@ public class MqttClientService : IHostedService
 
         if (_reconnectTask != null)
         {
-            await _reconnectTask;
+            try
+            {
+                await _reconnectTask;
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Reconnect task stopped with an error.");
+            }
         }
 
-        await _mqttClient.DisconnectAsync();
-        _reconnectCancellationTokenSource?.Dispose();
+        try
+        {
+            if (_mqttClient.IsConnected)
+            {
+                await _mqttClient.DisconnectAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to disconnect MQTT client cleanly.");
+        }
+        finally
+        {
+            _reconnectCancellationTokenSource?.Dispose();
+        }
     }
 
-    private async Task SubscribeToTopics()
+    private async Task SubscribeToTopics(CancellationToken cancellationToken)
     {
+        if (_mqttClient == null)
+        {
+            return;
+        }
+
         var subscribeOptions = new MqttClientSubscribeOptionsBuilder()
             .WithTopicFilter("devices/+/data", MqttQualityOfServiceLevel.AtLeastOnce)
             .WithTopicFilter("devices/+/job_from_device", MqttQualityOfServiceLevel.AtLeastOnce)
@@ -194,17 +248,29 @@ public class MqttClientService : IHostedService
             .WithTopicFilter("$SYS/brokers/+/clients/+/disconnected", MqttQualityOfServiceLevel.AtLeastOnce)
             .Build();
 
-        await _mqttClient.SubscribeAsync(subscribeOptions, CancellationToken.None);
+        await _mqttClient.SubscribeAsync(subscribeOptions, cancellationToken);
         _logger.LogInformation("Subscribed to MQTT topics");
     }
 
-    public async Task<MqttClientPublishResult> PublishAsync(
+    public async Task<bool> TryPublishAsync(
         string topic,
         byte[] payload,
         MqttQualityOfServiceLevel qos = MqttQualityOfServiceLevel.AtLeastOnce,
         bool retain = false
     )
     {
+        if (!_isMqttEnabled || _mqttClient == null)
+        {
+            _logger.LogWarning("Skipping MQTT publish because MQTT is disabled.");
+            return false;
+        }
+
+        if (!_mqttClient.IsConnected)
+        {
+            _logger.LogWarning("Skipping MQTT publish for topic {Topic} because MQTT client is not connected.", topic);
+            return false;
+        }
+
         var message = new MqttApplicationMessageBuilder()
             .WithTopic(topic)
             .WithPayload(payload)
@@ -212,6 +278,20 @@ public class MqttClientService : IHostedService
             .WithRetainFlag(retain)
             .Build();
 
-        return await _mqttClient.PublishAsync(message);
+        try
+        {
+            var result = await _mqttClient.PublishAsync(message);
+            if (!result.IsSuccess)
+            {
+                _logger.LogWarning("MQTT publish failed for topic {Topic}.", topic);
+            }
+
+            return result.IsSuccess;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "MQTT publish threw an exception for topic {Topic}.", topic);
+            return false;
+        }
     }
 }
