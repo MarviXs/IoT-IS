@@ -51,6 +51,9 @@
               {{ props.row.name }}
             </RouterLink>
             <span v-else>{{ props.row.name }}</span>
+            <q-badge v-if="isSyncedFromEdge(props.row)" class="q-ml-sm" color="grey-6" text-color="white">
+              {{ getSyncedFromEdgeLabel(props.row) }}
+            </q-badge>
           </q-td>
         </template>
 
@@ -129,6 +132,7 @@ const pagination = ref<PaginationClient>({
 });
 const templatesPaginated = ref<DeviceTemplatesResponse>();
 const templates = computed(() => templatesPaginated.value?.items ?? []);
+type TemplateListItem = NonNullable<DeviceTemplatesResponse['items']>[number];
 
 const importTemplateDialogOpen = ref(false);
 
@@ -199,6 +203,22 @@ function slugify(value: string) {
     .trim()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '') || 'device-template';
+}
+
+function isSyncedFromEdge(template: TemplateListItem): boolean {
+  return template.syncedFromEdge === true;
+}
+
+function getSyncedFromEdgeLabel(template: TemplateListItem): string {
+  if (!isSyncedFromEdge(template)) {
+    return '';
+  }
+
+  if (template.syncedFromEdgeNodeName) {
+    return t('device.synced_from_edge_with_name', { name: template.syncedFromEdgeNodeName });
+  }
+
+  return t('device.synced_from_edge');
 }
 
 const columns = computed<QTableProps['columns']>(() => [

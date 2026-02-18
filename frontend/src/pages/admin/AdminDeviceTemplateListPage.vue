@@ -48,6 +48,9 @@
         <template #body-cell-name="props">
           <q-td :props="props">
             <RouterLink :to="`/device-templates/${props.row.id}`">{{ props.row.name }}</RouterLink>
+            <q-badge v-if="isSyncedFromEdge(props.row)" class="q-ml-sm" color="grey-6" text-color="white">
+              {{ getSyncedFromEdgeLabel(props.row) }}
+            </q-badge>
           </q-td>
         </template>
 
@@ -169,6 +172,7 @@ const pagination = ref<PaginationClient>({
 
 const templatesPaginated = ref<AdminDeviceTemplatesResponse>();
 const templates = computed(() => templatesPaginated.value?.items ?? []);
+type AdminTemplateListItem = NonNullable<AdminDeviceTemplatesResponse['items']>[number];
 
 const importTemplateDialogOpen = ref(false);
 
@@ -272,6 +276,22 @@ function slugify(value: string) {
     .trim()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '') || 'device-template';
+}
+
+function isSyncedFromEdge(template: AdminTemplateListItem): boolean {
+  return template.syncedFromEdge === true;
+}
+
+function getSyncedFromEdgeLabel(template: AdminTemplateListItem): string {
+  if (!isSyncedFromEdge(template)) {
+    return '';
+  }
+
+  if (template.syncedFromEdgeNodeName) {
+    return t('device.synced_from_edge_with_name', { name: template.syncedFromEdgeNodeName });
+  }
+
+  return t('device.synced_from_edge');
 }
 
 function canEditTemplate(template: NonNullable<AdminDeviceTemplatesResponse['items']>[number]): boolean {
