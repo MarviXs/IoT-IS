@@ -197,7 +197,7 @@ public class HubEdgeSyncService(AppDbContext appContext, RedisService redis, IHu
 
             foreach (var streamEntries in streamEntriesBatch)
             {
-                redisTasks.Add(redis.Db.StreamAddAsync("datapoints", streamEntries, maxLength: 500000));
+                redisTasks.Add(redis.Db.StreamAddAsync("datapoints", streamEntries, maxLength: 2000000));
             }
 
             foreach (var deviceIdString in touchedDevices)
