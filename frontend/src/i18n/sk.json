@@ -183,7 +183,7 @@
       "chunk_list_empty": "Neboli nájdené žiadne chunky.",
       "chunk_list_load_error": "Nepodarilo sa načítať chunky TimescaleDB.",
       "chunk_list_range": "Rozsah: {from} -> {to}",
-      "chunk_list_size": "Veľkosť: {size} ({bytes} bajtov)",
+      "chunk_list_size": "Veľkosť: {size}",
       "chunk_delete_single_confirm_title": "Vymazať vybraný chunk",
       "chunk_delete_single_confirm_body": "Táto akcia natrvalo vymaže tento chunk.",
       "chunk_delete_single_success": "Chunk {chunk} bol vymazaný (odstránených: {count}).",

@@ -63,7 +63,7 @@ public static class GetTimescaleDataPointChunks
             LEFT JOIN chunks_detailed_size('"DataPoints"'::regclass) s
                 ON s.chunk_schema = c.chunk_schema AND s.chunk_name = c.chunk_name
             WHERE c.hypertable_schema = 'public' AND c.hypertable_name = 'DataPoints'
-            ORDER BY c.range_start DESC, c.chunk_name DESC;
+            ORDER BY c.range_start ASC NULLS LAST, c.chunk_name ASC;
             """;
 
         public async Task<IReadOnlyCollection<Response>> Handle(Query request, CancellationToken cancellationToken)

@@ -372,7 +372,6 @@
                       {{
                         t('system.storage.chunk_list_size', {
                           size: formatBytes(chunk.totalBytes),
-                          bytes: chunk.totalBytes.toLocaleString(),
                         })
                       }}
                     </q-item-label>
@@ -534,14 +533,13 @@
               })
             }}
           </div>
-          <div v-if="selectedChunkToDelete" class="text-caption text-secondary">
-            {{
-              t('system.storage.chunk_list_size', {
-                size: formatBytes(selectedChunkToDelete.totalBytes),
-                bytes: selectedChunkToDelete.totalBytes.toLocaleString(),
-              })
-            }}
-          </div>
+            <div v-if="selectedChunkToDelete" class="text-caption text-secondary">
+              {{
+                t('system.storage.chunk_list_size', {
+                  size: formatBytes(selectedChunkToDelete.totalBytes),
+                })
+              }}
+            </div>
         </q-card-section>
         <q-card-actions align="right">
           <q-btn

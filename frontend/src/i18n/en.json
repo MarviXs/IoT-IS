@@ -187,7 +187,7 @@
       "chunk_list_empty": "No chunks found.",
       "chunk_list_load_error": "Failed to load TimescaleDB chunks.",
       "chunk_list_range": "Range: {from} -> {to}",
-      "chunk_list_size": "Size: {size} ({bytes} bytes)",
+      "chunk_list_size": "Size: {size}",
       "chunk_delete_single_confirm_title": "Delete selected chunk",
       "chunk_delete_single_confirm_body": "This action permanently deletes this chunk.",
       "chunk_delete_single_success": "Deleted chunk {chunk} ({count} dropped).",
