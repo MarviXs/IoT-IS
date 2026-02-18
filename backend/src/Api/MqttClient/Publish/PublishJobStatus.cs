@@ -58,9 +58,8 @@ public class PublishJobStatus(MqttClientService mqttClient, AppDbContext context
         builder.Finish(jobFbs.Value);
 
         var buffer = builder.SizedByteArray();
-        var result = await mqttClient.PublishAsync(topic, buffer);
-
-        if (result.IsSuccess)
+        var isPublished = await mqttClient.TryPublishAsync(topic, buffer);
+        if (isPublished)
         {
             return Result.Ok();
         }
