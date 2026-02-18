@@ -102,6 +102,10 @@ public class HubEdgeSyncService(
 
         var accepted = 0;
         var skipped = 0;
+        var streamEntriesBatch = new List<NameValueEntry[]>(request.Datapoints.Count);
+        var latestBySensorKey = new Dictionary<string, string>(StringComparer.Ordinal);
+        var touchedDevices = new HashSet<string>();
+        var notifications = new List<SensorLastDataPointDto>(request.Datapoints.Count);
 
         foreach (var incoming in request.Datapoints)
         {
@@ -156,13 +160,8 @@ public class HubEdgeSyncService(
                 streamEntries.Add(new("grid_y", incoming.GridY!.Value.ToString(CultureInfo.InvariantCulture)));
             }
 
-            await redis.Db.StreamAddAsync("datapoints", streamEntries.ToArray(), maxLength: 500000);
-            await redis.Db.StringSetAsync($"device:{deviceIdString}:connected", "1", TimeSpan.FromMinutes(30), flags: CommandFlags.FireAndForget);
-            await redis.Db.StringSetAsync(
-                $"device:{deviceIdString}:lastSeen",
-                now.ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture),
-                flags: CommandFlags.FireAndForget
-            );
+            streamEntriesBatch.Add(streamEntries.ToArray());
+            touchedDevices.Add(deviceIdString);
 
             var latest = new GetLatestDataPoints.Response(
                 timestamp,
@@ -172,29 +171,68 @@ public class HubEdgeSyncService(
                 incoming.HasGridX ? incoming.GridX : null,
                 incoming.HasGridY ? incoming.GridY : null
             );
-            await redis.Db.StringSetAsync(
-                $"device:{deviceIdString}:{incoming.SensorTag}:last",
-                JsonSerializer.Serialize(latest),
-                TimeSpan.FromHours(1),
-                flags: CommandFlags.FireAndForget
+            latestBySensorKey[$"device:{deviceIdString}:{incoming.SensorTag}:last"] = JsonSerializer.Serialize(latest);
+            notifications.Add(
+                new SensorLastDataPointDto(
+                    deviceIdString,
+                    incoming.SensorTag,
+                    incoming.Value,
+                    incoming.HasLatitude ? incoming.Latitude : null,
+                    incoming.HasLongitude ? incoming.Longitude : null,
+                    incoming.HasGridX ? incoming.GridX : null,
+                    incoming.HasGridY ? incoming.GridY : null,
+                    timestamp
+                )
             );
 
-            await hubContext
-                .Clients.Group(deviceIdString)
-                .ReceiveSensorLastDataPoint(
-                    new SensorLastDataPointDto(
-                        deviceIdString,
-                        incoming.SensorTag,
-                        incoming.Value,
-                        incoming.HasLatitude ? incoming.Latitude : null,
-                        incoming.HasLongitude ? incoming.Longitude : null,
-                        incoming.HasGridX ? incoming.GridX : null,
-                        incoming.HasGridY ? incoming.GridY : null,
-                        timestamp
+            accepted++;
+        }
+
+        if (accepted > 0)
+        {
+            var nowUnixSeconds = now.ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture);
+            var redisTasks = new List<Task>(streamEntriesBatch.Count + touchedDevices.Count * 2 + latestBySensorKey.Count);
+
+            foreach (var streamEntries in streamEntriesBatch)
+            {
+                redisTasks.Add(redis.Db.StreamAddAsync("datapoints", streamEntries, maxLength: 500000));
+            }
+
+            foreach (var deviceIdString in touchedDevices)
+            {
+                redisTasks.Add(
+                    redis.Db.StringSetAsync(
+                        $"device:{deviceIdString}:connected",
+                        "1",
+                        TimeSpan.FromMinutes(30),
+                        flags: CommandFlags.FireAndForget
                     )
                 );
+                redisTasks.Add(
+                    redis.Db.StringSetAsync(
+                        $"device:{deviceIdString}:lastSeen",
+                        nowUnixSeconds,
+                        flags: CommandFlags.FireAndForget
+                    )
+                );
+            }
 
-            accepted++;
+            foreach (var latestEntry in latestBySensorKey)
+            {
+                redisTasks.Add(
+                    redis.Db.StringSetAsync(
+                        latestEntry.Key,
+                        latestEntry.Value,
+                        TimeSpan.FromHours(1),
+                        flags: CommandFlags.FireAndForget
+                    )
+                );
+            }
+
+            await Task.WhenAll(redisTasks);
+
+            await Task.WhenAll(notifications.Select(notification =>
+                hubContext.Clients.Group(notification.DeviceId).ReceiveSensorLastDataPoint(notification)));
         }
 
         return new SyncDataPointsResponse

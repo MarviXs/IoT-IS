@@ -17,6 +17,7 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
     private const string GroupName = "edge_hub_sync";
     private const int MaxPendingTimeUnclaimed = 20000;
     private const int DefaultSyncSeconds = 5;
+    private const int SyncBatchSize = 10000;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -63,17 +64,14 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
                     consumerName,
                     MaxPendingTimeUnclaimed,
                     "0-0",
-                    5000
+                    SyncBatchSize
                 );
-                var messages = await redis.Db.StreamReadGroupAsync(StreamName, GroupName, consumerName, ">");
+                var messages = await redis.Db.StreamReadGroupAsync(StreamName, GroupName, consumerName, ">", SyncBatchSize);
                 messages = [.. messages, .. autoClaimResult.ClaimedEntries];
 
                 var edgeMetadataVersion = await metadataVersionService.GetCurrentVersionAsync(stoppingToken);
-                var request = new SyncDataPointsRequest
-                {
-                    EdgeMetadataVersion = edgeMetadataVersion
-                };
-                var ackIds = new List<RedisValue>();
+                var validDataPoints = new List<(RedisValue AckId, HubDataPoint Datapoint)>();
+                var invalidAckIds = new List<RedisValue>();
 
                 if (messages.Length > 0)
                 {
@@ -99,7 +97,6 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
                         try
                         {
                             var parsed = ParseResult(message);
-                            ackIds.Add(message.Id);
 
                             if (
                                 !parsed.TryGetValue("device_id", out var rawDeviceId)
@@ -107,11 +104,13 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
                                 || !existingDeviceSet.Contains(deviceId)
                             )
                             {
+                                invalidAckIds.Add(message.Id);
                                 continue;
                             }
 
                             if (!parsed.TryGetValue("sensor_tag", out var sensorTag) || string.IsNullOrWhiteSpace(sensorTag))
                             {
+                                invalidAckIds.Add(message.Id);
                                 continue;
                             }
 
@@ -122,6 +121,7 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
                                 || double.IsInfinity(value)
                             )
                             {
+                                invalidAckIds.Add(message.Id);
                                 continue;
                             }
 
@@ -170,59 +170,85 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
                                 gridY = parsedGridY;
                             }
 
-                            request.Datapoints.Add(
-                                new HubDataPoint
-                                {
-                                    DeviceId = deviceId.ToString(),
-                                    SensorTag = sensorTag,
-                                    Value = value,
-                                    TimestampUnixMs = timestampUnixMs,
-                                    Latitude = latitude,
-                                    Longitude = longitude,
-                                    GridX = gridX,
-                                    GridY = gridY
-                                }
+                            validDataPoints.Add(
+                                (
+                                    message.Id,
+                                    new HubDataPoint
+                                    {
+                                        DeviceId = deviceId.ToString(),
+                                        SensorTag = sensorTag,
+                                        Value = value,
+                                        TimestampUnixMs = timestampUnixMs,
+                                        Latitude = latitude,
+                                        Longitude = longitude,
+                                        GridX = gridX,
+                                        GridY = gridY
+                                    }
+                                )
                             );
                         }
                         catch (Exception parseException)
                         {
                             logger.LogWarning(parseException, "Failed to parse datapoint stream message for edge hub sync: {MessageId}", message.Id);
+                            invalidAckIds.Add(message.Id);
                         }
                     }
                 }
 
                 var client = hubApiClientFactory.Create(settings.HubUrl!, settings.HubToken!);
-                var datapointResponse = await SendDatapointSyncRequestAsync(client, request, stoppingToken);
-                if (datapointResponse == null)
-                {
-                    continue;
-                }
+                var syncCompleted = true;
+                var datapointResponse = default(SyncDataPointsResponse?);
 
-                if (datapointResponse.RequiresMetadataSync)
+                if (validDataPoints.Count == 0)
                 {
-                    var metadataRequest = await metadataSnapshotService.BuildSnapshotAsync(
+                    var emptyBatchResponse = await SendDatapointBatchWithMetadataRetryAsync(
+                        client,
+                        new SyncDataPointsRequest
+                        {
+                            EdgeMetadataVersion = edgeMetadataVersion
+                        },
                         edgeMetadataVersion,
-                        datapointResponse.RequiresFullMetadataSync,
+                        metadataSnapshotService,
                         stoppingToken
                     );
-                    var metadataSyncSucceeded = await SendMetadataSyncRequestAsync(client, metadataRequest, stoppingToken);
-                    if (!metadataSyncSucceeded)
+                    if (emptyBatchResponse == null || !emptyBatchResponse.DatapointsProcessed)
                     {
                         continue;
                     }
 
-                    await metadataSnapshotService.MarkMetadataSyncAppliedAsync(metadataRequest.EdgeMetadataVersion, stoppingToken);
-
-                    datapointResponse = await SendDatapointSyncRequestAsync(client, request, stoppingToken);
-                    if (datapointResponse == null)
+                    datapointResponse = emptyBatchResponse;
+                }
+                else
+                {
+                    foreach (var datapointBatch in validDataPoints.Chunk(SyncBatchSize))
                     {
-                        continue;
+                        var batchRequest = new SyncDataPointsRequest
+                        {
+                            EdgeMetadataVersion = edgeMetadataVersion,
+                            Datapoints = datapointBatch.Select(x => x.Datapoint).ToList()
+                        };
+
+                        var batchResponse = await SendDatapointBatchWithMetadataRetryAsync(
+                            client,
+                            batchRequest,
+                            edgeMetadataVersion,
+                            metadataSnapshotService,
+                            stoppingToken
+                        );
+                        if (batchResponse == null || !batchResponse.DatapointsProcessed)
+                        {
+                            syncCompleted = false;
+                            break;
+                        }
+
+                        datapointResponse = batchResponse;
+                        await redis.Db.StreamAcknowledgeAsync(StreamName, GroupName, datapointBatch.Select(x => x.AckId).ToArray());
                     }
                 }
 
                 delaySeconds = configuredSyncIntervalSeconds;
 
-                if (!datapointResponse.DatapointsProcessed)
+                if (!syncCompleted || datapointResponse is null || !datapointResponse.DatapointsProcessed)
                 {
                     continue;
                 }
@@ -240,9 +266,9 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
                     flags: CommandFlags.FireAndForget
                 );
 
-                if (ackIds.Count > 0)
+                if (invalidAckIds.Count > 0)
                 {
-                    await redis.Db.StreamAcknowledgeAsync(StreamName, GroupName, [.. ackIds]);
+                    await redis.Db.StreamAcknowledgeAsync(StreamName, GroupName, [.. invalidAckIds]);
                 }
             }
             catch (HttpRequestException requestException)
@@ -280,6 +306,40 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
         }
 
         return response;
+    }
+
+    private async Task<SyncDataPointsResponse?> SendDatapointBatchWithMetadataRetryAsync(
+        HttpClient client,
+        SyncDataPointsRequest request,
+        int edgeMetadataVersion,
+        EdgeHubMetadataSnapshotService metadataSnapshotService,
+        CancellationToken cancellationToken
+    )
+    {
+        var datapointResponse = await SendDatapointSyncRequestAsync(client, request, cancellationToken);
+        if (datapointResponse == null)
+        {
+            return null;
+        }
+
+        if (!datapointResponse.RequiresMetadataSync)
+        {
+            return datapointResponse;
+        }
+
+        var metadataRequest = await metadataSnapshotService.BuildSnapshotAsync(
+            edgeMetadataVersion,
+            datapointResponse.RequiresFullMetadataSync,
+            cancellationToken
+        );
+        var metadataSyncSucceeded = await SendMetadataSyncRequestAsync(client, metadataRequest, cancellationToken);
+        if (!metadataSyncSucceeded)
+        {
+            return null;
+        }
+
+        await metadataSnapshotService.MarkMetadataSyncAppliedAsync(metadataRequest.EdgeMetadataVersion, cancellationToken);
+        return await SendDatapointSyncRequestAsync(client, request, cancellationToken);
     }
 
     private async Task<bool> SendMetadataSyncRequestAsync(HttpClient client, SyncMetadataRequest request, CancellationToken cancellationToken)
