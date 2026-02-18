@@ -111,11 +111,19 @@ const sensors = computed<SensorData[]>(() => {
   }));
 });
 
-const breadcrumbs = computed(() => [
-  { label: t('job.label', 2), to: '/jobs' },
-  { label: job.value?.name ?? jobId.value, to: `/jobs/${jobId.value}` },
-  { label: t('job.graph') },
-]);
+const isFromExperiments = computed(() => route.query.from === 'experiments');
+
+const breadcrumbs = computed(() => {
+  if (isFromExperiments.value) {
+    return [{ label: t('experiment.label', 2), to: '/experiments' }, { label: t('job.graph') }];
+  }
+
+  return [
+    { label: t('job.label', 2), to: '/jobs' },
+    { label: job.value?.name ?? jobId.value, to: `/jobs/${jobId.value}` },
+    { label: t('job.graph') },
+  ];
+});
 
 function formatDate(date: string | undefined) {
   if (!date) {

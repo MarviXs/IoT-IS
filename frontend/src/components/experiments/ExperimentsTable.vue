@@ -157,6 +157,9 @@ function getGraphRoute(experiment: ExperimentTableRow) {
 
   return {
     path: `/jobs/${experiment.ranJobId}/graph`,
+    query: {
+      from: 'experiments',
+    },
   };
 }
 
