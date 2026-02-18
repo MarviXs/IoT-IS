@@ -14,5 +14,7 @@ public class SystemNodeSettingConfiguration : IEntityTypeConfiguration<SystemNod
         builder.Property(setting => setting.HubToken).HasMaxLength(256);
         builder.Property(setting => setting.SyncIntervalSeconds).IsRequired().HasDefaultValue(5);
         builder.Property(setting => setting.DataPointSyncMode).IsRequired().HasDefaultValue(EdgeDataPointSyncMode.OnlyNew);
+        builder.Property(setting => setting.BackfillCursorOffset).IsRequired().HasDefaultValue(0);
+        builder.Property(setting => setting.BackfillCompleted).IsRequired().HasDefaultValue(false);
     }
 }

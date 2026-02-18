@@ -9,4 +9,8 @@ public class SystemNodeSetting : BaseModel
     public string? HubToken { get; set; }
     public int SyncIntervalSeconds { get; set; } = 5;
     public EdgeDataPointSyncMode DataPointSyncMode { get; set; } = EdgeDataPointSyncMode.OnlyNew;
+    public long? BackfillCutoffUnixMs { get; set; }
+    public long? BackfillCursorTimestampUnixMs { get; set; }
+    public int BackfillCursorOffset { get; set; } = 0;
+    public bool BackfillCompleted { get; set; } = false;
 }

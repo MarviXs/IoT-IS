@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Http.Json;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Enums;
+using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Features.System.Services;
 using Fei.Is.Api.Redis;
 using Microsoft.EntityFrameworkCore;
@@ -18,12 +19,6 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
     private const int MaxPendingTimeUnclaimed = 20000;
     private const int DefaultSyncSeconds = 5;
     private const int SyncBatchSize = 10000;
-    private const string SyncModeStateKey = "edge:hub:datapoints:sync-mode";
-    private const string BackfillCutoffKey = "edge:hub:datapoints:backfill:cutoff-ms";
-    private const string BackfillCursorTimestampMsKey = "edge:hub:datapoints:backfill:cursor:timestamp-ms";
-    private const string BackfillCursorOffsetKey = "edge:hub:datapoints:backfill:cursor:offset";
-    private const string BackfillCompletedKey = "edge:hub:datapoints:backfill:completed";
-    private static readonly TimeSpan BackfillStateTtl = TimeSpan.FromDays(30);
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -57,7 +52,10 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
                 var configuredSyncIntervalSeconds = settings.SyncIntervalSeconds > 0 ? settings.SyncIntervalSeconds : DefaultSyncSeconds;
                 delaySeconds = configuredSyncIntervalSeconds;
                 var dataPointSyncMode = NormalizeSyncMode(settings.DataPointSyncMode);
-                await EnsureBackfillStateAsync(redis, dataPointSyncMode);
+                if (EnsureBackfillState(settings, dataPointSyncMode))
+                {
+                    await appContext.SaveChangesAsync(stoppingToken);
+                }
 
                 if (
                     !await redis.Db.KeyExistsAsync(StreamName)
@@ -85,7 +83,7 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
 
                 if (dataPointSyncMode == EdgeDataPointSyncMode.AllDatapoints)
                 {
-                    var backfillBatch = await BuildTimescaleBackfillBatchAsync(timescaleContext, redis, edgeMetadataVersion, stoppingToken);
+                    var backfillBatch = await BuildTimescaleBackfillBatchAsync(timescaleContext, settings, edgeMetadataVersion, stoppingToken);
                     if (backfillBatch.HasRows)
                     {
                         if (backfillBatch.Request.Datapoints.Count > 0)
@@ -107,17 +105,18 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
 
                         if (backfillBatch.LastTimestampUnixMs.HasValue)
                         {
-                            await SaveBackfillCursorAsync(
-                                redis,
+                            SaveBackfillCursor(
+                                settings,
                                 backfillBatch.LastTimestampUnixMs.Value,
                                 backfillBatch.NextTimestampOffset
                             );
+                            await appContext.SaveChangesAsync(stoppingToken);
                         }
                     }
 
-                    if (backfillBatch.MarkCompleted)
+                    if (backfillBatch.MarkCompleted && MarkBackfillCompleted(settings))
                     {
-                        await MarkBackfillCompletedAsync(redis);
+                        await appContext.SaveChangesAsync(stoppingToken);
                     }
                 }
 
@@ -411,37 +410,24 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
         return true;
     }
 
-    private async Task EnsureBackfillStateAsync(RedisService redis, EdgeDataPointSyncMode mode)
+    private static bool EnsureBackfillState(SystemNodeSetting settings, EdgeDataPointSyncMode mode)
     {
         var normalizedMode = NormalizeSyncMode(mode);
-        var previousModeValue = await redis.Db.StringGetAsync(SyncModeStateKey);
-        var previousMode = TryParseSyncMode(previousModeValue);
-        await redis.Db.StringSetAsync(
-            SyncModeStateKey,
-            ((int)normalizedMode).ToString(CultureInfo.InvariantCulture),
-            BackfillStateTtl
-        );
-
         if (normalizedMode == EdgeDataPointSyncMode.OnlyNew)
         {
-            if (previousMode == EdgeDataPointSyncMode.AllDatapoints)
-            {
-                await ClearBackfillStateAsync(redis);
-            }
-
-            return;
+            return ClearBackfillState(settings);
         }
 
-        if (previousMode == EdgeDataPointSyncMode.AllDatapoints && await redis.Db.KeyExistsAsync(BackfillCutoffKey))
+        if (settings.BackfillCutoffUnixMs.HasValue)
         {
-            return;
+            return false;
         }
 
-        var cutoffUnixMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
-        await redis.Db.StringSetAsync(BackfillCutoffKey, cutoffUnixMs, BackfillStateTtl);
-        await redis.Db.StringSetAsync(BackfillCursorOffsetKey, "0", BackfillStateTtl);
-        await redis.Db.KeyDeleteAsync(BackfillCursorTimestampMsKey);
-        await redis.Db.StringSetAsync(BackfillCompletedKey, "0", BackfillStateTtl);
+        settings.BackfillCutoffUnixMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        settings.BackfillCursorTimestampUnixMs = null;
+        settings.BackfillCursorOffset = 0;
+        settings.BackfillCompleted = false;
+        return true;
     }
 
     private static EdgeDataPointSyncMode NormalizeSyncMode(EdgeDataPointSyncMode mode)
@@ -449,56 +435,32 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
         return mode == EdgeDataPointSyncMode.AllDatapoints ? EdgeDataPointSyncMode.AllDatapoints : EdgeDataPointSyncMode.OnlyNew;
     }
 
-    private static EdgeDataPointSyncMode? TryParseSyncMode(RedisValue value)
-    {
-        return value.HasValue
-            && int.TryParse(value.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed)
-            && Enum.IsDefined(typeof(EdgeDataPointSyncMode), parsed)
-            ? (EdgeDataPointSyncMode)parsed
-            : null;
-    }
-
     private async Task<BackfillBatchResult> BuildTimescaleBackfillBatchAsync(
         TimeScaleDbContext timescaleContext,
-        RedisService redis,
+        SystemNodeSetting settings,
         int edgeMetadataVersion,
         CancellationToken cancellationToken
     )
     {
-        var completedValue = await redis.Db.StringGetAsync(BackfillCompletedKey);
-        if (
-            completedValue.HasValue
-            && int.TryParse(completedValue.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var isCompleted)
-            && isCompleted == 1
-        )
+        if (settings.BackfillCompleted)
         {
             return BackfillBatchResult.Empty(markCompleted: false);
         }
 
-        var cutoffValue = await redis.Db.StringGetAsync(BackfillCutoffKey);
-        if (!cutoffValue.HasValue || !long.TryParse(cutoffValue.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var cutoffUnixMs))
+        if (!settings.BackfillCutoffUnixMs.HasValue)
         {
             return BackfillBatchResult.Empty(markCompleted: false);
         }
 
         DateTimeOffset? cursorTimestamp = null;
-        var cursorTimestampValue = await redis.Db.StringGetAsync(BackfillCursorTimestampMsKey);
-        if (
-            cursorTimestampValue.HasValue
-            && long.TryParse(cursorTimestampValue.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var cursorTimestampUnixMs)
-        )
+        if (settings.BackfillCursorTimestampUnixMs.HasValue)
         {
-            cursorTimestamp = DateTimeOffset.FromUnixTimeMilliseconds(cursorTimestampUnixMs);
+            cursorTimestamp = DateTimeOffset.FromUnixTimeMilliseconds(settings.BackfillCursorTimestampUnixMs.Value);
         }
 
-        var cursorOffset = 0;
-        var cursorOffsetValue = await redis.Db.StringGetAsync(BackfillCursorOffsetKey);
-        if (cursorOffsetValue.HasValue && int.TryParse(cursorOffsetValue.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsedOffset))
-        {
-            cursorOffset = Math.Max(0, parsedOffset);
-        }
+        var cursorOffset = Math.Max(0, settings.BackfillCursorOffset);
 
-        var cutoffTimestamp = DateTimeOffset.FromUnixTimeMilliseconds(cutoffUnixMs);
+        var cutoffTimestamp = DateTimeOffset.FromUnixTimeMilliseconds(settings.BackfillCutoffUnixMs.Value);
         var query = timescaleContext
             .DataPoints.AsNoTracking()
             .Where(dataPoint => dataPoint.TimeStamp <= cutoffTimestamp);
@@ -563,35 +525,35 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
         );
     }
 
-    private async Task SaveBackfillCursorAsync(RedisService redis, long timestampUnixMs, int offset)
+    private static void SaveBackfillCursor(SystemNodeSetting settings, long timestampUnixMs, int offset)
     {
-        await redis.Db.StringSetAsync(
-            BackfillCursorTimestampMsKey,
-            timestampUnixMs.ToString(CultureInfo.InvariantCulture),
-            BackfillStateTtl
-        );
-        await redis.Db.StringSetAsync(
-            BackfillCursorOffsetKey,
-            offset.ToString(CultureInfo.InvariantCulture),
-            BackfillStateTtl
-        );
+        settings.BackfillCursorTimestampUnixMs = timestampUnixMs;
+        settings.BackfillCursorOffset = Math.Max(0, offset);
     }
 
-    private async Task MarkBackfillCompletedAsync(RedisService redis)
+    private static bool MarkBackfillCompleted(SystemNodeSetting settings)
     {
-        await redis.Db.StringSetAsync(BackfillCompletedKey, "1", BackfillStateTtl);
+        if (settings.BackfillCompleted)
+        {
+            return false;
+        }
+
+        settings.BackfillCompleted = true;
+        return true;
     }
 
-    private async Task ClearBackfillStateAsync(RedisService redis)
+    private static bool ClearBackfillState(SystemNodeSetting settings)
     {
-        await redis.Db.KeyDeleteAsync(
-            [
-                (RedisKey)BackfillCutoffKey,
-                (RedisKey)BackfillCursorTimestampMsKey,
-                (RedisKey)BackfillCursorOffsetKey,
-                (RedisKey)BackfillCompletedKey
-            ]
-        );
+        var hadState = settings.BackfillCutoffUnixMs.HasValue
+            || settings.BackfillCursorTimestampUnixMs.HasValue
+            || settings.BackfillCursorOffset != 0
+            || settings.BackfillCompleted;
+
+        settings.BackfillCutoffUnixMs = null;
+        settings.BackfillCursorTimestampUnixMs = null;
+        settings.BackfillCursorOffset = 0;
+        settings.BackfillCompleted = false;
+        return hadState;
     }
 
     private sealed record BackfillBatchResult(
