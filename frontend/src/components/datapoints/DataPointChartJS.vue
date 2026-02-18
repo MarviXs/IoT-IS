@@ -880,13 +880,7 @@ async function updateTimeRange(timeRange: TimeRange) {
   await getDataPoints();
 }
 
-function getSensorColor(sensor: SensorData, index: number): string {
-  if (sensor.group) {
-    const uniqueGroups = Array.from(new Set(props.sensors.filter((s) => s.group).map((s) => s.group)));
-    const groupIndex = uniqueGroups.indexOf(sensor.group);
-    return getGraphColor(groupIndex);
-  }
-
+function getSensorColor(index: number): string {
   return getGraphColor(index);
 }
 
@@ -950,7 +944,7 @@ function updateChartData() {
   props.sensors.forEach((sensor, index) => {
     const key = getSensorUniqueId(sensor);
     const unit = sensor.unit ?? '';
-    const sensorColor = getSensorColor(sensor, index);
+    const sensorColor = getSensorColor(index);
     const accuracyDecimals = sensor.accuracyDecimals ?? 2;
 
     if (!uniqueUnits.has(unit)) {

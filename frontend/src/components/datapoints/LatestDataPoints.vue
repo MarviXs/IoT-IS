@@ -60,13 +60,10 @@ const ungroupedSensors = computed(() => {
 });
 
 const getGraphColorFromSensor = (sensor: SensorData): string => {
-  if (sensor.group) {
-    const groupNames = Object.keys(groupedSensors.value);
-    const index = groupNames.indexOf(sensor.group);
-    return getGraphColor(index);
-  }
-
-  return getGraphColor(sensors.value.indexOf(sensor));
+  const index = (sensors.value ?? []).findIndex(
+    (item) => item.id === sensor.id || (item.deviceId === sensor.deviceId && item.tag === sensor.tag),
+  );
+  return getGraphColor(index >= 0 ? index : 0);
 };
 </script>
 
