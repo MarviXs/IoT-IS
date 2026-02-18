@@ -13,5 +13,6 @@ public class SystemNodeSettingConfiguration : IEntityTypeConfiguration<SystemNod
         builder.Property(setting => setting.HubUrl).HasMaxLength(1024);
         builder.Property(setting => setting.HubToken).HasMaxLength(256);
         builder.Property(setting => setting.SyncIntervalSeconds).IsRequired().HasDefaultValue(5);
+        builder.Property(setting => setting.DataPointSyncMode).IsRequired().HasDefaultValue(EdgeDataPointSyncMode.OnlyNew);
     }
 }

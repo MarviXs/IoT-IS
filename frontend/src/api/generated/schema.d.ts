@@ -2559,6 +2559,11 @@ export interface components {
          * Format: int32
          * @enum {integer}
          */
+        "Fei.Is.Api.Data.Enums.EdgeDataPointSyncMode": 0 | 1;
+        /**
+         * Format: int32
+         * @enum {integer}
+         */
         "Fei.Is.Api.Data.Enums.SystemNodeType": 0 | 1;
         /**
          * Format: int32
@@ -4252,6 +4257,7 @@ export interface components {
             hubToken?: string | null;
             /** Format: int32 */
             syncIntervalSeconds: number;
+            dataPointSyncMode: components["schemas"]["Fei.Is.Api.Data.Enums.EdgeDataPointSyncMode"];
         };
         "Fei.Is.Api.Features.System.Queries.GetNodeSettings.EdgeNodeResponse": {
             /** Format: uuid */
@@ -4279,6 +4285,7 @@ export interface components {
             hubToken?: string | null;
             /** Format: int32 */
             syncIntervalSeconds: number;
+            dataPointSyncMode: components["schemas"]["Fei.Is.Api.Data.Enums.EdgeDataPointSyncMode"];
             edgeNodes: components["schemas"]["Fei.Is.Api.Features.System.Queries.GetNodeSettings.EdgeNodeResponse"][];
             hubConnectionStatus: components["schemas"]["Fei.Is.Api.Features.System.Queries.GetNodeSettings.HubConnectionStatusResponse"];
         };

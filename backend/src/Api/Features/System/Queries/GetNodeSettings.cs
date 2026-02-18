@@ -49,7 +49,8 @@ public static class GetNodeSettings
                     setting.NodeType,
                     setting.HubUrl,
                     setting.HubToken,
-                    setting.SyncIntervalSeconds
+                    setting.SyncIntervalSeconds,
+                    setting.DataPointSyncMode
                 })
                 .FirstOrDefaultAsync(cancellationToken);
             var configuredSyncIntervalSeconds = settings?.SyncIntervalSeconds > 0 ? settings.SyncIntervalSeconds : 5;
@@ -137,6 +138,7 @@ public static class GetNodeSettings
                 settings?.HubUrl,
                 settings?.HubToken,
                 configuredSyncIntervalSeconds,
+                settings?.DataPointSyncMode ?? EdgeDataPointSyncMode.OnlyNew,
                 edgeNodes,
                 hubConnectionStatus
             );
@@ -148,6 +150,7 @@ public static class GetNodeSettings
         string? HubUrl,
         string? HubToken,
         int SyncIntervalSeconds,
+        EdgeDataPointSyncMode DataPointSyncMode,
         IReadOnlyCollection<EdgeNodeResponse> EdgeNodes,
         HubConnectionStatusResponse? HubConnectionStatus
     );

@@ -14,7 +14,13 @@ namespace Fei.Is.Api.Features.System.Commands;
 
 public static class UpdateNodeSettings
 {
-    public record Request(SystemNodeType NodeType, string? HubUrl, string? HubToken, int SyncIntervalSeconds);
+    public record Request(
+        SystemNodeType NodeType,
+        string? HubUrl,
+        string? HubToken,
+        int SyncIntervalSeconds,
+        EdgeDataPointSyncMode DataPointSyncMode = EdgeDataPointSyncMode.OnlyNew
+    );
 
     public sealed class Endpoint : ICarterModule
     {
@@ -61,13 +67,19 @@ public static class UpdateNodeSettings
             var settings = await context.SystemNodeSettings.OrderBy(setting => setting.CreatedAt).FirstOrDefaultAsync(cancellationToken);
             if (settings == null)
             {
-                settings = new SystemNodeSetting { NodeType = message.Request.NodeType, SyncIntervalSeconds = message.Request.SyncIntervalSeconds };
+                settings = new SystemNodeSetting
+                {
+                    NodeType = message.Request.NodeType,
+                    SyncIntervalSeconds = message.Request.SyncIntervalSeconds,
+                    DataPointSyncMode = message.Request.DataPointSyncMode
+                };
                 await context.SystemNodeSettings.AddAsync(settings, cancellationToken);
             }
             else
             {
                 settings.NodeType = message.Request.NodeType;
                 settings.SyncIntervalSeconds = message.Request.SyncIntervalSeconds;
+                settings.DataPointSyncMode = message.Request.DataPointSyncMode;
             }
 
             if (message.Request.NodeType == SystemNodeType.Edge)
@@ -128,6 +140,7 @@ public static class UpdateNodeSettings
 
             RuleFor(command => command.Request.HubToken).MaximumLength(256).When(command => command.Request.NodeType == SystemNodeType.Edge);
             RuleFor(command => command.Request.SyncIntervalSeconds).InclusiveBetween(1, 86400);
+            RuleFor(command => command.Request.DataPointSyncMode).IsInEnum();
         }
 
         private static string? NormalizeHubUrl(string? hubUrl)

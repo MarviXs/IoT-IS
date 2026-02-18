@@ -8,4 +8,5 @@ public class SystemNodeSetting : BaseModel
     public string? HubUrl { get; set; }
     public string? HubToken { get; set; }
     public int SyncIntervalSeconds { get; set; } = 5;
+    public EdgeDataPointSyncMode DataPointSyncMode { get; set; } = EdgeDataPointSyncMode.OnlyNew;
 }

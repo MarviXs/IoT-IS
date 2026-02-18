@@ -156,6 +156,8 @@
                 outlined
                 dense
                 :label="t('system.node_settings.hub_url_label')"
+                :hint="t('system.node_settings.hub_url_hint')"
+                persistent-hint
                 :disable="isNodeSettingsLoading || isNodeSettingsSaving"
               />
               <q-input
@@ -163,6 +165,8 @@
                 outlined
                 dense
                 :label="t('system.node_settings.hub_token_label')"
+                :hint="t('system.node_settings.hub_token_hint')"
+                persistent-hint
                 :disable="isNodeSettingsLoading || isNodeSettingsSaving"
               />
               <q-input
@@ -174,6 +178,18 @@
                 dense
                 :label="t('system.node_settings.sync_interval_label')"
                 :hint="t('system.node_settings.sync_interval_hint')"
+                persistent-hint
+                :disable="isNodeSettingsLoading || isNodeSettingsSaving"
+              />
+              <q-select
+                v-model="dataPointSyncMode"
+                :options="dataPointSyncModeOptions"
+                emit-value
+                map-options
+                outlined
+                dense
+                :label="t('system.node_settings.datapoint_sync_mode_label')"
+                :hint="t('system.node_settings.datapoint_sync_mode_hint')"
                 persistent-hint
                 :disable="isNodeSettingsLoading || isNodeSettingsSaving"
               />
@@ -351,6 +367,7 @@ import {
   mdiSync,
 } from '@quasar/extras/mdi-v7';
 import SystemService, {
+  type EdgeDataPointSyncMode,
   type EdgeNodeResponse,
   type HubConnectionStatusResponse,
   type SystemNodeType,
@@ -373,7 +390,8 @@ const isNodeSettingsSaving = ref(false);
 const nodeType = ref<SystemNodeType>(0);
 const hubUrl = ref('');
 const hubToken = ref('');
-const syncIntervalSeconds = ref(5);
+const syncIntervalSeconds = ref(10);
+const dataPointSyncMode = ref<EdgeDataPointSyncMode>(0);
 const edgeNodes = ref<EdgeNodeResponse[]>([]);
 const hubConnectionStatus = ref<HubConnectionStatusResponse | null>(null);
 const isEdgeNodeDialogOpen = ref(false);
@@ -394,6 +412,10 @@ const edgeNodeForm = ref({
 const nodeTypeOptions = computed<{ label: string; value: SystemNodeType }[]>(() => [
   { label: t('system.node_settings.node_types.hub'), value: 0 },
   { label: t('system.node_settings.node_types.edge'), value: 1 },
+]);
+const dataPointSyncModeOptions = computed<{ label: string; value: EdgeDataPointSyncMode }[]>(() => [
+  { label: t('system.node_settings.datapoint_sync_modes.only_new'), value: 0 },
+  { label: t('system.node_settings.datapoint_sync_modes.all_datapoints'), value: 1 },
 ]);
 
 const isEdgeNodeEditing = computed(() => editingEdgeNodeId.value !== null);
@@ -484,7 +506,8 @@ async function loadNodeSettings() {
     nodeType.value = normalizedNodeType;
     hubUrl.value = response.hubUrl ?? '';
     hubToken.value = response.hubToken ?? '';
-    syncIntervalSeconds.value = response.syncIntervalSeconds ?? 5;
+    syncIntervalSeconds.value = response.syncIntervalSeconds ?? 10;
+    dataPointSyncMode.value = normalizeDataPointSyncMode(response.dataPointSyncMode as unknown);
     edgeNodeTokenVisibility.value = {};
     edgeNodes.value = response.edgeNodes;
     hubConnectionStatus.value = response.hubConnectionStatus ?? null;
@@ -544,6 +567,7 @@ async function saveNodeSettings(options: { showSuccessToast?: boolean } = {}): P
       hubUrl: isHubNodeMode.value ? null : hubUrlPayload,
       hubToken: isHubNodeMode.value ? null : hubTokenPayload,
       syncIntervalSeconds: normalizedSyncIntervalSeconds,
+      dataPointSyncMode: dataPointSyncMode.value,
     });
     if (showSuccessToast) {
       toast.success(t('system.node_settings.save_success'));
@@ -653,6 +677,14 @@ function normalizeNodeType(value: unknown): SystemNodeType {
   }
 
   if (value === 1 || value === '1' || value === 'Edge' || value === 'edge') {
+    return 1;
+  }
+
+  return 0;
+}
+
+function normalizeDataPointSyncMode(value: unknown): EdgeDataPointSyncMode {
+  if (value === 1 || value === '1' || value === 'AllDatapoints') {
     return 1;
   }
 

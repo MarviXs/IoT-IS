@@ -12,6 +12,7 @@ export type UpdateEdgeNodeRequest = paths['/system/edge-nodes/{id}']['put']['req
 export type EdgeNodeResponse = NodeSettingsResponse['edgeNodes'][number];
 export type HubConnectionStatusResponse = NodeSettingsResponse['hubConnectionStatus'];
 export type SystemNodeType = NodeSettingsResponse['nodeType'];
+export type EdgeDataPointSyncMode = NodeSettingsResponse['dataPointSyncMode'];
 
 class SystemService {
   async getTimescaleStorageUsage(): Promise<TimescaleStorageResponse> {

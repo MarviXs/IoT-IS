@@ -94,10 +94,13 @@
       "edge_nodes_title": "Edge uzly",
       "hub_connection_title": "Pripojenie k hubu",
       "hub_url_label": "URL hubu",
-      "hub_url_hint": "Príklad: https://hub.example.com/api",
+      "hub_url_hint": "Toto je URL backend API hubu (príklad: https://hub.example.com/api).",
       "hub_token_label": "Token hubu",
+      "hub_token_hint": "Použite token edge uzla nastavený na hube.",
       "sync_interval_label": "Interval synchronizácie (sekundy)",
       "sync_interval_hint": "Ako často sa má tento edge uzol synchronizovať s hubom.",
+      "datapoint_sync_mode_label": "Režim synchronizácie meraní",
+      "datapoint_sync_mode_hint": "Vyberte, či sa majú synchronizovať iba nové merania alebo najprv všetky historické merania.",
       "hub_connection_required": "V režime edge sú URL hubu a token povinné.",
       "add_edge_node": "Pridať edge uzol",
       "edit_edge_node": "Upraviť edge uzol",
@@ -138,6 +141,10 @@
       "last_sync_at": "Posledná synchronizácia: {value}",
       "no_sync_yet": "nikdy",
       "expected_sync_seconds": "Očakávaný interval: {value}s",
+      "datapoint_sync_modes": {
+        "only_new": "Iba nové merania",
+        "all_datapoints": "Všetky merania (backfill + nové)"
+      },
       "node_types": {
         "hub": "Hub",
         "edge": "Edge"
@@ -292,8 +299,8 @@
     "mac_address": "MAC adresa",
     "api_key": "API kľúč",
     "device_info": "Informácie o zariadení",
-    "auto_delete_datapoints_label": "Automaticky odstrániť dátové body staršie ako (dni)",
-    "auto_delete_datapoints_hint": "Nechajte prázdne pre ponechanie všetkých dátových bodov.",
+    "auto_delete_datapoints_label": "Automaticky odstrániť merania staršie ako (dni)",
+    "auto_delete_datapoints_hint": "Nechajte prázdne pre ponechanie všetkých meraní.",
     "sample_rate_label": "Vzorkovacia frekvencia (sekundy)",
     "sample_rate_hint": "Nechajte prázdne pre predvolenú hodnotu zariadenia.",
     "auto_delete_datapoints_disabled": "Vypnuté",
