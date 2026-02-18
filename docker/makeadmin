@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SERVICE=pg
+DB_USER=is
+DB_NAME=is_sdg
+
+usage() {
+    echo "Usage: $(basename "$0") <email>"
+}
+
+if [[ $# -ne 1 ]]; then
+    usage
+    exit 1
+fi
+
+EMAIL="$1"
+
+if [[ -z "$EMAIL" ]]; then
+    echo "Email cannot be empty."
+    exit 1
+fi
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
+EMAIL_SQL_ESCAPED=${EMAIL//\'/\'\'}
+
+USER_ID=$(
+    docker compose exec -T "$SERVICE" psql -U "$DB_USER" -d "$DB_NAME" -tA -c \
+        "SELECT \"Id\"
+         FROM \"AspNetUsers\"
+         WHERE \"NormalizedEmail\" = UPPER('$EMAIL_SQL_ESCAPED')
+            OR \"Email\" ILIKE '$EMAIL_SQL_ESCAPED'
+         LIMIT 1;"
+)
+
+if [[ -z "$USER_ID" ]]; then
+    echo "User not found for email: $EMAIL"
+    exit 1
+fi
+
+ROLE_ID=$(
+    docker compose exec -T "$SERVICE" psql -U "$DB_USER" -d "$DB_NAME" -tA -c \
+        "SELECT \"Id\"
+         FROM \"AspNetRoles\"
+         WHERE \"NormalizedName\" = 'ADMIN'
+         LIMIT 1;"
+)
+
+if [[ -z "$ROLE_ID" ]]; then
+    echo "Admin role not found."
+    exit 1
+fi
+
+ALREADY_ADMIN=$(
+    docker compose exec -T "$SERVICE" psql -U "$DB_USER" -d "$DB_NAME" -tA -c \
+        "SELECT 1
+         FROM \"AspNetUserRoles\"
+         WHERE \"UserId\" = '$USER_ID'
+           AND \"RoleId\" = '$ROLE_ID'
+         LIMIT 1;"
+)
+
+if [[ "$ALREADY_ADMIN" == "1" ]]; then
+    echo "User is already admin: $EMAIL"
+    exit 0
+fi
+
+docker compose exec -T "$SERVICE" psql -U "$DB_USER" -d "$DB_NAME" -c \
+    "INSERT INTO \"AspNetUserRoles\" (\"UserId\", \"RoleId\")
+     VALUES ('$USER_ID', '$ROLE_ID');"
+
+echo "User promoted to admin: $EMAIL"
