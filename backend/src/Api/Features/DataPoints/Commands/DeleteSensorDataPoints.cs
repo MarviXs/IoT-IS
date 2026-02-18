@@ -11,6 +11,8 @@ using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
+using NpgsqlTypes;
 
 namespace Fei.Is.Api.Features.DataPoints.Commands;
 
@@ -77,6 +79,24 @@ public static class DeleteSensorDataPoints
         : IRequestHandler<Command, Result<Response>>
     {
         private const int DeleteBatchSize = 50_000;
+        private const string DeleteBatchSql = """
+            WITH candidates AS (
+                SELECT dp.tableoid, dp."DeviceId", dp."SensorTag", dp."TimeStamp"
+                FROM "DataPoints" AS dp
+                WHERE dp."DeviceId" = @device_id
+                  AND dp."SensorTag" = @sensor_tag
+                  AND (@from_ts IS NULL OR dp."TimeStamp" >= @from_ts)
+                  AND (@to_ts IS NULL OR dp."TimeStamp" <= @to_ts)
+                ORDER BY dp."TimeStamp" DESC
+                LIMIT @batch_size
+            )
+            DELETE FROM "DataPoints" AS dp
+            USING candidates
+            WHERE dp.tableoid = candidates.tableoid
+              AND dp."DeviceId" = candidates."DeviceId"
+              AND dp."SensorTag" = candidates."SensorTag"
+              AND dp."TimeStamp" = candidates."TimeStamp";
+            """;
 
         public async Task<Result<Response>> Handle(Command message, CancellationToken cancellationToken)
         {
@@ -137,86 +157,16 @@ public static class DeleteSensorDataPoints
             CancellationToken cancellationToken
         )
         {
-            FormattableString sql;
+            var parameters = new[]
+            {
+                new NpgsqlParameter("device_id", deviceId),
+                new NpgsqlParameter("sensor_tag", sensorTag),
+                new NpgsqlParameter("from_ts", NpgsqlDbType.TimestampTz) { Value = from ?? (object)DBNull.Value },
+                new NpgsqlParameter("to_ts", NpgsqlDbType.TimestampTz) { Value = to ?? (object)DBNull.Value },
+                new NpgsqlParameter("batch_size", DeleteBatchSize)
+            };
 
-            if (from.HasValue && to.HasValue)
-            {
-                var fromValue = from.Value;
-                var toValue = to.Value;
-                sql =
-                    $"""
-                    WITH rows_to_delete AS (
-                        SELECT dp.ctid
-                        FROM "DataPoints" AS dp
-                        WHERE dp."DeviceId" = {deviceId}
-                          AND dp."SensorTag" = {sensorTag}
-                          AND dp."TimeStamp" >= {fromValue}
-                          AND dp."TimeStamp" <= {toValue}
-                        ORDER BY dp."TimeStamp" DESC
-                        LIMIT {DeleteBatchSize}
-                    )
-                    DELETE FROM "DataPoints" AS dp
-                    USING rows_to_delete
-                    WHERE dp.ctid = rows_to_delete.ctid;
-                    """;
-            }
-            else if (from.HasValue)
-            {
-                var fromValue = from.Value;
-                sql =
-                    $"""
-                    WITH rows_to_delete AS (
-                        SELECT dp.ctid
-                        FROM "DataPoints" AS dp
-                        WHERE dp."DeviceId" = {deviceId}
-                          AND dp."SensorTag" = {sensorTag}
-                          AND dp."TimeStamp" >= {fromValue}
-                        ORDER BY dp."TimeStamp" DESC
-                        LIMIT {DeleteBatchSize}
-                    )
-                    DELETE FROM "DataPoints" AS dp
-                    USING rows_to_delete
-                    WHERE dp.ctid = rows_to_delete.ctid;
-                    """;
-            }
-            else if (to.HasValue)
-            {
-                var toValue = to.Value;
-                sql =
-                    $"""
-                    WITH rows_to_delete AS (
-                        SELECT dp.ctid
-                        FROM "DataPoints" AS dp
-                        WHERE dp."DeviceId" = {deviceId}
-                          AND dp."SensorTag" = {sensorTag}
-                          AND dp."TimeStamp" <= {toValue}
-                        ORDER BY dp."TimeStamp" DESC
-                        LIMIT {DeleteBatchSize}
-                    )
-                    DELETE FROM "DataPoints" AS dp
-                    USING rows_to_delete
-                    WHERE dp.ctid = rows_to_delete.ctid;
-                    """;
-            }
-            else
-            {
-                sql =
-                    $"""
-                    WITH rows_to_delete AS (
-                        SELECT dp.ctid
-                        FROM "DataPoints" AS dp
-                        WHERE dp."DeviceId" = {deviceId}
-                          AND dp."SensorTag" = {sensorTag}
-                        ORDER BY dp."TimeStamp" DESC
-                        LIMIT {DeleteBatchSize}
-                    )
-                    DELETE FROM "DataPoints" AS dp
-                    USING rows_to_delete
-                    WHERE dp.ctid = rows_to_delete.ctid;
-                    """;
-            }
-
-            return await timescaleContext.Database.ExecuteSqlInterpolatedAsync(sql, cancellationToken);
+            return await timescaleContext.Database.ExecuteSqlRawAsync(DeleteBatchSql, parameters, cancellationToken);
         }
     }
 }
