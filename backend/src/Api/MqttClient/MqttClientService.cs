@@ -1,4 +1,5 @@
 using Fei.Is.Api.MqttClient.Subscribe;
+using FluentResults;
 using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Exceptions;
@@ -151,22 +152,26 @@ public class MqttClientService : IHostedService
                 if (MqttTopicFilterComparer.Compare(topic, "devices/+/data") == MqttTopicFilterCompareResult.IsMatch)
                 {
                     var dataPointReceived = scope.ServiceProvider.GetRequiredService<DataPointReceived>();
-                    await dataPointReceived.Handle(topicParts[1], args.ApplicationMessage.PayloadSegment, CancellationToken.None);
+                    var result = await dataPointReceived.Handle(topicParts[1], args.ApplicationMessage.PayloadSegment, CancellationToken.None);
+                    LogHandlerFailure(nameof(DataPointReceived), result);
                 }
                 else if (MqttTopicFilterComparer.Compare(topic, "devices/+/job_from_device") == MqttTopicFilterCompareResult.IsMatch)
                 {
                     var jobStatusReceived = scope.ServiceProvider.GetRequiredService<JobStatusReceived>();
-                    await jobStatusReceived.Handle(topicParts[1], args.ApplicationMessage.PayloadSegment, CancellationToken.None);
+                    var result = await jobStatusReceived.Handle(topicParts[1], args.ApplicationMessage.PayloadSegment, CancellationToken.None);
+                    LogHandlerFailure(nameof(JobStatusReceived), result);
                 }
                 else if (MqttTopicFilterComparer.Compare(topic, "$SYS/brokers/+/clients/+/connected") == MqttTopicFilterCompareResult.IsMatch)
                 {
                     var onDeviceConnected = scope.ServiceProvider.GetRequiredService<OnDeviceConnected>();
-                    await onDeviceConnected.Handle(args.ApplicationMessage.PayloadSegment, CancellationToken.None);
+                    var result = await onDeviceConnected.Handle(args.ApplicationMessage.PayloadSegment, CancellationToken.None);
+                    LogHandlerFailure(nameof(OnDeviceConnected), result);
                 }
                 else if (MqttTopicFilterComparer.Compare(topic, "$SYS/brokers/+/clients/+/disconnected") == MqttTopicFilterCompareResult.IsMatch)
                 {
                     var onDeviceDisconnected = scope.ServiceProvider.GetRequiredService<OnDeviceDisconnected>();
-                    await onDeviceDisconnected.Handle(args.ApplicationMessage.PayloadSegment, CancellationToken.None);
+                    var result = await onDeviceDisconnected.Handle(args.ApplicationMessage.PayloadSegment, CancellationToken.None);
+                    LogHandlerFailure(nameof(OnDeviceDisconnected), result);
                 }
             }
             catch (Exception ex)
@@ -176,6 +181,17 @@ public class MqttClientService : IHostedService
         });
 
         return Task.CompletedTask;
+    }
+
+    private void LogHandlerFailure(string handlerName, Result result)
+    {
+        if (result.IsSuccess)
+        {
+            return;
+        }
+
+        var errors = string.Join("; ", result.Errors.Select(error => error.Message));
+        _logger.LogError("MQTT handler {HandlerName} returned failure. Errors: {Errors}", handlerName, errors);
     }
 
     public Task StartAsync(CancellationToken cancellationToken)
