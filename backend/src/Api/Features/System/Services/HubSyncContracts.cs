@@ -6,6 +6,7 @@ namespace Fei.Is.Api.Features.System.Services;
 public sealed class SyncDataPointsRequest
 {
     public int EdgeMetadataVersion { get; init; }
+    public int? SyncIntervalSeconds { get; init; }
     public List<HubDataPoint> Datapoints { get; init; } = [];
 }
 

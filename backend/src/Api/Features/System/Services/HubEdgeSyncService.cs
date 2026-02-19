@@ -36,10 +36,7 @@ public class HubEdgeSyncService(AppDbContext appContext, RedisService redis, IHu
             .OrderBy(setting => setting.CreatedAt)
             .Select(setting => (int?)setting.SyncIntervalSeconds)
             .FirstOrDefaultAsync(cancellationToken);
-        var nextSyncSeconds =
-            configuredSyncIntervalSeconds.HasValue && configuredSyncIntervalSeconds.Value > 0
-                ? configuredSyncIntervalSeconds.Value
-                : DefaultNextSyncSeconds;
+        var nextSyncSeconds = ResolveNextSyncSeconds(request.SyncIntervalSeconds, configuredSyncIntervalSeconds);
 
         await redis.Db.StringSetAsync(
             $"edge-node:{edgeNode.Id}:expected-sync-seconds",
@@ -651,6 +648,21 @@ public class HubEdgeSyncService(AppDbContext appContext, RedisService redis, IHu
     private static int NormalizeVersion(int version)
     {
         return version < 0 ? 0 : version;
+    }
+
+    private static int ResolveNextSyncSeconds(int? requestSyncIntervalSeconds, int? configuredSyncIntervalSeconds)
+    {
+        if (requestSyncIntervalSeconds.HasValue && requestSyncIntervalSeconds.Value > 0)
+        {
+            return Math.Clamp(requestSyncIntervalSeconds.Value, 1, 86400);
+        }
+
+        if (configuredSyncIntervalSeconds.HasValue && configuredSyncIntervalSeconds.Value > 0)
+        {
+            return configuredSyncIntervalSeconds.Value;
+        }
+
+        return DefaultNextSyncSeconds;
     }
 
     private async Task<int?> GetAppliedMetadataVersionAsync(Guid edgeNodeId)

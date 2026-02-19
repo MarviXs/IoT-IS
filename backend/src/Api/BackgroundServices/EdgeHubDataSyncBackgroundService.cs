@@ -84,7 +84,13 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
 
                 if (dataPointSyncMode == EdgeDataPointSyncMode.AllDatapoints)
                 {
-                    var backfillBatch = await BuildTimescaleBackfillBatchAsync(timescaleContext, settings, edgeMetadataVersion, stoppingToken);
+                    var backfillBatch = await BuildTimescaleBackfillBatchAsync(
+                        timescaleContext,
+                        settings,
+                        edgeMetadataVersion,
+                        configuredSyncIntervalSeconds,
+                        stoppingToken
+                    );
                     if (backfillBatch.HasRows)
                     {
                         if (backfillBatch.Request.Datapoints.Count > 0)
@@ -251,7 +257,11 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
                     {
                         var emptyBatchResponse = await SendDatapointBatchWithMetadataRetryAsync(
                             client,
-                            new SyncDataPointsRequest { EdgeMetadataVersion = edgeMetadataVersion },
+                            new SyncDataPointsRequest
+                            {
+                                EdgeMetadataVersion = edgeMetadataVersion,
+                                SyncIntervalSeconds = configuredSyncIntervalSeconds
+                            },
                             edgeMetadataVersion,
                             metadataSnapshotService,
                             stoppingToken
@@ -274,6 +284,7 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
                         var batchRequest = new SyncDataPointsRequest
                         {
                             EdgeMetadataVersion = edgeMetadataVersion,
+                            SyncIntervalSeconds = configuredSyncIntervalSeconds,
                             Datapoints = datapointBatch.Select(x => x.Datapoint).ToList()
                         };
 
@@ -453,6 +464,7 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
         TimeScaleDbContext timescaleContext,
         SystemNodeSetting settings,
         int edgeMetadataVersion,
+        int syncIntervalSeconds,
         CancellationToken cancellationToken
     )
     {
@@ -525,7 +537,12 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
 
         return new BackfillBatchResult(
             HasRows: true,
-            Request: new SyncDataPointsRequest { EdgeMetadataVersion = edgeMetadataVersion, Datapoints = datapoints },
+            Request: new SyncDataPointsRequest
+            {
+                EdgeMetadataVersion = edgeMetadataVersion,
+                SyncIntervalSeconds = syncIntervalSeconds,
+                Datapoints = datapoints
+            },
             LastTimestampUnixMs: lastTimestamp.ToUnixTimeMilliseconds(),
             NextTimestampOffset: nextOffset,
             MarkCompleted: rawRows.Count < SyncBatchSize

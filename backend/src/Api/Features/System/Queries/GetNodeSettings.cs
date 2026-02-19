@@ -79,14 +79,19 @@ public static class GetNodeSettings
                     }
 
                     int? expectedSyncSeconds = null;
-                    if (expectedSyncValues[index].HasValue && int.TryParse(expectedSyncValues[index], out var expected))
+                    if (
+                        expectedSyncValues[index].HasValue
+                        && int.TryParse(expectedSyncValues[index], out var expected)
+                        && expected > 0
+                    )
                     {
                         expectedSyncSeconds = expected;
                     }
 
-                    var thresholdSeconds = Math.Max(1, (int)Math.Ceiling((expectedSyncSeconds ?? configuredSyncIntervalSeconds) * 2d));
+                    var resolvedExpectedSyncSeconds = expectedSyncSeconds ?? configuredSyncIntervalSeconds;
+                    var thresholdSeconds = Math.Max(1, (int)Math.Ceiling(resolvedExpectedSyncSeconds * 2d));
                     var isOnline = lastSyncAt.HasValue && (now - lastSyncAt.Value) <= TimeSpan.FromSeconds(thresholdSeconds);
-                    edgeNodeStatusById[snapshot.Id] = (isOnline, lastSyncAt, expectedSyncSeconds);
+                    edgeNodeStatusById[snapshot.Id] = (isOnline, lastSyncAt, resolvedExpectedSyncSeconds);
                 }
             }
 
@@ -95,7 +100,7 @@ public static class GetNodeSettings
                 {
                     var status = edgeNodeStatusById.TryGetValue(snapshot.Id, out var resolvedStatus)
                         ? resolvedStatus
-                        : (IsOnline: false, LastSyncAt: (DateTimeOffset?)null, ExpectedSyncSeconds: (int?)null);
+                        : (IsOnline: false, LastSyncAt: (DateTimeOffset?)null, ExpectedSyncSeconds: configuredSyncIntervalSeconds);
                     return new EdgeNodeResponse(
                         snapshot.Id,
                         snapshot.Name,
