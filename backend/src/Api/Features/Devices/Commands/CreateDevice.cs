@@ -5,6 +5,7 @@ using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
+using Fei.Is.Api.Redis;
 using FluentResults;
 using FluentValidation;
 using MediatR;
@@ -56,7 +57,7 @@ public static class CreateDevice
 
     public record Command(Request Request, ClaimsPrincipal User) : IRequest<Result<Guid>>;
 
-    public sealed class Handler(AppDbContext context, IValidator<Command> validator) : IRequestHandler<Command, Result<Guid>>
+    public sealed class Handler(AppDbContext context, IValidator<Command> validator, RedisService redis) : IRequestHandler<Command, Result<Guid>>
     {
         public async Task<Result<Guid>> Handle(Command message, CancellationToken cancellationToken)
         {
@@ -99,6 +100,8 @@ public static class CreateDevice
 
             await context.Devices.AddAsync(device, cancellationToken);
             await context.SaveChangesAsync(cancellationToken);
+            var redisKey = $"device:{device.AccessToken}:id";
+            await redis.Db.StringSetAsync(redisKey, device.Id.ToString(), TimeSpan.FromHours(1));
 
             return Result.Ok(device.Id);
         }
