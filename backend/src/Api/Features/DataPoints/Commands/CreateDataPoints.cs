@@ -2,6 +2,7 @@ using System.Text.Json;
 using Carter;
 using EFCore.BulkExtensions;
 using Fei.Is.Api.Common.Errors;
+using Fei.Is.Api.Common.Utils;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
@@ -96,7 +97,7 @@ public static class CreateDataPoints
             {
                 DeviceId = device.Id,
                 SensorTag = dataPoint.Tag,
-                TimeStamp = GetDataPointTimeStampOrCurrentTime(dataPoint.TimeStamp),
+                TimeStamp = UnixTimestampUtils.NormalizeToDateTimeOffsetOrNow(dataPoint.TimeStamp),
                 Value = dataPoint.Value,
                 Latitude = dataPoint.Latitude,
                 Longitude = dataPoint.Longitude,
@@ -198,15 +199,6 @@ public static class CreateDataPoints
 
             device.SampleRateSeconds = (float)sampleRateRequest.Value;
             await appContext.SaveChangesAsync(cancellationToken);
-        }
-
-        private static DateTimeOffset GetDataPointTimeStampOrCurrentTime(long? timeStamp)
-        {
-            if (!timeStamp.HasValue)
-                return DateTimeOffset.UtcNow;
-
-            var date = DateTimeOffset.FromUnixTimeMilliseconds(timeStamp.Value);
-            return date.Year < 2000 ? DateTimeOffset.UtcNow : date;
         }
     }
 }

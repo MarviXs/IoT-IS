@@ -2,6 +2,7 @@ using System;
 using System.Globalization;
 using System.Text.Json.Nodes;
 using EFCore.BulkExtensions;
+using Fei.Is.Api.Common.Utils;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
@@ -99,7 +100,7 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
                                 {
                                     DeviceId = Guid.Parse(parsed["device_id"]),
                                     SensorTag = parsed["sensor_tag"],
-                                    TimeStamp = DateTimeOffset.FromUnixTimeMilliseconds(long.Parse(parsed["timestamp"])),
+                                    TimeStamp = ParseTimestamp(parsed),
                                     Value = value,
                                     Latitude = latitude,
                                     Longitude = longitude,
@@ -197,6 +198,19 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
                 logger.LogError($"Error evaluating scene: {scene.Id}, Exception: {ex.Message}");
             }
         }
+    }
+
+    private static DateTimeOffset ParseTimestamp(IReadOnlyDictionary<string, string> parsed)
+    {
+        if (
+            parsed.TryGetValue("timestamp", out var rawTimestamp)
+            && long.TryParse(rawTimestamp, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsedTimestamp)
+        )
+        {
+            return UnixTimestampUtils.NormalizeToDateTimeOffsetOrNow(parsedTimestamp);
+        }
+
+        return DateTimeOffset.UtcNow;
     }
 
     private async Task HandleTriggeredScene(

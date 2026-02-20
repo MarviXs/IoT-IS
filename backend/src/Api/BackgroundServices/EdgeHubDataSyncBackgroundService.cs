@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Net;
 using System.Net.Http.Json;
+using Fei.Is.Api.Common.Utils;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
@@ -181,13 +182,16 @@ public class EdgeHubDataSyncBackgroundService(IServiceProvider serviceProvider, 
                                 continue;
                             }
 
+                            var timestampRaw = 0L;
                             if (
-                                !parsed.TryGetValue("timestamp", out var rawTimestamp)
-                                || !long.TryParse(rawTimestamp, NumberStyles.Integer, CultureInfo.InvariantCulture, out var timestampUnixMs)
+                                parsed.TryGetValue("timestamp", out var rawTimestamp)
+                                && long.TryParse(rawTimestamp, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsedTimestamp)
                             )
                             {
-                                timestampUnixMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                                timestampRaw = parsedTimestamp;
                             }
+
+                            var timestampUnixMs = UnixTimestampUtils.NormalizeToDateTimeOffsetOrNow(timestampRaw).ToUnixTimeMilliseconds();
 
                             double? latitude = null;
                             double? longitude = null;

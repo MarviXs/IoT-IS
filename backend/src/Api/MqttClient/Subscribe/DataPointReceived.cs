@@ -1,5 +1,6 @@
 using System.Text.Json;
 using DataPointFlatBuffers;
+using Fei.Is.Api.Common.Utils;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Features.DataPoints.Queries;
 using Fei.Is.Api.Redis;
@@ -52,7 +53,7 @@ public class DataPointReceived(AppDbContext appContext, RedisService redis, IHub
         }
 
         var datapoint = DataPointFbs.GetRootAsDataPointFbs(new ByteBuffer(payload.ToArray()));
-        var timestamp = GetDataPointTimeStampOrCurrentTime(datapoint.Ts);
+        var timestamp = UnixTimestampUtils.NormalizeToDateTimeOffsetOrNow(datapoint.Ts);
 
         if (double.IsNaN(datapoint.Value) || double.IsInfinity(datapoint.Value))
         {
@@ -134,14 +135,5 @@ public class DataPointReceived(AppDbContext appContext, RedisService redis, IHub
 
         device.SampleRateSeconds = (float)value;
         await appContext.SaveChangesAsync(cancellationToken);
-    }
-
-    private static DateTimeOffset GetDataPointTimeStampOrCurrentTime(long? timeStamp)
-    {
-        if (!timeStamp.HasValue)
-            return DateTimeOffset.UtcNow;
-
-        var date = DateTimeOffset.FromUnixTimeMilliseconds(timeStamp.Value);
-        return date.Year < 2000 ? DateTimeOffset.UtcNow : date;
     }
 }

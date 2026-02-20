@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text.Json;
+using Fei.Is.Api.Common.Utils;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Features.DataPoints.Queries;
@@ -121,15 +122,7 @@ public class HubEdgeSyncService(AppDbContext appContext, RedisService redis, IHu
                 continue;
             }
 
-            DateTimeOffset timestamp;
-            try
-            {
-                timestamp = incoming.TimestampUnixMs > 0 ? DateTimeOffset.FromUnixTimeMilliseconds(incoming.TimestampUnixMs) : now;
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-                timestamp = now;
-            }
+            var timestamp = UnixTimestampUtils.NormalizeToDateTimeOffsetOrNow(incoming.TimestampUnixMs, now);
 
             var deviceIdString = deviceId.ToString();
             var streamEntries = new List<NameValueEntry>
