@@ -164,6 +164,20 @@
             </div>
             <div class="column q-col-gutter-y-sm">
               <div class="text-subtitle2">{{ t('chart.export_options') }}</div>
+              <q-select
+                v-model="exportTimeFormat"
+                outlined
+                emit-value
+                map-options
+                :label="t('chart.export_time_format')"
+                :options="exportTimeFormatOptions"
+              />
+              <q-checkbox
+                v-if="exportTimeFormat === 'dateTime'"
+                v-model="exportIncludeMilliseconds"
+                :label="t('chart.export_include_milliseconds')"
+                dense
+              />
               <q-checkbox v-model="exportRoundNumbers" :label="t('chart.export_round_numbers')" dense />
               <div class="column q-gutter-y-xs">
                 <div class="text-body2">{{ t('chart.export_orientation') }}</div>
@@ -364,6 +378,8 @@ const chart = shallowRef<Chart<'line', { x: string; y?: number | null }[]>>();
 const exportSelectedSensors = ref<string[]>([]);
 const exportSelectedTimeRange = ref('');
 const exportRoundNumbers = ref(true);
+const exportTimeFormat = ref<'dateTime' | 'unixSeconds' | 'unixMilliseconds'>('dateTime');
+const exportIncludeMilliseconds = ref(false);
 const exportOrientation = ref<'column' | 'row'>('column');
 const exportCustomRange = reactive({
   from: '',
@@ -484,6 +500,12 @@ const exportOrientationOptions = computed(() => [
   { label: t('chart.export_orientation_row'), value: 'row' },
 ]);
 
+const exportTimeFormatOptions = computed(() => [
+  { label: t('chart.export_time_format_date_time'), value: 'dateTime' },
+  { label: t('chart.export_time_format_unix_seconds'), value: 'unixSeconds' },
+  { label: t('chart.export_time_format_unix_milliseconds'), value: 'unixMilliseconds' },
+]);
+
 const sensorOptions = computed(() =>
   props.sensors.map((sensor) => ({
     label: `${sensor.name}${sensor.unit ? ` (${sensor.unit})` : ''}`,
@@ -530,6 +552,8 @@ function initializeExportForm() {
   }
 
   exportRoundNumbers.value = true;
+  exportTimeFormat.value = 'dateTime';
+  exportIncludeMilliseconds.value = false;
   exportOrientation.value = 'column';
 }
 
@@ -1311,16 +1335,20 @@ const csvConfig = mkConfig({
 });
 
 type ExportOrientation = 'column' | 'row';
+type ExportTimeFormat = 'dateTime' | 'unixSeconds' | 'unixMilliseconds';
+type CsvTimeValue = string | number;
 
 type GenerateCsvOptions = {
   data?: Map<string, DataPoint[]>;
   sensorKeys?: string[];
   roundNumbers?: boolean;
   orientation?: ExportOrientation;
+  timeFormat?: ExportTimeFormat;
+  includeMilliseconds?: boolean;
 };
 
 type AggregatedExportRecord = {
-  formattedTime: string;
+  formattedTime: CsvTimeValue;
   values: Record<string, string | number>;
 };
 
@@ -1343,12 +1371,37 @@ const formatDataPointValue = (sensor: SensorData, value: number | null | undefin
   return roundNumber(value, decimals);
 };
 
+const formatTimestampForCsv = (
+  timestamp: string,
+  timeFormat: ExportTimeFormat,
+  includeMilliseconds: boolean,
+): CsvTimeValue => {
+  const date = new Date(timestamp);
+  const unixMilliseconds = date.getTime();
+
+  if (Number.isNaN(unixMilliseconds)) {
+    return timestamp;
+  }
+
+  if (timeFormat === 'unixSeconds') {
+    return Math.floor(unixMilliseconds / 1000);
+  }
+
+  if (timeFormat === 'unixMilliseconds') {
+    return unixMilliseconds;
+  }
+
+  return format(date, includeMilliseconds ? 'dd/MM/yyyy HH:mm:ss.SSS' : 'dd/MM/yyyy HH:mm:ss');
+};
+
 const generateCSVData = (options: GenerateCsvOptions = {}) => {
   const {
     data = dataPoints,
     sensorKeys = tickedNodes.value,
     roundNumbers = exportRoundNumbers.value,
     orientation = exportOrientation.value,
+    timeFormat = exportTimeFormat.value,
+    includeMilliseconds = exportIncludeMilliseconds.value,
   } = options;
 
   const aggregatedData = new Map<string, AggregatedExportRecord>();
@@ -1368,7 +1421,7 @@ const generateCSVData = (options: GenerateCsvOptions = {}) => {
       const timeKey = dataPoint.ts;
       if (!aggregatedData.has(timeKey)) {
         aggregatedData.set(timeKey, {
-          formattedTime: format(new Date(dataPoint.ts), 'dd/MM/yyyy HH:mm:ss'),
+          formattedTime: formatTimestampForCsv(dataPoint.ts, timeFormat, includeMilliseconds),
           values: {},
         });
       }
@@ -1401,7 +1454,7 @@ const generateCSVData = (options: GenerateCsvOptions = {}) => {
 
       sortedTimeKeys.forEach((timeKey) => {
         const record = aggregatedData.get(timeKey);
-        const header = record?.formattedTime ?? format(new Date(timeKey), 'dd/MM/yyyy HH:mm:ss');
+        const header = record?.formattedTime ?? formatTimestampForCsv(timeKey, timeFormat, includeMilliseconds);
         row[header] = record?.values[sensorKey] ?? '';
       });
 
@@ -1411,7 +1464,7 @@ const generateCSVData = (options: GenerateCsvOptions = {}) => {
     formattedCsvData = sortedTimeKeys.map((timeKey) => {
       const record = aggregatedData.get(timeKey);
       const row: Record<string, string | number> = {
-        Time: record?.formattedTime ?? format(new Date(timeKey), 'dd/MM/yyyy HH:mm:ss'),
+        Time: record?.formattedTime ?? formatTimestampForCsv(timeKey, timeFormat, includeMilliseconds),
       };
 
       orderedSensors.forEach((sensor) => {
