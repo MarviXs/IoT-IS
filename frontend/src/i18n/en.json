@@ -436,7 +436,6 @@
     "export_time_format_date_time": "Date and time",
     "export_time_format_unix_seconds": "Unix seconds",
     "export_time_format_unix_milliseconds": "Unix milliseconds",
-    "export_include_milliseconds": "Include milliseconds",
     "export_orientation": "Orientation",
     "export_orientation_column": "Column export",
     "export_orientation_row": "Row export",
