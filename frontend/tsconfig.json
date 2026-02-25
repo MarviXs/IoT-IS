@@ -1,10 +1,10 @@
 {
   "extends": "./.quasar/tsconfig.json",
   "compilerOptions": {
-    "baseUrl": ".",
+    "strict": false,
     "paths": {
       "@/*": ["./src/*"]
     },
-    "types": ["@intlify/unplugin-vue-i18n/messages"]
+    "types": ["node", "@intlify/unplugin-vue-i18n/messages"]
   }
 }
