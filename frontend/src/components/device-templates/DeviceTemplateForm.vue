@@ -112,10 +112,11 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { QForm, QInput } from 'quasar';
+import type { QInput } from 'quasar';
+import { QForm } from 'quasar';
 import { isFormValid } from '@/utils/form-validation';
 import type { SensorFormData } from './SensorForm.vue';
-import SensorForm from './SensorForm.vue';
+import type SensorForm from './SensorForm.vue';
 import { mdiPencil, mdiPlusCircle } from '@quasar/extras/mdi-v7';
 import { matSensors } from '@quasar/extras/material-icons';
 import { useAuthStore } from '@/stores/auth-store';

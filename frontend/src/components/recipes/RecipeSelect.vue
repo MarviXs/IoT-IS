@@ -18,7 +18,7 @@ import { computed, nextTick, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import RecipeService from '@/api/services/RecipeService';
 import { handleError } from '@/utils/error-handler';
-import { QSelect } from 'quasar';
+import type { QSelect } from 'quasar';
 import type { RecipesQueryParams, RecipesResponse } from '@/api/services/RecipeService';
 
 export interface RecipeSelectData {

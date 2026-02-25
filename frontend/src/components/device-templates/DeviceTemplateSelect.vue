@@ -19,7 +19,7 @@ import { useI18n } from 'vue-i18n';
 import type { DeviceTemplatesQueryParams, DeviceTemplatesResponse } from '@/api/services/DeviceTemplateService';
 import DeviceTemplateService from '@/api/services/DeviceTemplateService';
 import { handleError } from '@/utils/error-handler';
-import { QSelect } from 'quasar';
+import type { QSelect } from 'quasar';
 
 export interface DeviceTemplateSelectData {
   id?: string;

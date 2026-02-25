@@ -80,7 +80,7 @@
 import type { GetDataPointsQuery } from '@/api/services/DataPointService';
 import DataPointService from '@/api/services/DataPointService';
 import type { DataPoint } from '@/models/DataPoint';
-import ChartTimeRangeSelect from '@/components/datapoints/ChartTimeRangeSelect.vue';
+import type ChartTimeRangeSelect from '@/components/datapoints/ChartTimeRangeSelect.vue';
 import type { TimeRange } from '@/models/TimeRange';
 import type { PropType } from 'vue';
 import { computed, ref, watch, onMounted, onBeforeUnmount } from 'vue';

@@ -18,7 +18,7 @@
 import { computed, nextTick, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { handleError } from '@/utils/error-handler';
-import { QSelect } from 'quasar';
+import type { QSelect } from 'quasar';
 import type { SuppliersListQueryParams, SuppliersListResponse } from '@/api/services/SupplierService';
 import SupplierService from '@/api/services/SupplierService';
 

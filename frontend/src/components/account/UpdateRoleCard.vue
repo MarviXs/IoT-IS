@@ -26,7 +26,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { QForm } from 'quasar';
+import type { QForm } from 'quasar';
 import { Role } from '@/models/Role';
 import { useI18n } from 'vue-i18n';
 

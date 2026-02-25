@@ -33,7 +33,8 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { QForm, QInput } from 'quasar';
+import type { QForm} from 'quasar';
+import { QInput } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import { mdiEyeOff, mdiEye } from '@quasar/extras/mdi-v7';
 

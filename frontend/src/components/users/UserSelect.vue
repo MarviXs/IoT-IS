@@ -17,7 +17,7 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { QSelect } from 'quasar';
+import type { QSelect } from 'quasar';
 import UserManagementService from '@/api/services/UserManagementService';
 import { handleError } from '@/utils/error-handler';
 import type { UsersQueryParams, UsersResponse } from '@/api/services/UserManagementService';

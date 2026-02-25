@@ -62,7 +62,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { toast } from 'vue3-toastify';
-import { QInput } from 'quasar';
+import type { QInput } from 'quasar';
 import { useAuthStore } from '@/stores/auth-store';
 import { isFormValid } from '@/utils/form-validation';
 import LanguageSelect from '@/components/core/LanguageSelect.vue';

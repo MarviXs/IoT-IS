@@ -1,0 +1,25 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "vue", "unicorn"],
+  "env": {
+    "builtin": true,
+    "browser": true,
+    "node": true,
+    "serviceworker": true,
+    "es2026": true
+  },
+  "ignorePatterns": [
+    "dist/**",
+    "src-capacitor/**",
+    "src-cordova/**",
+    ".quasar/**",
+    "quasar.config.*.temporary.compiled*"
+  ],
+  "globals": {
+    "ga": "readonly",
+    "cordova": "readonly",
+    "Capacitor": "readonly",
+    "chrome": "readonly",
+    "browser": "readonly"
+  }
+}

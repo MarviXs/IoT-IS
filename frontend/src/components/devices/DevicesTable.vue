@@ -256,7 +256,8 @@
 </template>
 
 <script setup lang="ts">
-import { QInfiniteScroll, useQuasar, type QTableProps } from 'quasar';
+import type { QInfiniteScroll} from 'quasar';
+import { useQuasar, type QTableProps } from 'quasar';
 import ShareDeviceDialog from './ShareDeviceDialog.vue';
 import type { PropType } from 'vue';
 import { computed, ref, watch } from 'vue';

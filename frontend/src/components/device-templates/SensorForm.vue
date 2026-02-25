@@ -50,7 +50,7 @@
 
 <script setup lang="ts">
 import { mdiCloseCircle } from '@quasar/extras/mdi-v7';
-import { QInput } from 'quasar';
+import type { QInput } from 'quasar';
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { isFormValid } from '@/utils/form-validation';

@@ -73,6 +73,15 @@ const productForm = ref();
 const creatingProduct = ref(false);
 
 async function createProduct() {
+  const categoryId = product.value.category?.id;
+  const vatCategoryId = product.value.vatCategory?.id;
+  const supplierId = product.value.supplier?.id;
+
+  if (!categoryId || !vatCategoryId || !supplierId) {
+    toast.error(t('global.rules.required'));
+    return;
+  }
+
   // Vytvoríme CreateProductParams vrátane nových polí
   const createRequest: CreateProductParams = {
     code: product.value.code!,
@@ -86,9 +95,9 @@ async function createProduct() {
     discountedPriceWithoutVAT: product.value.discountedPriceWithoutVAT,
     retailPrice: product.value.retailPrice,
     variety: product.value.variety,
-    categoryId: product.value.category?.id!,
-    vatCategoryId: product.value.vatCategory?.id!,
-    supplierId: product.value.supplier?.id!,
+    categoryId,
+    vatCategoryId,
+    supplierId,
     country: product.value.country,
     city: product.value.city,
     greenhouseNumber: product.value.greenhouseNumber,
