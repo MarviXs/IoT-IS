@@ -29,7 +29,7 @@ issue_certificate() {
     --domain "${MQTT_DOMAIN}" \
     --key-type ecdsa \
     ${staging_args} \
-    --deploy-hook /opt/certbot/deploy-emqx-cert.sh
+    --deploy-hook "/bin/sh /opt/certbot/deploy-emqx-cert.sh"
 }
 
 renew_certificates() {
@@ -38,7 +38,7 @@ renew_certificates() {
     --webroot \
     --webroot-path /var/www/certbot \
     ${staging_args} \
-    --deploy-hook /opt/certbot/deploy-emqx-cert.sh
+    --deploy-hook "/bin/sh /opt/certbot/deploy-emqx-cert.sh"
 }
 
 if [ ! -e "/etc/letsencrypt/renewal/${MQTT_DOMAIN}.conf" ]; then
@@ -47,7 +47,7 @@ if [ ! -e "/etc/letsencrypt/renewal/${MQTT_DOMAIN}.conf" ]; then
     sleep 300
   done
 else
-  /opt/certbot/deploy-emqx-cert.sh || true
+  /bin/sh /opt/certbot/deploy-emqx-cert.sh || true
 fi
 
 while true; do
