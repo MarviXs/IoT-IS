@@ -36,6 +36,15 @@ dashboard {
     http {bind = 18083}
   }
 }
+listeners.ssl.default {
+  bind = "0.0.0.0:8883"
+  ssl_options {
+    certfile = "/opt/emqx/etc/certs/server.pem"
+    keyfile = "/opt/emqx/etc/certs/server.key"
+    fail_if_no_peer_cert = false
+    verify = verify_none
+  }
+}
 mqtt {
   await_rel_timeout = "300s"
   client_attrs_init = []
