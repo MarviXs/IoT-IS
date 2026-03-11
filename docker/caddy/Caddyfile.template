@@ -1,5 +1,6 @@
 (acme_challenge) {
-    handle /.well-known/acme-challenge/* {
+    @acme_challenge path /.well-known/acme-challenge/*
+    handle @acme_challenge {
         root * /var/www/certbot
         file_server
     }
@@ -7,8 +8,8 @@
 
 http:// {
     import acme_challenge
-
-    redir https://{host}{uri}
+    @not_acme not path /.well-known/acme-challenge/*
+    redir @not_acme https://{host}{uri}
 }
 
 https://{$FRONTEND_DOMAIN} {
