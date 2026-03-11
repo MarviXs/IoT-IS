@@ -1,17 +1,23 @@
-http:// {
+(acme_challenge) {
     handle /.well-known/acme-challenge/* {
         root * /var/www/certbot
         file_server
     }
+}
+
+http:// {
+    import acme_challenge
 
     redir https://{host}{uri}
 }
 
 https://{$FRONTEND_DOMAIN} {
+    import acme_challenge
     reverse_proxy frontend:80
 }
 
 https://{$BACKEND_DOMAIN} {
+    import acme_challenge
     reverse_proxy backend:8080 {
         # Default settings for all paths
     }
