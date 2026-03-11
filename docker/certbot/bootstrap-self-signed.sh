@@ -20,3 +20,12 @@ openssl req \
 
 chmod 600 /emqx-certs/server.key
 chmod 644 /emqx-certs/server.pem
+
+# Also populate EMQX's default TLS filenames so any built-in listener that
+# still references them does not crash before Let's Encrypt is issued.
+cp /emqx-certs/server.pem /emqx-certs/cert.pem
+cp /emqx-certs/server.key /emqx-certs/key.pem
+cp /emqx-certs/server.pem /emqx-certs/cacert.pem
+
+chmod 600 /emqx-certs/key.pem
+chmod 644 /emqx-certs/cert.pem /emqx-certs/cacert.pem

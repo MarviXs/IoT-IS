@@ -36,6 +36,9 @@ dashboard {
     http {bind = 18083}
   }
 }
+listeners.wss.default {
+  enable = false
+}
 listeners.ssl.default {
   bind = "0.0.0.0:8883"
   ssl_options {
