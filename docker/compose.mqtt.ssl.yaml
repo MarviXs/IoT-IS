@@ -1,0 +1,54 @@
+name: iot-is
+services:
+  mqtt-cert-bootstrap:
+    image: alpine:3.21
+    restart: "no"
+    entrypoint: ["/bin/sh", "/opt/certbot/bootstrap-self-signed.sh"]
+    environment:
+      - MQTT_DOMAIN=${MQTT_DOMAIN}
+    volumes:
+      - ./certbot/emqx:/emqx-certs
+      - ./certbot/bootstrap-self-signed.sh:/opt/certbot/bootstrap-self-signed.sh:ro
+    networks:
+      - out-network
+  emqx:
+    image: emqx/emqx:5.8.1
+    restart: unless-stopped
+    depends_on:
+      mqtt-cert-bootstrap:
+        condition: service_completed_successfully
+    ports:
+      - "1883:1883" # MQTT
+      - "8883:8883" # MQTT over SSL/TLS
+      - "18083:18083" # Dashboard
+    volumes:
+      - ./emqx/cluster.hocon:/opt/emqx/data/configs/cluster.hocon
+      - ./emqx/acl.conf:/opt/emqx/etc/acl.conf
+      - ./emqx/init_user.json:/opt/emqx/init_user.json
+      - ./certbot/emqx:/opt/emqx/etc/certs
+    networks:
+      - int-network
+      - out-network
+  certbot-mqtt:
+    image: certbot/certbot:latest
+    restart: unless-stopped
+    depends_on:
+      mqtt-cert-bootstrap:
+        condition: service_completed_successfully
+    entrypoint: ["/bin/sh", "/opt/certbot/renew.sh"]
+    environment:
+      - MQTT_DOMAIN=${MQTT_DOMAIN}
+      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
+      - CERTBOT_STAGING=${CERTBOT_STAGING:-0}
+    volumes:
+      - ./certbot/www:/var/www/certbot
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/emqx:/emqx-certs
+      - ./certbot/renew.sh:/opt/certbot/renew.sh:ro
+      - ./certbot/deploy-emqx-cert.sh:/opt/certbot/deploy-emqx-cert.sh:ro
+    networks:
+      - out-network
+
+networks:
+  int-network:
+  out-network:
