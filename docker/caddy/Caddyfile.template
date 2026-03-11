@@ -1,14 +1,9 @@
-http://{$MQTT_DOMAIN} {
+http:// {
     handle /.well-known/acme-challenge/* {
         root * /var/www/certbot
         file_server
     }
 
-    respond "Not Found" 404
-}
-
-# Redirect HTTP to HTTPS for app domains
-http:// {
     redir https://{host}{uri}
 }
 

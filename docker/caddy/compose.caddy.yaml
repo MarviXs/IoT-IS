@@ -14,7 +14,6 @@ services:
     environment:
       - FRONTEND_DOMAIN=${FRONTEND_DOMAIN}
       - BACKEND_DOMAIN=${BACKEND_DOMAIN}
-      - MQTT_DOMAIN=${MQTT_DOMAIN}
     networks:
       - iot-is_out-network
 networks:
