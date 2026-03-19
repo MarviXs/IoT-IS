@@ -28,19 +28,19 @@ public struct DataPointFbs : IFlatbufferObject
   public byte[] GetTagArray() { return __p.__vector_as_array<byte>(4); }
   public double Value { get { int o = __p.__offset(6); return o != 0 ? __p.bb.GetDouble(o + __p.bb_pos) : (double)0.0; } }
   public long Ts { get { int o = __p.__offset(8); return o != 0 ? __p.bb.GetLong(o + __p.bb_pos) : (long)0; } }
-  public double Latitude { get { int o = __p.__offset(10); return o != 0 ? __p.bb.GetDouble(o + __p.bb_pos) : (double)0.0; } }
-  public double Longitude { get { int o = __p.__offset(12); return o != 0 ? __p.bb.GetDouble(o + __p.bb_pos) : (double)0.0; } }
-  public int GridX { get { int o = __p.__offset(14); return o != 0 ? __p.bb.GetInt(o + __p.bb_pos) : (int)0; } }
-  public int GridY { get { int o = __p.__offset(16); return o != 0 ? __p.bb.GetInt(o + __p.bb_pos) : (int)0; } }
+  public double? Latitude { get { int o = __p.__offset(10); return o != 0 ? __p.bb.GetDouble(o + __p.bb_pos) : (double?)null; } }
+  public double? Longitude { get { int o = __p.__offset(12); return o != 0 ? __p.bb.GetDouble(o + __p.bb_pos) : (double?)null; } }
+  public int? GridX { get { int o = __p.__offset(14); return o != 0 ? __p.bb.GetInt(o + __p.bb_pos) : (int?)null; } }
+  public int? GridY { get { int o = __p.__offset(16); return o != 0 ? __p.bb.GetInt(o + __p.bb_pos) : (int?)null; } }
 
   public static Offset<DataPointFlatBuffers.DataPointFbs> CreateDataPointFbs(FlatBufferBuilder builder,
       StringOffset tagOffset = default(StringOffset),
       double value = 0.0,
       long ts = 0,
-      double latitude = 0.0,
-      double longitude = 0.0,
-      int grid_x = 0,
-      int grid_y = 0) {
+      double? latitude = null,
+      double? longitude = null,
+      int? grid_x = null,
+      int? grid_y = null) {
     builder.StartTable(7);
     DataPointFbs.AddLongitude(builder, longitude);
     DataPointFbs.AddLatitude(builder, latitude);
@@ -56,10 +56,10 @@ public struct DataPointFbs : IFlatbufferObject
   public static void AddTag(FlatBufferBuilder builder, StringOffset tagOffset) { builder.AddOffset(0, tagOffset.Value, 0); }
   public static void AddValue(FlatBufferBuilder builder, double value) { builder.AddDouble(1, value, 0.0); }
   public static void AddTs(FlatBufferBuilder builder, long ts) { builder.AddLong(2, ts, 0); }
-  public static void AddLatitude(FlatBufferBuilder builder, double latitude) { builder.AddDouble(3, latitude, 0.0); }
-  public static void AddLongitude(FlatBufferBuilder builder, double longitude) { builder.AddDouble(4, longitude, 0.0); }
-  public static void AddGridX(FlatBufferBuilder builder, int gridX) { builder.AddInt(5, gridX, 0); }
-  public static void AddGridY(FlatBufferBuilder builder, int gridY) { builder.AddInt(6, gridY, 0); }
+  public static void AddLatitude(FlatBufferBuilder builder, double? latitude) { builder.AddDouble(3, latitude); }
+  public static void AddLongitude(FlatBufferBuilder builder, double? longitude) { builder.AddDouble(4, longitude); }
+  public static void AddGridX(FlatBufferBuilder builder, int? gridX) { builder.AddInt(5, gridX); }
+  public static void AddGridY(FlatBufferBuilder builder, int? gridY) { builder.AddInt(6, gridY); }
   public static Offset<DataPointFlatBuffers.DataPointFbs> EndDataPointFbs(FlatBufferBuilder builder) {
     int o = builder.EndTable();
     return new Offset<DataPointFlatBuffers.DataPointFbs>(o);

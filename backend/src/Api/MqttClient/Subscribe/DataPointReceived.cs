@@ -62,22 +62,32 @@ public class DataPointReceived(AppDbContext appContext, RedisService redis, IHub
 
         await UpdateSampleRateIfNeeded(deviceGuid, datapoint.Tag, datapoint.Value, cancellationToken);
 
-        var redisResult = await redis.Db.StreamAddAsync(
-            "datapoints",
-            [
-                new("device_id", deviceId.ToString()),
-                new("sensor_tag", datapoint.Tag),
-                new("value", datapoint.Value),
-                new("timestamp", timestamp.ToUnixTimeMilliseconds()),
-                new("latitude", datapoint.Latitude),
-                new("longitude", datapoint.Longitude),
-                new("grid_x", datapoint.GridX),
-                new("grid_y", datapoint.GridY)
-            ],
-            maxLength: 500000
-        );
+        var streamEntries = new List<NameValueEntry>
+        {
+            new("device_id", deviceId),
+            new("sensor_tag", datapoint.Tag),
+            new("value", datapoint.Value),
+            new("timestamp", timestamp.ToUnixTimeMilliseconds())
+        };
 
-        
+        if (datapoint.Latitude.HasValue)
+        {
+            streamEntries.Add(new("latitude", datapoint.Latitude.Value));
+        }
+        if (datapoint.Longitude.HasValue)
+        {
+            streamEntries.Add(new("longitude", datapoint.Longitude.Value));
+        }
+        if (datapoint.GridX.HasValue)
+        {
+            streamEntries.Add(new("grid_x", datapoint.GridX.Value));
+        }
+        if (datapoint.GridY.HasValue)
+        {
+            streamEntries.Add(new("grid_y", datapoint.GridY.Value));
+        }
+
+        await redis.Db.StreamAddAsync("datapoints", streamEntries.ToArray(), maxLength: 500000);
 
         await redis.Db.StringSetAsync($"device:{deviceId}:connected", "1", TimeSpan.FromMinutes(30), flags: CommandFlags.FireAndForget);
         await redis.Db.StringSetAsync($"device:{deviceId}:lastSeen", DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), flags: CommandFlags.FireAndForget);
