@@ -108,12 +108,15 @@ public static class DeviceExtensions
         var elapsed = nowUtc - lastSeen.Value;
         var window = TimeSpan.FromSeconds(sampleRateSeconds.Value);
 
-        if (elapsed > window + window)
+        var degradedWindow = TimeSpan.FromSeconds(sampleRateSeconds.Value * 1.5);
+        var offlineWindow = TimeSpan.FromSeconds(sampleRateSeconds.Value * 2);
+
+        if (elapsed > offlineWindow)
         {
             return DeviceConnectionState.Offline;
         }
 
-        if (elapsed > window)
+        if (elapsed > degradedWindow)
         {
             return DeviceConnectionState.Degraded;
         }
