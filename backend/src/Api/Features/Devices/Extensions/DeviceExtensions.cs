@@ -106,22 +106,63 @@ public static class DeviceExtensions
         }
 
         var elapsed = nowUtc - lastSeen.Value;
-        var window = TimeSpan.FromSeconds(sampleRateSeconds.Value);
+        var degradedWindow = GetDegradedWindow(protocol, sampleRateSeconds);
+        var offlineWindow = GetOfflineWindow(protocol, sampleRateSeconds);
 
-        var degradedWindow = TimeSpan.FromSeconds(sampleRateSeconds.Value * 1.5);
-        var offlineWindow = TimeSpan.FromSeconds(sampleRateSeconds.Value * 2);
-
-        if (elapsed > offlineWindow)
+        if (offlineWindow.HasValue && elapsed > offlineWindow.Value)
         {
             return DeviceConnectionState.Offline;
         }
 
-        if (elapsed > degradedWindow)
+        if (degradedWindow.HasValue && elapsed > degradedWindow.Value)
         {
             return DeviceConnectionState.Degraded;
         }
 
         return DeviceConnectionState.Online;
+    }
+
+    public static bool IsLatestDataPointStale(
+        DeviceConnectionProtocol protocol,
+        float? sampleRateSeconds,
+        DateTimeOffset? timestamp,
+        DateTimeOffset nowUtc
+    )
+    {
+        if (!timestamp.HasValue)
+        {
+            return false;
+        }
+
+        var offlineWindow = GetOfflineWindow(protocol, sampleRateSeconds);
+        if (!offlineWindow.HasValue)
+        {
+            return false;
+        }
+
+        return nowUtc - timestamp.Value > offlineWindow.Value;
+    }
+
+    public static TimeSpan? GetDegradedWindow(DeviceConnectionProtocol protocol, float? sampleRateSeconds)
+    {
+        var normalizedSampleRate = NormalizeSampleRate(protocol, sampleRateSeconds);
+        return normalizedSampleRate.HasValue ? TimeSpan.FromSeconds(normalizedSampleRate.Value * 1.5) : null;
+    }
+
+    public static TimeSpan? GetOfflineWindow(DeviceConnectionProtocol protocol, float? sampleRateSeconds)
+    {
+        var normalizedSampleRate = NormalizeSampleRate(protocol, sampleRateSeconds);
+        return normalizedSampleRate.HasValue ? TimeSpan.FromSeconds(normalizedSampleRate.Value * 2) : null;
+    }
+
+    private static float? NormalizeSampleRate(DeviceConnectionProtocol protocol, float? sampleRateSeconds)
+    {
+        if (protocol == DeviceConnectionProtocol.HTTP && (!sampleRateSeconds.HasValue || sampleRateSeconds <= 0))
+        {
+            return 60;
+        }
+
+        return sampleRateSeconds.HasValue && sampleRateSeconds > 0 ? sampleRateSeconds : null;
     }
 
     public static IQueryable<Device> WhereOwned(this IQueryable<Device> devices, Guid ownerId)

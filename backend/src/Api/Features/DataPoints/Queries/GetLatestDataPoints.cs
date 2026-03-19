@@ -102,14 +102,14 @@ public static class GetLatestDataPoints
                         var cachedResponse = JsonSerializer.Deserialize<Response>(cachedLatestDataPoint!);
                         if (cachedResponse != null)
                         {
-                            return Result.Ok(cachedResponse);
+                            return Result.Ok(MaskStaleValue(device, cachedResponse, DateTimeOffset.UtcNow));
                         }
                     }
                     catch (JsonException)
                     {
                         if (double.TryParse(cachedLatestDataPoint.ToString(), out double value))
                         {
-                            return Result.Ok(new Response(null, value, null, null, null, null));
+                            return Result.Ok(MaskStaleValue(device, new Response(null, value, null, null, null, null), DateTimeOffset.UtcNow));
                         }
                     }
                 }
@@ -156,7 +156,17 @@ public static class GetLatestDataPoints
                 );
             }
 
-            return Result.Ok(response);
+            return Result.Ok(MaskStaleValue(device, response, DateTimeOffset.UtcNow));
+        }
+
+        private static Response MaskStaleValue(Device device, Response response, DateTimeOffset nowUtc)
+        {
+            if (!DeviceExtensions.IsLatestDataPointStale(device.Protocol, device.SampleRateSeconds, response.Ts, nowUtc))
+            {
+                return response;
+            }
+
+            return response with { Value = null };
         }
     }
 

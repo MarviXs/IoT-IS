@@ -69,4 +69,34 @@ public class DeviceConnectionStateTests
 
         state.Should().Be(DeviceConnectionState.Offline);
     }
+
+    [Fact]
+    public void Should_NotTreatLatestDataPointAsStale_AtOfflineWindowBoundary()
+    {
+        var now = DateTimeOffset.UtcNow;
+
+        var isStale = DeviceExtensions.IsLatestDataPointStale(
+            DeviceConnectionProtocol.HTTP,
+            sampleRateSeconds: 10,
+            timestamp: now.AddSeconds(-20),
+            nowUtc: now
+        );
+
+        isStale.Should().BeFalse();
+    }
+
+    [Fact]
+    public void Should_TreatLatestDataPointAsStale_AfterOfflineWindow()
+    {
+        var now = DateTimeOffset.UtcNow;
+
+        var isStale = DeviceExtensions.IsLatestDataPointStale(
+            DeviceConnectionProtocol.HTTP,
+            sampleRateSeconds: 10,
+            timestamp: now.AddSeconds(-20.1),
+            nowUtc: now
+        );
+
+        isStale.Should().BeTrue();
+    }
 }
