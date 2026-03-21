@@ -146,7 +146,7 @@ public static class DeviceExtensions
     public static TimeSpan? GetDegradedWindow(DeviceConnectionProtocol protocol, float? sampleRateSeconds)
     {
         var normalizedSampleRate = NormalizeSampleRate(protocol, sampleRateSeconds);
-        return normalizedSampleRate.HasValue ? TimeSpan.FromSeconds(normalizedSampleRate.Value * 1.5) : null;
+        return normalizedSampleRate.HasValue ? TimeSpan.FromSeconds(normalizedSampleRate.Value * 1.1) : null;
     }
 
     public static TimeSpan? GetOfflineWindow(DeviceConnectionProtocol protocol, float? sampleRateSeconds)
