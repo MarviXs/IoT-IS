@@ -1,112 +1,114 @@
 <template>
-  <q-card class="q-pa-sm shadow">
-    <q-stepper ref="stepper" v-model="formStep" animated vertical header-nav keep-alive>
-      <q-step :name="1" :title="t('device_template.template_details')" :icon="mdiPencil">
-        <q-form class="q-py-md q-px-sm">
-          <div class="row q-col-gutter-y-sm q-col-gutter-x-lg">
-            <q-input
-              ref="nameRef"
-              v-model="template.name"
-              :rules="nameRules"
-              class="col-12"
-              :label="t('global.name')"
-              :disable="readOnly"
-            />
-            <q-select
-              v-model="template.deviceType"
-              :options="[
-                { label: 'Generic', value: 'Generic' },
-                { label: 'NuviaMSU', value: 'NuviaMSU' },
-              ]"
-              class="col-12"
-              label="Device Type"
-              :rules="[(val) => (val && val.length > 0) || t('global.rules.required')]"
-              emit-value
-              map-options
-              :disable="readOnly"
-            />
-            <div v-if="authStore.isAdmin" class="col-12">
-              <q-toggle v-model="template.isGlobal" :label="t('device_template.global_template')" :disable="readOnly" />
-              <div class="text-caption text-grey-7 q-ml-lg">
-                {{ t('device_template.global_template_hint') }}
+  <div>
+    <q-card class="q-pa-sm shadow">
+      <q-stepper ref="stepper" v-model="formStep" animated vertical header-nav keep-alive>
+        <q-step :name="1" :title="t('device_template.template_details')" :icon="mdiPencil">
+          <q-form class="q-py-md q-px-sm">
+            <div class="row q-col-gutter-y-sm q-col-gutter-x-lg">
+              <q-input
+                ref="nameRef"
+                v-model="template.name"
+                :rules="nameRules"
+                class="col-12"
+                :label="t('global.name')"
+                :disable="readOnly"
+              />
+              <q-select
+                v-model="template.deviceType"
+                :options="[
+                  { label: 'Generic', value: 'Generic' },
+                  { label: 'NuviaMSU', value: 'NuviaMSU' },
+                ]"
+                class="col-12"
+                label="Device Type"
+                :rules="[(val) => (val && val.length > 0) || t('global.rules.required')]"
+                emit-value
+                map-options
+                :disable="readOnly"
+              />
+              <div v-if="authStore.isAdmin" class="col-12">
+                <q-toggle v-model="template.isGlobal" :label="t('device_template.global_template')" :disable="readOnly" />
+                <div class="text-caption text-grey-7 q-ml-lg">
+                  {{ t('device_template.global_template_hint') }}
+                </div>
               </div>
-            </div>
-            <div class="col-12">
-              <q-toggle v-model="template.enableMap" :label="t('device_template.enable_map')" :disable="readOnly" />
-            </div>
-            <div class="col-12">
-              <q-toggle v-model="template.enableGrid" :label="t('device_template.enable_grid')" :disable="readOnly" />
-            </div>
+              <div class="col-12">
+                <q-toggle v-model="template.enableMap" :label="t('device_template.enable_map')" :disable="readOnly" />
+              </div>
+              <div class="col-12">
+                <q-toggle v-model="template.enableGrid" :label="t('device_template.enable_grid')" :disable="readOnly" />
+              </div>
 
-            <q-input
-              v-if="template.enableGrid"
-              v-model.number="template.gridRowSpan"
-              type="number"
-              min="1"
-              step="1"
-              class="col-12 col-sm-6"
-              :rules="gridRowRules"
-              :label="t('device_template.grid_rows')"
-              :disable="readOnly"
-            />
-            <q-input
-              v-if="template.enableGrid"
-              v-model.number="template.gridColumnSpan"
-              type="number"
-              min="1"
-              step="1"
-              class="col-12 col-sm-6"
-              :rules="gridColumnRules"
-              :label="t('device_template.grid_columns')"
-              :disable="readOnly"
-            />
-          </div>
-          <q-card-actions v-if="!readOnly" align="left" class="text-primary q-mt-sm q-px-none">
+              <q-input
+                v-if="template.enableGrid"
+                v-model.number="template.gridRowSpan"
+                type="number"
+                min="1"
+                step="1"
+                class="col-12 col-sm-6"
+                :rules="gridRowRules"
+                :label="t('device_template.grid_rows')"
+                :disable="readOnly"
+              />
+              <q-input
+                v-if="template.enableGrid"
+                v-model.number="template.gridColumnSpan"
+                type="number"
+                min="1"
+                step="1"
+                class="col-12 col-sm-6"
+                :rules="gridColumnRules"
+                :label="t('device_template.grid_columns')"
+                :disable="readOnly"
+              />
+            </div>
+            <q-card-actions v-if="!readOnly" align="left" class="text-primary q-mt-sm q-px-none">
+              <q-btn
+                unelevated
+                color="primary"
+                :label="t('global.next')"
+                padding="7px 40px"
+                outline
+                no-caps
+                type="submit"
+                @click.prevent="goToStep(2)"
+              />
+            </q-card-actions>
+          </q-form>
+        </q-step>
+        <q-step :name="2" :title="t('device.add_sensors')" :icon="matSensors">
+          <q-form>
+            <div v-for="(sensor, index) in sensors" :key="index">
+              <SensorForm ref="sensorFormRef" v-model="sensors[index]" :read-only="readOnly" @remove="deleteSensor(index)" />
+            </div>
             <q-btn
-              unelevated
-              color="primary"
-              :label="t('global.next')"
-              padding="7px 40px"
+              v-if="!readOnly"
+              class="full-width q-mb-md q-mt-sm"
               outline
+              :icon="mdiPlusCircle"
+              color="primary"
               no-caps
-              type="submit"
-              @click.prevent="goToStep(2)"
+              padding="12px 30px"
+              :label="t('device.add_sensor')"
+              @click="addSensor"
             />
-          </q-card-actions>
-        </q-form>
-      </q-step>
-      <q-step :name="2" :title="t('device.add_sensors')" :icon="matSensors">
-        <q-form>
-          <div v-for="(sensor, index) in sensors" :key="index">
-            <sensor-form ref="sensorFormRef" v-model="sensors[index]" :read-only="readOnly" @remove="deleteSensor(index)" />
-          </div>
-          <q-btn
-            v-if="!readOnly"
-            class="full-width q-mb-md q-mt-sm"
-            outline
-            :icon="mdiPlusCircle"
-            color="primary"
-            no-caps
-            padding="12px 30px"
-            :label="t('device.add_sensor')"
-            @click="addSensor"
-          />
-        </q-form>
-      </q-step>
-    </q-stepper>
-  </q-card>
-  <q-btn
-    v-if="!readOnly"
-    unelevated
-    color="primary"
-    :label="t('global.save')"
-    padding="7px 35px"
-    class="q-mt-md"
-    :loading="loading"
-    no-caps
-    type="submit"
-    @click.prevent="submitForm"
-  />
+          </q-form>
+        </q-step>
+      </q-stepper>
+    </q-card>
+    <q-btn
+      v-if="!readOnly"
+      unelevated
+      color="primary"
+      :label="t('global.save')"
+      padding="7px 35px"
+      class="q-mt-md"
+      :loading="loading"
+      no-caps
+      type="submit"
+      @click.prevent="submitForm"
+    />
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -115,8 +117,8 @@ import { useI18n } from 'vue-i18n';
 import type { QInput } from 'quasar';
 import { QForm } from 'quasar';
 import { isFormValid } from '@/utils/form-validation';
+import SensorForm from './SensorForm.vue';
 import type { SensorFormData } from './SensorForm.vue';
-import type SensorForm from './SensorForm.vue';
 import { mdiPencil, mdiPlusCircle } from '@quasar/extras/mdi-v7';
 import { matSensors } from '@quasar/extras/material-icons';
 import { useAuthStore } from '@/stores/auth-store';
@@ -212,7 +214,7 @@ function deleteSensor(index: number) {
 // Input validation
 const nameRef = ref<QInput>();
 
-const sensorFormRef = ref<(typeof SensorForm)[]>([]);
+const sensorFormRef = ref<InstanceType<typeof SensorForm>[]>([]);
 
 const nameRules = [(val: string) => (val && val.length > 0) || t('global.rules.required')];
 const gridRowRules = [
