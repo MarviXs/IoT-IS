@@ -23,6 +23,8 @@ public static class GetLatestDataPoints
         public DateTimeOffset? From { get; set; }
 
         public DateTimeOffset? To { get; set; }
+
+        public bool MaskStaleValue { get; set; } = false;
     }
 
     public class Endpoint : ICarterModule
@@ -88,6 +90,7 @@ public static class GetLatestDataPoints
 
             var from = parameters.From;
             var to = parameters.To;
+            var maskStaleValue = parameters.MaskStaleValue;
             var useCache = from == null && to == null;
 
             var redisKey = $"device:{message.DeviceId}:{message.SensorTag}:last";
@@ -102,14 +105,15 @@ public static class GetLatestDataPoints
                         var cachedResponse = JsonSerializer.Deserialize<Response>(cachedLatestDataPoint!);
                         if (cachedResponse != null)
                         {
-                            return Result.Ok(MaskStaleValue(device, cachedResponse, DateTimeOffset.UtcNow));
+                            return Result.Ok(maskStaleValue ? MaskStaleValue(device, cachedResponse, DateTimeOffset.UtcNow) : cachedResponse);
                         }
                     }
                     catch (JsonException)
                     {
                         if (double.TryParse(cachedLatestDataPoint.ToString(), out double value))
                         {
-                            return Result.Ok(MaskStaleValue(device, new Response(null, value, null, null, null, null), DateTimeOffset.UtcNow));
+                            var fallbackResponse = new Response(null, value, null, null, null, null);
+                            return Result.Ok(maskStaleValue ? MaskStaleValue(device, fallbackResponse, DateTimeOffset.UtcNow) : fallbackResponse);
                         }
                     }
                 }
@@ -156,7 +160,7 @@ public static class GetLatestDataPoints
                 );
             }
 
-            return Result.Ok(MaskStaleValue(device, response, DateTimeOffset.UtcNow));
+            return Result.Ok(maskStaleValue ? MaskStaleValue(device, response, DateTimeOffset.UtcNow) : response);
         }
 
         private static Response MaskStaleValue(Device device, Response response, DateTimeOffset nowUtc)

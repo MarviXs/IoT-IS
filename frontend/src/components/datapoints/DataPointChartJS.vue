@@ -343,6 +343,7 @@ const storageKeySuffix = computed(() => props.timeRangeStorageKey ?? deviceId.va
 
 const graphOptions = useStorage<GraphOptions>(`graphOptions_${storageKeySuffix.value}`, {
   refreshInterval: 30,
+  maskStaleValue: false,
   timeFormat: '24h',
   interpolationMethod: 'straight',
   lineStyle: 'lines',
@@ -354,6 +355,10 @@ const graphOptions = useStorage<GraphOptions>(`graphOptions_${storageKeySuffix.v
   timeBucketSizeSeconds: 60,
   timeBucketMethod: 'Average',
 });
+
+if (graphOptions.value.maskStaleValue == null) {
+  graphOptions.value.maskStaleValue = false;
+}
 
 const storedTimeRange = useStorage(`chartTimeRange_${storageKeySuffix.value}`, '6h');
 const storedCustomTimeRange = useStorage(`chartCustomTimeRange_${storageKeySuffix.value}`, {

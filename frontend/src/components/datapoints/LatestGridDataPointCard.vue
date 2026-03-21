@@ -1,10 +1,10 @@
 <template>
   <div>
-    <div class="shadow card bg-white full-width column items-center justify-center grid-card">
+    <div class="shadow card full-width column items-center justify-center grid-card">
       <div class="sensor-name">{{ name }}</div>
       <div class="sensor-value">{{ valueRounded }} {{ unit }}</div>
     </div>
-    <div class="color-strip"></div>
+    <div v-if="!heatmapEnabled" class="color-strip"></div>
   </div>
 </template>
 
@@ -18,6 +18,9 @@ const props = defineProps<{
   unit: string;
   accuracyDecimals: number;
   color: string;
+  heatmapEnabled: boolean;
+  backgroundColor: string;
+  textColor: string;
   lastValue: number | null;
 }>();
 
@@ -30,10 +33,13 @@ const valueRounded = computed(() => {
 .grid-card {
   border-top-left-radius: 0.5rem;
   border-top-right-radius: 0.5rem;
+  border-bottom-left-radius: v-bind('heatmapEnabled ? "0.5rem" : "0"');
+  border-bottom-right-radius: v-bind('heatmapEnabled ? "0.5rem" : "0"');
+  background-color: v-bind(backgroundColor);
 }
 .sensor-name {
   font-weight: 400;
-  color: var(--q-grey-color);
+  color: v-bind(textColor);
   font-size: 1rem;
   text-align: center;
 }
@@ -42,6 +48,7 @@ const valueRounded = computed(() => {
   margin-top: 0.25rem;
   font-weight: 500;
   font-size: 1.3rem;
+  color: v-bind(textColor);
   text-align: center;
 }
 

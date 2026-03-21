@@ -37,6 +37,7 @@
     "actions": "Actions",
     "active": "Active",
     "automatic_refresh_interval": "Automatic refresh interval",
+    "mask_stale_values": "Hide stale values in latest values",
     "enter_refresh_interval_s": "Enter refresh interval in seconds (0 to disable)",
     "rules": {
       "required": "This field is required!",
@@ -254,6 +255,10 @@
     "grid_settings": "Grid",
     "enable_map": "Enable map",
     "enable_grid": "Enable grid",
+    "default_view": "Default",
+    "heatmap_view": "Heatmap",
+    "heatmap_toggle": "Enable heatmap",
+    "heatmap_scale": "Heatmap scale",
     "grid_rows": "Grid rows",
     "grid_columns": "Grid columns",
     "grid_not_configured": "Grid layout is not configured for this device template.",

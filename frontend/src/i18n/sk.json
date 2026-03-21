@@ -34,6 +34,7 @@
     "refresh": "Obnoviť",
     "active": "Aktívne",
     "automatic_refresh_interval": "Automatický interval obnovy",
+    "mask_stale_values": "Skryť zastarané hodnoty v posledných hodnotách",
     "enter_refresh_interval_s": "Zadajte interval obnovy v sekundách (0 pre vypnutie)",
     "rules": {
       "required": "Toto pole je povinné!"
@@ -248,6 +249,10 @@
     "grid_settings": "Mriežka",
     "enable_map": "Povoliť mapu",
     "enable_grid": "Povoliť mriežku",
+    "default_view": "Predvolené",
+    "heatmap_view": "Mapa tepla",
+    "heatmap_toggle": "Povoliť mapu tepla",
+    "heatmap_scale": "Stupnica mapy tepla",
     "grid_rows": "Riadky mriežky",
     "grid_columns": "Stĺpce mriežky",
     "grid_not_configured": "Rozloženie mriežky nie je pre túto šablónu zariadenia nastavené.",

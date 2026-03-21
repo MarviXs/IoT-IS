@@ -9,9 +9,10 @@
       <q-card-section class="column q-gutter-sm">
         <div class="text-subtitle1">v1.3</div>
         <ul class="q-pl-md q-my-none">
-          <li>Hide stale latest datapoint values after the device offline window</li>
+          <li>Hide stale latest datapoint values after the device offline window option</li>
           <li>Show firmware version in device info</li>
           <li>Fixed sensor selection saving across multiple tabs.</li>
+          <li>Added a heatmap view to the device grid.</li>
         </ul>
       </q-card-section>
       <q-separator spaced inset />

@@ -120,7 +120,7 @@
 import { useRoute } from 'vue-router';
 import DeviceInfoCard from '@/components/devices/DeviceInfoCard.vue';
 import DataPointChartJS from '@/components/datapoints/DataPointChartJS.vue';
-import { computed, onUnmounted, ref } from 'vue';
+import { computed, onUnmounted, ref, watch } from 'vue';
 import DeviceService from '@/api/services/DeviceService';
 import { deviceToTreeNode, extractNodeKeys } from '@/utils/sensor-nodes';
 import SensorSelectionTree from '@/components/datapoints/SensorSelectionTree.vue';
@@ -146,6 +146,9 @@ import DataPointService from '@/api/services/DataPointService';
 import LatestDataPoints from '@/components/datapoints/LatestDataPoints.vue';
 import DeviceNotificationTable from '@/components/devices/DeviceNotificationTable.vue';
 import type { SensorData } from '@/models/SensorData';
+import { useStorage } from '@vueuse/core';
+import type { GraphOptions } from '@/components/datapoints/GraphOptionsForm.vue';
+import type { GetLatestDataPointsQuery } from '@/api/services/DataPointService';
 
 const { t } = useI18n();
 const { connection, connect } = useSignalR();
@@ -160,6 +163,26 @@ const currentJobCard = ref();
 
 const sensorTree = ref<SensorNode>();
 const tickedNodes = ref<string[]>();
+type DeviceLatestDataPointsQuery = GetLatestDataPointsQuery & { MaskStaleValue?: boolean };
+
+const graphOptions = useStorage<GraphOptions>(`graphOptions_${deviceId}`, {
+  refreshInterval: 30,
+  maskStaleValue: false,
+  timeFormat: '24h',
+  interpolationMethod: 'straight',
+  lineStyle: 'lines',
+  lineWidth: 3,
+  markerSize: 3,
+  samplingOption: 'BUCKETS',
+  downsampleResolution: 100,
+  downsampleMethod: 'Lttb',
+  timeBucketSizeSeconds: 60,
+  timeBucketMethod: 'Average',
+});
+
+if (graphOptions.value.maskStaleValue == null) {
+  graphOptions.value.maskStaleValue = false;
+}
 
 const sensors = computed<SensorData[]>(() => {
   return (
@@ -212,7 +235,10 @@ async function getLastDataPoints() {
 }
 
 async function getLastDataPoint(deviceId: string, tag: string) {
-  const { data, error } = await DataPointService.getLatestDataPoints(deviceId, tag);
+  const query: DeviceLatestDataPointsQuery = {
+    MaskStaleValue: graphOptions.value.maskStaleValue ?? false,
+  };
+  const { data, error } = await DataPointService.getLatestDataPoints(deviceId, tag, query);
   if (error || !data) {
     return;
   }
@@ -249,6 +275,13 @@ async function subscribeToLastDataPointUpdates() {
   });
 }
 subscribeToLastDataPointUpdates();
+
+watch(
+  () => graphOptions.value.maskStaleValue,
+  () => {
+    void getLastDataPoints();
+  },
+);
 
 const isUpdateDialogOpen = ref(false);
 onUnmounted(() => {

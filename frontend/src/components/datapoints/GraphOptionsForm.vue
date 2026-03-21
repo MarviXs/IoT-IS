@@ -19,6 +19,14 @@
         ></q-select>
       </div>
       <div>
+        <q-checkbox
+          v-model="graphOptions.maskStaleValue"
+          color="primary"
+          dense
+          :label="t('global.mask_stale_values')"
+        />
+      </div>
+      <div>
         <div class="form-subtitle text-primary">Graph Style</div>
         <div class="chart-form">
           <q-select
@@ -105,6 +113,7 @@ import { useI18n } from 'vue-i18n';
 
 export type GraphOptions = {
   refreshInterval: number;
+  maskStaleValue: boolean;
   timeFormat: '12h' | '24h';
 
   interpolationMethod: 'straight' | 'bezier';
