@@ -11,6 +11,7 @@
         <ul class="q-pl-md q-my-none">
           <li>Hide stale latest datapoint values after the device offline window</li>
           <li>Show firmware version in device info</li>
+          <li>Fixed sensor selection saving across multiple tabs.</li>
         </ul>
       </q-card-section>
       <q-separator spaced inset />

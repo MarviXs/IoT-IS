@@ -336,8 +336,8 @@ const isExportDialogOpen = ref(false);
 // Use first sensor's deviceId for per-device settings (assumes all sensors are from the same device)
 const deviceId = computed(() => props.sensors[0]?.deviceId ?? 'unknown');
 
-// Store ticked sensor state per device
-const storedTickedNodes = useStorage<string[]>('tickedSensors_unknown', []);
+const tickedNodesStorageKey = computed(() => `tickedSensors_${deviceId.value}`);
+const storedTickedNodes = useStorage<string[]>(tickedNodesStorageKey, []);
 
 const storageKeySuffix = computed(() => props.timeRangeStorageKey ?? deviceId.value);
 
@@ -1097,34 +1097,10 @@ function updateDatasetVisibility(tickedNodes: string[]) {
   chart.value.update();
 }
 
-// Update storage when deviceId changes and synchronize with model
-watch(
-  () => deviceId.value,
-  (newDeviceId) => {
-    // Update the storage key when device changes
-    const storageKey = `tickedSensors_${newDeviceId}`;
-    const storedValue = localStorage.getItem(storageKey);
-
-    if (storedValue) {
-      try {
-        const parsedValue = JSON.parse(storedValue);
-        if (Array.isArray(parsedValue)) {
-          storedTickedNodes.value = parsedValue;
-        }
-      } catch (e) {
-        console.error('Failed to parse stored ticked nodes:', e);
-      }
-    }
-  },
-  { immediate: true },
-);
-
 // Synchronize stored ticked nodes with model value
 watch(
   () => tickedNodes.value,
   (newTickedNodes) => {
-    const storageKey = `tickedSensors_${deviceId.value}`;
-    localStorage.setItem(storageKey, JSON.stringify(newTickedNodes));
     storedTickedNodes.value = [...newTickedNodes];
   },
   { deep: true },
