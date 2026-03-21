@@ -48,15 +48,24 @@
             <q-spinner color="primary" size="2rem" />
           </div>
           <div v-else>
-            <div v-if="heatmapEnabled && heatmapRange" class="heatmap-scale">
+            <div v-if="heatmapEnabled && activeHeatmapScale" class="heatmap-scale">
               <div class="heatmap-scale__header">
                 <span class="heatmap-scale__title">{{ t('device_template.heatmap_scale') }}</span>
               </div>
               <div class="heatmap-scale__body">
-                <div class="heatmap-scale__bar" :style="{ background: heatmapGradient }"></div>
+                <div class="heatmap-scale__bar" :style="{ background: activeHeatmapScale.gradient }"></div>
                 <div class="heatmap-scale__ticks">
-                  <span v-for="tick in heatmapTickLabels" :key="tick" class="heatmap-scale__tick-label">
-                    {{ tick }}
+                  <span
+                    v-for="(tick, index) in activeHeatmapScale.ticks"
+                    :key="`${index}-${tick.label}`"
+                    class="heatmap-scale__tick-label"
+                    :class="{
+                      'heatmap-scale__tick-label--start': index === 0,
+                      'heatmap-scale__tick-label--end': index === activeHeatmapScale.ticks.length - 1,
+                    }"
+                    :style="{ left: `${tick.position}%` }"
+                  >
+                    {{ tick.label }}
                   </span>
                 </div>
               </div>
@@ -73,9 +82,9 @@
                   :accuracy-decimals="cellData[cell.key].accuracyDecimals"
                   :color="cellData[cell.key].color"
                   :heatmap-enabled="heatmapEnabled"
-                  :background-color="getCardBackgroundColor(cellData[cell.key].value)"
-                  :text-color="getCardTextColor(cellData[cell.key].value)"
-                  :last-value="cellData[cell.key].value"
+                  :background-color="getCardBackgroundColor(getDisplayValue(cellData[cell.key].value))"
+                  :text-color="getCardTextColor(getDisplayValue(cellData[cell.key].value))"
+                  :last-value="getDisplayValue(cellData[cell.key].value)"
                 />
                 <div v-else class="empty-grid-cell shadow"></div>
               </div>
@@ -116,12 +125,13 @@ const device = ref<DeviceResponse>();
 const isLoadingGrid = ref(false);
 const selectedTimeRange = ref<TimeRange | null>(null);
 const timeRangeSelectRef = ref<{ updateTimeRange: () => void }>();
-type GridMode = 'default' | 'heatmap';
+type GridMode = 'default' | 'heatmap1' | 'heatmap2';
 const gridMode = ref<GridMode>('default');
 
 const cellData = reactive<Record<string, GridCellData>>({});
 const sensorCellMap = reactive<Record<string, string>>({});
 const fallbackTimestamp = new Date(0).toISOString();
+const heatmapIgnoredValue = 9999999;
 let activeRequestId = 0;
 const usesOneBasedX = ref<boolean | null>(null);
 const usesOneBasedY = ref<boolean | null>(null);
@@ -143,10 +153,11 @@ type GridLatestDataPointsQuery = GetLatestDataPointsQuery & { MaskStaleValue?: b
 const gridRows = computed(() => device.value?.deviceTemplate?.gridRowSpan ?? 0);
 const gridColumns = computed(() => device.value?.deviceTemplate?.gridColumnSpan ?? 0);
 const hasGrid = computed(() => gridRows.value > 0 && gridColumns.value > 0);
-const heatmapEnabled = computed(() => gridMode.value === 'heatmap');
+const heatmapEnabled = computed(() => gridMode.value !== 'default');
 const gridModeOptions = computed(() => [
   { label: t('device_template.default_view'), value: 'default' as GridMode },
-  { label: t('device_template.heatmap_view'), value: 'heatmap' as GridMode },
+  { label: t('device_template.heatmap_1_view'), value: 'heatmap1' as GridMode },
+  { label: t('device_template.heatmap_2_view'), value: 'heatmap2' as GridMode },
 ]);
 const heatmapPalette = [
   { stop: 0, color: '#5e0b7b' },
@@ -155,6 +166,15 @@ const heatmapPalette = [
   { stop: 0.68, color: '#2f9198' },
   { stop: 0.84, color: '#7bcf4d' },
   { stop: 1, color: '#ffe44a' },
+];
+const centeredHeatmapPalette = [
+  { stop: 0, color: '#5e0b7b' },
+  { stop: 0.25, color: '#4769a5' },
+  { stop: 0.4, color: '#7bcf4d' },
+  { stop: 0.5, color: '#ffe44a' },
+  { stop: 0.6, color: '#7bcf4d' },
+  { stop: 0.75, color: '#4769a5' },
+  { stop: 1, color: '#5e0b7b' },
 ];
 
 const gridStyle = computed(() => {
@@ -184,7 +204,7 @@ const gridCells = computed(() => {
 
 const numericCellValues = computed(() => {
   return Object.values(cellData)
-    .map((cell) => cell.value)
+    .map((cell) => getDisplayValue(cell.value))
     .filter((value): value is number => typeof value === 'number' && Number.isFinite(value));
 });
 
@@ -196,6 +216,31 @@ const heatmapRange = computed(() => {
   return {
     min: Math.min(...numericCellValues.value),
     max: Math.max(...numericCellValues.value),
+  };
+});
+
+const heatmapAverage = computed(() => {
+  if (numericCellValues.value.length === 0) {
+    return null;
+  }
+
+  const total = numericCellValues.value.reduce((sum, value) => sum + value, 0);
+  return total / numericCellValues.value.length;
+});
+
+const centeredHeatmapRange = computed(() => {
+  if (numericCellValues.value.length === 0 || heatmapAverage.value === null) {
+    return null;
+  }
+
+  const average = heatmapAverage.value;
+  const maxDeviation = Math.max(...numericCellValues.value.map((value) => Math.abs(value - average)), 0);
+
+  return {
+    mean: average,
+    maxDeviation,
+    min: average - maxDeviation,
+    max: average + maxDeviation,
   };
 });
 
@@ -215,10 +260,56 @@ const heatmapTickLabels = computed(() => {
   return Array.from({ length: points }, (_, index) => formatHeatmapTick(min + index * step));
 });
 
+const centeredHeatmapTickLabels = computed(() => {
+  if (!centeredHeatmapRange.value) {
+    return [] as string[];
+  }
+
+  const { min, max } = centeredHeatmapRange.value;
+  const points = 5;
+
+  if (max <= min) {
+    return Array.from({ length: points }, () => formatHeatmapTick(min));
+  }
+
+  const step = (max - min) / (points - 1);
+  return Array.from({ length: points }, (_, index) => formatHeatmapTick(min + index * step));
+});
+
 const heatmapGradient = computed(() => {
   return `linear-gradient(90deg, ${heatmapPalette
     .map((entry) => `${entry.color} ${Math.round(entry.stop * 100)}%`)
     .join(', ')})`;
+});
+
+const centeredHeatmapGradient = computed(() => {
+  return `linear-gradient(90deg, ${centeredHeatmapPalette
+    .map((entry) => `${entry.color} ${Math.round(entry.stop * 100)}%`)
+    .join(', ')})`;
+});
+
+const activeHeatmapScale = computed(() => {
+  if (gridMode.value === 'heatmap1' && heatmapRange.value) {
+    return {
+      gradient: heatmapGradient.value,
+      ticks: heatmapTickLabels.value.map((label, index, labels) => ({
+        label,
+        position: labels.length <= 1 ? 0 : (index / (labels.length - 1)) * 100,
+      })),
+    };
+  }
+
+  if (gridMode.value === 'heatmap2' && centeredHeatmapRange.value) {
+    return {
+      gradient: centeredHeatmapGradient.value,
+      ticks: centeredHeatmapTickLabels.value.map((label, index, labels) => ({
+        label,
+        position: labels.length <= 1 ? 0 : (index / (labels.length - 1)) * 100,
+      })),
+    };
+  }
+
+  return null;
 });
 
 async function getDevice() {
@@ -489,6 +580,10 @@ function formatHeatmapTick(value: number) {
   return value.toFixed(2).replace(/\.?0+$/, '');
 }
 
+function getDisplayValue(value: number | null) {
+  return value === heatmapIgnoredValue ? null : value;
+}
+
 function getCardBackgroundColor(value: number | null) {
   if (!heatmapEnabled.value) {
     return '#ffffff';
@@ -511,26 +606,49 @@ function getCardTextColor(value: number | null) {
 }
 
 function getHeatmapColor(value: number | null) {
-  if (value === null || !Number.isFinite(value) || !heatmapRange.value) {
+  if (value === null || !Number.isFinite(value)) {
+    return '#ffffff';
+  }
+
+  if (gridMode.value === 'heatmap2') {
+    return getCenteredHeatmapColor(value);
+  }
+
+  if (!heatmapRange.value) {
     return '#ffffff';
   }
 
   const { min, max } = heatmapRange.value;
 
   if (max <= min) {
-    return interpolateHeatmapColor(0.72);
+    return interpolatePaletteColor(heatmapPalette, 0.72);
   }
 
   const normalized = clamp((value - min) / (max - min), 0, 1);
-  return interpolateHeatmapColor(normalized);
+  return interpolatePaletteColor(heatmapPalette, normalized);
 }
 
-function interpolateHeatmapColor(position: number) {
+function getCenteredHeatmapColor(value: number) {
+  if (!centeredHeatmapRange.value) {
+    return '#ffffff';
+  }
+
+  const { mean, maxDeviation } = centeredHeatmapRange.value;
+
+  if (maxDeviation <= 0) {
+    return interpolatePaletteColor(centeredHeatmapPalette, 0.5);
+  }
+
+  const normalized = clamp(0.5 + (value - mean) / (maxDeviation * 2), 0, 1);
+  return interpolatePaletteColor(centeredHeatmapPalette, normalized);
+}
+
+function interpolatePaletteColor(palette: { stop: number; color: string }[], position: number) {
   const normalized = clamp(position, 0, 1);
 
-  for (let index = 1; index < heatmapPalette.length; index += 1) {
-    const previous = heatmapPalette[index - 1];
-    const current = heatmapPalette[index];
+  for (let index = 1; index < palette.length; index += 1) {
+    const previous = palette[index - 1];
+    const current = palette[index];
 
     if (normalized <= current.stop) {
       const range = current.stop - previous.stop || 1;
@@ -539,7 +657,7 @@ function interpolateHeatmapColor(position: number) {
     }
   }
 
-  return heatmapPalette[heatmapPalette.length - 1].color;
+  return palette[palette.length - 1].color;
 }
 
 function mixHexColors(start: string, end: string, ratio: number) {
@@ -645,18 +763,25 @@ function clamp(value: number, min: number, max: number) {
 }
 
 .heatmap-scale__ticks {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 0.5rem;
+  position: relative;
+  height: 1.2rem;
 }
 
 .heatmap-scale__tick-label {
+  position: absolute;
+  top: 0;
   font-size: 0.78rem;
   color: #5f6b7a;
+  transform: translateX(-50%);
+  white-space: nowrap;
 }
 
-.heatmap-scale__tick-label:last-child {
-  text-align: right;
+.heatmap-scale__tick-label--start {
+  transform: translateX(0);
+}
+
+.heatmap-scale__tick-label--end {
+  transform: translateX(-100%);
 }
 
 .grid-loading {
