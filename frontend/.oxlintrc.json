@@ -13,7 +13,8 @@
     "src-capacitor/**",
     "src-cordova/**",
     ".quasar/**",
-    "quasar.config.*.temporary.compiled*"
+    "quasar.config.*.temporary.compiled*",
+    "node_modules/"
   ],
   "globals": {
     "ga": "readonly",
