@@ -13,10 +13,12 @@ http:// {
 }
 
 https://{$FRONTEND_DOMAIN} {
+    encode zstd gzip
     reverse_proxy frontend:80
 }
 
 https://{$BACKEND_DOMAIN} {
+    encode zstd gzip
     reverse_proxy backend:8080 {
         # Default settings for all paths
     }
