@@ -769,12 +769,11 @@ async function submitExport() {
   try {
     const exportData = new Map<string, DataPoint[]>();
     const sensorKeys = new Set(exportSelectedSensors.value);
-
-    const promises = props.sensors.map(async (sensor) => {
+    for (const sensor of props.sensors) {
       const key = getSensorUniqueId(sensor);
 
       if (!sensorKeys.has(key) || !sensor.id) {
-        return;
+        continue;
       }
 
       const query: GetDataPointsQuery = {
@@ -786,13 +785,11 @@ async function submitExport() {
 
       if (error) {
         console.error(error);
-        return;
+        continue;
       }
 
       exportData.set(key, data ?? []);
-    });
-
-    await Promise.all(promises);
+    }
 
     const csvContent = generateCSVData({
       data: exportData,
