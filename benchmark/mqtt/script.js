@@ -19,9 +19,8 @@ const MQTT_HOST = "localhost";
 const MQTT_PORT = "1883";
 const USERNAME = "stress@gmail.com";
 const PASSWORD = "stress";
-const DEVICE_COUNT = 50;
+const DEVICE_COUNT = 10;
 const SENSORS_PER_DEVICE = 5;
-const VUS = 100;
 const DURATION = "30s";
 const CONNECT_TIMEOUT_MS = 2000;
 const CONNECT_READY_TIMEOUT_MS = 5000;
@@ -43,7 +42,7 @@ export const options = {
   scenarios: {
     mqtt_datapoints: {
       executor: "constant-vus",
-      vus: VUS,
+      vus: DEVICE_COUNT,
       duration: DURATION,
     },
   },
@@ -192,10 +191,6 @@ function validateConfig() {
 
   if (!Number.isInteger(SENSORS_PER_DEVICE) || SENSORS_PER_DEVICE <= 0) {
     fail("SENSORS_PER_DEVICE must be a positive integer.");
-  }
-
-  if (!Number.isInteger(VUS) || VUS <= 0) {
-    fail("VUS must be a positive integer.");
   }
 }
 
