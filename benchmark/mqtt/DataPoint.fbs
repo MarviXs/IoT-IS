@@ -1,0 +1,11 @@
+namespace DataPointFlatBuffers;
+
+table DataPointFbs {
+  tag: string;
+  value: double;
+  ts: long;
+  latitude: double = null;
+  longitude: double = null;
+  grid_x: int = null;
+  grid_y: int = null;
+}

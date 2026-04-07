@@ -1,104 +1,223 @@
-/*
+import { check, fail, sleep } from "k6";
+import exec from "k6/execution";
+import { Client } from "k6/x/mqtt";
 
-This is a k6 test script that imports the xk6-mqtt and
-tests Mqtt with a 100 messages per connection.
+import { createDataPointFlatBuffer } from "../core/flatbuffers.js";
+import { login } from "../core/auth.js";
+import {
+  buildSensorRequests,
+  createDevice,
+  createDeviceTemplate,
+  deleteDevice,
+  deleteDeviceTemplate,
+  replaceDeviceTemplateSensors,
+} from "../core/devices.js";
 
-*/
+const BASE_URL = "http://localhost:9001/api";
+const MQTT_HOST = "localhost";
+const MQTT_PORT = "1883";
+const USERNAME = "stress@gmail.com";
+const PASSWORD = "stress";
+const DEVICE_COUNT = 100;
+const SENSORS_PER_DEVICE = 5;
+const VUS = 100;
+const DURATION = "30s";
+const CONNECT_TIMEOUT_MS = 2000;
+const CONNECT_READY_TIMEOUT_MS = 5000;
+const CONNECT_READY_POLL_SECONDS = 0.1;
+const MQTT_QOS = 0;
+const MQTT_RETAIN = false;
 
-import { check } from "k6";
+export const options = {
+  setupTimeout: "15m",
+  teardownTimeout: "15m",
+  scenarios: {
+    mqtt_datapoints: {
+      executor: "constant-vus",
+      vus: VUS,
+      duration: DURATION,
+    },
+  },
+  thresholds: {
+    checks: ["rate>0.99"],
+  },
+};
 
-const mqtt = require("k6/x/mqtt");
+export function setup() {
+  validateConfig();
 
-const accessToken = "eoBEBzyoTLoy38bHULeTFWaj";
+  const runId = `mqtt-benchmark-${Date.now()}`;
+  const session = login(BASE_URL, USERNAME, PASSWORD);
+  const sensorRequests = buildSensorRequests(SENSORS_PER_DEVICE);
+  const createdDeviceIds = [];
+  let templateId = null;
 
-const rnd_count = 2000;
-
-// create random number to create a new topic at each run
-let rnd = Math.random() * rnd_count;
-
-// conection timeout (ms)
-let connectTimeout = 2000;
-
-// publish timeout (ms)
-let publishTimeout = 10000;
-
-// connection close timeout (ms)
-let closeTimeout = 2000;
-
-// Mqtt topic one per VU
-const k6Topic = `devices/${accessToken}/data`;
-// Connect IDs one connection per VU
-const k6PubId = `k6-pub-${rnd}-${__VU}`;
-
-// number of message pusblished and receives at each iteration
-const messageCount = 1;
-
-const host = "localhost";
-const port = "1883";
-
-// create publisher client
-let publisher = new mqtt.Client(
-  // The list of URL of  MQTT server to connect to
-  [host + ":" + port],
-  // A username to authenticate to the MQTT server
-  accessToken,
-  // Password to match username
-  "",
-  // clean session setting
-  false,
-  // Client id for reader
-  k6PubId,
-  // timeout in ms
-  connectTimeout
-);
-let err;
-
-try {
-  publisher.connect();
-} catch (error) {
-  err = error;
-}
-
-if (err != undefined) {
-  console.error("publish connect error:", err);
-  // you may want to use fail here if you want only to test successfull connection only
-  // fail("fatal could not connect to broker for publish")
-}
-
-const payload = 'CgNjbzIRAAAAAAAAOUA='
-
-export default function () {
-
-  check(publisher, {
-    "is publisher connected": (publisher) => publisher.isConnected(),
-  });
-
-  for (let i = 0; i < messageCount; i++) {
-    // publish count messages
-    let err_publish;
-    try {
-      publisher.publish(
-        // topic to be used
-        k6Topic,
-        // The QoS of messages
-        1,
-        // Message to be sent
-        payload,
-        // retain policy on message
-        false,
-        // timeout in ms
-        publishTimeout
-      );
-    } catch (error) {
-      err_publish = error;
-    }
-    check(err_publish, {
-      "is sent": (err) => err == undefined,
+  try {
+    templateId = createDeviceTemplate(session, {
+      name: `${runId}-template`,
+      deviceType: "Generic",
     });
+
+    replaceDeviceTemplateSensors(session, templateId, sensorRequests);
+
+    const devices = Array.from({ length: DEVICE_COUNT }, (_, index) => {
+      const deviceNumber = index + 1;
+      const accessToken = `${runId}-device-${deviceNumber}`;
+      const deviceId = createDevice(session, {
+        name: `${runId}-device-${deviceNumber}`,
+        accessToken,
+        templateId,
+        protocol: "MQTT",
+        dataPointRetentionDays: 30,
+        sampleRateSeconds: 1,
+      });
+
+      createdDeviceIds.push(deviceId);
+
+      return {
+        id: deviceId,
+        accessToken,
+      };
+    });
+
+    return {
+      session,
+      templateId,
+      devices,
+      sensorTags: sensorRequests.map((sensor) => sensor.tag),
+    };
+  } catch (error) {
+    cleanupResources(session, createdDeviceIds, templateId);
+    throw error;
   }
 }
 
-export function teardown() {
-  // closing both connections at VU close
-  publisher.close(closeTimeout);
+export default function (data) {
+  const device = getAssignedDevice(data.devices);
+  const client = createPublisher(device.accessToken);
+
+  check(client, {
+    "mqtt publisher is connected": (currentClient) => currentClient.connected,
+  });
+
+  const timestamp = Date.now();
+  for (let sensorIndex = 0; sensorIndex < data.sensorTags.length; sensorIndex += 1) {
+    const payload = createDataPointFlatBuffer(
+      data.sensorTags[sensorIndex],
+      buildSensorValue(sensorIndex),
+      timestamp
+    );
+
+    let publishError;
+    try {
+      client.publish(
+        `devices/${device.accessToken}/data`,
+        payload,
+        {
+          qos: MQTT_QOS,
+          retain: MQTT_RETAIN,
+        }
+      );
+    } catch (error) {
+      publishError = error;
+    }
+
+    check(publishError, {
+      "mqtt datapoint publish succeeded": (error) => error === undefined,
+    });
+  }
+
+  try {
+    client.end();
+  } catch (_) {
+  }
+}
+
+export function teardown(data) {
+  cleanupResources(
+    data.session,
+    data.devices.map((device) => device.id),
+    data.templateId
+  );
+}
+
+function getAssignedDevice(devices) {
+  const deviceIndex = (exec.vu.idInTest - 1) % devices.length;
+  return devices[deviceIndex];
+}
+
+function createPublisher(deviceAccessToken) {
+  const clientId = `k6-mqtt-${deviceAccessToken}-${exec.vu.idInTest}`;
+  const publisher = new Client({
+    client_id: clientId,
+    username: deviceAccessToken,
+    password: "",
+  });
+
+  publisher.connect(`mqtt://${MQTT_HOST}:${MQTT_PORT}`, {
+    connect_timeout: CONNECT_TIMEOUT_MS,
+    clean_session: false,
+  });
+
+  const connectDeadline = Date.now() + CONNECT_READY_TIMEOUT_MS;
+  while (!publisher.connected && Date.now() < connectDeadline) {
+    sleep(CONNECT_READY_POLL_SECONDS);
+  }
+
+  if (!publisher.connected) {
+    fail(`MQTT client did not connect for device ${deviceAccessToken}.`);
+  }
+
+  return publisher;
+}
+
+function cleanupResources(session, deviceIds, templateId) {
+  for (const deviceId of deviceIds) {
+    try {
+      deleteDevice(session, deviceId);
+    } catch (error) {
+      console.error(`Cleanup failed for device ${deviceId}: ${error.message}`);
+    }
+  }
+
+  if (!templateId) {
+    return;
+  }
+
+  try {
+    deleteDeviceTemplate(session, templateId);
+  } catch (error) {
+    console.error(
+      `Cleanup failed for device template ${templateId}: ${error.message}`
+    );
+  }
+}
+
+function validateConfig() {
+  if (!USERNAME || !PASSWORD) {
+    fail("USERNAME and PASSWORD must be set.");
+  }
+
+  if (!MQTT_HOST || !MQTT_PORT) {
+    fail("MQTT_HOST and MQTT_PORT must be set.");
+  }
+
+  if (!Number.isInteger(DEVICE_COUNT) || DEVICE_COUNT <= 0) {
+    fail("DEVICE_COUNT must be a positive integer.");
+  }
+
+  if (!Number.isInteger(SENSORS_PER_DEVICE) || SENSORS_PER_DEVICE <= 0) {
+    fail("SENSORS_PER_DEVICE must be a positive integer.");
+  }
+
+  if (!Number.isInteger(VUS) || VUS <= 0) {
+    fail("VUS must be a positive integer.");
+  }
+}
+
+function buildSensorValue(sensorIndex) {
+  const iteration = exec.scenario.iterationInTest;
+  const vuId = exec.vu.idInTest;
+
+  return sensorIndex + iteration + vuId / 1000;
 }
