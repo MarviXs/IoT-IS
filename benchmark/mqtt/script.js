@@ -19,12 +19,12 @@ const MQTT_HOST = "localhost";
 const MQTT_PORT = "1883";
 const USERNAME = "stress@gmail.com";
 const PASSWORD = "stress";
-const DEVICE_COUNT = 10;
+const DEVICE_COUNT = 1;
 const SENSORS_PER_DEVICE = 5;
 const DURATION = "30s";
 const CONNECT_TIMEOUT_MS = 2000;
 const CONNECT_READY_TIMEOUT_MS = 5000;
-const MQTT_QOS = 0;
+const MQTT_QOS = 1;
 const MQTT_RETAIN = false;
 const PUBLISH_OPTIONS = Object.freeze({
   qos: MQTT_QOS,
