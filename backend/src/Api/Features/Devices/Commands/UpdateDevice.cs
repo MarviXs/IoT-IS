@@ -6,6 +6,7 @@ using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
 using Fei.Is.Api.Features.Devices.Extensions;
+using Fei.Is.Api.Features.Devices.Services;
 using Fei.Is.Api.Redis;
 using FluentResults;
 using FluentValidation;
@@ -75,7 +76,8 @@ public static class UpdateDevice
 
     public record Command(Request Request, Guid DeviceId, ClaimsPrincipal User) : IRequest<Result>;
 
-    public sealed class Handler(AppDbContext context, IValidator<Command> validator, RedisService redis) : IRequestHandler<Command, Result>
+    public sealed class Handler(AppDbContext context, IValidator<Command> validator, DeviceAccessTokenResolver deviceAccessTokenResolver)
+        : IRequestHandler<Command, Result>
     {
         public async Task<Result> Handle(Command message, CancellationToken cancellationToken)
         {
@@ -116,12 +118,10 @@ public static class UpdateDevice
             await context.SaveChangesAsync(cancellationToken);
             if (!string.Equals(previousAccessToken, device.AccessToken, StringComparison.Ordinal))
             {
-                var previousRedisKey = $"device:{previousAccessToken}:id";
-                await redis.Db.KeyDeleteAsync(previousRedisKey);
+                await deviceAccessTokenResolver.InvalidateAsync(previousAccessToken);
             }
 
-            var redisKey = $"device:{device.AccessToken}:id";
-            await redis.Db.StringSetAsync(redisKey, device.Id.ToString(), TimeSpan.FromHours(1));
+            await deviceAccessTokenResolver.SetAsync(device.AccessToken, device.Id);
 
             return Result.Ok();
         }

@@ -7,6 +7,7 @@ using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
 using Fei.Is.Api.Features.DataPoints.Queries;
+using Fei.Is.Api.Features.Devices.Services;
 using Fei.Is.Api.Redis;
 using Fei.Is.Api.SignalR.Dtos;
 using Fei.Is.Api.SignalR.Hubs;
@@ -77,25 +78,24 @@ public static class CreateDataPoints
     public sealed class Handler(
         AppDbContext appContext,
         TimeScaleDbContext timescaleContext,
+        DeviceAccessTokenResolver deviceAccessTokenResolver,
         RedisService redis,
         IHubContext<IsHub, INotificationsClient> hubContext
     ) : IRequestHandler<Command, Result<Guid>>
     {
         public async Task<Result<Guid>> Handle(Command message, CancellationToken cancellationToken)
         {
-            var device = await appContext
-                .Devices.AsNoTracking()
-                .FirstOrDefaultAsync(device => device.AccessToken == message.DeviceAccessToken, cancellationToken);
-            if (device == null)
+            var deviceId = await deviceAccessTokenResolver.ResolveDeviceIdAsync(message.DeviceAccessToken, cancellationToken);
+            if (!deviceId.HasValue)
             {
                 return Result.Fail(new NotFoundError());
             }
 
-            await UpdateSampleRateIfNeeded(appContext, device.Id, message.Request, cancellationToken);
+            await UpdateSampleRateIfNeeded(appContext, deviceId.Value, message.Request, cancellationToken);
 
             var dataPoints = message.Request.Select(dataPoint => new DataPoint
             {
-                DeviceId = device.Id,
+                DeviceId = deviceId.Value,
                 SensorTag = dataPoint.Tag,
                 TimeStamp = UnixTimestampUtils.NormalizeToDateTimeOffsetOrNow(dataPoint.TimeStamp),
                 Value = dataPoint.Value,
@@ -105,12 +105,12 @@ public static class CreateDataPoints
                 GridY = dataPoint.GridY
             });
 
-            var deviceId = device.Id.ToString();
+            var deviceIdString = deviceId.Value.ToString();
             foreach (var datapoint in dataPoints)
             {
                 var streamEntries = new List<NameValueEntry>
                 {
-                    new("device_id", deviceId),
+                    new("device_id", deviceIdString),
                     new("sensor_tag", datapoint.SensorTag),
                     new("value", datapoint.Value),
                     new("timestamp", datapoint.TimeStamp.ToUnixTimeMilliseconds()),
@@ -134,9 +134,9 @@ public static class CreateDataPoints
                 }
 
                 await redis.Db.StreamAddAsync("datapoints", streamEntries.ToArray(), maxLength: 500000);
-                await redis.Db.StringSetAsync($"device:{deviceId}:connected", "1", TimeSpan.FromMinutes(30), flags: CommandFlags.FireAndForget);
+                await redis.Db.StringSetAsync($"device:{deviceIdString}:connected", "1", TimeSpan.FromMinutes(30), flags: CommandFlags.FireAndForget);
                 await redis.Db.StringSetAsync(
-                    $"device:{deviceId}:lastSeen",
+                    $"device:{deviceIdString}:lastSeen",
                     DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(),
                     flags: CommandFlags.FireAndForget
                 );
@@ -150,16 +150,16 @@ public static class CreateDataPoints
                 );
 
                 await redis.Db.StringSetAsync(
-                    $"device:{deviceId}:{datapoint.SensorTag}:last",
+                    $"device:{deviceIdString}:{datapoint.SensorTag}:last",
                     JsonSerializer.Serialize(latestResponse),
                     TimeSpan.FromHours(1),
                     flags: CommandFlags.FireAndForget
                 );
                 await hubContext
-                    .Clients.Group(deviceId)
+                    .Clients.Group(deviceIdString)
                     .ReceiveSensorLastDataPoint(
                         new SensorLastDataPointDto(
-                            deviceId,
+                            deviceIdString,
                             datapoint.SensorTag.ToString(),
                             datapoint.Value,
                             datapoint.Latitude,

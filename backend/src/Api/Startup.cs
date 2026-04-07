@@ -6,6 +6,7 @@ using Fei.Is.Api.Common.OpenAPI;
 using Fei.Is.Api.Extensions;
 using Fei.Is.Api.Features.Auth;
 using Fei.Is.Api.Features.DataPoints.Jobs;
+using Fei.Is.Api.Features.Devices.Services;
 using Fei.Is.Api.Features.Jobs.Services;
 using Fei.Is.Api.Features.JobSchedules.Jobs;
 using Fei.Is.Api.Features.JobSchedules.Services;
@@ -93,6 +94,8 @@ public class Startup(IConfiguration configuration)
         services.AddTransient<JobScheduleExecutionJob>();
         services.AddScoped<TokenService>();
         services.AddSingleton<RedisService>();
+        services.AddSingleton<RecentDeviceIdCache>();
+        services.AddScoped<DeviceAccessTokenResolver>();
 
         services.AddSingleton<MqttClientService>();
         services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<MqttClientService>());

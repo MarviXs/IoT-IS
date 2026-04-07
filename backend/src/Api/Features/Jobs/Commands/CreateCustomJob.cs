@@ -6,6 +6,7 @@ using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
 using Fei.Is.Api.Features.Devices.Extensions;
+using Fei.Is.Api.Features.Devices.Services;
 using Fei.Is.Api.Features.Jobs.EventHandlers;
 using Fei.Is.Api.Features.Jobs.Services;
 using FluentResults;
@@ -66,7 +67,8 @@ public static class CreateCustomJob
 
     public record Command(Request Request, string DeviceAccessToken, ClaimsPrincipal User) : IRequest<Result<Guid>>;
 
-    public sealed class Handler(AppDbContext context, IValidator<Command> validator) : IRequestHandler<Command, Result<Guid>>
+    public sealed class Handler(AppDbContext context, IValidator<Command> validator, DeviceAccessTokenResolver deviceAccessTokenResolver)
+        : IRequestHandler<Command, Result<Guid>>
     {
         public async Task<Result<Guid>> Handle(Command message, CancellationToken cancellationToken)
         {
@@ -76,17 +78,15 @@ public static class CreateCustomJob
                 return Result.Fail(new ValidationError(result));
             }
 
-            var device = await context
-                .Devices.Include(d => d.SharedWithUsers)
-                .FirstOrDefaultAsync(device => device.AccessToken == message.DeviceAccessToken, cancellationToken);
-            if (device == null)
+            var deviceId = await deviceAccessTokenResolver.ResolveDeviceIdAsync(message.DeviceAccessToken, cancellationToken);
+            if (!deviceId.HasValue)
             {
                 return Result.Fail(new NotFoundError());
             }
 
             var job = new Job
             {
-                DeviceId = device.Id,
+                DeviceId = deviceId.Value,
                 Name = message.Request.JobName,
                 Status = JobStatusEnum.JOB_SUCCEEDED,
                 CreatedAt = DateTime.UtcNow,

@@ -6,6 +6,7 @@ using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
 using Fei.Is.Api.Features.Devices.Extensions;
+using Fei.Is.Api.Features.Devices.Services;
 using Fei.Is.Api.Features.Jobs.Extensions;
 using FluentResults;
 using MediatR;
@@ -54,20 +55,19 @@ public static class GetActiveJobsFromDevice
 
     public record Query(string DeviceId) : IRequest<Result<List<Response>>>;
 
-    public sealed class Handler(AppDbContext context) : IRequestHandler<Query, Result<List<Response>>>
+    public sealed class Handler(AppDbContext context, DeviceAccessTokenResolver deviceAccessTokenResolver) : IRequestHandler<Query, Result<List<Response>>>
     {
         public async Task<Result<List<Response>>> Handle(Query request, CancellationToken cancellationToken)
         {
-            var device = await context.Devices.AsNoTracking().Where(d => d.AccessToken == request.DeviceId).FirstOrDefaultAsync(cancellationToken);
-
-            if (device == null)
+            var deviceId = await deviceAccessTokenResolver.ResolveDeviceIdAsync(request.DeviceId, cancellationToken);
+            if (!deviceId.HasValue)
             {
                 return Result.Fail(new NotFoundError());
             }
 
             var activeJobs = await context
                 .Jobs.AsNoTracking()
-                .GetActiveJobs(device.Id)
+                .GetActiveJobs(deviceId.Value)
                 .Include(j => j.Commands.OrderBy(c => c.Order))
                 .ToListAsync(cancellationToken);
 

@@ -1,5 +1,6 @@
 using Carter;
 using Fei.Is.Api.Data.Contexts;
+using Fei.Is.Api.Features.Devices.Services;
 using FluentResults;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -37,13 +38,19 @@ public static class AuthDevice
 
     public record Query(string AccessToken) : IRequest<Result<Response>>;
 
-    public sealed class Handler(AppDbContext context) : IRequestHandler<Query, Result<Response>>
+    public sealed class Handler(AppDbContext context, DeviceAccessTokenResolver deviceAccessTokenResolver) : IRequestHandler<Query, Result<Response>>
     {
         public async Task<Result<Response>> Handle(Query request, CancellationToken cancellationToken)
         {
+            var deviceId = await deviceAccessTokenResolver.ResolveDeviceIdAsync(request.AccessToken, cancellationToken);
+            if (!deviceId.HasValue)
+            {
+                return Result.Ok(new Response("ignore", false));
+            }
+
             var device = await context
                 .Devices.AsNoTracking()
-                .Where(device => device.AccessToken == request.AccessToken)
+                .Where(device => device.Id == deviceId.Value)
                 .FirstOrDefaultAsync(cancellationToken);
 
             if (device == null)

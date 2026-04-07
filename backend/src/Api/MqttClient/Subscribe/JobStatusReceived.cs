@@ -1,6 +1,7 @@
 using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Enums;
+using Fei.Is.Api.Features.Devices.Services;
 using Fei.Is.Api.Features.Jobs.Extensions;
 using Fei.Is.Api.Redis;
 using Fei.Is.Api.SignalR.Dtos;
@@ -14,43 +15,29 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fei.Is.Api.MqttClient.Subscribe;
 
-public class JobStatusReceived(AppDbContext appContext, RedisService redis, IHubContext<IsHub, INotificationsClient> hubContext)
+public class JobStatusReceived(
+    AppDbContext appContext,
+    DeviceAccessTokenResolver deviceAccessTokenResolver,
+    RedisService redis,
+    IHubContext<IsHub, INotificationsClient> hubContext
+)
 {
     public async Task<Result> Handle(string deviceAccessToken, ArraySegment<byte> payload, CancellationToken cancellationToken)
     {
-        var redisKey = $"device:{deviceAccessToken}:id";
-        var cachedDeviceId = await redis.Db.StringGetAsync(redisKey);
-
-        string deviceId;
-
-        if (cachedDeviceId.HasValue)
+        var deviceId = await deviceAccessTokenResolver.ResolveDeviceIdAsync(deviceAccessToken, cancellationToken);
+        if (!deviceId.HasValue)
         {
-            deviceId = cachedDeviceId!;
+            return Result.Fail("Device not found");
         }
-        else
-        {
-            var deviceGuid = await appContext
-                .Devices.Where(d => d.AccessToken == deviceAccessToken)
-                .Select(d => d.Id)
-                .FirstOrDefaultAsync(cancellationToken);
+        var deviceIdString = deviceId.Value.ToString();
 
-            if (deviceGuid == Guid.Empty)
-            {
-                return Result.Fail("Device not found");
-            }
-            deviceId = deviceGuid.ToString();
-
-            // Store deviceId in Redis cache
-            await redis.Db.StringSetAsync(redisKey, deviceId, TimeSpan.FromHours(1));
-        }
-
-        redis.Db.StringSetAsync($"device:{deviceId}:connected", "1", TimeSpan.FromMinutes(30));
-        redis.Db.StringSetAsync($"device:{deviceId}:lastSeen", DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString());
+        redis.Db.StringSetAsync($"device:{deviceIdString}:connected", "1", TimeSpan.FromMinutes(30));
+        redis.Db.StringSetAsync($"device:{deviceIdString}:lastSeen", DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString());
 
         var jobFbs = JobFbs.GetRootAsJobFbs(new ByteBuffer(payload.ToArray()));
 
         var job = await appContext
-            .Jobs.Where(j => j.DeviceId == Guid.Parse(deviceId) && j.Id == Guid.Parse(jobFbs.JobId))
+            .Jobs.Where(j => j.DeviceId == deviceId.Value && j.Id == Guid.Parse(jobFbs.JobId))
             .Include(j => j.Device)
             .Include(j => j.Commands.OrderBy(c => c.Order))
             .FirstOrDefaultAsync(cancellationToken);

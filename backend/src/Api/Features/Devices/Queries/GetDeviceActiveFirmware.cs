@@ -3,6 +3,7 @@ using Carter;
 using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models;
+using Fei.Is.Api.Features.Devices.Services;
 using Fei.Is.Api.Extensions;
 using FluentResults;
 using FluentValidation;
@@ -50,7 +51,8 @@ public static class GetDeviceActiveFirmware
 
     public record Query(string DeviceAccessToken) : IRequest<Result<Response>>;
 
-    public sealed class Handler(AppDbContext context, IValidator<Query> validator) : IRequestHandler<Query, Result<Response>>
+    public sealed class Handler(AppDbContext context, IValidator<Query> validator, DeviceAccessTokenResolver deviceAccessTokenResolver)
+        : IRequestHandler<Query, Result<Response>>
     {
         public async Task<Result<Response>> Handle(Query message, CancellationToken cancellationToken)
         {
@@ -60,11 +62,17 @@ public static class GetDeviceActiveFirmware
                 return Result.Fail(new ValidationError(validationResult));
             }
 
+            var deviceId = await deviceAccessTokenResolver.ResolveDeviceIdAsync(message.DeviceAccessToken, cancellationToken);
+            if (!deviceId.HasValue)
+            {
+                return Result.Fail(new NotFoundError());
+            }
+
             var device = await context
                 .Devices.AsNoTracking()
                 .Include(d => d.DeviceTemplate)
                 .ThenInclude(t => t.Firmwares)
-                .FirstOrDefaultAsync(d => d.AccessToken == message.DeviceAccessToken, cancellationToken);
+                .FirstOrDefaultAsync(d => d.Id == deviceId.Value, cancellationToken);
 
             if (device == null)
             {

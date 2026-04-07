@@ -3,6 +3,7 @@ using DataPointFlatBuffers;
 using Fei.Is.Api.Common.Utils;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Features.DataPoints.Queries;
+using Fei.Is.Api.Features.Devices.Services;
 using Fei.Is.Api.Redis;
 using Fei.Is.Api.SignalR.Dtos;
 using Fei.Is.Api.SignalR.Hubs;
@@ -15,42 +16,21 @@ using StackExchange.Redis;
 
 namespace Fei.Is.Api.MqttClient.Subscribe;
 
-public class DataPointReceived(AppDbContext appContext, RedisService redis, IHubContext<IsHub, INotificationsClient> hubContext)
+public class DataPointReceived(
+    AppDbContext appContext,
+    DeviceAccessTokenResolver deviceAccessTokenResolver,
+    RedisService redis,
+    IHubContext<IsHub, INotificationsClient> hubContext
+)
 {
     public async Task<Result> Handle(string deviceAccessToken, ArraySegment<byte> payload, CancellationToken cancellationToken)
     {
-        var redisKey = $"device:{deviceAccessToken}:id";
-
-        // Check if deviceId is in Redis cache
-        var cachedDeviceId = await redis.Db.StringGetAsync(redisKey);
-
-        string deviceId;
-        Guid deviceGuid;
-
-        if (cachedDeviceId.HasValue)
+        var deviceGuid = await deviceAccessTokenResolver.ResolveDeviceIdAsync(deviceAccessToken, cancellationToken);
+        if (!deviceGuid.HasValue)
         {
-            deviceId = cachedDeviceId!;
-            if (!Guid.TryParse(deviceId, out deviceGuid))
-            {
-                return Result.Fail("Invalid device ID");
-            }
+            return Result.Fail("Device not found");
         }
-        else
-        {
-            deviceGuid = await appContext
-                .Devices.Where(d => d.AccessToken == deviceAccessToken)
-                .Select(d => d.Id)
-                .FirstOrDefaultAsync(cancellationToken);
-
-            if (deviceGuid == Guid.Empty)
-            {
-                return Result.Fail("Device not found");
-            }
-            deviceId = deviceGuid.ToString();
-
-            // Store deviceId in Redis cache
-            await redis.Db.StringSetAsync(redisKey, deviceId, TimeSpan.FromHours(1));
-        }
+        var deviceId = deviceGuid.Value.ToString();
 
         var datapoint = DataPointFbs.GetRootAsDataPointFbs(new ByteBuffer(payload.ToArray()));
         var timestamp = UnixTimestampUtils.NormalizeToDateTimeOffsetOrNow(datapoint.Ts);
@@ -60,7 +40,7 @@ public class DataPointReceived(AppDbContext appContext, RedisService redis, IHub
             return Result.Fail("Invalid datapoint value");
         }
 
-        await UpdateSampleRateIfNeeded(deviceGuid, datapoint.Tag, datapoint.Value, cancellationToken);
+        await UpdateSampleRateIfNeeded(deviceGuid.Value, datapoint.Tag, datapoint.Value, cancellationToken);
 
         var streamEntries = new List<NameValueEntry>
         {

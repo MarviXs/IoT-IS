@@ -5,6 +5,7 @@ using Carter;
 using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models;
+using Fei.Is.Api.Features.Devices.Services;
 using Fei.Is.Api.Extensions;
 using Fei.Is.Api.Services.DeviceFirmwares;
 using FluentResults;
@@ -69,7 +70,12 @@ public static class DownloadDeviceFirmwareFromDevice
 
     public record Query(Request Request, Guid FirmwareId) : IRequest<Result<(Stream Stream, string FileName)>>;
 
-    public sealed class Handler(AppDbContext context, IDeviceFirmwareFileService firmwareFileService, IValidator<Query> validator)
+    public sealed class Handler(
+        AppDbContext context,
+        IDeviceFirmwareFileService firmwareFileService,
+        IValidator<Query> validator,
+        DeviceAccessTokenResolver deviceAccessTokenResolver
+    )
         : IRequestHandler<Query, Result<(Stream Stream, string FileName)>>
     {
         public async Task<Result<(Stream Stream, string FileName)>> Handle(Query message, CancellationToken cancellationToken)
@@ -80,9 +86,15 @@ public static class DownloadDeviceFirmwareFromDevice
                 return Result.Fail(new ValidationError(validationResult));
             }
 
+            var deviceId = await deviceAccessTokenResolver.ResolveDeviceIdAsync(message.Request.AccessToken, cancellationToken);
+            if (!deviceId.HasValue)
+            {
+                return Result.Fail(new NotFoundError());
+            }
+
             var deviceInfo = await context
                 .Devices.AsNoTracking()
-                .Where(d => d.AccessToken == message.Request.AccessToken)
+                .Where(d => d.Id == deviceId.Value)
                 .Select(d => new { d.DeviceTemplateId })
                 .FirstOrDefaultAsync(cancellationToken);
 

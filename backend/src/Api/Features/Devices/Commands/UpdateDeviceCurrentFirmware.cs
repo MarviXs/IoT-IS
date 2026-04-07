@@ -2,6 +2,7 @@ using Carter;
 using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models;
+using Fei.Is.Api.Features.Devices.Services;
 using Fei.Is.Api.Extensions;
 using FluentResults;
 using FluentValidation;
@@ -51,7 +52,8 @@ public static class UpdateDeviceCurrentFirmware
 
     public record Command(Request Request, string AccessToken) : IRequest<Result>;
 
-    public sealed class Handler(AppDbContext context, IValidator<Command> validator) : IRequestHandler<Command, Result>
+    public sealed class Handler(AppDbContext context, IValidator<Command> validator, DeviceAccessTokenResolver deviceAccessTokenResolver)
+        : IRequestHandler<Command, Result>
     {
         public async Task<Result> Handle(Command message, CancellationToken cancellationToken)
         {
@@ -61,8 +63,13 @@ public static class UpdateDeviceCurrentFirmware
                 return Result.Fail(new ValidationError(validationResult));
             }
 
-            var device = await context.Devices.FirstOrDefaultAsync(d => d.AccessToken == message.AccessToken, cancellationToken);
+            var deviceId = await deviceAccessTokenResolver.ResolveDeviceIdAsync(message.AccessToken, cancellationToken);
+            if (!deviceId.HasValue)
+            {
+                return Result.Fail(new NotFoundError());
+            }
 
+            var device = await context.Devices.FirstOrDefaultAsync(d => d.Id == deviceId.Value, cancellationToken);
             if (device == null)
             {
                 return Result.Fail(new NotFoundError());
