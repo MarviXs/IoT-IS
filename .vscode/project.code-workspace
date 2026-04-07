@@ -18,6 +18,9 @@
 		},
 		{
 			"path": "../.github"
+		},
+		{
+			"path": "../benchmark"
 		}
 	],
 	"settings": {}
