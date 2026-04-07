@@ -1,5 +1,6 @@
-import { check, fail, sleep } from "k6";
+import { check, fail } from "k6";
 import exec from "k6/execution";
+import { Counter } from "k6/metrics";
 import { Client } from "k6/x/mqtt";
 
 import { createDataPointFlatBuffer } from "../core/flatbuffers.js";
@@ -24,13 +25,17 @@ const VUS = 100;
 const DURATION = "30s";
 const CONNECT_TIMEOUT_MS = 2000;
 const CONNECT_READY_TIMEOUT_MS = 5000;
-const CONNECT_READY_POLL_SECONDS = 0.1;
 const MQTT_QOS = 0;
 const MQTT_RETAIN = false;
 const PUBLISH_OPTIONS = Object.freeze({
   qos: MQTT_QOS,
   retain: MQTT_RETAIN,
 });
+const mqttPublishBatches = new Counter("mqtt_publish_batches");
+const mqttDatapointsSent = new Counter("mqtt_datapoints_sent");
+const mqttPublishFailures = new Counter("mqtt_publish_failures");
+
+let batchSequence = 0;
 
 export const options = {
   setupTimeout: "15m",
@@ -99,33 +104,42 @@ export function setup() {
 
 export default function (data) {
   const device = getAssignedDevice(data.devices);
-  const client = createPublisher(device.accessToken);
-
-  const timestamp = Date.now();
-  let publishError;
-  for (let sensorIndex = 0; sensorIndex < data.sensorTags.length; sensorIndex += 1) {
-    const payload = createDataPointFlatBuffer(
-      data.sensorTags[sensorIndex],
-      buildSensorValue(sensorIndex),
-      timestamp
-    );
-
-    try {
-      client.publish(device.topic, payload, PUBLISH_OPTIONS);
-    } catch (error) {
-      publishError = error;
-      break;
-    }
-  }
-
-  check(publishError, {
-    "mqtt datapoint publish succeeded": (error) => error === undefined,
+  const client = new Client({
+    client_id: `k6-mqtt-${device.accessToken}-${exec.vu.idInTest}`,
+    username: device.accessToken,
+    password: "",
   });
 
-  try {
-    client.end();
-  } catch (_) {
-  }
+  let isConnected = false;
+
+  const connectTimeout = setTimeout(() => {
+    if (isConnected) {
+      return;
+    }
+
+    mqttPublishFailures.add(1);
+    fail(`MQTT client did not connect for device ${device.accessToken}.`);
+  }, CONNECT_READY_TIMEOUT_MS);
+
+  client.on("connect", () => {
+    isConnected = true;
+    clearTimeout(connectTimeout);
+
+    check(client, {
+      "mqtt publisher is connected": (currentClient) => currentClient.connected,
+    });
+
+    publishBatch(client, device.topic, data.sensorTags);
+  });
+
+  client.on("end", () => {
+    clearTimeout(connectTimeout);
+  });
+
+  client.connect(`mqtt://${MQTT_HOST}:${MQTT_PORT}`, {
+    connect_timeout: CONNECT_TIMEOUT_MS,
+    clean_session: false,
+  });
 }
 
 export function teardown(data) {
@@ -139,35 +153,6 @@ export function teardown(data) {
 function getAssignedDevice(devices) {
   const deviceIndex = (exec.vu.idInTest - 1) % devices.length;
   return devices[deviceIndex];
-}
-
-function createPublisher(deviceAccessToken) {
-  const clientId = `k6-mqtt-${deviceAccessToken}-${exec.vu.idInTest}`;
-  const publisher = new Client({
-    client_id: clientId,
-    username: deviceAccessToken,
-    password: "",
-  });
-
-  publisher.connect(`mqtt://${MQTT_HOST}:${MQTT_PORT}`, {
-    connect_timeout: CONNECT_TIMEOUT_MS,
-    clean_session: false,
-  });
-
-  const connectDeadline = Date.now() + CONNECT_READY_TIMEOUT_MS;
-  while (!publisher.connected && Date.now() < connectDeadline) {
-    sleep(CONNECT_READY_POLL_SECONDS);
-  }
-
-  if (!publisher.connected) {
-    fail(`MQTT client did not connect for device ${deviceAccessToken}.`);
-  }
-
-  check(publisher, {
-    "mqtt publisher is connected": (currentClient) => currentClient.connected,
-  });
-
-  return publisher;
 }
 
 function cleanupResources(session, deviceIds, templateId) {
@@ -215,8 +200,58 @@ function validateConfig() {
 }
 
 function buildSensorValue(sensorIndex) {
-  const iteration = exec.scenario.iterationInTest;
+  const iteration = batchSequence;
   const vuId = exec.vu.idInTest;
 
   return sensorIndex + iteration + vuId / 1000;
+}
+
+function publishBatch(client, topic, sensorTags) {
+  if (!client.connected || exec.scenario.progress >= 1) {
+    endClient(client);
+    return;
+  }
+
+  const timestamp = Date.now();
+  let publishError;
+
+  for (let sensorIndex = 0; sensorIndex < sensorTags.length; sensorIndex += 1) {
+    const payload = createDataPointFlatBuffer(
+      sensorTags[sensorIndex],
+      buildSensorValue(sensorIndex),
+      timestamp
+    );
+
+    try {
+      client.publish(topic, payload, PUBLISH_OPTIONS);
+      mqttDatapointsSent.add(1);
+    } catch (error) {
+      publishError = error;
+      mqttPublishFailures.add(1);
+      break;
+    }
+  }
+
+  batchSequence += 1;
+
+  check(publishError, {
+    "mqtt datapoint publish succeeded": (error) => error === undefined,
+  });
+
+  if (publishError) {
+    endClient(client);
+    return;
+  }
+
+  mqttPublishBatches.add(1);
+  setTimeout(() => {
+    publishBatch(client, topic, sensorTags);
+  }, 0);
+}
+
+function endClient(client) {
+  try {
+    client.end();
+  } catch (_) {
+  }
 }
