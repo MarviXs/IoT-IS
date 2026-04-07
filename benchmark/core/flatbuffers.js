@@ -17,10 +17,6 @@ function encodeString(value) {
   return bytes;
 }
 
-export function encodeAsciiString(value) {
-  return encodeString(value);
-}
-
 function writeInt32(buffer, offset, value) {
   buffer[offset] = value & 0xff;
   buffer[offset + 1] = (value >>> 8) & 0xff;
@@ -56,10 +52,6 @@ function alignTo(value, alignment) {
 
 export function createDataPointFlatBuffer(tag, value, timestamp) {
   const tagBytes = encodeString(tag);
-  return createDataPointFlatBufferFromBytes(tagBytes, value, timestamp);
-}
-
-export function createDataPointFlatBufferFromBytes(tagBytes, value, timestamp) {
   const stringLength = 4 + tagBytes.length + 1;
   const stringStart = 48;
   const totalLength = alignTo(stringStart + stringLength, 4);

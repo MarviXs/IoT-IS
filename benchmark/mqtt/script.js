@@ -2,10 +2,7 @@ import { check, fail, sleep } from "k6";
 import exec from "k6/execution";
 import { Client } from "k6/x/mqtt";
 
-import {
-  createDataPointFlatBufferFromBytes,
-  encodeAsciiString,
-} from "../core/flatbuffers.js";
+import { createDataPointFlatBuffer } from "../core/flatbuffers.js";
 import { login } from "../core/auth.js";
 import {
   buildSensorRequests,
@@ -21,19 +18,15 @@ const MQTT_HOST = "localhost";
 const MQTT_PORT = "1883";
 const USERNAME = "stress@gmail.com";
 const PASSWORD = "stress";
-const DEVICE_COUNT = 100;
+const DEVICE_COUNT = 50;
 const SENSORS_PER_DEVICE = 5;
+const VUS = 100;
 const DURATION = "30s";
 const CONNECT_TIMEOUT_MS = 2000;
 const CONNECT_READY_TIMEOUT_MS = 5000;
-const CONNECT_READY_POLL_SECONDS = 0.01;
+const CONNECT_READY_POLL_SECONDS = 0.1;
 const MQTT_QOS = 0;
 const MQTT_RETAIN = false;
-
-let cachedPublisher;
-let cachedDeviceAccessToken;
-let cachedTopics;
-let cachedSensorTagBytes;
 
 export const options = {
   setupTimeout: "15m",
@@ -41,9 +34,8 @@ export const options = {
   scenarios: {
     mqtt_datapoints: {
       executor: "constant-vus",
-      vus: DEVICE_COUNT,
+      vus: VUS,
       duration: DURATION,
-      gracefulStop: "0s",
     },
   },
   thresholds: {
@@ -102,24 +94,24 @@ export function setup() {
 
 export default function (data) {
   const device = getAssignedDevice(data.devices);
-  const client = getPublisher(device, data.sensorTags);
+  const client = createPublisher(device.accessToken);
 
   check(client, {
     "mqtt publisher is connected": (currentClient) => currentClient.connected,
   });
 
   const timestamp = Date.now();
-  let publishError;
   for (let sensorIndex = 0; sensorIndex < data.sensorTags.length; sensorIndex += 1) {
-    const payload = createDataPointFlatBufferFromBytes(
-      cachedSensorTagBytes[sensorIndex],
+    const payload = createDataPointFlatBuffer(
+      data.sensorTags[sensorIndex],
       buildSensorValue(sensorIndex),
       timestamp
     );
 
+    let publishError;
     try {
       client.publish(
-        cachedTopics[sensorIndex],
+        `devices/${device.accessToken}/data`,
         payload,
         {
           qos: MQTT_QOS,
@@ -128,13 +120,17 @@ export default function (data) {
       );
     } catch (error) {
       publishError = error;
-      break;
     }
+
+    check(publishError, {
+      "mqtt datapoint publish succeeded": (error) => error === undefined,
+    });
   }
 
-  check(publishError, {
-    "mqtt datapoint publish succeeded": (error) => error === undefined,
-  });
+  try {
+    client.end();
+  } catch (_) {
+  }
 }
 
 export function teardown(data) {
@@ -146,29 +142,8 @@ export function teardown(data) {
 }
 
 function getAssignedDevice(devices) {
-  const deviceIndex = exec.vu.idInTest - 1;
+  const deviceIndex = (exec.vu.idInTest - 1) % devices.length;
   return devices[deviceIndex];
-}
-
-function getPublisher(device, sensorTags) {
-  if (cachedPublisher && cachedDeviceAccessToken === device.accessToken) {
-    return cachedPublisher;
-  }
-
-  if (cachedPublisher) {
-    try {
-      cachedPublisher.end();
-    } catch (_) {
-    }
-  }
-
-  cachedTopics = sensorTags.map(() => `devices/${device.accessToken}/data`);
-  cachedSensorTagBytes = sensorTags.map((tag) => encodeAsciiString(tag));
-
-  cachedPublisher = createPublisher(device.accessToken);
-  cachedDeviceAccessToken = device.accessToken;
-
-  return cachedPublisher;
 }
 
 function createPublisher(deviceAccessToken) {
@@ -233,6 +208,10 @@ function validateConfig() {
 
   if (!Number.isInteger(SENSORS_PER_DEVICE) || SENSORS_PER_DEVICE <= 0) {
     fail("SENSORS_PER_DEVICE must be a positive integer.");
+  }
+
+  if (!Number.isInteger(VUS) || VUS <= 0) {
+    fail("VUS must be a positive integer.");
   }
 }
 
