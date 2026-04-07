@@ -27,6 +27,10 @@ const CONNECT_READY_TIMEOUT_MS = 5000;
 const CONNECT_READY_POLL_SECONDS = 0.1;
 const MQTT_QOS = 0;
 const MQTT_RETAIN = false;
+const PUBLISH_OPTIONS = Object.freeze({
+  qos: MQTT_QOS,
+  retain: MQTT_RETAIN,
+});
 
 export const options = {
   setupTimeout: "15m",
@@ -77,6 +81,7 @@ export function setup() {
       return {
         id: deviceId,
         accessToken,
+        topic: `devices/${accessToken}/data`,
       };
     });
 
@@ -96,11 +101,8 @@ export default function (data) {
   const device = getAssignedDevice(data.devices);
   const client = createPublisher(device.accessToken);
 
-  check(client, {
-    "mqtt publisher is connected": (currentClient) => currentClient.connected,
-  });
-
   const timestamp = Date.now();
+  let publishError;
   for (let sensorIndex = 0; sensorIndex < data.sensorTags.length; sensorIndex += 1) {
     const payload = createDataPointFlatBuffer(
       data.sensorTags[sensorIndex],
@@ -108,24 +110,17 @@ export default function (data) {
       timestamp
     );
 
-    let publishError;
     try {
-      client.publish(
-        `devices/${device.accessToken}/data`,
-        payload,
-        {
-          qos: MQTT_QOS,
-          retain: MQTT_RETAIN,
-        }
-      );
+      client.publish(device.topic, payload, PUBLISH_OPTIONS);
     } catch (error) {
       publishError = error;
+      break;
     }
-
-    check(publishError, {
-      "mqtt datapoint publish succeeded": (error) => error === undefined,
-    });
   }
+
+  check(publishError, {
+    "mqtt datapoint publish succeeded": (error) => error === undefined,
+  });
 
   try {
     client.end();
@@ -167,6 +162,10 @@ function createPublisher(deviceAccessToken) {
   if (!publisher.connected) {
     fail(`MQTT client did not connect for device ${deviceAccessToken}.`);
   }
+
+  check(publisher, {
+    "mqtt publisher is connected": (currentClient) => currentClient.connected,
+  });
 
   return publisher;
 }
