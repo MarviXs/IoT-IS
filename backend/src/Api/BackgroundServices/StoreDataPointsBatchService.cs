@@ -12,7 +12,8 @@ public class StoreDataPointsBatchService(IServiceProvider serviceProvider, ILogg
 {
     private const string StreamName = "datapoints";
     private const string GroupName = "store_data";
-    private const int ProcessingSpeed = 250;
+    private const int IdleDelayMs = 10;
+    private const int ReadBatchSize = 10000;
     private const int MaxPendingTimeUnclaimed = 20000;
 
     static Dictionary<string, string> ParseResult(StreamEntry entry) => entry.Values.ToDictionary(x => x.Name.ToString(), x => x.Value.ToString());
@@ -36,8 +37,15 @@ public class StoreDataPointsBatchService(IServiceProvider serviceProvider, ILogg
                 }
 
                 // Claim pending messages
-                var autoClaimResult = await redis.Db.StreamAutoClaimAsync(StreamName, GroupName, consumerName, MaxPendingTimeUnclaimed, "0-0", 5000);
-                var messages = await redis.Db.StreamReadGroupAsync(StreamName, GroupName, consumerName, ">");
+                var autoClaimResult = await redis.Db.StreamAutoClaimAsync(
+                    StreamName,
+                    GroupName,
+                    consumerName,
+                    MaxPendingTimeUnclaimed,
+                    "0-0",
+                    ReadBatchSize
+                );
+                var messages = await redis.Db.StreamReadGroupAsync(StreamName, GroupName, consumerName, ">", ReadBatchSize);
 
                 messages = [.. messages, .. autoClaimResult.ClaimedEntries];
 
@@ -121,20 +129,28 @@ public class StoreDataPointsBatchService(IServiceProvider serviceProvider, ILogg
                         }
                     }
 
+                    var messageIds = messages.Select(m => m.Id).ToArray();
+
                     if (dataPoints.Count != 0)
                     {
-
                         await timescale.BulkInsertAsync(dataPoints, cancellationToken: stoppingToken);
-                        var messageIds = messages.Select(m => m.Id).ToArray();
                         await redis.Db.StreamAcknowledgeAsync(StreamName, GroupName, messageIds);
                     }
+
+                    else
+                    {
+                        await redis.Db.StreamAcknowledgeAsync(StreamName, GroupName, messageIds);
+                    }
+
+                    continue;
                 }
-                await Task.Delay(ProcessingSpeed, stoppingToken);
+
+                await Task.Delay(IdleDelayMs, stoppingToken);
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "Error processing datapoints messages: {ExceptionMessage}", ex.Message);
-                await Task.Delay(ProcessingSpeed, stoppingToken);
+                await Task.Delay(IdleDelayMs, stoppingToken);
             }
         }
     }
