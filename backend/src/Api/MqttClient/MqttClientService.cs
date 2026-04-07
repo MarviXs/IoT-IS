@@ -1,3 +1,4 @@
+using System.Threading.Channels;
 using Fei.Is.Api.MqttClient.Subscribe;
 using FluentResults;
 using MQTTnet;
@@ -10,9 +11,18 @@ namespace Fei.Is.Api.MqttClient;
 
 public class MqttClientService : IHostedService
 {
+    private const int WorkerCount = 4;
+
     private readonly IMqttClient? _mqttClient;
     private readonly MqttClientOptions? _mqttOptions;
     private readonly IServiceScopeFactory _serviceScopeFactory;
+    private readonly Channel<QueuedMqttMessage> _messageChannel = Channel.CreateUnbounded<QueuedMqttMessage>(
+        new UnboundedChannelOptions
+        {
+            SingleWriter = false,
+            SingleReader = false
+        }
+    );
 
     private readonly ILogger<MqttClientService> _logger;
 
@@ -20,7 +30,9 @@ public class MqttClientService : IHostedService
     private readonly TimeSpan _reconnectDelay = TimeSpan.FromSeconds(5);
 
     private CancellationTokenSource? _reconnectCancellationTokenSource;
+    private CancellationTokenSource? _processingCancellationTokenSource;
     private Task? _reconnectTask;
+    private Task[] _processingTasks = [];
 
     public MqttClientService(IServiceScopeFactory serviceScopeFactory, IConfiguration configuration, ILogger<MqttClientService> logger)
     {
@@ -138,49 +150,30 @@ public class MqttClientService : IHostedService
         );
     }
 
-    public Task ProcessMessageAsync(MqttApplicationMessageReceivedEventArgs args)
+    public async Task ProcessMessageAsync(MqttApplicationMessageReceivedEventArgs args)
     {
-        _ = Task.Run(async () =>
+        try
         {
-            try
+            if (_processingCancellationTokenSource == null)
             {
-                using var scope = _serviceScopeFactory.CreateScope();
-
-                var topic = args.ApplicationMessage.Topic;
-                var topicParts = topic.Split('/');
-
-                if (MqttTopicFilterComparer.Compare(topic, "devices/+/data") == MqttTopicFilterCompareResult.IsMatch)
-                {
-                    var dataPointReceived = scope.ServiceProvider.GetRequiredService<DataPointReceived>();
-                    var result = await dataPointReceived.Handle(topicParts[1], args.ApplicationMessage.PayloadSegment, CancellationToken.None);
-                    LogHandlerFailure(nameof(DataPointReceived), result);
-                }
-                else if (MqttTopicFilterComparer.Compare(topic, "devices/+/job_from_device") == MqttTopicFilterCompareResult.IsMatch)
-                {
-                    var jobStatusReceived = scope.ServiceProvider.GetRequiredService<JobStatusReceived>();
-                    var result = await jobStatusReceived.Handle(topicParts[1], args.ApplicationMessage.PayloadSegment, CancellationToken.None);
-                    LogHandlerFailure(nameof(JobStatusReceived), result);
-                }
-                else if (MqttTopicFilterComparer.Compare(topic, "$SYS/brokers/+/clients/+/connected") == MqttTopicFilterCompareResult.IsMatch)
-                {
-                    var onDeviceConnected = scope.ServiceProvider.GetRequiredService<OnDeviceConnected>();
-                    var result = await onDeviceConnected.Handle(args.ApplicationMessage.PayloadSegment, CancellationToken.None);
-                    LogHandlerFailure(nameof(OnDeviceConnected), result);
-                }
-                else if (MqttTopicFilterComparer.Compare(topic, "$SYS/brokers/+/clients/+/disconnected") == MqttTopicFilterCompareResult.IsMatch)
-                {
-                    var onDeviceDisconnected = scope.ServiceProvider.GetRequiredService<OnDeviceDisconnected>();
-                    var result = await onDeviceDisconnected.Handle(args.ApplicationMessage.PayloadSegment, CancellationToken.None);
-                    LogHandlerFailure(nameof(OnDeviceDisconnected), result);
-                }
+                return;
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error processing MQTT message");
-            }
-        });
 
-        return Task.CompletedTask;
+            var topic = args.ApplicationMessage.Topic;
+            var payload = args.ApplicationMessage.PayloadSegment.ToArray();
+
+            await _messageChannel.Writer.WriteAsync(
+                new QueuedMqttMessage(topic, payload),
+                _processingCancellationTokenSource.Token
+            );
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error queueing MQTT message");
+        }
     }
 
     private void LogHandlerFailure(string handlerName, Result result)
@@ -202,6 +195,11 @@ public class MqttClientService : IHostedService
             return Task.CompletedTask;
         }
 
+        _processingCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        _processingTasks = Enumerable.Range(0, WorkerCount)
+            .Select(_ => Task.Run(() => ProcessMessagesLoopAsync(_processingCancellationTokenSource.Token), _processingCancellationTokenSource.Token))
+            .ToArray();
+
         ReconnectUsingTimer(cancellationToken);
         return Task.CompletedTask;
     }
@@ -217,6 +215,10 @@ public class MqttClientService : IHostedService
         {
             _reconnectCancellationTokenSource.Cancel();
         }
+        if (_processingCancellationTokenSource != null)
+        {
+            _processingCancellationTokenSource.Cancel();
+        }
 
         if (_reconnectTask != null)
         {
@@ -230,6 +232,20 @@ public class MqttClientService : IHostedService
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, "Reconnect task stopped with an error.");
+            }
+        }
+        if (_processingTasks.Length != 0)
+        {
+            try
+            {
+                await Task.WhenAll(_processingTasks);
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "MQTT processing workers stopped with an error.");
             }
         }
 
@@ -247,6 +263,61 @@ public class MqttClientService : IHostedService
         finally
         {
             _reconnectCancellationTokenSource?.Dispose();
+            _processingCancellationTokenSource?.Dispose();
+        }
+    }
+
+    private async Task ProcessMessagesLoopAsync(CancellationToken cancellationToken)
+    {
+        while (await _messageChannel.Reader.WaitToReadAsync(cancellationToken))
+        {
+            while (_messageChannel.Reader.TryRead(out var message))
+            {
+                try
+                {
+                    await ProcessQueuedMessageAsync(message, cancellationToken);
+                }
+                catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error processing queued MQTT message");
+                }
+            }
+        }
+    }
+
+    private async Task ProcessQueuedMessageAsync(QueuedMqttMessage message, CancellationToken cancellationToken)
+    {
+        using var scope = _serviceScopeFactory.CreateScope();
+
+        var topicParts = message.Topic.Split('/');
+
+        if (MqttTopicFilterComparer.Compare(message.Topic, "devices/+/data") == MqttTopicFilterCompareResult.IsMatch)
+        {
+            var dataPointReceived = scope.ServiceProvider.GetRequiredService<DataPointReceived>();
+            var result = await dataPointReceived.Handle(topicParts[1], message.Payload, cancellationToken);
+            LogHandlerFailure(nameof(DataPointReceived), result);
+        }
+        else if (MqttTopicFilterComparer.Compare(message.Topic, "devices/+/job_from_device") == MqttTopicFilterCompareResult.IsMatch)
+        {
+            var jobStatusReceived = scope.ServiceProvider.GetRequiredService<JobStatusReceived>();
+            var result = await jobStatusReceived.Handle(topicParts[1], message.Payload, cancellationToken);
+            LogHandlerFailure(nameof(JobStatusReceived), result);
+        }
+        else if (MqttTopicFilterComparer.Compare(message.Topic, "$SYS/brokers/+/clients/+/connected") == MqttTopicFilterCompareResult.IsMatch)
+        {
+            var onDeviceConnected = scope.ServiceProvider.GetRequiredService<OnDeviceConnected>();
+            var result = await onDeviceConnected.Handle(message.Payload, cancellationToken);
+            LogHandlerFailure(nameof(OnDeviceConnected), result);
+        }
+        else if (MqttTopicFilterComparer.Compare(message.Topic, "$SYS/brokers/+/clients/+/disconnected") == MqttTopicFilterCompareResult.IsMatch)
+        {
+            var onDeviceDisconnected = scope.ServiceProvider.GetRequiredService<OnDeviceDisconnected>();
+            var result = await onDeviceDisconnected.Handle(message.Payload, cancellationToken);
+            LogHandlerFailure(nameof(OnDeviceDisconnected), result);
         }
     }
 
@@ -310,4 +381,6 @@ public class MqttClientService : IHostedService
             return false;
         }
     }
+
+    private sealed record QueuedMqttMessage(string Topic, byte[] Payload);
 }
