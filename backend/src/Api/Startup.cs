@@ -10,6 +10,7 @@ using Fei.Is.Api.Features.Devices.Services;
 using Fei.Is.Api.Features.Jobs.Services;
 using Fei.Is.Api.Features.JobSchedules.Jobs;
 using Fei.Is.Api.Features.JobSchedules.Services;
+using Fei.Is.Api.Features.Scenes.Services;
 using Fei.Is.Api.Features.System.Services;
 using Fei.Is.Api.MqttClient;
 using Fei.Is.Api.MqttClient.Publish;
@@ -90,6 +91,7 @@ public class Startup(IConfiguration configuration)
 
         // Add services
         services.AddScoped<JobService>();
+        services.AddScoped<SceneDeviceCacheService>();
         services.AddSingleton<IJobScheduleScheduler, JobScheduleQuartzScheduler>();
         services.AddTransient<JobScheduleExecutionJob>();
         services.AddScoped<TokenService>();

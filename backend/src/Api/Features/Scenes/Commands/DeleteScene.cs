@@ -4,6 +4,7 @@ using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
+using Fei.Is.Api.Features.Scenes.Services;
 using FluentResults;
 using FluentValidation;
 using MediatR;
@@ -50,11 +51,14 @@ public static class DeleteScene
 
     public record Command(Guid SceneId, ClaimsPrincipal User) : IRequest<Result<Guid>>;
 
-    public sealed class Handler(AppDbContext context) : IRequestHandler<Command, Result<Guid>>
+    public sealed class Handler(AppDbContext context, SceneDeviceCacheService sceneDeviceCache) : IRequestHandler<Command, Result<Guid>>
     {
         public async Task<Result<Guid>> Handle(Command message, CancellationToken cancellationToken)
         {
-            var scene = await context.Scenes.FirstOrDefaultAsync(x => x.Id == message.SceneId, cancellationToken);
+            var scene = await context
+                .Scenes
+                .Include(x => x.SensorTriggers)
+                .FirstOrDefaultAsync(x => x.Id == message.SceneId, cancellationToken);
             if (scene == null)
             {
                 return Result.Fail(new NotFoundError());
@@ -64,8 +68,10 @@ public static class DeleteScene
                 return Result.Fail(new ForbiddenError());
             }
            
+            var affectedDeviceIds = scene.SensorTriggers.Select(trigger => trigger.DeviceId).Distinct().ToArray();
             context.Scenes.Remove(scene);
             await context.SaveChangesAsync(cancellationToken);
+            await sceneDeviceCache.RefreshDevicesAsync(context, affectedDeviceIds, cancellationToken);
             
             return Result.Ok(scene.Id);
         }

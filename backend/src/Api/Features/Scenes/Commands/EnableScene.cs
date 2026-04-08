@@ -4,6 +4,7 @@ using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
+using Fei.Is.Api.Features.Scenes.Services;
 using FluentResults;
 using FluentValidation;
 using MediatR;
@@ -48,7 +49,7 @@ public static class EnableScene
 
     public record Command(Request Request, Guid SceneId, ClaimsPrincipal User) : IRequest<Result<Guid>>;
 
-    public sealed class Handler(AppDbContext context, IValidator<Command> validator) : IRequestHandler<Command, Result<Guid>>
+    public sealed class Handler(AppDbContext context, SceneDeviceCacheService sceneDeviceCache, IValidator<Command> validator) : IRequestHandler<Command, Result<Guid>>
     {
         public async Task<Result<Guid>> Handle(Command message, CancellationToken cancellationToken)
         {
@@ -58,7 +59,10 @@ public static class EnableScene
                 return Result.Fail(new ValidationError(result));
             }
 
-            var scene = await context.Scenes.FirstOrDefaultAsync(x => x.Id == message.SceneId, cancellationToken: cancellationToken);
+            var scene = await context
+                .Scenes
+                .Include(x => x.SensorTriggers)
+                .FirstOrDefaultAsync(x => x.Id == message.SceneId, cancellationToken: cancellationToken);
             if (scene == null)
             {
                 return Result.Fail(new NotFoundError());
@@ -71,6 +75,7 @@ public static class EnableScene
             scene.IsEnabled = message.Request.IsEnabled;
 
             await context.SaveChangesAsync(cancellationToken);
+            await sceneDeviceCache.RefreshDevicesAsync(context, scene.SensorTriggers.Select(trigger => trigger.DeviceId), cancellationToken);
 
             return Result.Ok(scene.Id);
         }

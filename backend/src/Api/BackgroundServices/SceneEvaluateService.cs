@@ -1,12 +1,15 @@
 using System;
 using System.Globalization;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using EFCore.BulkExtensions;
 using Fei.Is.Api.Common.Utils;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
+using Fei.Is.Api.Features.DataPoints.Queries;
 using Fei.Is.Api.Features.Jobs.Services;
+using Fei.Is.Api.Features.Scenes.Services;
 using Fei.Is.Api.Redis;
 using Fei.Is.Api.Services.Notifications;
 using Json.Logic;
@@ -21,8 +24,6 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
     private const string GroupName = "evaluate_scene";
     private const int ProcessingSpeed = 50;
 
-    static Dictionary<string, string> ParseResult(StreamEntry entry) => entry.Values.ToDictionary(x => x.Name.ToString(), x => x.Value.ToString());
-
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
         string consumerName = Guid.NewGuid().ToString();
@@ -35,6 +36,7 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
                 var timescale = scope.ServiceProvider.GetRequiredService<TimeScaleDbContext>();
                 var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
                 var redis = scope.ServiceProvider.GetRequiredService<RedisService>();
+                var sceneDeviceCache = scope.ServiceProvider.GetRequiredService<SceneDeviceCacheService>();
 
                 // Create consumer group if it doesn't exist
                 if (!await redis.Db.KeyExistsAsync(StreamName) || (await redis.Db.StreamGroupInfoAsync(StreamName)).All(x => x.Name != GroupName))
@@ -46,68 +48,18 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
 
                 if (messages.Length != 0)
                 {
-                    var dataPoints = new List<DataPoint>();
+                    var dataPoints = new List<DataPoint>(messages.Length);
 
                     foreach (var message in messages)
                     {
                         try
                         {
-                            var parsed = ParseResult(message);
-
-                            if (!double.TryParse(parsed["value"], NumberStyles.Float, CultureInfo.InvariantCulture, out var value))
+                            if (!TryParseDataPoint(message, out var dataPoint))
                             {
                                 continue;
                             }
 
-                            double? latitude = null;
-                            if (
-                                parsed.TryGetValue("latitude", out var latitudeRaw)
-                                && double.TryParse(latitudeRaw, NumberStyles.Float, CultureInfo.InvariantCulture, out var latitudeValue)
-                            )
-                            {
-                                latitude = latitudeValue;
-                            }
-
-                            double? longitude = null;
-                            if (
-                                parsed.TryGetValue("longitude", out var longitudeRaw)
-                                && double.TryParse(longitudeRaw, NumberStyles.Float, CultureInfo.InvariantCulture, out var longitudeValue)
-                            )
-                            {
-                                longitude = longitudeValue;
-                            }
-
-                            int? gridX = null;
-                            if (
-                                parsed.TryGetValue("grid_x", out var gridXRaw)
-                                && int.TryParse(gridXRaw, NumberStyles.Integer, CultureInfo.InvariantCulture, out var gridXValue)
-                            )
-                            {
-                                gridX = gridXValue;
-                            }
-
-                            int? gridY = null;
-                            if (
-                                parsed.TryGetValue("grid_y", out var gridYRaw)
-                                && int.TryParse(gridYRaw, NumberStyles.Integer, CultureInfo.InvariantCulture, out var gridYValue)
-                            )
-                            {
-                                gridY = gridYValue;
-                            }
-
-                            dataPoints.Add(
-                                new DataPoint
-                                {
-                                    DeviceId = Guid.Parse(parsed["device_id"]),
-                                    SensorTag = parsed["sensor_tag"],
-                                    TimeStamp = ParseTimestamp(parsed),
-                                    Value = value,
-                                    Latitude = latitude,
-                                    Longitude = longitude,
-                                    GridX = gridX,
-                                    GridY = gridY
-                                }
-                            );
+                            dataPoints.Add(dataPoint);
                         }
                         catch (Exception ex)
                         {
@@ -115,20 +67,45 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
                         }
                     }
 
+                    var messageIds = messages.Select(m => m.Id).ToArray();
+
                     if (dataPoints.Count != 0)
                     {
-                        var dataPointKeys = dataPoints.Select(dp => $"{dp.SensorTag}{dp.DeviceId}").ToHashSet();
+                        var dataPointLookup = new Dictionary<(Guid DeviceId, string SensorTag), DataPoint>(dataPoints.Count);
+                        var deviceIds = new HashSet<Guid>();
+                        var sensorTags = new HashSet<string>(StringComparer.Ordinal);
+
+                        foreach (var dataPoint in dataPoints)
+                        {
+                            dataPointLookup[(dataPoint.DeviceId, dataPoint.SensorTag)] = dataPoint;
+                            deviceIds.Add(dataPoint.DeviceId);
+                            sensorTags.Add(dataPoint.SensorTag);
+                        }
+
+                        if (!await sceneDeviceCache.AnyEnabledScenesForDevicesAsync(dbContext, deviceIds, cancellationToken))
+                        {
+                            await redis.Db.StreamAcknowledgeAsync(StreamName, GroupName, messageIds);
+                            await Task.Delay(ProcessingSpeed, cancellationToken);
+                            continue;
+                        }
 
                         var scenes = await dbContext
-                            .Scenes.Where(s => s.SensorTriggers.Any(st => dataPointKeys.Contains(st.SensorTag + st.DeviceId)))
+                            .Scenes.Where(s => s.SensorTriggers.Any(st => deviceIds.Contains(st.DeviceId) && sensorTags.Contains(st.SensorTag)))
                             .Include(s => s.SensorTriggers)
+                            .Include(s => s.Actions)
                             .ToListAsync(cancellationToken);
 
-                        await EvaluateScenes(dataPoints, scenes, scope, cancellationToken);
+                        scenes = scenes
+                            .Where(s => s.SensorTriggers.Any(st => dataPointLookup.ContainsKey((st.DeviceId, st.SensorTag))))
+                            .ToList();
 
-                        var messageIds = messages.Select(m => m.Id).ToArray();
-                        await redis.Db.StreamAcknowledgeAsync(StreamName, GroupName, messageIds);
+                        if (scenes.Count != 0)
+                        {
+                            await EvaluateScenes(dataPointLookup, scenes, scope, cancellationToken);
+                        }
                     }
+
+                    await redis.Db.StreamAcknowledgeAsync(StreamName, GroupName, messageIds);
                 }
                 await Task.Delay(ProcessingSpeed, cancellationToken);
             }
@@ -140,10 +117,17 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
         }
     }
 
-    private async Task EvaluateScenes(List<DataPoint> dataPoints, List<Scene> scenes, IServiceScope serviceScope, CancellationToken cancellationToken)
+    private async Task EvaluateScenes(
+        IReadOnlyDictionary<(Guid DeviceId, string SensorTag), DataPoint> incomingDataPoints,
+        List<Scene> scenes,
+        IServiceScope serviceScope,
+        CancellationToken cancellationToken
+    )
     {
         var redis = serviceScope.ServiceProvider.GetRequiredService<RedisService>();
         var timescale = serviceScope.ServiceProvider.GetRequiredService<TimeScaleDbContext>();
+        var resolvedDataPoints = new Dictionary<(Guid DeviceId, string SensorTag), DataPoint?>();
+        var nowUtc = DateTimeOffset.UtcNow;
 
         foreach (var scene in scenes)
         {
@@ -157,7 +141,7 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
             if (scene.LastTriggeredAt.HasValue && scene.CooldownAfterTriggerTime > 0)
             {
                 var cooldownEnd = scene.LastTriggeredAt.Value.AddSeconds(scene.CooldownAfterTriggerTime);
-                if (DateTimeOffset.UtcNow < cooldownEnd)
+                if (nowUtc < cooldownEnd)
                 {
                     continue;
                 }
@@ -167,11 +151,16 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
             var sensorValues = new Dictionary<(Guid DeviceId, string SensorTag), double?>();
             foreach (var trigger in scene.SensorTriggers)
             {
-                var dataPoint = dataPoints.FirstOrDefault(dp => dp.DeviceId == trigger.DeviceId && dp.SensorTag == trigger.SensorTag);
-                dataPoint ??= await GetDataPointFromCache(trigger, redis);
-                dataPoint ??= await GetDataPointFromDb(trigger, timescale);
+                var key = (trigger.DeviceId, trigger.SensorTag);
 
-                sensorValues[(trigger.DeviceId, trigger.SensorTag)] = dataPoint?.Value;
+                if (!incomingDataPoints.TryGetValue(key, out var dataPoint) && !resolvedDataPoints.TryGetValue(key, out dataPoint))
+                {
+                    dataPoint = await GetDataPointFromCache(trigger, redis);
+                    dataPoint ??= await GetDataPointFromDb(trigger, timescale);
+                    resolvedDataPoints[key] = dataPoint;
+                }
+
+                sensorValues[key] = dataPoint?.Value;
 
                 if (dataPoint != null)
                 {
@@ -200,17 +189,89 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
         }
     }
 
-    private static DateTimeOffset ParseTimestamp(IReadOnlyDictionary<string, string> parsed)
+    private static bool TryParseDataPoint(StreamEntry entry, out DataPoint dataPoint)
     {
-        if (
-            parsed.TryGetValue("timestamp", out var rawTimestamp)
-            && long.TryParse(rawTimestamp, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsedTimestamp)
-        )
+        dataPoint = null!;
+
+        string? sensorTag = null;
+        Guid deviceId = Guid.Empty;
+        double value = 0;
+        bool hasDeviceId = false;
+        bool hasValue = false;
+        var timestamp = DateTimeOffset.UtcNow;
+        double? latitude = null;
+        double? longitude = null;
+        int? gridX = null;
+        int? gridY = null;
+
+        foreach (var valueEntry in entry.Values)
         {
-            return UnixTimestampUtils.NormalizeToDateTimeOffsetOrNow(parsedTimestamp);
+            var name = valueEntry.Name.ToString();
+            var rawValue = valueEntry.Value.ToString();
+
+            switch (name)
+            {
+                case "device_id":
+                    hasDeviceId = Guid.TryParse(rawValue, out deviceId);
+                    break;
+                case "sensor_tag":
+                    sensorTag = rawValue;
+                    break;
+                case "value":
+                    hasValue = double.TryParse(rawValue, NumberStyles.Float, CultureInfo.InvariantCulture, out value)
+                        && !double.IsNaN(value)
+                        && !double.IsInfinity(value);
+                    break;
+                case "timestamp":
+                    if (long.TryParse(rawValue, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsedTimestamp))
+                    {
+                        timestamp = UnixTimestampUtils.NormalizeToDateTimeOffsetOrNow(parsedTimestamp);
+                    }
+                    break;
+                case "latitude":
+                    if (double.TryParse(rawValue, NumberStyles.Float, CultureInfo.InvariantCulture, out var latitudeValue))
+                    {
+                        latitude = latitudeValue;
+                    }
+                    break;
+                case "longitude":
+                    if (double.TryParse(rawValue, NumberStyles.Float, CultureInfo.InvariantCulture, out var longitudeValue))
+                    {
+                        longitude = longitudeValue;
+                    }
+                    break;
+                case "grid_x":
+                    if (int.TryParse(rawValue, NumberStyles.Integer, CultureInfo.InvariantCulture, out var gridXValue))
+                    {
+                        gridX = gridXValue;
+                    }
+                    break;
+                case "grid_y":
+                    if (int.TryParse(rawValue, NumberStyles.Integer, CultureInfo.InvariantCulture, out var gridYValue))
+                    {
+                        gridY = gridYValue;
+                    }
+                    break;
+            }
         }
 
-        return DateTimeOffset.UtcNow;
+        if (!hasDeviceId || !hasValue || string.IsNullOrEmpty(sensorTag))
+        {
+            return false;
+        }
+
+        dataPoint = new DataPoint
+        {
+            DeviceId = deviceId,
+            SensorTag = sensorTag,
+            TimeStamp = timestamp,
+            Value = value,
+            Latitude = latitude,
+            Longitude = longitude,
+            GridX = gridX,
+            GridY = gridY
+        };
+        return true;
     }
 
     private async Task HandleTriggeredScene(
@@ -293,14 +354,28 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
     private static async Task<DataPoint?> GetDataPointFromCache(SceneSensorTrigger trigger, RedisService redis)
     {
         var cacheResult = await redis.Db.StringGetAsync($"device:{trigger.DeviceId}:{trigger.SensorTag}:last");
-        return cacheResult.HasValue
-            ? new DataPoint
-            {
-                DeviceId = trigger.DeviceId,
-                SensorTag = trigger.SensorTag,
-                Value = (double)cacheResult,
-            }
-            : null;
+        if (!cacheResult.HasValue)
+        {
+            return null;
+        }
+
+        var latestDataPoint = JsonSerializer.Deserialize<GetLatestDataPoints.Response>(cacheResult!);
+        if (latestDataPoint?.Value == null)
+        {
+            return null;
+        }
+
+        return new DataPoint
+        {
+            DeviceId = trigger.DeviceId,
+            SensorTag = trigger.SensorTag,
+            TimeStamp = latestDataPoint.Ts ?? DateTimeOffset.UtcNow,
+            Value = latestDataPoint.Value.Value,
+            Latitude = latestDataPoint.Latitude,
+            Longitude = latestDataPoint.Longitude,
+            GridX = latestDataPoint.GridX,
+            GridY = latestDataPoint.GridY
+        };
     }
 
     private static async Task<DataPoint?> GetDataPointFromDb(SceneSensorTrigger trigger, TimeScaleDbContext timescale)

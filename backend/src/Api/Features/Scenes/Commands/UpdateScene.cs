@@ -5,6 +5,7 @@ using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
+using Fei.Is.Api.Features.Scenes.Services;
 using Fei.Is.Api.Features.Scenes.Utils;
 using FluentResults;
 using FluentValidation;
@@ -67,7 +68,7 @@ public static class UpdateScene
 
     public record Command(Request Request, Guid SceneId, ClaimsPrincipal User) : IRequest<Result<Guid>>;
 
-    public sealed class Handler(AppDbContext context, IValidator<Command> validator) : IRequestHandler<Command, Result<Guid>>
+    public sealed class Handler(AppDbContext context, SceneDeviceCacheService sceneDeviceCache, IValidator<Command> validator) : IRequestHandler<Command, Result<Guid>>
     {
         public async Task<Result<Guid>> Handle(Command message, CancellationToken cancellationToken)
         {
@@ -77,7 +78,10 @@ public static class UpdateScene
                 return Result.Fail(new ValidationError(result));
             }
 
-            var scene = await context.Scenes.FirstOrDefaultAsync(x => x.Id == message.SceneId, cancellationToken: cancellationToken);
+            var scene = await context
+                .Scenes
+                .Include(x => x.SensorTriggers)
+                .FirstOrDefaultAsync(x => x.Id == message.SceneId, cancellationToken: cancellationToken);
             if (scene == null)
             {
                 return Result.Fail(new NotFoundError());
@@ -113,6 +117,8 @@ public static class UpdateScene
                 }
             }
 
+            var affectedDeviceIds = scene.SensorTriggers.Select(trigger => trigger.DeviceId).Concat(triggers.Select(trigger => trigger.DeviceId)).Distinct().ToArray();
+
             scene.Name = message.Request.Name;
             scene.Description = message.Request.Description;
             scene.IsEnabled = message.Request.IsEnabled;
@@ -131,7 +137,7 @@ public static class UpdateScene
                 })
                 .ToList();
 
-            var existingTriggers = context.SceneSensorTriggers.Where(x => x.SceneId == scene.Id).ToList();
+            var existingTriggers = scene.SensorTriggers.ToList();
             context.SceneSensorTriggers.RemoveRange(existingTriggers);
 
             foreach (var trigger in triggers)
@@ -146,6 +152,7 @@ public static class UpdateScene
             }
 
             await context.SaveChangesAsync(cancellationToken);
+            await sceneDeviceCache.RefreshDevicesAsync(context, affectedDeviceIds, cancellationToken);
 
             return Result.Ok(scene.Id);
         }
