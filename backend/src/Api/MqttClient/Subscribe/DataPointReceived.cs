@@ -5,7 +5,6 @@ using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Features.DataPoints.Queries;
 using Fei.Is.Api.Features.Devices.Services;
 using Fei.Is.Api.Redis;
-using Fei.Is.Api.SignalR;
 using Fei.Is.Api.SignalR.Dtos;
 using Fei.Is.Api.SignalR.Hubs;
 using Fei.Is.Api.SignalR.Interfaces;
@@ -173,9 +172,7 @@ public class DataPointReceived(
         foreach (var (deviceId, notifications) in notificationsByDevice)
         {
             ObserveBackgroundTask(
-                hubContext.Clients.Group(deviceId).ReceiveSensorLastDataPoints(
-                    SignalRDataPointCoalescer.CoalesceLatestByTag(deviceId, notifications)
-                ),
+                hubContext.Clients.Group(deviceId).ReceiveSensorLastDataPoints(notifications),
                 "SignalR notification batch failed for device {DeviceId}",
                 deviceId
             );

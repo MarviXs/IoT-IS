@@ -6,7 +6,6 @@ using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Features.DataPoints.Queries;
 using Fei.Is.Api.Redis;
-using Fei.Is.Api.SignalR;
 using Fei.Is.Api.SignalR.Dtos;
 using Fei.Is.Api.SignalR.Hubs;
 using Fei.Is.Api.SignalR.Interfaces;
@@ -208,8 +207,7 @@ public class HubEdgeSyncService(AppDbContext appContext, RedisService redis, IHu
             await Task.WhenAll(redisTasks);
 
             await Task.WhenAll(
-                SignalRDataPointCoalescer
-                    .CoalesceLatestByDeviceAndTag(notifications)
+                notifications
                     .GroupBy(notification => notification.DeviceId, StringComparer.Ordinal)
                     .Select(group => hubContext.Clients.Group(group.Key).ReceiveSensorLastDataPoints(group.ToList()))
             );
