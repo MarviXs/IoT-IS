@@ -114,6 +114,7 @@ import type { TimeRange } from '@/models/TimeRange';
 import { mdiRefresh } from '@quasar/extras/mdi-v7';
 import { useSignalR } from '@/composables/useSignalR';
 import type { LastDataPoint } from '@/models/LastDataPoint';
+import { subscribeToLastDataPointEvents } from '@/utils/signalrDataPoints';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -557,13 +558,13 @@ function handleLastDataPointUpdate(dataPoint: LastDataPoint) {
 }
 
 function subscribeToLastDataPointUpdates() {
-  connection.on('ReceiveSensorLastDataPoint', handleLastDataPointUpdate);
+  return subscribeToLastDataPointEvents(connection, handleLastDataPointUpdate);
 }
-subscribeToLastDataPointUpdates();
+const unsubscribeFromLastDataPointUpdates = subscribeToLastDataPointUpdates();
 
 onUnmounted(() => {
   void connection.send('UnsubscribeFromDevice', deviceId);
-  connection.off('ReceiveSensorLastDataPoint', handleLastDataPointUpdate);
+  unsubscribeFromLastDataPointUpdates();
 });
 
 interface SensorGridEntry {

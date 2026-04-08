@@ -69,6 +69,7 @@ import type { StartJobRequest } from '@/api/services/JobService';
 import DataPointService from '@/api/services/DataPointService';
 import type { LastDataPoint } from '@/models/LastDataPoint';
 import { useSignalR } from '@/composables/useSignalR';
+import { subscribeToLastDataPointEvents } from '@/utils/signalrDataPoints';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -100,7 +101,7 @@ onMounted(async () => {
 
 onUnmounted(() => {
   try {
-    connection.off('ReceiveSensorLastDataPoint', handleSensorUpdate);
+    unsubscribeFromLastDataPointUpdates();
     void connection.send('UnsubscribeFromDevice', deviceId);
   } catch (error) {
     console.error('Failed to unsubscribe from device updates', error);
@@ -341,8 +342,6 @@ async function initializeToggleStates() {
 async function subscribeToDeviceUpdates() {
   try {
     await connect();
-    connection.off('ReceiveSensorLastDataPoint', handleSensorUpdate);
-    connection.on('ReceiveSensorLastDataPoint', handleSensorUpdate);
     await connection.send('SubscribeToDevice', deviceId);
   } catch (error) {
     console.error('Failed to subscribe to device updates', error);
@@ -374,6 +373,8 @@ const handleSensorUpdate = (dataPoint: LastDataPoint) => {
     }
   }
 };
+
+const unsubscribeFromLastDataPointUpdates = subscribeToLastDataPointEvents(connection, handleSensorUpdate);
 </script>
 
 <style scoped>

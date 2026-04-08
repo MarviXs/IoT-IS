@@ -207,7 +207,9 @@ public class HubEdgeSyncService(AppDbContext appContext, RedisService redis, IHu
             await Task.WhenAll(redisTasks);
 
             await Task.WhenAll(
-                notifications.Select(notification => hubContext.Clients.Group(notification.DeviceId).ReceiveSensorLastDataPoint(notification))
+                notifications
+                    .GroupBy(notification => notification.DeviceId, StringComparer.Ordinal)
+                    .Select(group => hubContext.Clients.Group(group.Key).ReceiveSensorLastDataPoints(group.ToList()))
             );
         }
 

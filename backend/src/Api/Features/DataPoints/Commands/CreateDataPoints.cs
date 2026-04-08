@@ -106,10 +106,10 @@ public static class CreateDataPoints
             var notificationsGroup = hubContext.Clients.Group(deviceIdString);
             var nowUnixSeconds = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
             var redisBatch = redis.Db.CreateBatch();
-            var pendingTasks = new Task[(requestCount * 3) + 2];
-            var taskIndex = 0;
-            pendingTasks[taskIndex++] = redisBatch.StringSetAsync($"device:{deviceIdString}:connected", "1", TimeSpan.FromMinutes(30));
-            pendingTasks[taskIndex++] = redisBatch.StringSetAsync($"device:{deviceIdString}:lastSeen", nowUnixSeconds);
+            var pendingTasks = new List<Task>((requestCount * 2) + 3);
+            var notifications = new List<SensorLastDataPointDto>(requestCount);
+            pendingTasks.Add(redisBatch.StringSetAsync($"device:{deviceIdString}:connected", "1", TimeSpan.FromMinutes(30)));
+            pendingTasks.Add(redisBatch.StringSetAsync($"device:{deviceIdString}:lastSeen", nowUnixSeconds));
 
             foreach (var request in message.Request)
             {
@@ -157,7 +157,7 @@ public static class CreateDataPoints
                     streamEntries[entryIndex++] = new("grid_y", request.GridY.Value);
                 }
 
-                pendingTasks[taskIndex++] = redisBatch.StreamAddAsync(DataPointsStreamName, streamEntries, maxLength: 500000);
+                pendingTasks.Add(redisBatch.StreamAddAsync(DataPointsStreamName, streamEntries, maxLength: 500000));
 
                 var latestResponse = new GetLatestDataPoints.Response(
                     timestamp,
@@ -168,12 +168,12 @@ public static class CreateDataPoints
                     request.GridY
                 );
 
-                pendingTasks[taskIndex++] = redisBatch.StringSetAsync(
+                pendingTasks.Add(redisBatch.StringSetAsync(
                     $"device:{deviceIdString}:{request.Tag}:last",
                     JsonSerializer.Serialize(latestResponse),
                     TimeSpan.FromHours(1)
-                );
-                pendingTasks[taskIndex++] = notificationsGroup.ReceiveSensorLastDataPoint(
+                ));
+                notifications.Add(
                     new SensorLastDataPointDto(
                         deviceIdString,
                         request.Tag,
@@ -187,6 +187,7 @@ public static class CreateDataPoints
                 );
             }
 
+            pendingTasks.Add(notificationsGroup.ReceiveSensorLastDataPoints(notifications));
             redisBatch.Execute();
             await Task.WhenAll(pendingTasks);
 

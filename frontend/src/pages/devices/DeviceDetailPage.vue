@@ -149,6 +149,7 @@ import type { SensorData } from '@/models/SensorData';
 import { useStorage } from '@vueuse/core';
 import type { GraphOptions } from '@/components/datapoints/GraphOptionsForm.vue';
 import type { GetLatestDataPointsQuery } from '@/api/services/DataPointService';
+import { subscribeToLastDataPointEvents, upsertLastDataPoint } from '@/utils/signalrDataPoints';
 
 const { t } = useI18n();
 const { connection, connect } = useSignalR();
@@ -252,29 +253,12 @@ async function getLastDataPoint(deviceId: string, tag: string) {
     gridX: data.gridX ?? null,
     gridY: data.gridY ?? null,
   };
-  const index = lastDataPoints.value.findIndex(
-    (dp) => dp.deviceId === newDataPoint.deviceId && dp.tag === newDataPoint.tag,
-  );
-  if (index !== -1) {
-    lastDataPoints.value[index] = newDataPoint;
-  } else {
-    lastDataPoints.value.push(newDataPoint);
-  }
+  upsertLastDataPoint(lastDataPoints.value, newDataPoint);
 }
 
-async function subscribeToLastDataPointUpdates() {
-  connection.on('ReceiveSensorLastDataPoint', (dataPoint: LastDataPoint) => {
-    const index = lastDataPoints.value.findIndex(
-      (dp) => dp.deviceId === dataPoint.deviceId && dp.tag === dataPoint.tag,
-    );
-    if (index !== -1) {
-      lastDataPoints.value[index] = dataPoint;
-    } else {
-      lastDataPoints.value.push(dataPoint);
-    }
-  });
-}
-subscribeToLastDataPointUpdates();
+const unsubscribeFromLastDataPointUpdates = subscribeToLastDataPointEvents(connection, (dataPoint) => {
+  upsertLastDataPoint(lastDataPoints.value, dataPoint);
+});
 
 watch(
   () => graphOptions.value.maskStaleValue,
@@ -286,7 +270,7 @@ watch(
 const isUpdateDialogOpen = ref(false);
 onUnmounted(() => {
   connection.send('UnsubscribeFromDevice', deviceId);
-  connection.off('ReceiveSensorLastDataPoint');
+  unsubscribeFromLastDataPointUpdates();
 });
 </script>
 

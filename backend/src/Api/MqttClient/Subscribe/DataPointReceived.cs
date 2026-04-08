@@ -113,6 +113,7 @@ public class DataPointReceived(
         var nowUnixSeconds = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
         var redisBatch = redis.Db.CreateBatch();
         var streamAddTasks = new Task<RedisValue>[parsedDataPoints.Count];
+        var notificationsByDevice = new Dictionary<string, List<SensorLastDataPointDto>>(StringComparer.Ordinal);
 
         for (var i = 0; i < parsedDataPoints.Count; i++)
         {
@@ -146,29 +147,36 @@ public class DataPointReceived(
                 flags: CommandFlags.FireAndForget
             );
 
-            ObserveBackgroundTask(
-                hubContext
-                    .Clients.Group(datapoint.DeviceIdString)
-                    .ReceiveSensorLastDataPoint(
-                        new SensorLastDataPointDto(
-                            datapoint.DeviceIdString,
-                            datapoint.SensorTag,
-                            datapoint.Value,
-                            datapoint.Latitude,
-                            datapoint.Longitude,
-                            datapoint.GridX,
-                            datapoint.GridY,
-                            datapoint.Timestamp
-                        )
-                    ),
-                "SignalR notification failed for device {DeviceId} and sensor {SensorTag}",
-                datapoint.DeviceIdString,
-                datapoint.SensorTag
+            if (!notificationsByDevice.TryGetValue(datapoint.DeviceIdString, out var notifications))
+            {
+                notifications = new List<SensorLastDataPointDto>();
+                notificationsByDevice[datapoint.DeviceIdString] = notifications;
+            }
+
+            notifications.Add(
+                new SensorLastDataPointDto(
+                    datapoint.DeviceIdString,
+                    datapoint.SensorTag,
+                    datapoint.Value,
+                    datapoint.Latitude,
+                    datapoint.Longitude,
+                    datapoint.GridX,
+                    datapoint.GridY,
+                    datapoint.Timestamp
+                )
             );
         }
 
         redisBatch.Execute();
         await Task.WhenAll(streamAddTasks.Cast<Task>().Append(updateSampleRateTask));
+        foreach (var (deviceId, notifications) in notificationsByDevice)
+        {
+            ObserveBackgroundTask(
+                hubContext.Clients.Group(deviceId).ReceiveSensorLastDataPoints(notifications),
+                "SignalR notification batch failed for device {DeviceId}",
+                deviceId
+            );
+        }
 
         return Result.Ok();
     }
@@ -253,7 +261,7 @@ public class DataPointReceived(
         }
     }
 
-    private void ObserveBackgroundTask(Task task, string message, string deviceId, string sensorTag)
+    private void ObserveBackgroundTask(Task task, string message, string deviceId)
     {
         if (task.IsCompletedSuccessfully)
         {
@@ -268,11 +276,11 @@ public class DataPointReceived(
                     return;
                 }
 
-                var (log, logMessage, loggedDeviceId, loggedSensorTag) = ((ILogger<DataPointReceived>, string, string, string))state!;
+                var (log, logMessage, loggedDeviceId) = ((ILogger<DataPointReceived>, string, string))state!;
 
-                log.LogWarning(completedTask.Exception, logMessage, loggedDeviceId, loggedSensorTag);
+                log.LogWarning(completedTask.Exception, logMessage, loggedDeviceId);
             },
-            (logger, message, deviceId, sensorTag),
+            (logger, message, deviceId),
             CancellationToken.None,
             TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
             TaskScheduler.Default

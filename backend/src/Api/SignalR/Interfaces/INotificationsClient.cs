@@ -6,4 +6,5 @@ public interface INotificationsClient
 {
     Task ReceiveJobUpdate(JobUpdateDto jobUpdate);
     Task ReceiveSensorLastDataPoint(SensorLastDataPointDto sensorLastDataPoint);
+    Task ReceiveSensorLastDataPoints(IReadOnlyList<SensorLastDataPointDto> sensorLastDataPoints);
 }
