@@ -9,6 +9,7 @@ using Fei.Is.Api.Extensions;
 using Fei.Is.Api.Features.DataPoints.Queries;
 using Fei.Is.Api.Features.Devices.Services;
 using Fei.Is.Api.Redis;
+using Fei.Is.Api.SignalR;
 using Fei.Is.Api.SignalR.Dtos;
 using Fei.Is.Api.SignalR.Hubs;
 using Fei.Is.Api.SignalR.Interfaces;
@@ -187,7 +188,11 @@ public static class CreateDataPoints
                 );
             }
 
-            pendingTasks.Add(notificationsGroup.ReceiveSensorLastDataPoints(notifications));
+            pendingTasks.Add(
+                notificationsGroup.ReceiveSensorLastDataPoints(
+                    SignalRDataPointCoalescer.CoalesceLatestByTag(deviceIdString, notifications)
+                )
+            );
             redisBatch.Execute();
             await Task.WhenAll(pendingTasks);
 
