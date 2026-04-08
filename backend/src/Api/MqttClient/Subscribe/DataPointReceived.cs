@@ -23,6 +23,9 @@ public class DataPointReceived(
     IHubContext<IsHub, INotificationsClient> hubContext
 )
 {
+    private const string DataPointsStreamName = "datapoints";
+    private const string SampleRateTag = "samplerate";
+
     public async Task<Result> Handle(string deviceAccessToken, ArraySegment<byte> payload, CancellationToken cancellationToken)
     {
         var deviceGuid = await deviceAccessTokenResolver.ResolveDeviceIdAsync(deviceAccessToken, cancellationToken);
@@ -30,23 +33,26 @@ public class DataPointReceived(
         {
             return Result.Fail("Device not found");
         }
-        var deviceId = deviceGuid.Value.ToString();
+        var deviceIdGuid = deviceGuid.Value;
+        var deviceId = deviceIdGuid.ToString();
 
         var datapoint = DataPointFbs.GetRootAsDataPointFbs(new ByteBuffer(payload.ToArray()));
         var timestamp = UnixTimestampUtils.NormalizeToDateTimeOffsetOrNow(datapoint.Ts);
+        var sensorTag = datapoint.Tag;
+        var value = datapoint.Value;
 
-        if (double.IsNaN(datapoint.Value) || double.IsInfinity(datapoint.Value))
+        if (double.IsNaN(value) || double.IsInfinity(value))
         {
             return Result.Fail("Invalid datapoint value");
         }
 
-        await UpdateSampleRateIfNeeded(deviceGuid.Value, datapoint.Tag, datapoint.Value, cancellationToken);
+        var updateSampleRateTask = UpdateSampleRateIfNeeded(deviceIdGuid, sensorTag, value, cancellationToken);
 
-        var streamEntries = new List<NameValueEntry>
+        var streamEntries = new List<NameValueEntry>(8)
         {
             new("device_id", deviceId),
-            new("sensor_tag", datapoint.Tag),
-            new("value", datapoint.Value),
+            new("sensor_tag", sensorTag),
+            new("value", value),
             new("timestamp", timestamp.ToUnixTimeMilliseconds())
         };
 
@@ -67,34 +73,35 @@ public class DataPointReceived(
             streamEntries.Add(new("grid_y", datapoint.GridY.Value));
         }
 
-        await redis.Db.StreamAddAsync("datapoints", streamEntries.ToArray(), maxLength: 500000);
+        var streamAddTask = redis.Db.StreamAddAsync(DataPointsStreamName, streamEntries.ToArray(), maxLength: 500000);
 
-        await redis.Db.StringSetAsync($"device:{deviceId}:connected", "1", TimeSpan.FromMinutes(30), flags: CommandFlags.FireAndForget);
-        await redis.Db.StringSetAsync($"device:{deviceId}:lastSeen", DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), flags: CommandFlags.FireAndForget);
+        var nowUnixSeconds = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
 
         var latestResponse = new GetLatestDataPoints.Response(
             timestamp,
-            datapoint.Value,
+            value,
             datapoint.Latitude,
             datapoint.Longitude,
             datapoint.GridX,
             datapoint.GridY
         );
 
-        await redis.Db.StringSetAsync(
-            $"device:{deviceId}:{datapoint.Tag}:last",
-            JsonSerializer.Serialize(latestResponse),
+        var lastValueJson = JsonSerializer.Serialize(latestResponse);
+        var connectedTask = redis.Db.StringSetAsync($"device:{deviceId}:connected", "1", TimeSpan.FromMinutes(30), flags: CommandFlags.FireAndForget);
+        var lastSeenTask = redis.Db.StringSetAsync($"device:{deviceId}:lastSeen", nowUnixSeconds, flags: CommandFlags.FireAndForget);
+        var lastValueTask = redis.Db.StringSetAsync(
+            $"device:{deviceId}:{sensorTag}:last",
+            lastValueJson,
             TimeSpan.FromHours(1),
             flags: CommandFlags.FireAndForget
         );
-
-        await hubContext
+        var notifyTask = hubContext
             .Clients.Group(deviceId)
             .ReceiveSensorLastDataPoint(
                 new SensorLastDataPointDto(
                     deviceId,
-                    datapoint.Tag.ToString(),
-                    datapoint.Value,
+                    sensorTag,
+                    value,
                     datapoint.Latitude,
                     datapoint.Longitude,
                     datapoint.GridX,
@@ -102,21 +109,27 @@ public class DataPointReceived(
                     timestamp
                 )
             );
+        await Task.WhenAll(streamAddTask, updateSampleRateTask, connectedTask, lastSeenTask, lastValueTask, notifyTask);
 
         return Result.Ok();
     }
 
-    private async Task UpdateSampleRateIfNeeded(Guid deviceId, string? tag, double value, CancellationToken cancellationToken)
+    private Task UpdateSampleRateIfNeeded(Guid deviceId, string? tag, double value, CancellationToken cancellationToken)
     {
-        if (!string.Equals(tag, "samplerate", StringComparison.OrdinalIgnoreCase))
+        if (!string.Equals(tag, SampleRateTag, StringComparison.OrdinalIgnoreCase))
         {
-            return;
+            return Task.CompletedTask;
         }
         if (value <= 0 || double.IsNaN(value) || double.IsInfinity(value))
         {
-            return;
+            return Task.CompletedTask;
         }
 
+        return UpdateSampleRateAsync(deviceId, value, cancellationToken);
+    }
+
+    private async Task UpdateSampleRateAsync(Guid deviceId, double value, CancellationToken cancellationToken)
+    {
         var device = await appContext.Devices.FindAsync([deviceId], cancellationToken);
         if (device == null)
         {

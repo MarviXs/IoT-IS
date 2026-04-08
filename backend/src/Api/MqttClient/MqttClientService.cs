@@ -11,17 +11,13 @@ namespace Fei.Is.Api.MqttClient;
 
 public class MqttClientService : IHostedService
 {
-    private const int WorkerCount = 4;
+    private const int WorkerCount = 8;
 
     private readonly IMqttClient? _mqttClient;
     private readonly MqttClientOptions? _mqttOptions;
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly Channel<QueuedMqttMessage> _messageChannel = Channel.CreateUnbounded<QueuedMqttMessage>(
-        new UnboundedChannelOptions
-        {
-            SingleWriter = false,
-            SingleReader = false
-        }
+        new UnboundedChannelOptions { SingleWriter = false, SingleReader = false }
     );
 
     private readonly ILogger<MqttClientService> _logger;
@@ -133,7 +129,11 @@ public class MqttClientService : IHostedService
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogWarning(ex, "Unexpected error while connecting to MQTT broker. Retrying in {RetryDelaySeconds} seconds...", _reconnectDelay.TotalSeconds);
+                        _logger.LogWarning(
+                            ex,
+                            "Unexpected error while connecting to MQTT broker. Retrying in {RetryDelaySeconds} seconds...",
+                            _reconnectDelay.TotalSeconds
+                        );
                     }
 
                     try
@@ -162,14 +162,9 @@ public class MqttClientService : IHostedService
             var topic = args.ApplicationMessage.Topic;
             var payload = args.ApplicationMessage.PayloadSegment.ToArray();
 
-            await _messageChannel.Writer.WriteAsync(
-                new QueuedMqttMessage(topic, payload),
-                _processingCancellationTokenSource.Token
-            );
+            await _messageChannel.Writer.WriteAsync(new QueuedMqttMessage(topic, payload), _processingCancellationTokenSource.Token);
         }
-        catch (OperationCanceledException)
-        {
-        }
+        catch (OperationCanceledException) { }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error queueing MQTT message");
@@ -196,7 +191,8 @@ public class MqttClientService : IHostedService
         }
 
         _processingCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        _processingTasks = Enumerable.Range(0, WorkerCount)
+        _processingTasks = Enumerable
+            .Range(0, WorkerCount)
             .Select(_ => Task.Run(() => ProcessMessagesLoopAsync(_processingCancellationTokenSource.Token), _processingCancellationTokenSource.Token))
             .ToArray();
 
@@ -226,9 +222,7 @@ public class MqttClientService : IHostedService
             {
                 await _reconnectTask;
             }
-            catch (OperationCanceledException)
-            {
-            }
+            catch (OperationCanceledException) { }
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, "Reconnect task stopped with an error.");
@@ -240,9 +234,7 @@ public class MqttClientService : IHostedService
             {
                 await Task.WhenAll(_processingTasks);
             }
-            catch (OperationCanceledException)
-            {
-            }
+            catch (OperationCanceledException) { }
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, "MQTT processing workers stopped with an error.");
