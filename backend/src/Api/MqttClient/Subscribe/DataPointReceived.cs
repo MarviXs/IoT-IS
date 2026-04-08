@@ -29,31 +29,152 @@ public class DataPointReceived(
 
     public async Task<Result> Handle(string deviceAccessToken, ArraySegment<byte> payload, CancellationToken cancellationToken)
     {
-        if (payload.Array == null)
+        var result = await HandleBatch([(deviceAccessToken, payload)], cancellationToken);
+        return result.IsSuccess ? Result.Ok() : Result.Fail(result.Errors);
+    }
+
+    public async Task<Result> HandleBatch(
+        IReadOnlyList<(string DeviceAccessToken, ArraySegment<byte> Payload)> messages,
+        CancellationToken cancellationToken
+    )
+    {
+        if (messages.Count == 0)
         {
-            return Result.Fail("Payload is missing");
+            return Result.Ok();
         }
 
-        var deviceGuid = await deviceAccessTokenResolver.ResolveDeviceIdAsync(deviceAccessToken, cancellationToken);
-        if (!deviceGuid.HasValue)
+        var deviceIdsByToken = new Dictionary<string, Guid>(StringComparer.Ordinal);
+        var parsedDataPoints = new List<ParsedDataPoint>(messages.Count);
+        var sampleRatesToUpdate = new Dictionary<Guid, float>();
+
+        foreach (var (deviceAccessToken, payload) in messages)
         {
-            return Result.Fail("Device not found");
+            if (payload.Array == null)
+            {
+                logger.LogWarning("Skipping MQTT datapoint because payload is missing for access token {DeviceAccessToken}", deviceAccessToken);
+                continue;
+            }
+
+            if (!deviceIdsByToken.TryGetValue(deviceAccessToken, out var deviceId))
+            {
+                var resolvedDeviceId = await deviceAccessTokenResolver.ResolveDeviceIdAsync(deviceAccessToken, cancellationToken);
+                if (!resolvedDeviceId.HasValue)
+                {
+                    logger.LogWarning("Skipping MQTT datapoint because device was not found for access token {DeviceAccessToken}", deviceAccessToken);
+                    continue;
+                }
+
+                deviceId = resolvedDeviceId.Value;
+                deviceIdsByToken[deviceAccessToken] = deviceId;
+            }
+
+            var datapoint = DataPointFbs.GetRootAsDataPointFbs(new ByteBuffer(payload.Array, payload.Offset));
+            var timestamp = UnixTimestampUtils.NormalizeToDateTimeOffsetOrNow(datapoint.Ts);
+            var sensorTag = datapoint.Tag;
+            var value = datapoint.Value;
+
+            if (double.IsNaN(value) || double.IsInfinity(value))
+            {
+                logger.LogWarning(
+                    "Skipping MQTT datapoint because value is invalid for device {DeviceId} and sensor {SensorTag}",
+                    deviceId,
+                    sensorTag
+                );
+                continue;
+            }
+
+            var deviceIdString = deviceId.ToString();
+            parsedDataPoints.Add(
+                new ParsedDataPoint(
+                    deviceId,
+                    deviceIdString,
+                    sensorTag,
+                    value,
+                    timestamp,
+                    datapoint.Latitude,
+                    datapoint.Longitude,
+                    datapoint.GridX,
+                    datapoint.GridY
+                )
+            );
+
+            if (string.Equals(sensorTag, SampleRateTag, StringComparison.OrdinalIgnoreCase) && value > 0)
+            {
+                sampleRatesToUpdate[deviceId] = (float)value;
+            }
         }
-        var deviceIdGuid = deviceGuid.Value;
-        var deviceId = deviceIdGuid.ToString();
 
-        var datapoint = DataPointFbs.GetRootAsDataPointFbs(new ByteBuffer(payload.Array, payload.Offset));
-        var timestamp = UnixTimestampUtils.NormalizeToDateTimeOffsetOrNow(datapoint.Ts);
-        var sensorTag = datapoint.Tag;
-        var value = datapoint.Value;
-
-        if (double.IsNaN(value) || double.IsInfinity(value))
+        if (parsedDataPoints.Count == 0)
         {
-            return Result.Fail("Invalid datapoint value");
+            return Result.Ok();
         }
 
-        var updateSampleRateTask = UpdateSampleRateIfNeeded(deviceIdGuid, sensorTag, value, cancellationToken);
+        var updateSampleRateTask = UpdateSampleRatesIfNeeded(sampleRatesToUpdate, cancellationToken);
+        var nowUnixSeconds = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
+        var redisBatch = redis.Db.CreateBatch();
+        var streamAddTasks = new Task<RedisValue>[parsedDataPoints.Count];
 
+        for (var i = 0; i < parsedDataPoints.Count; i++)
+        {
+            var datapoint = parsedDataPoints[i];
+            var streamEntries = CreateStreamEntries(datapoint);
+            var latestResponse = new GetLatestDataPoints.Response(
+                datapoint.Timestamp,
+                datapoint.Value,
+                datapoint.Latitude,
+                datapoint.Longitude,
+                datapoint.GridX,
+                datapoint.GridY
+            );
+
+            streamAddTasks[i] = redisBatch.StreamAddAsync(DataPointsStreamName, streamEntries, maxLength: 500000);
+            _ = redisBatch.StringSetAsync(
+                $"device:{datapoint.DeviceIdString}:connected",
+                "1",
+                TimeSpan.FromMinutes(30),
+                flags: CommandFlags.FireAndForget
+            );
+            _ = redisBatch.StringSetAsync(
+                $"device:{datapoint.DeviceIdString}:lastSeen",
+                nowUnixSeconds,
+                flags: CommandFlags.FireAndForget
+            );
+            _ = redisBatch.StringSetAsync(
+                $"device:{datapoint.DeviceIdString}:{datapoint.SensorTag}:last",
+                JsonSerializer.Serialize(latestResponse),
+                TimeSpan.FromHours(1),
+                flags: CommandFlags.FireAndForget
+            );
+
+            ObserveBackgroundTask(
+                hubContext
+                    .Clients.Group(datapoint.DeviceIdString)
+                    .ReceiveSensorLastDataPoint(
+                        new SensorLastDataPointDto(
+                            datapoint.DeviceIdString,
+                            datapoint.SensorTag,
+                            datapoint.Value,
+                            datapoint.Latitude,
+                            datapoint.Longitude,
+                            datapoint.GridX,
+                            datapoint.GridY,
+                            datapoint.Timestamp
+                        )
+                    ),
+                "SignalR notification failed for device {DeviceId} and sensor {SensorTag}",
+                datapoint.DeviceIdString,
+                datapoint.SensorTag
+            );
+        }
+
+        redisBatch.Execute();
+        await Task.WhenAll(streamAddTasks.Cast<Task>().Append(updateSampleRateTask));
+
+        return Result.Ok();
+    }
+
+    private static NameValueEntry[] CreateStreamEntries(ParsedDataPoint datapoint)
+    {
         var streamEntriesCount = 4;
         if (datapoint.Latitude.HasValue)
         {
@@ -74,10 +195,10 @@ public class DataPointReceived(
 
         var streamEntries = new NameValueEntry[streamEntriesCount];
         var entryIndex = 0;
-        streamEntries[entryIndex++] = new("device_id", deviceId);
-        streamEntries[entryIndex++] = new("sensor_tag", sensorTag);
-        streamEntries[entryIndex++] = new("value", value);
-        streamEntries[entryIndex++] = new("timestamp", timestamp.ToUnixTimeMilliseconds());
+        streamEntries[entryIndex++] = new("device_id", datapoint.DeviceIdString);
+        streamEntries[entryIndex++] = new("sensor_tag", datapoint.SensorTag);
+        streamEntries[entryIndex++] = new("value", datapoint.Value);
+        streamEntries[entryIndex++] = new("timestamp", datapoint.Timestamp.ToUnixTimeMilliseconds());
 
         if (datapoint.Latitude.HasValue)
         {
@@ -96,72 +217,40 @@ public class DataPointReceived(
             streamEntries[entryIndex++] = new("grid_y", datapoint.GridY.Value);
         }
 
-        var nowUnixSeconds = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
-
-        var latestResponse = new GetLatestDataPoints.Response(
-            timestamp,
-            value,
-            datapoint.Latitude,
-            datapoint.Longitude,
-            datapoint.GridX,
-            datapoint.GridY
-        );
-
-        var lastValueJson = JsonSerializer.Serialize(latestResponse);
-        var redisBatch = redis.Db.CreateBatch();
-        var streamAddTask = redisBatch.StreamAddAsync(DataPointsStreamName, streamEntries, maxLength: 500000);
-        _ = redisBatch.StringSetAsync($"device:{deviceId}:connected", "1", TimeSpan.FromMinutes(30), flags: CommandFlags.FireAndForget);
-        _ = redisBatch.StringSetAsync($"device:{deviceId}:lastSeen", nowUnixSeconds, flags: CommandFlags.FireAndForget);
-        _ = redisBatch.StringSetAsync($"device:{deviceId}:{sensorTag}:last", lastValueJson, TimeSpan.FromHours(1), flags: CommandFlags.FireAndForget);
-        redisBatch.Execute();
-        ObserveBackgroundTask(
-            hubContext
-                .Clients.Group(deviceId)
-                .ReceiveSensorLastDataPoint(
-                    new SensorLastDataPointDto(
-                        deviceId,
-                        sensorTag,
-                        value,
-                        datapoint.Latitude,
-                        datapoint.Longitude,
-                        datapoint.GridX,
-                        datapoint.GridY,
-                        timestamp
-                    )
-                ),
-            "SignalR notification failed for device {DeviceId} and sensor {SensorTag}",
-            deviceId,
-            sensorTag
-        );
-        await Task.WhenAll(streamAddTask, updateSampleRateTask);
-
-        return Result.Ok();
+        return streamEntries;
     }
 
-    private Task UpdateSampleRateIfNeeded(Guid deviceId, string? tag, double value, CancellationToken cancellationToken)
+    private async Task UpdateSampleRatesIfNeeded(IReadOnlyDictionary<Guid, float> sampleRatesToUpdate, CancellationToken cancellationToken)
     {
-        if (!string.Equals(tag, SampleRateTag, StringComparison.OrdinalIgnoreCase))
-        {
-            return Task.CompletedTask;
-        }
-        if (value <= 0 || double.IsNaN(value) || double.IsInfinity(value))
-        {
-            return Task.CompletedTask;
-        }
-
-        return UpdateSampleRateAsync(deviceId, value, cancellationToken);
-    }
-
-    private async Task UpdateSampleRateAsync(Guid deviceId, double value, CancellationToken cancellationToken)
-    {
-        var device = await appContext.Devices.FindAsync([deviceId], cancellationToken);
-        if (device == null)
+        if (sampleRatesToUpdate.Count == 0)
         {
             return;
         }
 
-        device.SampleRateSeconds = (float)value;
-        await appContext.SaveChangesAsync(cancellationToken);
+        var deviceIds = sampleRatesToUpdate.Keys.ToArray();
+        var devices = await appContext.Devices.Where(device => deviceIds.Contains(device.Id)).ToListAsync(cancellationToken);
+        var hasChanges = false;
+
+        foreach (var device in devices)
+        {
+            if (!sampleRatesToUpdate.TryGetValue(device.Id, out var sampleRate))
+            {
+                continue;
+            }
+
+            if (device.SampleRateSeconds == sampleRate)
+            {
+                continue;
+            }
+
+            device.SampleRateSeconds = sampleRate;
+            hasChanges = true;
+        }
+
+        if (hasChanges)
+        {
+            await appContext.SaveChangesAsync(cancellationToken);
+        }
     }
 
     private void ObserveBackgroundTask(Task task, string message, string deviceId, string sensorTag)
@@ -189,4 +278,16 @@ public class DataPointReceived(
             TaskScheduler.Default
         );
     }
+
+    private readonly record struct ParsedDataPoint(
+        Guid DeviceId,
+        string DeviceIdString,
+        string SensorTag,
+        double Value,
+        DateTimeOffset Timestamp,
+        double? Latitude,
+        double? Longitude,
+        int? GridX,
+        int? GridY
+    );
 }

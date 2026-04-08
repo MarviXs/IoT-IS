@@ -12,6 +12,7 @@ namespace Fei.Is.Api.MqttClient;
 public class MqttClientService : IHostedService
 {
     private const int WorkerCount = 8;
+    private const int MaxMessageBatchSize = 256;
     private const string DeviceTopicPrefix = "devices/";
     private const string DataTopicSuffix = "/data";
     private const string JobFromDeviceTopicSuffix = "/job_from_device";
@@ -266,13 +267,27 @@ public class MqttClientService : IHostedService
 
     private async Task ProcessMessagesLoopAsync(CancellationToken cancellationToken)
     {
+        var messageBatch = new List<QueuedMqttMessage>(MaxMessageBatchSize);
+
         while (await _messageChannel.Reader.WaitToReadAsync(cancellationToken))
         {
-            while (_messageChannel.Reader.TryRead(out var message))
+            while (!cancellationToken.IsCancellationRequested)
             {
+                messageBatch.Clear();
+
+                while (messageBatch.Count < MaxMessageBatchSize && _messageChannel.Reader.TryRead(out var message))
+                {
+                    messageBatch.Add(message);
+                }
+
+                if (messageBatch.Count == 0)
+                {
+                    break;
+                }
+
                 try
                 {
-                    await ProcessQueuedMessageAsync(message, cancellationToken);
+                    await ProcessQueuedMessagesAsync(messageBatch, cancellationToken);
                 }
                 catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
                 {
@@ -286,35 +301,43 @@ public class MqttClientService : IHostedService
         }
     }
 
-    private async Task ProcessQueuedMessageAsync(QueuedMqttMessage message, CancellationToken cancellationToken)
+    private async Task ProcessQueuedMessagesAsync(List<QueuedMqttMessage> messages, CancellationToken cancellationToken)
     {
-        if (TryGetDeviceTopicToken(message.Topic, DataTopicSuffix, out var deviceAccessToken))
+        using var scope = _serviceScopeFactory.CreateScope();
+        List<(string DeviceAccessToken, ArraySegment<byte> Payload)>? dataMessages = null;
+
+        foreach (var message in messages)
         {
-            using var scope = _serviceScopeFactory.CreateScope();
+            if (TryGetDeviceTopicToken(message.Topic, DataTopicSuffix, out var deviceAccessToken))
+            {
+                dataMessages ??= new List<(string DeviceAccessToken, ArraySegment<byte> Payload)>(messages.Count);
+                dataMessages.Add((deviceAccessToken, message.Payload));
+            }
+            else if (TryGetDeviceTopicToken(message.Topic, JobFromDeviceTopicSuffix, out deviceAccessToken))
+            {
+                var jobStatusReceived = scope.ServiceProvider.GetRequiredService<JobStatusReceived>();
+                var result = await jobStatusReceived.Handle(deviceAccessToken, message.Payload, cancellationToken);
+                LogHandlerFailure(nameof(JobStatusReceived), result);
+            }
+            else if (message.Topic.EndsWith(SysConnectedTopicSuffix, StringComparison.Ordinal))
+            {
+                var onDeviceConnected = scope.ServiceProvider.GetRequiredService<OnDeviceConnected>();
+                var result = await onDeviceConnected.Handle(message.Payload, cancellationToken);
+                LogHandlerFailure(nameof(OnDeviceConnected), result);
+            }
+            else if (message.Topic.EndsWith(SysDisconnectedTopicSuffix, StringComparison.Ordinal))
+            {
+                var onDeviceDisconnected = scope.ServiceProvider.GetRequiredService<OnDeviceDisconnected>();
+                var result = await onDeviceDisconnected.Handle(message.Payload, cancellationToken);
+                LogHandlerFailure(nameof(OnDeviceDisconnected), result);
+            }
+        }
+
+        if (dataMessages is { Count: > 0 })
+        {
             var dataPointReceived = scope.ServiceProvider.GetRequiredService<DataPointReceived>();
-            var result = await dataPointReceived.Handle(deviceAccessToken, message.Payload, cancellationToken);
+            var result = await dataPointReceived.HandleBatch(dataMessages, cancellationToken);
             LogHandlerFailure(nameof(DataPointReceived), result);
-        }
-        else if (TryGetDeviceTopicToken(message.Topic, JobFromDeviceTopicSuffix, out deviceAccessToken))
-        {
-            using var scope = _serviceScopeFactory.CreateScope();
-            var jobStatusReceived = scope.ServiceProvider.GetRequiredService<JobStatusReceived>();
-            var result = await jobStatusReceived.Handle(deviceAccessToken, message.Payload, cancellationToken);
-            LogHandlerFailure(nameof(JobStatusReceived), result);
-        }
-        else if (message.Topic.EndsWith(SysConnectedTopicSuffix, StringComparison.Ordinal))
-        {
-            using var scope = _serviceScopeFactory.CreateScope();
-            var onDeviceConnected = scope.ServiceProvider.GetRequiredService<OnDeviceConnected>();
-            var result = await onDeviceConnected.Handle(message.Payload, cancellationToken);
-            LogHandlerFailure(nameof(OnDeviceConnected), result);
-        }
-        else if (message.Topic.EndsWith(SysDisconnectedTopicSuffix, StringComparison.Ordinal))
-        {
-            using var scope = _serviceScopeFactory.CreateScope();
-            var onDeviceDisconnected = scope.ServiceProvider.GetRequiredService<OnDeviceDisconnected>();
-            var result = await onDeviceDisconnected.Handle(message.Payload, cancellationToken);
-            LogHandlerFailure(nameof(OnDeviceDisconnected), result);
         }
     }
 
