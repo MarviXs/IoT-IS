@@ -39,6 +39,10 @@ dashboard {
 listeners.wss.default {
   enable = false
 }
+force_shutdown {
+  max_heap_size = "32MB"
+  max_mailbox_size = 10000
+}
 mqtt {
   await_rel_timeout = "300s"
   client_attrs_init = []
