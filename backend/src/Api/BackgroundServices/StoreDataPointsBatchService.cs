@@ -12,7 +12,7 @@ public class StoreDataPointsBatchService(IServiceProvider serviceProvider, ILogg
 {
     private const string StreamName = "datapoints";
     private const string GroupName = "store_data";
-    private const int IdleDelayMs = 10;
+    private const int IdleDelayMs = 100;
     private const int ReadBatchSize = 100000;
     private const int MaxPendingTimeUnclaimed = 20000;
 
@@ -141,8 +141,6 @@ public class StoreDataPointsBatchService(IServiceProvider serviceProvider, ILogg
                     {
                         await redis.Db.StreamAcknowledgeAsync(StreamName, GroupName, messageIds);
                     }
-
-                    continue;
                 }
 
                 await Task.Delay(IdleDelayMs, stoppingToken);
