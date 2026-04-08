@@ -108,40 +108,27 @@ public class DataPointReceived(
         );
 
         var lastValueJson = JsonSerializer.Serialize(latestResponse);
-        var streamAddTask = redis.Db.StreamAddAsync(DataPointsStreamName, streamEntries, maxLength: 500000);
-
-        _ = redis.Db.StringSetAsync(
-            $"device:{deviceId}:connected",
-            "1",
-            TimeSpan.FromMinutes(30),
-            flags: CommandFlags.FireAndForget
-        );
-        _ = redis.Db.StringSetAsync(
-            $"device:{deviceId}:lastSeen",
-            nowUnixSeconds,
-            flags: CommandFlags.FireAndForget
-        );
-        _ = redis.Db.StringSetAsync(
-            $"device:{deviceId}:{sensorTag}:last",
-            lastValueJson,
-            TimeSpan.FromHours(1),
-            flags: CommandFlags.FireAndForget
-        );
+        var redisBatch = redis.Db.CreateBatch();
+        var streamAddTask = redisBatch.StreamAddAsync(DataPointsStreamName, streamEntries, maxLength: 500000);
+        _ = redisBatch.StringSetAsync($"device:{deviceId}:connected", "1", TimeSpan.FromMinutes(30), flags: CommandFlags.FireAndForget);
+        _ = redisBatch.StringSetAsync($"device:{deviceId}:lastSeen", nowUnixSeconds, flags: CommandFlags.FireAndForget);
+        _ = redisBatch.StringSetAsync($"device:{deviceId}:{sensorTag}:last", lastValueJson, TimeSpan.FromHours(1), flags: CommandFlags.FireAndForget);
+        redisBatch.Execute();
         ObserveBackgroundTask(
             hubContext
-            .Clients.Group(deviceId)
-            .ReceiveSensorLastDataPoint(
-                new SensorLastDataPointDto(
-                    deviceId,
-                    sensorTag,
-                    value,
-                    datapoint.Latitude,
-                    datapoint.Longitude,
-                    datapoint.GridX,
-                    datapoint.GridY,
-                    timestamp
-                )
-            ),
+                .Clients.Group(deviceId)
+                .ReceiveSensorLastDataPoint(
+                    new SensorLastDataPointDto(
+                        deviceId,
+                        sensorTag,
+                        value,
+                        datapoint.Latitude,
+                        datapoint.Longitude,
+                        datapoint.GridX,
+                        datapoint.GridY,
+                        timestamp
+                    )
+                ),
             "SignalR notification failed for device {DeviceId} and sensor {SensorTag}",
             deviceId,
             sensorTag
@@ -192,8 +179,7 @@ public class DataPointReceived(
                     return;
                 }
 
-                var (log, logMessage, loggedDeviceId, loggedSensorTag) =
-                    ((ILogger<DataPointReceived>, string, string, string))state!;
+                var (log, logMessage, loggedDeviceId, loggedSensorTag) = ((ILogger<DataPointReceived>, string, string, string))state!;
 
                 log.LogWarning(completedTask.Exception, logMessage, loggedDeviceId, loggedSensorTag);
             },
