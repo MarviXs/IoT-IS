@@ -13,7 +13,7 @@ public class StoreDataPointsBatchService(IServiceProvider serviceProvider, ILogg
     private const string StreamName = "datapoints";
     private const string GroupName = "store_data";
     private const int IdleDelayMs = 10;
-    private const int ReadBatchSize = 10000;
+    private const int ReadBatchSize = 100000;
     private const int MaxPendingTimeUnclaimed = 20000;
 
     static Dictionary<string, string> ParseResult(StreamEntry entry) => entry.Values.ToDictionary(x => x.Name.ToString(), x => x.Value.ToString());

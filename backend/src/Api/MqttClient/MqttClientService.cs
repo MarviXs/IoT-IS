@@ -12,6 +12,11 @@ namespace Fei.Is.Api.MqttClient;
 public class MqttClientService : IHostedService
 {
     private const int WorkerCount = 8;
+    private const string DeviceTopicPrefix = "devices/";
+    private const string DataTopicSuffix = "/data";
+    private const string JobFromDeviceTopicSuffix = "/job_from_device";
+    private const string SysConnectedTopicSuffix = "/connected";
+    private const string SysDisconnectedTopicSuffix = "/disconnected";
 
     private readonly IMqttClient? _mqttClient;
     private readonly MqttClientOptions? _mqttOptions;
@@ -160,7 +165,7 @@ public class MqttClientService : IHostedService
             }
 
             var topic = args.ApplicationMessage.Topic;
-            var payload = args.ApplicationMessage.PayloadSegment.ToArray();
+            var payload = args.ApplicationMessage.PayloadSegment;
 
             await _messageChannel.Writer.WriteAsync(new QueuedMqttMessage(topic, payload), _processingCancellationTokenSource.Token);
         }
@@ -283,34 +288,59 @@ public class MqttClientService : IHostedService
 
     private async Task ProcessQueuedMessageAsync(QueuedMqttMessage message, CancellationToken cancellationToken)
     {
-        using var scope = _serviceScopeFactory.CreateScope();
-
-        var topicParts = message.Topic.Split('/');
-
-        if (MqttTopicFilterComparer.Compare(message.Topic, "devices/+/data") == MqttTopicFilterCompareResult.IsMatch)
+        if (TryGetDeviceTopicToken(message.Topic, DataTopicSuffix, out var deviceAccessToken))
         {
+            using var scope = _serviceScopeFactory.CreateScope();
             var dataPointReceived = scope.ServiceProvider.GetRequiredService<DataPointReceived>();
-            var result = await dataPointReceived.Handle(topicParts[1], message.Payload, cancellationToken);
+            var result = await dataPointReceived.Handle(deviceAccessToken, message.Payload, cancellationToken);
             LogHandlerFailure(nameof(DataPointReceived), result);
         }
-        else if (MqttTopicFilterComparer.Compare(message.Topic, "devices/+/job_from_device") == MqttTopicFilterCompareResult.IsMatch)
+        else if (TryGetDeviceTopicToken(message.Topic, JobFromDeviceTopicSuffix, out deviceAccessToken))
         {
+            using var scope = _serviceScopeFactory.CreateScope();
             var jobStatusReceived = scope.ServiceProvider.GetRequiredService<JobStatusReceived>();
-            var result = await jobStatusReceived.Handle(topicParts[1], message.Payload, cancellationToken);
+            var result = await jobStatusReceived.Handle(deviceAccessToken, message.Payload, cancellationToken);
             LogHandlerFailure(nameof(JobStatusReceived), result);
         }
-        else if (MqttTopicFilterComparer.Compare(message.Topic, "$SYS/brokers/+/clients/+/connected") == MqttTopicFilterCompareResult.IsMatch)
+        else if (message.Topic.EndsWith(SysConnectedTopicSuffix, StringComparison.Ordinal))
         {
+            using var scope = _serviceScopeFactory.CreateScope();
             var onDeviceConnected = scope.ServiceProvider.GetRequiredService<OnDeviceConnected>();
             var result = await onDeviceConnected.Handle(message.Payload, cancellationToken);
             LogHandlerFailure(nameof(OnDeviceConnected), result);
         }
-        else if (MqttTopicFilterComparer.Compare(message.Topic, "$SYS/brokers/+/clients/+/disconnected") == MqttTopicFilterCompareResult.IsMatch)
+        else if (message.Topic.EndsWith(SysDisconnectedTopicSuffix, StringComparison.Ordinal))
         {
+            using var scope = _serviceScopeFactory.CreateScope();
             var onDeviceDisconnected = scope.ServiceProvider.GetRequiredService<OnDeviceDisconnected>();
             var result = await onDeviceDisconnected.Handle(message.Payload, cancellationToken);
             LogHandlerFailure(nameof(OnDeviceDisconnected), result);
         }
+    }
+
+    private static bool TryGetDeviceTopicToken(string topic, string suffix, out string deviceAccessToken)
+    {
+        deviceAccessToken = string.Empty;
+
+        if (!topic.StartsWith(DeviceTopicPrefix, StringComparison.Ordinal) || !topic.EndsWith(suffix, StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        var tokenLength = topic.Length - DeviceTopicPrefix.Length - suffix.Length;
+        if (tokenLength <= 0)
+        {
+            return false;
+        }
+
+        var tokenStart = DeviceTopicPrefix.Length;
+        if (topic.AsSpan(tokenStart, tokenLength).Contains('/'))
+        {
+            return false;
+        }
+
+        deviceAccessToken = topic.Substring(tokenStart, tokenLength);
+        return true;
     }
 
     private async Task SubscribeToTopics(CancellationToken cancellationToken)
@@ -374,5 +404,5 @@ public class MqttClientService : IHostedService
         }
     }
 
-    private sealed record QueuedMqttMessage(string Topic, byte[] Payload);
+    private sealed record QueuedMqttMessage(string Topic, ArraySegment<byte> Payload);
 }

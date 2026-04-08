@@ -28,6 +28,11 @@ public class DataPointReceived(
 
     public async Task<Result> Handle(string deviceAccessToken, ArraySegment<byte> payload, CancellationToken cancellationToken)
     {
+        if (payload.Array == null)
+        {
+            return Result.Fail("Payload is missing");
+        }
+
         var deviceGuid = await deviceAccessTokenResolver.ResolveDeviceIdAsync(deviceAccessToken, cancellationToken);
         if (!deviceGuid.HasValue)
         {
@@ -36,7 +41,7 @@ public class DataPointReceived(
         var deviceIdGuid = deviceGuid.Value;
         var deviceId = deviceIdGuid.ToString();
 
-        var datapoint = DataPointFbs.GetRootAsDataPointFbs(new ByteBuffer(payload.ToArray()));
+        var datapoint = DataPointFbs.GetRootAsDataPointFbs(new ByteBuffer(payload.Array, payload.Offset));
         var timestamp = UnixTimestampUtils.NormalizeToDateTimeOffsetOrNow(datapoint.Ts);
         var sensorTag = datapoint.Tag;
         var value = datapoint.Value;
@@ -48,32 +53,47 @@ public class DataPointReceived(
 
         var updateSampleRateTask = UpdateSampleRateIfNeeded(deviceIdGuid, sensorTag, value, cancellationToken);
 
-        var streamEntries = new List<NameValueEntry>(8)
-        {
-            new("device_id", deviceId),
-            new("sensor_tag", sensorTag),
-            new("value", value),
-            new("timestamp", timestamp.ToUnixTimeMilliseconds())
-        };
-
+        var streamEntriesCount = 4;
         if (datapoint.Latitude.HasValue)
         {
-            streamEntries.Add(new("latitude", datapoint.Latitude.Value));
+            streamEntriesCount++;
         }
         if (datapoint.Longitude.HasValue)
         {
-            streamEntries.Add(new("longitude", datapoint.Longitude.Value));
+            streamEntriesCount++;
         }
         if (datapoint.GridX.HasValue)
         {
-            streamEntries.Add(new("grid_x", datapoint.GridX.Value));
+            streamEntriesCount++;
         }
         if (datapoint.GridY.HasValue)
         {
-            streamEntries.Add(new("grid_y", datapoint.GridY.Value));
+            streamEntriesCount++;
         }
 
-        var streamAddTask = redis.Db.StreamAddAsync(DataPointsStreamName, streamEntries.ToArray(), maxLength: 500000);
+        var streamEntries = new NameValueEntry[streamEntriesCount];
+        var entryIndex = 0;
+        streamEntries[entryIndex++] = new("device_id", deviceId);
+        streamEntries[entryIndex++] = new("sensor_tag", sensorTag);
+        streamEntries[entryIndex++] = new("value", value);
+        streamEntries[entryIndex++] = new("timestamp", timestamp.ToUnixTimeMilliseconds());
+
+        if (datapoint.Latitude.HasValue)
+        {
+            streamEntries[entryIndex++] = new("latitude", datapoint.Latitude.Value);
+        }
+        if (datapoint.Longitude.HasValue)
+        {
+            streamEntries[entryIndex++] = new("longitude", datapoint.Longitude.Value);
+        }
+        if (datapoint.GridX.HasValue)
+        {
+            streamEntries[entryIndex++] = new("grid_x", datapoint.GridX.Value);
+        }
+        if (datapoint.GridY.HasValue)
+        {
+            streamEntries[entryIndex++] = new("grid_y", datapoint.GridY.Value);
+        }
 
         var nowUnixSeconds = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
 
@@ -87,14 +107,16 @@ public class DataPointReceived(
         );
 
         var lastValueJson = JsonSerializer.Serialize(latestResponse);
-        var connectedTask = redis.Db.StringSetAsync($"device:{deviceId}:connected", "1", TimeSpan.FromMinutes(30), flags: CommandFlags.FireAndForget);
-        var lastSeenTask = redis.Db.StringSetAsync($"device:{deviceId}:lastSeen", nowUnixSeconds, flags: CommandFlags.FireAndForget);
-        var lastValueTask = redis.Db.StringSetAsync(
+        var batch = redis.Db.CreateBatch();
+        var streamAddTask = batch.StreamAddAsync(DataPointsStreamName, streamEntries, maxLength: 500000);
+        var connectedTask = batch.StringSetAsync($"device:{deviceId}:connected", "1", TimeSpan.FromMinutes(30));
+        var lastSeenTask = batch.StringSetAsync($"device:{deviceId}:lastSeen", nowUnixSeconds);
+        var lastValueTask = batch.StringSetAsync(
             $"device:{deviceId}:{sensorTag}:last",
             lastValueJson,
-            TimeSpan.FromHours(1),
-            flags: CommandFlags.FireAndForget
+            TimeSpan.FromHours(1)
         );
+        batch.Execute();
         var notifyTask = hubContext
             .Clients.Group(deviceId)
             .ReceiveSensorLastDataPoint(
