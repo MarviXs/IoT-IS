@@ -20,7 +20,8 @@ public class DataPointReceived(
     AppDbContext appContext,
     DeviceAccessTokenResolver deviceAccessTokenResolver,
     RedisService redis,
-    IHubContext<IsHub, INotificationsClient> hubContext
+    IHubContext<IsHub, INotificationsClient> hubContext,
+    ILogger<DataPointReceived> logger
 )
 {
     private const string DataPointsStreamName = "datapoints";
@@ -107,17 +108,27 @@ public class DataPointReceived(
         );
 
         var lastValueJson = JsonSerializer.Serialize(latestResponse);
-        var batch = redis.Db.CreateBatch();
-        var streamAddTask = batch.StreamAddAsync(DataPointsStreamName, streamEntries, maxLength: 500000);
-        var connectedTask = batch.StringSetAsync($"device:{deviceId}:connected", "1", TimeSpan.FromMinutes(30));
-        var lastSeenTask = batch.StringSetAsync($"device:{deviceId}:lastSeen", nowUnixSeconds);
-        var lastValueTask = batch.StringSetAsync(
+        var streamAddTask = redis.Db.StreamAddAsync(DataPointsStreamName, streamEntries, maxLength: 500000);
+
+        _ = redis.Db.StringSetAsync(
+            $"device:{deviceId}:connected",
+            "1",
+            TimeSpan.FromMinutes(30),
+            flags: CommandFlags.FireAndForget
+        );
+        _ = redis.Db.StringSetAsync(
+            $"device:{deviceId}:lastSeen",
+            nowUnixSeconds,
+            flags: CommandFlags.FireAndForget
+        );
+        _ = redis.Db.StringSetAsync(
             $"device:{deviceId}:{sensorTag}:last",
             lastValueJson,
-            TimeSpan.FromHours(1)
+            TimeSpan.FromHours(1),
+            flags: CommandFlags.FireAndForget
         );
-        batch.Execute();
-        var notifyTask = hubContext
+        ObserveBackgroundTask(
+            hubContext
             .Clients.Group(deviceId)
             .ReceiveSensorLastDataPoint(
                 new SensorLastDataPointDto(
@@ -130,8 +141,12 @@ public class DataPointReceived(
                     datapoint.GridY,
                     timestamp
                 )
-            );
-        await Task.WhenAll(streamAddTask, updateSampleRateTask, connectedTask, lastSeenTask, lastValueTask, notifyTask);
+            ),
+            "SignalR notification failed for device {DeviceId} and sensor {SensorTag}",
+            deviceId,
+            sensorTag
+        );
+        await Task.WhenAll(streamAddTask, updateSampleRateTask);
 
         return Result.Ok();
     }
@@ -160,5 +175,32 @@ public class DataPointReceived(
 
         device.SampleRateSeconds = (float)value;
         await appContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private void ObserveBackgroundTask(Task task, string message, string deviceId, string sensorTag)
+    {
+        if (task.IsCompletedSuccessfully)
+        {
+            return;
+        }
+
+        _ = task.ContinueWith(
+            static (completedTask, state) =>
+            {
+                if (completedTask.IsCanceled)
+                {
+                    return;
+                }
+
+                var (log, logMessage, loggedDeviceId, loggedSensorTag) =
+                    ((ILogger<DataPointReceived>, string, string, string))state!;
+
+                log.LogWarning(completedTask.Exception, logMessage, loggedDeviceId, loggedSensorTag);
+            },
+            (logger, message, deviceId, sensorTag),
+            CancellationToken.None,
+            TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+            TaskScheduler.Default
+        );
     }
 }
