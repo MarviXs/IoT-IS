@@ -96,7 +96,6 @@ public class Startup(IConfiguration configuration)
         services.AddTransient<JobScheduleExecutionJob>();
         services.AddScoped<TokenService>();
         services.AddSingleton<RedisService>();
-        services.AddSingleton<RecentDeviceIdCache>();
         services.AddScoped<DeviceAccessTokenResolver>();
 
         services.AddSingleton<MqttClientService>();
