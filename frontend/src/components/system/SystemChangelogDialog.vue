@@ -7,6 +7,13 @@
       </q-card-section>
       <q-separator />
       <q-card-section class="column q-gutter-sm">
+        <div class="text-subtitle1">v1.4</div>
+        <ul class="q-pl-md q-my-none">
+          <li>Optimized datapoint ingestion performance</li>
+        </ul>
+      </q-card-section>
+      <q-separator spaced inset />
+      <q-card-section class="column q-gutter-sm">
         <div class="text-subtitle1">v1.3</div>
         <ul class="q-pl-md q-my-none">
           <li>Hide stale latest datapoint values after the device offline window option</li>
