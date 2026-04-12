@@ -42,4 +42,14 @@ public class GetDeviceByIdTests(IntegrationTestWebAppFactory factory) : BaseInte
         deviceResponse.DataPointRetentionDays.Should().Be(device.DataPointRetentionDays);
         deviceResponse.SampleRateSeconds.Should().Be(device.SampleRateSeconds);
     }
+
+    [Fact]
+    public async Task GetDeviceById_ShouldReturnNotFound_WhenDeviceDoesNotExist()
+    {
+        // Act
+        var response = await Client.GetAsync($"devices/{Guid.NewGuid()}");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
 }

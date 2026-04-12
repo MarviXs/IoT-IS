@@ -30,4 +30,34 @@ public class DeleteDeviceTests(IntegrationTestWebAppFactory factory) : BaseInteg
         var deletedDevice = await AppDbContext.Devices.FindAsync(device.Id);
         deletedDevice.Should().BeNull();
     }
+
+    [Fact]
+    public async Task DeleteDevice_ShouldReturnForbidden_WhenDeviceIsSyncedFromEdge()
+    {
+        // Arrange
+        var deviceTemplate = new DeviceTemplateFake(factory.DefaultUserId).Generate();
+        await AppDbContext.DeviceTemplates.AddAsync(deviceTemplate);
+        await AppDbContext.SaveChangesAsync();
+
+        var device = new DeviceFake(factory.DefaultUserId, deviceTemplate.Id).Generate();
+        device.SyncedFromEdge = true;
+        await AppDbContext.Devices.AddAsync(device);
+        await AppDbContext.SaveChangesAsync();
+
+        // Act
+        var response = await Client.DeleteAsync($"devices/{device.Id}");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task DeleteDevice_ShouldReturnNotFound_WhenDeviceDoesNotExist()
+    {
+        // Act
+        var response = await Client.DeleteAsync($"devices/{Guid.NewGuid()}");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
 }

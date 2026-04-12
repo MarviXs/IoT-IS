@@ -54,6 +54,19 @@ public class CreateCommandTests(IntegrationTestWebAppFactory factory) : BaseInte
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
+
+    [Fact]
+    public async Task CreateCommand_ShouldReturnNotFound_WhenTemplateDoesNotExist()
+    {
+        // Arrange
+        var commandRequest = new CreateCommandRequestFake(Guid.NewGuid()).Generate();
+
+        // Act
+        var response = await Client.PostAsJsonAsync("commands", commandRequest);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
 }
 
 public class CreateCommandRequestFake : Faker<CreateCommand.Request>

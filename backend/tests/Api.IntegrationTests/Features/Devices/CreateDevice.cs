@@ -36,6 +36,50 @@ public class CreateDeviceTests(IntegrationTestWebAppFactory factory) : BaseInteg
         createdDevice.DataPointRetentionDays.Should().Be(deviceRequest.DataPointRetentionDays);
         createdDevice.SampleRateSeconds.Should().Be(deviceRequest.SampleRateSeconds);
     }
+
+    [Fact]
+    public async Task CreateDevice_ShouldReturnValidationProblem_WhenAccessTokenAlreadyExists()
+    {
+        // Arrange
+        var deviceTemplate = new DeviceTemplateFake(factory.DefaultUserId).Generate();
+        AppDbContext.DeviceTemplates.Add(deviceTemplate);
+        await AppDbContext.SaveChangesAsync();
+
+        var existingDevice = new DeviceFake(factory.DefaultUserId, deviceTemplate.Id).Generate();
+        AppDbContext.Devices.Add(existingDevice);
+        await AppDbContext.SaveChangesAsync();
+
+        var deviceRequest = new CreateDeviceRequestFake(deviceTemplate.Id).Generate() with
+        {
+            AccessToken = existingDevice.AccessToken
+        };
+
+        // Act
+        var response = await Client.PostAsJsonAsync("devices", deviceRequest);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task CreateDevice_ShouldReturnValidationProblem_WhenSampleRateIsNotPositive()
+    {
+        // Arrange
+        var deviceTemplate = new DeviceTemplateFake(factory.DefaultUserId).Generate();
+        AppDbContext.DeviceTemplates.Add(deviceTemplate);
+        await AppDbContext.SaveChangesAsync();
+
+        var deviceRequest = new CreateDeviceRequestFake(deviceTemplate.Id).Generate() with
+        {
+            SampleRateSeconds = 0
+        };
+
+        // Act
+        var response = await Client.PostAsJsonAsync("devices", deviceRequest);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
 }
 
 public class CreateDeviceRequestFake : Faker<CreateDevice.Request>
