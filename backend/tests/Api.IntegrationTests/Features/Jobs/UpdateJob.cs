@@ -3,7 +3,6 @@ using System.Net.Http.Json;
 using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Features.Jobs.Commands;
-using Fei.Is.Api.Features.Jobs.Queries;
 using Fei.Is.Api.IntegrationTests.Common;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
@@ -11,22 +10,8 @@ using Microsoft.EntityFrameworkCore;
 namespace Fei.Is.Api.IntegrationTests.Features.Jobs;
 
 [Collection("IntegrationTests")]
-public class JobEndpointsTests(IntegrationTestWebAppFactory factory) : BaseIntegrationTest(factory)
+public class UpdateJobTests(IntegrationTestWebAppFactory factory) : BaseIntegrationTest(factory)
 {
-    [Fact]
-    public async Task GetJobById_ShouldReturnJob()
-    {
-        var job = await SeedJobWithCommand();
-
-        var response = await Client.GetAsync($"jobs/{job.Id}");
-
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var body = await response.Content.ReadFromJsonAsync<GetJobById.Response>();
-        body.Should().NotBeNull();
-        body!.Id.Should().Be(job.Id);
-        body.Commands.Should().HaveCount(1);
-    }
-
     [Fact]
     public async Task UpdateJob_ShouldUpdateJob()
     {

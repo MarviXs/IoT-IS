@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Fei.Is.Api.IntegrationTests.Features.DataPoints;
 
 [Collection("IntegrationTests")]
-public class DataPointEndpointsTests(IntegrationTestWebAppFactory factory) : BaseIntegrationTest(factory)
+public class CreateDataPointsTests(IntegrationTestWebAppFactory factory) : BaseIntegrationTest(factory)
 {
     [Fact]
     public async Task CreateDataPoints_ShouldReturnNoContent_AndUpdateSampleRate()

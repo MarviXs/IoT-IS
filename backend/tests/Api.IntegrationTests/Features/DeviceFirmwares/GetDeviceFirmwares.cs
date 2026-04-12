@@ -7,7 +7,7 @@ using FluentAssertions;
 namespace Fei.Is.Api.IntegrationTests.Features.DeviceFirmwares;
 
 [Collection("IntegrationTests")]
-public class DeviceFirmwareEndpointsTests(IntegrationTestWebAppFactory factory) : BaseIntegrationTest(factory)
+public class GetDeviceFirmwaresTests(IntegrationTestWebAppFactory factory) : BaseIntegrationTest(factory)
 {
     [Fact]
     public async Task GetDeviceFirmwares_ShouldReturnFirmwares()
@@ -25,23 +25,5 @@ public class DeviceFirmwareEndpointsTests(IntegrationTestWebAppFactory factory) 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var body = await response.Content.ReadFromJsonAsync<List<GetDeviceFirmwares.Response>>();
         body.Should().ContainSingle(x => x.Id == firmware.Id);
-    }
-
-    [Fact]
-    public async Task GetDeviceFirmwareById_ShouldReturnFirmware()
-    {
-        var template = new DeviceTemplateFake(factory.DefaultUserId).Generate();
-        await AppDbContext.DeviceTemplates.AddAsync(template);
-        await AppDbContext.SaveChangesAsync();
-
-        var firmware = new DeviceFirmwareFake(template.Id).Generate();
-        await AppDbContext.DeviceFirmwares.AddAsync(firmware);
-        await AppDbContext.SaveChangesAsync();
-
-        var response = await Client.GetAsync($"device-templates/{template.Id}/firmwares/{firmware.Id}");
-
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var body = await response.Content.ReadFromJsonAsync<GetDeviceFirmwareById.Response>();
-        body!.Id.Should().Be(firmware.Id);
     }
 }
