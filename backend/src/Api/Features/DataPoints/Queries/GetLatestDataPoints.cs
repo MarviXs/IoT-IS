@@ -6,6 +6,7 @@ using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
+using Fei.Is.Api.Features.DataPoints.Services;
 using Fei.Is.Api.Features.Devices.Extensions;
 using Fei.Is.Api.Redis;
 using FluentResults;
@@ -119,24 +120,14 @@ public static class GetLatestDataPoints
                 }
             }
 
-            var query = timescaleContext
-                .DataPoints.Where(dp => dp.DeviceId == message.DeviceId && dp.SensorTag == message.SensorTag);
-
-            if (from.HasValue)
-            {
-                var fromValue = from.Value;
-                query = query.Where(dp => dp.TimeStamp >= fromValue);
-            }
-
-            if (to.HasValue)
-            {
-                var toValue = to.Value;
-                query = query.Where(dp => dp.TimeStamp <= toValue);
-            }
-
-            var latestDataPoint = await query
-                .OrderByDescending(dp => dp.TimeStamp)
-                .FirstOrDefaultAsync(cancellationToken);
+            var latestDataPoint = await LatestDataPointReader.GetLatestAsync(
+                timescaleContext,
+                message.DeviceId,
+                message.SensorTag,
+                from,
+                to,
+                cancellationToken
+            );
             if (latestDataPoint == null)
             {
                 return Result.Fail(new NotFoundError());

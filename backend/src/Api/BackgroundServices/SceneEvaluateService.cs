@@ -8,6 +8,7 @@ using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Features.DataPoints.Queries;
+using Fei.Is.Api.Features.DataPoints.Services;
 using Fei.Is.Api.Features.Jobs.Services;
 using Fei.Is.Api.Features.Scenes.Services;
 using Fei.Is.Api.Redis;
@@ -156,7 +157,7 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
                 if (!incomingDataPoints.TryGetValue(key, out var dataPoint) && !resolvedDataPoints.TryGetValue(key, out dataPoint))
                 {
                     dataPoint = await GetDataPointFromCache(trigger, redis);
-                    dataPoint ??= await GetDataPointFromDb(trigger, timescale);
+                    dataPoint ??= await GetDataPointFromDb(trigger, timescale, cancellationToken);
                     resolvedDataPoints[key] = dataPoint;
                 }
 
@@ -378,11 +379,19 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
         };
     }
 
-    private static async Task<DataPoint?> GetDataPointFromDb(SceneSensorTrigger trigger, TimeScaleDbContext timescale)
+    private static async Task<DataPoint?> GetDataPointFromDb(
+        SceneSensorTrigger trigger,
+        TimeScaleDbContext timescale,
+        CancellationToken cancellationToken
+    )
     {
-        return await timescale
-            .DataPoints.Where(dp => dp.DeviceId == trigger.DeviceId && dp.SensorTag == trigger.SensorTag)
-            .OrderByDescending(dp => dp.TimeStamp)
-            .FirstOrDefaultAsync();
+        return await LatestDataPointReader.GetLatestAsync(
+            timescale,
+            trigger.DeviceId,
+            trigger.SensorTag,
+            null,
+            null,
+            cancellationToken
+        );
     }
 }
