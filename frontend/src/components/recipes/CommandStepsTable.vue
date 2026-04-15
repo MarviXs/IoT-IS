@@ -1,6 +1,6 @@
 <template>
   <q-table
-    v-model:pagination.sync="pagination"
+    v-model:pagination="pagination"
     :rows="commands"
     :columns="availableCommandsColumns"
     :loading="isLoadingCommands"
@@ -12,6 +12,7 @@
     :rows-per-page-label="t('table.rows_per_page_label')"
     :rows-per-page-options="[20, 50, 100, 0]"
     class="shadow"
+    @request="(requestProp) => getCommands(requestProp.pagination)"
   >
     <template #body-cell-actions="propsActions">
       <q-td auto-width :props="propsActions">
@@ -53,6 +54,15 @@ const pagination = ref<PaginationClient>({
 const commandsPaginated = ref<CommandsResponse>();
 const commands = computed(() => commandsPaginated.value?.items ?? []);
 const isLoadingCommands = ref(false);
+
+function resolvePageSize(paginationReq: PaginationTable) {
+  if (paginationReq.rowsPerPage !== 0) {
+    return paginationReq.rowsPerPage;
+  }
+
+  return pagination.value.rowsNumber > 0 ? pagination.value.rowsNumber : 1000;
+}
+
 async function getCommands(paginationReq: PaginationTable) {
   const query: CommandsQueryParams = {
     DeviceTemplateId: props.deviceTemplateId,
@@ -60,7 +70,7 @@ async function getCommands(paginationReq: PaginationTable) {
     SortBy: paginationReq.sortBy,
     Descending: paginationReq.descending,
     PageNumber: paginationReq.page,
-    PageSize: paginationReq.rowsPerPage,
+    PageSize: resolvePageSize(paginationReq),
   };
 
   isLoadingCommands.value = true;
@@ -76,8 +86,8 @@ async function getCommands(paginationReq: PaginationTable) {
   pagination.value.rowsNumber = data.totalCount ?? 0;
   pagination.value.sortBy = paginationReq.sortBy;
   pagination.value.descending = paginationReq.descending;
-  pagination.value.page = paginationReq.page;
-  pagination.value.rowsPerPage = paginationReq.rowsPerPage;
+  pagination.value.page = data.currentPage;
+  pagination.value.rowsPerPage = paginationReq.rowsPerPage === 0 ? 0 : data.pageSize;
 }
 getCommands(pagination.value);
 

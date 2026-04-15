@@ -11,6 +11,7 @@
     :rows-per-page-label="t('table.rows_per_page_label')"
     :rows-per-page-options="[20, 50, 100, 0]"
     class="shadow"
+    @request="(requestProp) => getRecipes(requestProp.pagination)"
   >
     <template #body-cell-actions="propsActions">
       <q-td auto-width :props="propsActions">
@@ -79,13 +80,22 @@ const pagination = ref<PaginationClient>({
 const recipesPaginated = ref<RecipesResponse>();
 const recipes = computed(() => recipesPaginated.value?.items ?? []);
 const isLoadingRecipes = ref(false);
+
+function resolvePageSize(paginationReq: PaginationTable) {
+  if (paginationReq.rowsPerPage !== 0) {
+    return paginationReq.rowsPerPage;
+  }
+
+  return pagination.value.rowsNumber > 0 ? pagination.value.rowsNumber : 1000;
+}
+
 async function getRecipes(paginationReq: PaginationTable) {
   const paginationQuery: RecipesQueryParams = {
     DeviceTemplateId: props.deviceTemplateId,
     SortBy: paginationReq.sortBy,
     Descending: paginationReq.descending,
     PageNumber: paginationReq.page,
-    PageSize: paginationReq.rowsPerPage,
+    PageSize: resolvePageSize(paginationReq),
   };
 
   isLoadingRecipes.value = true;
@@ -101,8 +111,8 @@ async function getRecipes(paginationReq: PaginationTable) {
   pagination.value.rowsNumber = data.totalCount ?? 0;
   pagination.value.sortBy = paginationReq.sortBy;
   pagination.value.descending = paginationReq.descending;
-  pagination.value.page = paginationReq.page;
-  pagination.value.rowsPerPage = paginationReq.rowsPerPage;
+  pagination.value.page = data.currentPage;
+  pagination.value.rowsPerPage = paginationReq.rowsPerPage === 0 ? 0 : data.pageSize;
 }
 getRecipes(pagination.value);
 
