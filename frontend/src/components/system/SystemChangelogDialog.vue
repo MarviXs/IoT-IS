@@ -7,6 +7,14 @@
       </q-card-section>
       <q-separator />
       <q-card-section class="column q-gutter-sm">
+        <div class="text-subtitle1">v1.5</div>
+        <ul class="q-pl-md q-my-none">
+          <li>Fixed paging of commands on the recipe page</li>
+          <li>Added a clearer error message when deleting a command used in recipes</li>
+        </ul>
+      </q-card-section>
+      <q-separator spaced inset />
+      <q-card-section class="column q-gutter-sm">
         <div class="text-subtitle1">v1.4</div>
         <ul class="q-pl-md q-my-none">
           <li>Optimized datapoint ingestion performance</li>
