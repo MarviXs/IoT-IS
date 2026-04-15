@@ -754,7 +754,11 @@
       "update_success": "Command updated!",
       "update_failed": "Updating command failed!",
       "delete_success": "Command deleted!",
-      "delete_failed": "Deleting command failed!"
+      "delete_failed": "Deleting command failed!",
+      "delete_used_in_recipe": "Cannot delete command because it is used in recipe: {names}.",
+      "delete_used_in_recipes": "Cannot delete command because it is used in recipes: {names}.",
+      "delete_used_in_recipe_count": "Cannot delete command because it is used in {count} recipe.",
+      "delete_used_in_recipes_count": "Cannot delete command because it is used in {count} recipes."
     }
   },
   "collection": {

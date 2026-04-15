@@ -25,10 +25,22 @@ public static class DeleteCommand
                         var command = new Command(id, user);
 
                         var result = await mediator.Send(command);
+                        var commandUsedInRecipesError = result.Errors.OfType<CommandUsedInRecipesError>().FirstOrDefault();
 
                         if (result.HasError<NotFoundError>())
                         {
                             return TypedResults.NotFound();
+                        }
+                        if (commandUsedInRecipesError != null)
+                        {
+                            return TypedResults.Problem(
+                                detail: commandUsedInRecipesError.Message,
+                                extensions: new Dictionary<string, object?>
+                                {
+                                    ["recipeUsageCount"] = commandUsedInRecipesError.RecipeUsageCount,
+                                    ["recipeNames"] = commandUsedInRecipesError.RecipeNames
+                                }
+                            );
                         }
                         if (result.HasError<BadRequestError>())
                         {
@@ -50,6 +62,21 @@ public static class DeleteCommand
 
     public record Command(Guid CommandId, ClaimsPrincipal User) : IRequest<Result<Guid>>;
 
+    public sealed class CommandUsedInRecipesError : BadRequestError
+    {
+        public CommandUsedInRecipesError(string commandName, IReadOnlyList<string> recipeNames)
+            : base(
+                $"Cannot delete command \"{commandName}\" because it is used in {(recipeNames.Count == 1 ? "recipe" : "recipes")}: {string.Join(", ", recipeNames)}."
+            )
+        {
+            RecipeNames = recipeNames;
+        }
+
+        public int RecipeUsageCount => RecipeNames.Count;
+
+        public IReadOnlyList<string> RecipeNames { get; }
+    }
+
     public sealed class Handler(AppDbContext context) : IRequestHandler<Command, Result<Guid>>
     {
         public async Task<Result<Guid>> Handle(Command message, CancellationToken cancellationToken)
@@ -69,15 +96,15 @@ public static class DeleteCommand
             }
             if (command.RecipeSteps.Any())
             {
-                var firstRecipeStep = command.RecipeSteps.FirstOrDefault();
-                if (firstRecipeStep != null && firstRecipeStep.Recipe != null)
-                {
-                    return Result.Fail(new BadRequestError($"Command {command.Name} is used in recipe {firstRecipeStep.Recipe.Name}"));
-                }
-                else
-                {
-                    return Result.Fail(new BadRequestError($"Command {command.Name} is used in an invalid recipe"));
-                }
+                var recipeNames = command.RecipeSteps
+                    .Where(step => step.Recipe != null)
+                    .Select(step => step.Recipe!.Name.Trim())
+                    .Where(name => !string.IsNullOrWhiteSpace(name))
+                    .Distinct()
+                    .Order()
+                    .ToArray();
+
+                return Result.Fail(new CommandUsedInRecipesError(command.Name, recipeNames));
             }
 
             context.Commands.Remove(command);

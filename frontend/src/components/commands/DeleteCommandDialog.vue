@@ -6,6 +6,7 @@
 </template>
 
 <script setup lang="ts">
+import type { ProblemDetails } from '@/api/types/ProblemDetails';
 import { handleError } from '@/utils/error-handler';
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -25,6 +26,13 @@ const emit = defineEmits(['onDeleted']);
 const { t } = useI18n();
 
 const isDeleteInProgress = ref(false);
+
+type CommandDeleteProblemDetails = ProblemDetails & {
+  detail?: string | null;
+  recipeUsageCount?: number;
+  recipeNames?: string[];
+};
+
 async function handleDelete() {
   isDeleteInProgress.value = true;
   const { error } = await CommandService.deleteCommand(props.commandId);
@@ -32,6 +40,26 @@ async function handleDelete() {
   isDialogOpen.value = false;
 
   if (error) {
+    const deleteError = error as CommandDeleteProblemDetails;
+    if (Array.isArray(deleteError.recipeNames) && deleteError.recipeNames.length > 0) {
+      const names = deleteError.recipeNames.join(', ');
+      const key =
+        deleteError.recipeNames.length === 1
+          ? 'command.toasts.delete_used_in_recipe'
+          : 'command.toasts.delete_used_in_recipes';
+      toast.error(t(key, { names }));
+      return;
+    }
+
+    if (typeof deleteError.recipeUsageCount === 'number' && deleteError.recipeUsageCount > 0) {
+      const key =
+        deleteError.recipeUsageCount === 1
+          ? 'command.toasts.delete_used_in_recipe_count'
+          : 'command.toasts.delete_used_in_recipes_count';
+      toast.error(t(key, { count: deleteError.recipeUsageCount }));
+      return;
+    }
+
     handleError(error, t('command.toasts.delete_failed'));
     return;
   }

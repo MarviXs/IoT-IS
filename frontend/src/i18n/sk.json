@@ -726,7 +726,11 @@
       "update_success": "Príkaz bol aktualizovaný!",
       "update_failed": "Aktualizácia príkazu zlyhala!",
       "delete_success": "Príkaz bol vymazaný!",
-      "delete_failed": "Vymazanie príkazu zlyhalo!"
+      "delete_failed": "Vymazanie príkazu zlyhalo!",
+      "delete_used_in_recipe": "Príkaz nie je možné vymazať, pretože sa používa v recepte: {names}.",
+      "delete_used_in_recipes": "Príkaz nie je možné vymazať, pretože sa používa v receptoch: {names}.",
+      "delete_used_in_recipe_count": "Príkaz nie je možné vymazať, pretože sa používa v {count} recepte.",
+      "delete_used_in_recipes_count": "Príkaz nie je možné vymazať, pretože sa používa v {count} receptoch."
     }
   },
   "collection": {
