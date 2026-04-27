@@ -2979,6 +2979,8 @@ export interface components {
             displayName: string;
             name: string;
             params: number[];
+            /** Format: uuid */
+            id?: string | null;
         };
         "Fei.Is.Api.Features.DeviceTemplates.Commands.ImportDeviceTemplate.DeviceControlRequest": {
             name: string;
@@ -3005,6 +3007,10 @@ export interface components {
             cycles: number;
             /** Format: int32 */
             order: number;
+            /** Format: uuid */
+            commandId?: string | null;
+            commandDisplayName?: string | null;
+            commandParams?: number[] | null;
         };
         "Fei.Is.Api.Features.DeviceTemplates.Commands.ImportDeviceTemplate.Request": {
             templateData: components["schemas"]["Fei.Is.Api.Features.DeviceTemplates.Commands.ImportDeviceTemplate.TemplateRequest"];

@@ -91,7 +91,10 @@ public static class ExportDeviceTemplate
             }
 
             var commands = template
-                .Commands.Select(command => new ImportDeviceTemplate.DeviceCommandRequest(command.DisplayName, command.Name, command.Params))
+                .Commands.Select(command => new ImportDeviceTemplate.DeviceCommandRequest(command.DisplayName, command.Name, command.Params)
+                {
+                    Id = command.Id
+                })
                 .ToList();
 
             var sensors = template
@@ -121,7 +124,13 @@ public static class ExportDeviceTemplate
                     recipe.Name,
                     recipe
                         .Steps?.OrderBy(step => step.Order)
-                        .Select(step => new ImportDeviceTemplate.RecipeStepRequest(step.Command?.Name, step.Subrecipe?.Name, step.Cycles, step.Order))
+                        .Select(
+                            step =>
+                                new ImportDeviceTemplate.RecipeStepRequest(null, step.Subrecipe?.Name, step.Cycles, step.Order)
+                                {
+                                    CommandId = step.CommandId
+                                }
+                        )
                         .ToList()
                 ))
                 .ToList();

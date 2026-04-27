@@ -16,7 +16,10 @@ namespace Fei.Is.Api.Features.DeviceTemplates.Commands;
 
 public static class ImportDeviceTemplate
 {
-    public record DeviceCommandRequest(string DisplayName, string Name, List<double> Params);
+    public record DeviceCommandRequest(string DisplayName, string Name, List<double> Params)
+    {
+        public Guid? Id { get; init; }
+    }
 
     public record SensorRequest(string Tag, string Name, string? Unit, int? AccuracyDecimals, string? Group);
 
@@ -33,7 +36,12 @@ public static class ImportDeviceTemplate
         int Order
     );
 
-    public record RecipeStepRequest(string? CommandName, string? SubrecipeName, int Cycles, int Order);
+    public record RecipeStepRequest(string? CommandName, string? SubrecipeName, int Cycles, int Order)
+    {
+        public Guid? CommandId { get; init; }
+        public string? CommandDisplayName { get; init; }
+        public List<double>? CommandParams { get; init; }
+    }
 
     public record RecipeRequest(string Name, List<RecipeStepRequest>? Steps = null);
 
@@ -110,7 +118,8 @@ public static class ImportDeviceTemplate
             await context.DeviceTemplates.AddAsync(template, cancellationToken);
             await context.SaveChangesAsync(cancellationToken);
 
-            var commandsByName = new Dictionary<string, DataCommand>(StringComparer.OrdinalIgnoreCase);
+            var importedCommands = new List<DataCommand>();
+            var importedCommandsByPayloadId = new Dictionary<Guid, DataCommand>();
             foreach (var command in message.Request.TemplateData.Commands)
             {
                 var commandName = command.Name.Trim();
@@ -123,7 +132,16 @@ public static class ImportDeviceTemplate
                 };
 
                 await context.Commands.AddAsync(deviceCommand, cancellationToken);
-                commandsByName[commandName] = deviceCommand;
+                importedCommands.Add(deviceCommand);
+                if (command.Id.HasValue)
+                {
+                    if (importedCommandsByPayloadId.ContainsKey(command.Id.Value))
+                    {
+                        return Result.Fail(new ValidationError(nameof(DeviceCommandRequest.Id), "Command IDs must be unique"));
+                    }
+
+                    importedCommandsByPayloadId[command.Id.Value] = deviceCommand;
+                }
             }
 
             await context.SaveChangesAsync(cancellationToken);
@@ -204,8 +222,9 @@ public static class ImportDeviceTemplate
                     {
                         var commandName = stepRequest.CommandName?.Trim();
                         var subrecipeName = stepRequest.SubrecipeName?.Trim();
+                        var hasCommandReference = stepRequest.CommandId.HasValue || !string.IsNullOrWhiteSpace(commandName);
 
-                        if (!string.IsNullOrWhiteSpace(commandName) && !string.IsNullOrWhiteSpace(subrecipeName))
+                        if (hasCommandReference && !string.IsNullOrWhiteSpace(subrecipeName))
                         {
                             return Result.Fail(
                                 new ValidationError(nameof(RecipeStepRequest), "Step cannot reference both a command and a subrecipe")
@@ -213,9 +232,49 @@ public static class ImportDeviceTemplate
                         }
 
                         Guid? commandId = null;
-                        if (!string.IsNullOrWhiteSpace(commandName))
+                        if (stepRequest.CommandId.HasValue)
                         {
-                            if (!commandsByName.TryGetValue(commandName, out var command))
+                            if (!importedCommandsByPayloadId.TryGetValue(stepRequest.CommandId.Value, out var command))
+                            {
+                                return Result.Fail(
+                                    new ValidationError(
+                                        nameof(RecipeStepRequest.CommandId),
+                                        $"Command ID '{stepRequest.CommandId}' must be defined in the template commands"
+                                    )
+                                );
+                            }
+
+                            commandId = command.Id;
+                        }
+                        else if (!string.IsNullOrWhiteSpace(commandName))
+                        {
+                            var matchingCommands = importedCommands
+                                .Where(command => string.Equals(command.Name, commandName, StringComparison.OrdinalIgnoreCase))
+                                .ToList();
+
+                            var commandDisplayName = stepRequest.CommandDisplayName?.Trim();
+                            if (!string.IsNullOrWhiteSpace(commandDisplayName))
+                            {
+                                matchingCommands = matchingCommands
+                                    .Where(
+                                        command =>
+                                            string.Equals(
+                                                command.DisplayName.Trim(),
+                                                commandDisplayName,
+                                                StringComparison.OrdinalIgnoreCase
+                                            )
+                                    )
+                                    .ToList();
+                            }
+
+                            if (stepRequest.CommandParams != null)
+                            {
+                                matchingCommands = matchingCommands
+                                    .Where(command => command.Params.SequenceEqual(stepRequest.CommandParams))
+                                    .ToList();
+                            }
+
+                            if (matchingCommands.Count == 0)
                             {
                                 return Result.Fail(
                                     new ValidationError(
@@ -225,7 +284,12 @@ public static class ImportDeviceTemplate
                                 );
                             }
 
-                            commandId = command.Id;
+                            if (matchingCommands.Count > 1)
+                            {
+                                matchingCommands = [matchingCommands[0]];
+                            }
+
+                            commandId = matchingCommands[0].Id;
                         }
 
                         Guid? subrecipeId = null;
@@ -399,7 +463,11 @@ public static class ImportDeviceTemplate
                                 .ChildRules(step =>
                                 {
                                     step.RuleFor(s => s)
-                                        .Must(s => string.IsNullOrWhiteSpace(s.CommandName) != string.IsNullOrWhiteSpace(s.SubrecipeName))
+                                        .Must(
+                                            s =>
+                                                (s.CommandId.HasValue || !string.IsNullOrWhiteSpace(s.CommandName))
+                                                != !string.IsNullOrWhiteSpace(s.SubrecipeName)
+                                        )
                                         .WithMessage("Step must reference either a command or a subrecipe");
                                     step.RuleFor(s => s.Cycles).GreaterThan(0).WithMessage("Cycles must be greater than 0");
                                     step.RuleFor(s => s.Order).GreaterThanOrEqualTo(0).WithMessage("Order must be 0 or greater");
