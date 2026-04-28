@@ -7,6 +7,13 @@
       </q-card-section>
       <q-separator />
       <q-card-section class="column q-gutter-sm">
+        <div class="text-subtitle1">v1.7</div>
+        <ul class="q-pl-md q-my-none">
+          <li>Optimized realtime graph and latest datapoint updates for high-frequency data</li>
+        </ul>
+      </q-card-section>
+      <q-separator spaced inset />
+      <q-card-section class="column q-gutter-sm">
         <div class="text-subtitle1">v1.6</div>
         <ul class="q-pl-md q-my-none">
           <li>Fixed device template recipe import/export when multiple commands share the same name</li>
