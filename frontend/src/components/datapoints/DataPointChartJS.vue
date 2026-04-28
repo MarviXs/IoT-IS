@@ -89,7 +89,7 @@
               <q-item clickable v-close-popup @click="resetZoom">
                 <q-item-section>Reset zoom</q-item-section>
               </q-item>
-              <q-item clickable v-close-popup @click="refreshFromApi">
+              <q-item clickable v-close-popup :disable="isManualRefreshInProgress" @click="refreshFromApi">
                 <q-item-section>{{ t('global.refresh') }}</q-item-section>
               </q-item>
             </q-list>
@@ -105,6 +105,8 @@
           text-color="grey-5"
           class="options-btn full-width"
           :icon="mdiRefresh"
+          :loading="isManualRefreshInProgress"
+          :disable="isManualRefreshInProgress"
           @click="refreshFromApi"
         >
           <template #default>
@@ -304,8 +306,14 @@ import {
 Chart.register(zoomPlugin);
 
 // Hack to allow grouping of datasets by unit
-type DataSetCustom = ChartDataset<'line', { x: string; y?: number | null }[]> & {
+type ChartPoint = { x: number; y?: number | null };
+
+type DataSetCustom = ChartDataset<'line', ChartPoint[]> & {
   sensorKey: string;
+};
+
+type TimedDataPoint = DataPoint & {
+  timestamp: number;
 };
 
 const props = defineProps({
@@ -378,7 +386,7 @@ const timeRangeSelectRef = ref();
 const selectedTimeRange = ref<TimeRange>();
 
 const chartRef = ref<HTMLCanvasElement>();
-const chart = shallowRef<Chart<'line', { x: string; y?: number | null }[]>>();
+const chart = shallowRef<Chart<'line', ChartPoint[]>>();
 
 const exportSelectedSensors = ref<string[]>([]);
 const exportSelectedTimeRange = ref('');
@@ -884,12 +892,14 @@ async function submitDelete() {
   }
 }
 
-const currentXMin = ref<string>();
-const currentXMax = ref<string>();
+const currentXMin = ref<number>();
+const currentXMax = ref<number>();
 const shouldResetZoom = ref(false);
 const shouldReloadOnNextTimeRangeUpdate = ref(false);
 const shouldForceApiOnNextTimeRangeUpdate = ref(false);
+const isManualRefreshInProgress = ref(false);
 const realtimeStateReady = ref(false);
+let getDataPointsPromise: Promise<void> | null = null;
 let selectedRangeFromTimestamp = Number.NaN;
 let selectedRangeToTimestamp = Number.NaN;
 const rawDataPointLatestTimestamp = new Map<string, number>();
@@ -908,11 +918,65 @@ function toTimestamp(value?: string | null) {
     return Number.NaN;
   }
 
-  return new Date(value).getTime();
+  return Date.parse(value);
+}
+
+function toChartBoundary(timestamp: number) {
+  return Number.isNaN(timestamp) ? undefined : timestamp;
+}
+
+function toTimedDataPoint(point: DataPoint): TimedDataPoint | null {
+  const timestamp = toTimestamp(point.ts);
+
+  if (Number.isNaN(timestamp)) {
+    return null;
+  }
+
+  return {
+    ...point,
+    timestamp,
+  };
 }
 
 function normalizeDataPoints(points: DataPoint[]) {
-  return [...points].sort((a, b) => toTimestamp(a.ts) - toTimestamp(b.ts));
+  return points
+    .map(toTimedDataPoint)
+    .filter((point): point is TimedDataPoint => point !== null)
+    .sort((a, b) => a.timestamp - b.timestamp);
+}
+
+function findFirstPointAtOrAfter(points: TimedDataPoint[], timestamp: number) {
+  let low = 0;
+  let high = points.length;
+
+  while (low < high) {
+    const mid = Math.floor((low + high) / 2);
+
+    if (points[mid].timestamp < timestamp) {
+      low = mid + 1;
+    } else {
+      high = mid;
+    }
+  }
+
+  return low;
+}
+
+function findFirstPointAfter(points: TimedDataPoint[], timestamp: number) {
+  let low = 0;
+  let high = points.length;
+
+  while (low < high) {
+    const mid = Math.floor((low + high) / 2);
+
+    if (points[mid].timestamp <= timestamp) {
+      low = mid + 1;
+    } else {
+      high = mid;
+    }
+  }
+
+  return low;
 }
 
 function getSelectedRangeTimestamps() {
@@ -934,10 +998,9 @@ function syncChartSensorKeys() {
   });
 }
 
-function updateLatestTimestamp(sensorKey: string, points: DataPoint[]) {
+function updateLatestTimestamp(sensorKey: string, points: TimedDataPoint[]) {
   const latestTimestamp = points.reduce((latest, point) => {
-    const timestamp = toTimestamp(point.ts);
-    return Number.isNaN(timestamp) ? latest : Math.max(latest, timestamp);
+    return Math.max(latest, point.timestamp);
   }, Number.NEGATIVE_INFINITY);
 
   if (latestTimestamp !== Number.NEGATIVE_INFINITY) {
@@ -945,9 +1008,9 @@ function updateLatestTimestamp(sensorKey: string, points: DataPoint[]) {
   }
 }
 
-function seedRealtimeState(sensorKey: string, points: DataPoint[]) {
+function seedRealtimeState(sensorKey: string, points: TimedDataPoint[]) {
   updateLatestTimestamp(sensorKey, points);
-  dataPoints.set(sensorKey, normalizeDataPoints(points));
+  dataPoints.set(sensorKey, points);
 }
 
 function pruneRealtimeData() {
@@ -955,18 +1018,12 @@ function pruneRealtimeData() {
 
   if (graphOptions.value.samplingOption === 'RAW') {
     dataPoints.forEach((points, sensorKey) => {
-      dataPoints.set(
-        sensorKey,
-        points.filter((point) => {
-          const timestamp = toTimestamp(point.ts);
+      const startIndex = Number.isNaN(from) ? 0 : findFirstPointAtOrAfter(points, from);
+      const endIndex = Number.isNaN(to) ? points.length : findFirstPointAfter(points, to);
 
-          if (Number.isNaN(timestamp)) {
-            return false;
-          }
-
-          return (Number.isNaN(from) || timestamp >= from) && (Number.isNaN(to) || timestamp <= to);
-        }),
-      );
+      if (startIndex > 0 || endIndex < points.length) {
+        dataPoints.set(sensorKey, points.slice(startIndex, endIndex));
+      }
     });
     return;
   }
@@ -1008,8 +1065,8 @@ async function updateTimeRange(timeRange: TimeRange) {
   selectedRangeFromTimestamp = toTimestamp(timeRange.from);
   selectedRangeToTimestamp = toTimestamp(timeRange.to);
 
-  currentXMin.value = timeRange.from;
-  currentXMax.value = timeRange.to;
+  currentXMin.value = toChartBoundary(selectedRangeFromTimestamp);
+  currentXMax.value = toChartBoundary(selectedRangeToTimestamp);
 
   if (!shouldForceApiOnNextTimeRangeUpdate.value && canRefreshFromRealtime()) {
     applyRealtimeRefresh();
@@ -1025,7 +1082,7 @@ function getSensorColor(index: number): string {
   return getGraphColor(index);
 }
 
-const dataPoints = new Map<string, DataPoint[]>();
+const dataPoints = new Map<string, TimedDataPoint[]>();
 
 function handleRealtimeDataPoint(lastDataPoint: LastDataPoint) {
   if (graphOptions.value.samplingOption !== 'RAW' || !realtimeStateReady.value) {
@@ -1049,8 +1106,9 @@ function handleRealtimeDataPoint(lastDataPoint: LastDataPoint) {
 
   rawDataPointLatestTimestamp.set(sensorKey, timestamp);
 
-  const dataPoint: DataPoint = {
+  const dataPoint: TimedDataPoint = {
     ts: lastDataPoint.ts,
+    timestamp,
     value: lastDataPoint.value ?? null,
     latitude: lastDataPoint.latitude ?? null,
     longitude: lastDataPoint.longitude ?? null,
@@ -1098,7 +1156,7 @@ async function unsubscribeFromChartDevices() {
 
 const unsubscribeFromLastDataPointUpdates = subscribeToLastDataPointEvents(connection, handleRealtimeDataPoint);
 
-async function getDataPoints() {
+async function loadDataPoints() {
   if (props.sensors.length === 0) return;
 
   const from = new Date(selectedTimeRange.value?.from ?? 0);
@@ -1151,13 +1209,36 @@ async function getDataPoints() {
   updateChartData();
 }
 
+async function getDataPoints() {
+  if (getDataPointsPromise) {
+    return getDataPointsPromise;
+  }
+
+  getDataPointsPromise = loadDataPoints().finally(() => {
+    getDataPointsPromise = null;
+  });
+
+  return getDataPointsPromise;
+}
+
 async function refresh() {
   timeRangeSelectRef.value?.updateTimeRange();
 }
 
 async function refreshFromApi() {
-  shouldForceApiOnNextTimeRangeUpdate.value = true;
-  timeRangeSelectRef.value?.updateTimeRange();
+  if (isManualRefreshInProgress.value) {
+    return;
+  }
+
+  isManualRefreshInProgress.value = true;
+
+  try {
+    shouldForceApiOnNextTimeRangeUpdate.value = true;
+    timeRangeSelectRef.value?.updateTimeRange();
+    await getDataPointsPromise;
+  } finally {
+    isManualRefreshInProgress.value = false;
+  }
 }
 
 function roundNumber(num: number | undefined | null, decimals: number) {
@@ -1193,7 +1274,7 @@ function updateChartData() {
       hidden: !tickedNodes.value.includes(key),
       data:
         dataPoints.get(key)?.map((dataPoint) => ({
-          x: dataPoint.ts,
+          x: dataPoint.timestamp,
           y: dataPoint.value,
         })) ?? [],
       backgroundColor: transparentize(sensorColor, 0.5),
@@ -1240,12 +1321,12 @@ function updateChartData() {
 
   if (!chart.value.options.scales) return;
 
-  currentXMin.value = selectedTimeRange.value?.from;
-  currentXMax.value = selectedTimeRange.value?.to;
+  currentXMin.value = toChartBoundary(selectedRangeFromTimestamp);
+  currentXMax.value = toChartBoundary(selectedRangeToTimestamp);
 
   if (chart.value.options.scales.x && (!isZoomed || shouldResetChartZoom)) {
-    chart.value.options.scales.x.min = selectedTimeRange.value?.from;
-    chart.value.options.scales.x.max = selectedTimeRange.value?.to;
+    chart.value.options.scales.x.min = currentXMin.value;
+    chart.value.options.scales.x.max = currentXMax.value;
   }
 
   Object.assign(chart.value.options.scales, yScales);
@@ -1500,6 +1581,7 @@ onMounted(() => {
       interaction: {
         intersect: false,
       },
+      parsing: false,
       scales: {
         x: {
           axis: 'x',
