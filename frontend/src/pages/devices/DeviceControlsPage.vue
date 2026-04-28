@@ -69,7 +69,11 @@ import type { StartJobRequest } from '@/api/services/JobService';
 import DataPointService from '@/api/services/DataPointService';
 import type { LastDataPoint } from '@/models/LastDataPoint';
 import { useSignalR } from '@/composables/useSignalR';
-import { subscribeToLastDataPointEvents } from '@/utils/signalrDataPoints';
+import {
+  subscribeToDeviceDataPoints,
+  subscribeToLastDataPointEvents,
+  unsubscribeFromDeviceDataPoints,
+} from '@/utils/signalrDataPoints';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -102,7 +106,7 @@ onMounted(async () => {
 onUnmounted(() => {
   try {
     unsubscribeFromLastDataPointUpdates();
-    void connection.send('UnsubscribeFromDevice', deviceId);
+    void unsubscribeFromDeviceDataPoints(connection, deviceId);
   } catch (error) {
     console.error('Failed to unsubscribe from device updates', error);
   }
@@ -342,7 +346,7 @@ async function initializeToggleStates() {
 async function subscribeToDeviceUpdates() {
   try {
     await connect();
-    await connection.send('SubscribeToDevice', deviceId);
+    await subscribeToDeviceDataPoints(connection, deviceId);
   } catch (error) {
     console.error('Failed to subscribe to device updates', error);
   }
@@ -359,7 +363,7 @@ const handleSensorUpdate = (dataPoint: LastDataPoint) => {
   }
 
   const newState = dataPoint.value === 1;
-  toggleStates.value = { ...toggleStates.value, [controlId]: newState };
+  toggleStates.value[controlId] = newState;
 
   if (pendingToggleStates.value[controlId] !== undefined) {
     const desiredState = pendingToggleStates.value[controlId];

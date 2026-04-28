@@ -3,12 +3,15 @@ import { HubConnectionBuilder } from '@microsoft/signalr';
 import { ref, onMounted } from 'vue';
 import { useAuthStore } from '@/stores/auth-store.js';
 import { FailedToNegotiateWithServerError } from '@microsoft/signalr/dist/esm/Errors';
+import { resubscribeToDeviceDataPoints } from '@/utils/signalrDataPoints';
 
 const baseUrl = (process.env.VITE_API_URL || 'http://localhost:5097/') + 'is-hub';
 let connection: HubConnection | null = null;
+const isConnected = ref(false);
+const hasReconnectGap = ref(false);
+const reconnectVersion = ref(0);
 
 export function useSignalR() {
-  const isConnected = ref(false);
   const authStore = useAuthStore();
 
   const getConnection = () => {
@@ -21,8 +24,19 @@ export function useSignalR() {
         .withAutomaticReconnect()
         .build();
 
+      connection.onreconnecting(() => {
+        isConnected.value = false;
+        hasReconnectGap.value = true;
+      });
+
+      connection.onreconnected(() => {
+        isConnected.value = true;
+        reconnectVersion.value += 1;
+      });
+
       connection.onclose(() => {
         isConnected.value = false;
+        hasReconnectGap.value = true;
       });
     }
     return connection;
@@ -34,6 +48,7 @@ export function useSignalR() {
       try {
         await conn.start();
         isConnected.value = true;
+        await resubscribeToDeviceDataPoints(conn);
         console.log('Connected to SignalR hub');
       } catch (err: any) {
         if (err instanceof FailedToNegotiateWithServerError) {
@@ -42,6 +57,7 @@ export function useSignalR() {
             await authStore.refreshAccessToken();
             await conn.start();
             isConnected.value = true;
+            await resubscribeToDeviceDataPoints(conn);
             console.log('Connected to SignalR hub after token refresh');
           } catch (refreshErr) {
             console.error('Failed to refresh token and reconnect:', refreshErr);
@@ -72,6 +88,8 @@ export function useSignalR() {
   return {
     connection: getConnection(),
     isConnected,
+    hasReconnectGap,
+    reconnectVersion,
     connect,
     disconnect,
   };

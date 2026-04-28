@@ -114,7 +114,11 @@ import type { TimeRange } from '@/models/TimeRange';
 import { mdiRefresh } from '@quasar/extras/mdi-v7';
 import { useSignalR } from '@/composables/useSignalR';
 import type { LastDataPoint } from '@/models/LastDataPoint';
-import { subscribeToLastDataPointEvents } from '@/utils/signalrDataPoints';
+import {
+  subscribeToDeviceDataPoints,
+  subscribeToLastDataPointEvents,
+  unsubscribeFromDeviceDataPoints,
+} from '@/utils/signalrDataPoints';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -493,7 +497,7 @@ function resolveGridIndex(rawIndex: number | null | undefined, size: number, axi
 
 async function subscribeToDeviceUpdates() {
   await connect();
-  await connection.send('SubscribeToDevice', deviceId);
+  await subscribeToDeviceDataPoints(connection, deviceId);
 }
 void subscribeToDeviceUpdates();
 
@@ -563,7 +567,7 @@ function subscribeToLastDataPointUpdates() {
 const unsubscribeFromLastDataPointUpdates = subscribeToLastDataPointUpdates();
 
 onUnmounted(() => {
-  void connection.send('UnsubscribeFromDevice', deviceId);
+  void unsubscribeFromDeviceDataPoints(connection, deviceId);
   unsubscribeFromLastDataPointUpdates();
 });
 

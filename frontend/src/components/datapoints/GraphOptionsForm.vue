@@ -125,7 +125,7 @@ export type GraphOptions = {
   downsampleResolution: number;
   downsampleMethod: 'Asap' | 'Lttb';
   timeBucketSizeSeconds: number;
-  timeBucketMethod: 'Average' | 'Sum';
+  timeBucketMethod: 'Average' | 'Max' | 'Min' | 'StdDev' | 'Sum';
 };
 
 const { t } = useI18n();

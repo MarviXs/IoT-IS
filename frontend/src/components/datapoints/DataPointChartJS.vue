@@ -266,7 +266,7 @@
 
 <script setup lang="ts">
 import type { PropType } from 'vue';
-import { ref, reactive, onMounted, shallowRef, watch, watchEffect, computed } from 'vue';
+import { ref, reactive, onMounted, onUnmounted, shallowRef, watch, watchEffect, computed } from 'vue';
 import ChartTimeRangeSelect from '@/components/datapoints/ChartTimeRangeSelect.vue';
 import type { TimeRange } from '@/models/TimeRange';
 import { getGraphColor, transparentize } from '@/utils/colors';
@@ -293,12 +293,28 @@ import { mkConfig, generateCsv, download } from 'export-to-csv';
 import { format } from 'date-fns/format';
 import { toast } from 'vue3-toastify';
 import type { SensorData } from '@/models/SensorData';
+import type { LastDataPoint } from '@/models/LastDataPoint';
+import { useSignalR } from '@/composables/useSignalR';
+import {
+  subscribeToDeviceDataPoints,
+  subscribeToLastDataPointEvents,
+  unsubscribeFromDeviceDataPoints,
+} from '@/utils/signalrDataPoints';
 
 Chart.register(zoomPlugin);
 
 // Hack to allow grouping of datasets by unit
 type DataSetCustom = ChartDataset<'line', { x: string; y?: number | null }[]> & {
   sensorKey: string;
+};
+
+type BucketAccumulator = {
+  ts: string;
+  count: number;
+  sum: number;
+  sumSquares: number;
+  min: number;
+  max: number;
 };
 
 const props = defineProps({
@@ -367,6 +383,7 @@ const storedCustomTimeRange = useStorage(`chartCustomTimeRange_${storageKeySuffi
 });
 
 const { t } = useI18n();
+const { connection, connect, isConnected, hasReconnectGap } = useSignalR();
 
 const timeRangeSelectRef = ref();
 const selectedTimeRange = ref<TimeRange>();
@@ -881,9 +898,211 @@ async function submitDelete() {
 const currentXMin = ref<string>();
 const currentXMax = ref<string>();
 const shouldResetZoom = ref(false);
+const shouldReloadOnNextTimeRangeUpdate = ref(false);
+const realtimeStateReady = ref(false);
+let selectedRangeFromTimestamp = Number.NaN;
+let selectedRangeToTimestamp = Number.NaN;
+const rawDataPointLatestTimestamp = new Map<string, number>();
+const bucketAccumulators = new Map<string, Map<number, BucketAccumulator>>();
+const dirtyBucketSensorKeys = new Set<string>();
+const subscribedDeviceIds = new Set<string>();
+const chartSensorKeys = new Set<string>();
+const sensorKeys = computed(() => props.sensors.map((sensor) => getSensorUniqueId(sensor)).join(','));
+
+const chartDeviceIds = computed(() =>
+  Array.from(new Set(props.sensors.map((sensor) => sensor.deviceId).filter((id): id is string => !!id))),
+);
+
+const isRealtimeSamplingMode = computed(() => graphOptions.value.samplingOption !== 'DOWNSAMPLE');
+
+function toTimestamp(value?: string | null) {
+  if (!value) {
+    return Number.NaN;
+  }
+
+  return new Date(value).getTime();
+}
+
+function normalizeDataPoints(points: DataPoint[]) {
+  return [...points].sort((a, b) => toTimestamp(a.ts) - toTimestamp(b.ts));
+}
+
+function getSelectedRangeTimestamps() {
+  return {
+    from: selectedRangeFromTimestamp,
+    to: selectedRangeToTimestamp,
+  };
+}
+
+function clearRealtimeState() {
+  rawDataPointLatestTimestamp.clear();
+  bucketAccumulators.clear();
+  dirtyBucketSensorKeys.clear();
+  realtimeStateReady.value = false;
+}
+
+function syncChartSensorKeys() {
+  chartSensorKeys.clear();
+  props.sensors.forEach((sensor) => {
+    chartSensorKeys.add(getSensorUniqueId(sensor));
+  });
+}
+
+function updateLatestTimestamp(sensorKey: string, points: DataPoint[]) {
+  const latestTimestamp = points.reduce((latest, point) => {
+    const timestamp = toTimestamp(point.ts);
+    return Number.isNaN(timestamp) ? latest : Math.max(latest, timestamp);
+  }, Number.NEGATIVE_INFINITY);
+
+  if (latestTimestamp !== Number.NEGATIVE_INFINITY) {
+    rawDataPointLatestTimestamp.set(sensorKey, latestTimestamp);
+  }
+}
+
+function getBucketStart(timestamp: number) {
+  const bucketSizeMilliseconds = Math.max(graphOptions.value.timeBucketSizeSeconds, 1) * 1000;
+  return Math.floor(timestamp / bucketSizeMilliseconds) * bucketSizeMilliseconds;
+}
+
+function addDataPointToBucket(sensorKey: string, dataPoint: DataPoint) {
+  const value = dataPoint.value;
+  const timestamp = toTimestamp(dataPoint.ts);
+
+  if (value === undefined || value === null || Number.isNaN(timestamp)) {
+    return;
+  }
+
+  const bucketStart = getBucketStart(timestamp);
+  let sensorBuckets = bucketAccumulators.get(sensorKey);
+
+  if (!sensorBuckets) {
+    sensorBuckets = new Map<number, BucketAccumulator>();
+    bucketAccumulators.set(sensorKey, sensorBuckets);
+  }
+
+  const bucket = sensorBuckets.get(bucketStart);
+  if (!bucket) {
+    sensorBuckets.set(bucketStart, {
+      ts: new Date(bucketStart).toISOString(),
+      count: 1,
+      sum: value,
+      sumSquares: value * value,
+      min: value,
+      max: value,
+    });
+    return;
+  }
+
+  bucket.count += 1;
+  bucket.sum += value;
+  bucket.sumSquares += value * value;
+  bucket.min = Math.min(bucket.min, value);
+  bucket.max = Math.max(bucket.max, value);
+}
+
+function getBucketValue(bucket: BucketAccumulator) {
+  switch (graphOptions.value.timeBucketMethod) {
+    case 'Sum':
+      return bucket.sum;
+    case 'Max':
+      return bucket.max;
+    case 'Min':
+      return bucket.min;
+    case 'StdDev':
+      if (bucket.count < 2) {
+        return null;
+      }
+      return Math.sqrt(Math.max((bucket.sumSquares - (bucket.sum * bucket.sum) / bucket.count) / (bucket.count - 1), 0));
+    default:
+      return bucket.sum / bucket.count;
+  }
+}
+
+function renderBucketDataPoints(sensorKey: string) {
+  const sensorBuckets = bucketAccumulators.get(sensorKey);
+
+  if (!sensorBuckets) {
+    return [];
+  }
+
+  return Array.from(sensorBuckets.entries())
+    .sort(([left], [right]) => left - right)
+    .map(([, bucket]) => ({
+      ts: bucket.ts,
+      value: getBucketValue(bucket),
+    }));
+}
+
+function seedRealtimeState(sensorKey: string, points: DataPoint[]) {
+  updateLatestTimestamp(sensorKey, points);
+
+  if (graphOptions.value.samplingOption === 'BUCKETS') {
+    points.forEach((point) => addDataPointToBucket(sensorKey, point));
+    dataPoints.set(sensorKey, renderBucketDataPoints(sensorKey));
+    return;
+  }
+
+  dataPoints.set(sensorKey, normalizeDataPoints(points));
+}
+
+function pruneRealtimeData() {
+  const { from, to } = getSelectedRangeTimestamps();
+
+  if (graphOptions.value.samplingOption === 'RAW') {
+    dataPoints.forEach((points, sensorKey) => {
+      dataPoints.set(
+        sensorKey,
+        points.filter((point) => {
+          const timestamp = toTimestamp(point.ts);
+
+          if (Number.isNaN(timestamp)) {
+            return false;
+          }
+
+          return (Number.isNaN(from) || timestamp >= from) && (Number.isNaN(to) || timestamp <= to);
+        }),
+      );
+    });
+    return;
+  }
+
+  if (graphOptions.value.samplingOption === 'BUCKETS') {
+    bucketAccumulators.forEach((sensorBuckets, sensorKey) => {
+      sensorBuckets.forEach((_, bucketStart) => {
+        if ((!Number.isNaN(from) && bucketStart < from) || (!Number.isNaN(to) && bucketStart > to)) {
+          sensorBuckets.delete(bucketStart);
+        }
+      });
+      dataPoints.set(sensorKey, renderBucketDataPoints(sensorKey));
+    });
+  }
+}
+
+function applyRealtimeRefresh() {
+  if (graphOptions.value.samplingOption === 'BUCKETS') {
+    dirtyBucketSensorKeys.forEach((sensorKey) => {
+      dataPoints.set(sensorKey, renderBucketDataPoints(sensorKey));
+    });
+    dirtyBucketSensorKeys.clear();
+  }
+
+  pruneRealtimeData();
+  updateChartData();
+}
+
+function canRefreshFromRealtime() {
+  return (
+    !shouldReloadOnNextTimeRangeUpdate.value &&
+    isRealtimeSamplingMode.value &&
+    realtimeStateReady.value &&
+    isConnected.value &&
+    !hasReconnectGap.value
+  );
+}
 
 function onTimeRangeChanged(timeRangeName: string, customRangeData?: { from: string; to: string } | null) {
   shouldResetZoom.value = true;
+  shouldReloadOnNextTimeRangeUpdate.value = true;
 
   if (storedTimeRange.value !== timeRangeName) {
     storedTimeRange.value = timeRangeName;
@@ -899,10 +1118,18 @@ function onTimeRangeChanged(timeRangeName: string, customRangeData?: { from: str
 
 async function updateTimeRange(timeRange: TimeRange) {
   selectedTimeRange.value = timeRange;
+  selectedRangeFromTimestamp = toTimestamp(timeRange.from);
+  selectedRangeToTimestamp = toTimestamp(timeRange.to);
 
   currentXMin.value = timeRange.from;
   currentXMax.value = timeRange.to;
 
+  if (canRefreshFromRealtime()) {
+    applyRealtimeRefresh();
+    return;
+  }
+
+  shouldReloadOnNextTimeRangeUpdate.value = false;
   await getDataPoints();
 }
 
@@ -910,12 +1137,91 @@ function getSensorColor(index: number): string {
   return getGraphColor(index);
 }
 
-const dataPoints = reactive<Map<string, DataPoint[]>>(new Map());
+const dataPoints = new Map<string, DataPoint[]>();
+
+function handleRealtimeDataPoint(lastDataPoint: LastDataPoint) {
+  if (!isRealtimeSamplingMode.value || !realtimeStateReady.value) {
+    return;
+  }
+
+  const sensorKey = `${lastDataPoint.deviceId}-${lastDataPoint.tag}`;
+  if (!chartSensorKeys.has(sensorKey) || !lastDataPoint.ts) {
+    return;
+  }
+
+  const timestamp = toTimestamp(lastDataPoint.ts);
+  if (Number.isNaN(timestamp) || (!Number.isNaN(selectedRangeFromTimestamp) && timestamp < selectedRangeFromTimestamp)) {
+    return;
+  }
+
+  const latestTimestamp = rawDataPointLatestTimestamp.get(sensorKey) ?? Number.NEGATIVE_INFINITY;
+  if (timestamp <= latestTimestamp) {
+    return;
+  }
+
+  rawDataPointLatestTimestamp.set(sensorKey, timestamp);
+
+  const dataPoint: DataPoint = {
+    ts: lastDataPoint.ts,
+    value: lastDataPoint.value ?? null,
+    latitude: lastDataPoint.latitude ?? null,
+    longitude: lastDataPoint.longitude ?? null,
+  };
+
+  if (graphOptions.value.samplingOption === 'RAW') {
+    const points = dataPoints.get(sensorKey);
+    if (points) {
+      points.push(dataPoint);
+    } else {
+      dataPoints.set(sensorKey, [dataPoint]);
+    }
+    return;
+  }
+
+  addDataPointToBucket(sensorKey, dataPoint);
+  dirtyBucketSensorKeys.add(sensorKey);
+}
+
+async function syncDeviceSubscriptions() {
+  await connect();
+  const nextDeviceIds = new Set(chartDeviceIds.value);
+
+  await Promise.all(
+    Array.from(subscribedDeviceIds)
+      .filter((deviceId) => !nextDeviceIds.has(deviceId))
+      .map(async (deviceId) => {
+        await unsubscribeFromDeviceDataPoints(connection, deviceId);
+        subscribedDeviceIds.delete(deviceId);
+      }),
+  );
+
+  await Promise.all(
+    Array.from(nextDeviceIds)
+      .filter((deviceId) => !subscribedDeviceIds.has(deviceId))
+      .map(async (deviceId) => {
+        await subscribeToDeviceDataPoints(connection, deviceId);
+        subscribedDeviceIds.add(deviceId);
+      }),
+  );
+}
+
+async function unsubscribeFromChartDevices() {
+  await Promise.all(
+    Array.from(subscribedDeviceIds).map(async (deviceId) => {
+      await unsubscribeFromDeviceDataPoints(connection, deviceId);
+    }),
+  );
+  subscribedDeviceIds.clear();
+}
+
+const unsubscribeFromLastDataPointUpdates = subscribeToLastDataPointEvents(connection, handleRealtimeDataPoint);
+
 async function getDataPoints() {
   if (props.sensors.length === 0) return;
 
   const from = new Date(selectedTimeRange.value?.from ?? 0);
   const to = new Date(selectedTimeRange.value?.to ?? Date.now());
+  clearRealtimeState();
 
   const promises = props.sensors.map(async (sensor) => {
     if (!sensor.id) return;
@@ -928,9 +1234,6 @@ async function getDataPoints() {
     if (graphOptions.value.samplingOption === 'DOWNSAMPLE') {
       query.Downsample = graphOptions.value.downsampleResolution;
       query.DownsampleMethod = graphOptions.value.downsampleMethod;
-    } else if (graphOptions.value.samplingOption === 'BUCKETS') {
-      query.TimeBucket = graphOptions.value.timeBucketSizeSeconds;
-      query.TimeBucketMethod = graphOptions.value.timeBucketMethod;
     }
 
     const { data, error } = await DataPointService.getDataPoints(sensor.deviceId, sensor.tag, query);
@@ -939,17 +1242,32 @@ async function getDataPoints() {
       console.error(error);
       return;
     }
-    dataPoints.set(getSensorUniqueId(sensor), data ?? []);
+
+    const key = getSensorUniqueId(sensor);
+    const points = normalizeDataPoints(data ?? []);
+
+    if (isRealtimeSamplingMode.value) {
+      seedRealtimeState(key, points);
+    } else {
+      dataPoints.set(key, points);
+    }
   });
 
   await Promise.all(promises);
 
+  realtimeStateReady.value = isRealtimeSamplingMode.value;
+  if (isConnected.value) {
+    hasReconnectGap.value = false;
+  }
   updateChartData();
 }
 
 async function refresh() {
+  const shouldEmitParentRefresh = !canRefreshFromRealtime();
   timeRangeSelectRef.value?.updateTimeRange();
-  emit('refresh');
+  if (shouldEmitParentRefresh) {
+    emit('refresh');
+  }
 }
 
 function roundNumber(num: number | undefined | null, decimals: number) {
@@ -1180,7 +1498,7 @@ watch(
   () => isGraphOptionsDialogOpen.value,
   () => {
     if (!isGraphOptionsDialogOpen.value) {
-      getDataPoints();
+      void getDataPoints();
     }
   },
 );
@@ -1202,13 +1520,34 @@ watch(
 );
 
 watch(
-  () => props.sensors.map((sensor) => getSensorUniqueId(sensor)).join(','),
+  () => sensorKeys.value,
   (currentKeysCsv) => {
+    syncChartSensorKeys();
     const currentKeys = currentKeysCsv ? currentKeysCsv.split(',') : [];
     deleteSelectedSensors.value = deleteSelectedSensors.value.filter((key) => currentKeys.includes(key));
 
     if (isDeleteDialogOpen.value) {
       void loadDeleteTotals();
+    }
+
+    void syncDeviceSubscriptions();
+    if (selectedTimeRange.value) {
+      void getDataPoints();
+    }
+  },
+  { immediate: true },
+);
+
+watch(
+  () => isConnected.value,
+  (connected) => {
+    if (!connected || !isRealtimeSamplingMode.value || !selectedTimeRange.value) {
+      return;
+    }
+
+    void syncDeviceSubscriptions();
+    if (hasReconnectGap.value) {
+      void getDataPoints();
     }
   },
 );
@@ -1297,6 +1636,12 @@ onMounted(() => {
   if (selectedTimeRange.value) {
     updateTimeRange(selectedTimeRange.value);
   }
+});
+
+onUnmounted(() => {
+  unsubscribeFromLastDataPointUpdates();
+  void unsubscribeFromChartDevices();
+  chart.value?.destroy();
 });
 
 const csvConfig = mkConfig({

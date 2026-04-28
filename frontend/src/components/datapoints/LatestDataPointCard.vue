@@ -17,11 +17,11 @@ const props = defineProps<{
   unit: string;
   accuracyDecimals: number;
   color: string;
-  lastValue: number | null;
+  getLastValue?: (deviceId: string, sensorTag: string) => number | null | undefined;
 }>();
 
 const valueRounded = computed(() => {
-  return props.lastValue?.toFixed(props.accuracyDecimals) ?? '-';
+  return props.getLastValue?.(props.deviceId, props.sensorTag)?.toFixed(props.accuracyDecimals) ?? '-';
 });
 </script>
 

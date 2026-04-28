@@ -5,7 +5,12 @@
       <div class="group-item">
         <h5 class="group-name">{{ groupName }}</h5>
       </div>
-      <div class="data-card" v-for="sensor in sensors" :key="sensor.tag">
+      <div
+        class="data-card"
+        v-for="sensor in sensors"
+        :key="sensor.tag"
+        v-memo="[sensor.name, sensor.unit, sensor.accuracyDecimals]"
+      >
         <LatestDataPointCard
           :device-id="sensor.deviceId"
           :sensor-tag="sensor.tag"
@@ -13,13 +18,18 @@
           :unit="sensor.unit ?? ''"
           :accuracy-decimals="sensor.accuracyDecimals ?? 2"
           :color="getGraphColorFromSensor(sensor)"
-          :last-value="sensor.lastValue ?? null"
+          :get-last-value="getLastValue"
         />
       </div>
     </div>
   </div>
   <!-- Ungrouped Sensors -->
-  <div class="col-12 col-md-4 col-lg-3 col-xl-2" v-for="sensor in ungroupedSensors" :key="'ungrouped-' + sensor.tag">
+  <div
+    class="col-12 col-md-4 col-lg-3 col-xl-2"
+    v-for="sensor in ungroupedSensors"
+    :key="'ungrouped-' + sensor.tag"
+    v-memo="[sensor.name, sensor.unit, sensor.accuracyDecimals]"
+  >
     <LatestDataPointCard
       :device-id="sensor.deviceId"
       :sensor-tag="sensor.tag"
@@ -27,7 +37,7 @@
       :unit="sensor.unit ?? ''"
       :accuracy-decimals="sensor.accuracyDecimals ?? 2"
       :color="getGraphColorFromSensor(sensor)"
-      :last-value="sensor.lastValue ?? null"
+      :get-last-value="getLastValue"
     />
   </div>
 </template>
@@ -39,6 +49,9 @@ import LatestDataPointCard from '../datapoints/LatestDataPointCard.vue';
 import type { SensorData } from '@/models/SensorData';
 
 const sensors = defineModel<SensorData[]>('sensors');
+defineProps<{
+  getLastValue?: (deviceId: string, sensorTag: string) => number | null | undefined;
+}>();
 
 // Group sensors by their group field
 const groupedSensors = computed(() => {

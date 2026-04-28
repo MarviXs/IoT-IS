@@ -25,7 +25,7 @@
             :sensors="sensors"
           ></DataPointMap>
         </div>
-        <LatestDataPoints v-model:sensors="sensors" />
+        <LatestDataPoints v-model:sensors="sensors" :get-last-value="getLastValue" />
       </div>
     </template>
   </PageLayout>
@@ -33,7 +33,7 @@
 
 <script setup lang="ts">
 import { useRoute } from 'vue-router';
-import { computed, onUnmounted, ref } from 'vue';
+import { computed, onUnmounted, reactive, ref } from 'vue';
 import DeviceService from '@/api/services/DeviceService';
 import { deviceToTreeNode } from '@/utils/sensor-nodes';
 import { useI18n } from 'vue-i18n';
@@ -48,7 +48,11 @@ import LatestDataPoints from '@/components/datapoints/LatestDataPoints.vue';
 import MapSensorSelectionTree from '@/components/datapoints/MapSensorSelectionTree.vue';
 import DataPointMap from '@/components/datapoints/DataPointMap.vue';
 import type { SensorData } from '@/models/SensorData';
-import { subscribeToLastDataPointEvents, upsertLastDataPoint } from '@/utils/signalrDataPoints';
+import {
+  subscribeToDeviceDataPoints,
+  subscribeToLastDataPointEvents,
+  unsubscribeFromDeviceDataPoints,
+} from '@/utils/signalrDataPoints';
 
 const { t } = useI18n();
 const { connection, connect } = useSignalR();
@@ -60,18 +64,27 @@ const isLoadingDevice = ref(false);
 
 const sensorTree = ref<SensorNode>();
 const selectedSensor = ref<string | null>(null);
+const lastDataPointValues = reactive(new Map<string, number | null | undefined>());
+
+function getLastValue(deviceId: string, sensorTag: string) {
+  return lastDataPointValues.get(`${deviceId}-${sensorTag}`);
+}
+
+function setLastDataPointValue(dataPoint: LastDataPoint) {
+  lastDataPointValues.set(`${dataPoint.deviceId}-${dataPoint.tag}`, dataPoint.value);
+}
 
 const sensors = computed<SensorData[]>(() => {
   return (
     device.value?.deviceTemplate?.sensors.map((sensor) => {
+      const deviceId = device.value?.id ?? '';
       return {
         id: sensor.id,
-        deviceId: device.value?.id ?? '',
+        deviceId,
         tag: sensor.tag,
         name: sensor.name,
         unit: sensor.unit,
         accuracyDecimals: sensor.accuracyDecimals,
-        lastValue: lastDataPoints.value.find((dp) => dp.deviceId === device.value?.id && dp.tag === sensor.tag)?.value,
         group: sensor.group,
       };
     }) ?? []
@@ -103,11 +116,10 @@ getDevice();
 
 async function subscribeDeviceUpdates() {
   await connect();
-  connection.send('SubscribeToDevice', deviceId);
+  await subscribeToDeviceDataPoints(connection, deviceId);
 }
 subscribeDeviceUpdates();
 
-const lastDataPoints = ref<LastDataPoint[]>([]);
 async function getLastDataPoints() {
   for (const sensor of sensors.value) {
     getLastDataPoint(device.value?.id ?? '', sensor.tag);
@@ -129,15 +141,13 @@ async function getLastDataPoint(deviceId: string, tag: string) {
     gridX: data.gridX ?? null,
     gridY: data.gridY ?? null,
   };
-  upsertLastDataPoint(lastDataPoints.value, newDataPoint);
+  setLastDataPointValue(newDataPoint);
 }
 
-const unsubscribeFromLastDataPointUpdates = subscribeToLastDataPointEvents(connection, (dataPoint) => {
-  upsertLastDataPoint(lastDataPoints.value, dataPoint);
-});
+const unsubscribeFromLastDataPointUpdates = subscribeToLastDataPointEvents(connection, setLastDataPointValue);
 
 onUnmounted(() => {
-  connection.send('UnsubscribeFromDevice', deviceId);
+  void unsubscribeFromDeviceDataPoints(connection, deviceId);
   unsubscribeFromLastDataPointUpdates();
 });
 </script>
