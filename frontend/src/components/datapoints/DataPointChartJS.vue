@@ -986,6 +986,17 @@ function getSelectedRangeTimestamps() {
   };
 }
 
+function getPruneRangeWithBuffer() {
+  const { from, to } = getSelectedRangeTimestamps();
+  const hasValidRange = !Number.isNaN(from) && !Number.isNaN(to) && to > from;
+  const buffer = hasValidRange ? to - from : 0;
+
+  return {
+    from: Number.isNaN(from) ? Number.NaN : from - buffer,
+    to: Number.isNaN(to) ? Number.NaN : to + buffer,
+  };
+}
+
 function clearRealtimeState() {
   rawDataPointLatestTimestamp.clear();
   realtimeStateReady.value = false;
@@ -1014,7 +1025,7 @@ function seedRealtimeState(sensorKey: string, points: TimedDataPoint[]) {
 }
 
 function pruneRealtimeData() {
-  const { from, to } = getSelectedRangeTimestamps();
+  const { from, to } = getPruneRangeWithBuffer();
 
   if (graphOptions.value.samplingOption === 'RAW') {
     dataPoints.forEach((points, sensorKey) => {
