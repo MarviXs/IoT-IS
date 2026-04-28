@@ -308,15 +308,6 @@ type DataSetCustom = ChartDataset<'line', { x: string; y?: number | null }[]> & 
   sensorKey: string;
 };
 
-type BucketAccumulator = {
-  ts: string;
-  count: number;
-  sum: number;
-  sumSquares: number;
-  min: number;
-  max: number;
-};
-
 const props = defineProps({
   sensors: {
     type: Array as PropType<SensorData[]>,
@@ -903,8 +894,6 @@ const realtimeStateReady = ref(false);
 let selectedRangeFromTimestamp = Number.NaN;
 let selectedRangeToTimestamp = Number.NaN;
 const rawDataPointLatestTimestamp = new Map<string, number>();
-const bucketAccumulators = new Map<string, Map<number, BucketAccumulator>>();
-const dirtyBucketSensorKeys = new Set<string>();
 const subscribedDeviceIds = new Set<string>();
 const chartSensorKeys = new Set<string>();
 const sensorKeys = computed(() => props.sensors.map((sensor) => getSensorUniqueId(sensor)).join(','));
@@ -913,7 +902,7 @@ const chartDeviceIds = computed(() =>
   Array.from(new Set(props.sensors.map((sensor) => sensor.deviceId).filter((id): id is string => !!id))),
 );
 
-const isRealtimeSamplingMode = computed(() => graphOptions.value.samplingOption !== 'DOWNSAMPLE');
+const isRealtimeSamplingMode = computed(() => graphOptions.value.samplingOption === 'RAW');
 
 function toTimestamp(value?: string | null) {
   if (!value) {
@@ -936,8 +925,6 @@ function getSelectedRangeTimestamps() {
 
 function clearRealtimeState() {
   rawDataPointLatestTimestamp.clear();
-  bucketAccumulators.clear();
-  dirtyBucketSensorKeys.clear();
   realtimeStateReady.value = false;
 }
 
@@ -959,89 +946,8 @@ function updateLatestTimestamp(sensorKey: string, points: DataPoint[]) {
   }
 }
 
-function getBucketStart(timestamp: number) {
-  const bucketSizeMilliseconds = Math.max(graphOptions.value.timeBucketSizeSeconds, 1) * 1000;
-  return Math.floor(timestamp / bucketSizeMilliseconds) * bucketSizeMilliseconds;
-}
-
-function addDataPointToBucket(sensorKey: string, dataPoint: DataPoint) {
-  const value = dataPoint.value;
-  const timestamp = toTimestamp(dataPoint.ts);
-
-  if (value === undefined || value === null || Number.isNaN(timestamp)) {
-    return;
-  }
-
-  const bucketStart = getBucketStart(timestamp);
-  let sensorBuckets = bucketAccumulators.get(sensorKey);
-
-  if (!sensorBuckets) {
-    sensorBuckets = new Map<number, BucketAccumulator>();
-    bucketAccumulators.set(sensorKey, sensorBuckets);
-  }
-
-  const bucket = sensorBuckets.get(bucketStart);
-  if (!bucket) {
-    sensorBuckets.set(bucketStart, {
-      ts: new Date(bucketStart).toISOString(),
-      count: 1,
-      sum: value,
-      sumSquares: value * value,
-      min: value,
-      max: value,
-    });
-    return;
-  }
-
-  bucket.count += 1;
-  bucket.sum += value;
-  bucket.sumSquares += value * value;
-  bucket.min = Math.min(bucket.min, value);
-  bucket.max = Math.max(bucket.max, value);
-}
-
-function getBucketValue(bucket: BucketAccumulator) {
-  switch (graphOptions.value.timeBucketMethod) {
-    case 'Sum':
-      return bucket.sum;
-    case 'Max':
-      return bucket.max;
-    case 'Min':
-      return bucket.min;
-    case 'StdDev':
-      if (bucket.count < 2) {
-        return null;
-      }
-      return Math.sqrt(Math.max((bucket.sumSquares - (bucket.sum * bucket.sum) / bucket.count) / (bucket.count - 1), 0));
-    default:
-      return bucket.sum / bucket.count;
-  }
-}
-
-function renderBucketDataPoints(sensorKey: string) {
-  const sensorBuckets = bucketAccumulators.get(sensorKey);
-
-  if (!sensorBuckets) {
-    return [];
-  }
-
-  return Array.from(sensorBuckets.entries())
-    .sort(([left], [right]) => left - right)
-    .map(([, bucket]) => ({
-      ts: bucket.ts,
-      value: getBucketValue(bucket),
-    }));
-}
-
 function seedRealtimeState(sensorKey: string, points: DataPoint[]) {
   updateLatestTimestamp(sensorKey, points);
-
-  if (graphOptions.value.samplingOption === 'BUCKETS') {
-    points.forEach((point) => addDataPointToBucket(sensorKey, point));
-    dataPoints.set(sensorKey, renderBucketDataPoints(sensorKey));
-    return;
-  }
-
   dataPoints.set(sensorKey, normalizeDataPoints(points));
 }
 
@@ -1065,27 +971,9 @@ function pruneRealtimeData() {
     });
     return;
   }
-
-  if (graphOptions.value.samplingOption === 'BUCKETS') {
-    bucketAccumulators.forEach((sensorBuckets, sensorKey) => {
-      sensorBuckets.forEach((_, bucketStart) => {
-        if ((!Number.isNaN(from) && bucketStart < from) || (!Number.isNaN(to) && bucketStart > to)) {
-          sensorBuckets.delete(bucketStart);
-        }
-      });
-      dataPoints.set(sensorKey, renderBucketDataPoints(sensorKey));
-    });
-  }
 }
 
 function applyRealtimeRefresh() {
-  if (graphOptions.value.samplingOption === 'BUCKETS') {
-    dirtyBucketSensorKeys.forEach((sensorKey) => {
-      dataPoints.set(sensorKey, renderBucketDataPoints(sensorKey));
-    });
-    dirtyBucketSensorKeys.clear();
-  }
-
   pruneRealtimeData();
   updateChartData();
 }
@@ -1140,7 +1028,7 @@ function getSensorColor(index: number): string {
 const dataPoints = new Map<string, DataPoint[]>();
 
 function handleRealtimeDataPoint(lastDataPoint: LastDataPoint) {
-  if (!isRealtimeSamplingMode.value || !realtimeStateReady.value) {
+  if (graphOptions.value.samplingOption !== 'RAW' || !realtimeStateReady.value) {
     return;
   }
 
@@ -1168,18 +1056,12 @@ function handleRealtimeDataPoint(lastDataPoint: LastDataPoint) {
     longitude: lastDataPoint.longitude ?? null,
   };
 
-  if (graphOptions.value.samplingOption === 'RAW') {
-    const points = dataPoints.get(sensorKey);
-    if (points) {
-      points.push(dataPoint);
-    } else {
-      dataPoints.set(sensorKey, [dataPoint]);
-    }
-    return;
+  const points = dataPoints.get(sensorKey);
+  if (points) {
+    points.push(dataPoint);
+  } else {
+    dataPoints.set(sensorKey, [dataPoint]);
   }
-
-  addDataPointToBucket(sensorKey, dataPoint);
-  dirtyBucketSensorKeys.add(sensorKey);
 }
 
 async function syncDeviceSubscriptions() {
@@ -1234,6 +1116,9 @@ async function getDataPoints() {
     if (graphOptions.value.samplingOption === 'DOWNSAMPLE') {
       query.Downsample = graphOptions.value.downsampleResolution;
       query.DownsampleMethod = graphOptions.value.downsampleMethod;
+    } else if (graphOptions.value.samplingOption === 'BUCKETS') {
+      query.TimeBucket = graphOptions.value.timeBucketSizeSeconds;
+      query.TimeBucketMethod = graphOptions.value.timeBucketMethod;
     }
 
     const { data, error } = await DataPointService.getDataPoints(sensor.deviceId, sensor.tag, query);
