@@ -92,6 +92,6 @@ export function buildSensorRequests(sensorCount) {
     name: `Sensor ${index + 1}`,
     unit: "unit",
     accuracyDecimals: 2,
-    group: "Benchmark",
+    group: null,
   }));
 }
