@@ -17,12 +17,28 @@ export type DeleteDataPointsQuery =
   operations['DeleteSensorDataPoints']['parameters']['query'];
 export type DeleteDataPointsResponse =
   operations['DeleteSensorDataPoints']['responses']['200']['content']['application/json'];
+export type GetGraphDataPointsRequest = {
+  parameters: GetDataPointsQuery;
+  sensors: { deviceId: string; sensorTag: string }[];
+};
+export type GetGraphDataPointsResponse = {
+  deviceId: string;
+  sensorTag: string;
+  dataPoints: GetDataPointsResponse;
+}[];
 
 class DataPointService {
   async getDataPoints(deviceId: string, sensorTag: string, query: GetDataPointsQuery) {
     return await client.GET('/devices/{deviceId}/sensors/{sensorTag}/data', {
       params: { path: { deviceId, sensorTag }, query },
     });
+  }
+
+  async getGraphDataPoints(body: GetGraphDataPointsRequest) {
+    return await (client as any).POST('/data/graph', { body }) as {
+      data?: GetGraphDataPointsResponse;
+      error?: unknown;
+    };
   }
 
   async getLatestDataPoints(deviceId: string, sensorTag: string, query?: GetLatestDataPointsQuery) {

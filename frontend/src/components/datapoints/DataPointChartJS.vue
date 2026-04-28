@@ -89,7 +89,7 @@
               <q-item clickable v-close-popup @click="resetZoom">
                 <q-item-section>Reset zoom</q-item-section>
               </q-item>
-              <q-item clickable v-close-popup @click="refresh">
+              <q-item clickable v-close-popup @click="refreshFromApi">
                 <q-item-section>{{ t('global.refresh') }}</q-item-section>
               </q-item>
             </q-list>
@@ -105,7 +105,7 @@
           text-color="grey-5"
           class="options-btn full-width"
           :icon="mdiRefresh"
-          @click="refresh"
+          @click="refreshFromApi"
         >
           <template #default>
             <div class="text-grey-10 text-weight-regular q-ml-sm">
@@ -329,8 +329,6 @@ const props = defineProps({
     default: undefined,
   },
 });
-
-const emit = defineEmits(['refresh']);
 
 const tickedNodes = defineModel('tickedNodes', {
   type: Array as PropType<string[]>,
@@ -890,6 +888,7 @@ const currentXMin = ref<string>();
 const currentXMax = ref<string>();
 const shouldResetZoom = ref(false);
 const shouldReloadOnNextTimeRangeUpdate = ref(false);
+const shouldForceApiOnNextTimeRangeUpdate = ref(false);
 const realtimeStateReady = ref(false);
 let selectedRangeFromTimestamp = Number.NaN;
 let selectedRangeToTimestamp = Number.NaN;
@@ -1012,11 +1011,12 @@ async function updateTimeRange(timeRange: TimeRange) {
   currentXMin.value = timeRange.from;
   currentXMax.value = timeRange.to;
 
-  if (canRefreshFromRealtime()) {
+  if (!shouldForceApiOnNextTimeRangeUpdate.value && canRefreshFromRealtime()) {
     applyRealtimeRefresh();
     return;
   }
 
+  shouldForceApiOnNextTimeRangeUpdate.value = false;
   shouldReloadOnNextTimeRangeUpdate.value = false;
   await getDataPoints();
 }
@@ -1105,31 +1105,37 @@ async function getDataPoints() {
   const to = new Date(selectedTimeRange.value?.to ?? Date.now());
   clearRealtimeState();
 
-  const promises = props.sensors.map(async (sensor) => {
-    if (!sensor.id) return;
+  const query: GetDataPointsQuery = {
+    From: from.toISOString(),
+    To: to.toISOString(),
+  };
 
-    const query: GetDataPointsQuery = {
-      From: from.toISOString(),
-      To: to.toISOString(),
-    };
+  if (graphOptions.value.samplingOption === 'DOWNSAMPLE') {
+    query.Downsample = graphOptions.value.downsampleResolution;
+    query.DownsampleMethod = graphOptions.value.downsampleMethod;
+  } else if (graphOptions.value.samplingOption === 'BUCKETS') {
+    query.TimeBucket = graphOptions.value.timeBucketSizeSeconds;
+    query.TimeBucketMethod = graphOptions.value.timeBucketMethod;
+  }
 
-    if (graphOptions.value.samplingOption === 'DOWNSAMPLE') {
-      query.Downsample = graphOptions.value.downsampleResolution;
-      query.DownsampleMethod = graphOptions.value.downsampleMethod;
-    } else if (graphOptions.value.samplingOption === 'BUCKETS') {
-      query.TimeBucket = graphOptions.value.timeBucketSizeSeconds;
-      query.TimeBucketMethod = graphOptions.value.timeBucketMethod;
-    }
+  const sensors = props.sensors.filter((sensor) => sensor.deviceId && sensor.tag);
+  const { data, error } = await DataPointService.getGraphDataPoints({
+    parameters: query,
+    sensors: sensors.map((sensor) => ({
+      deviceId: sensor.deviceId,
+      sensorTag: sensor.tag,
+    })),
+  });
 
-    const { data, error } = await DataPointService.getDataPoints(sensor.deviceId, sensor.tag, query);
+  if (error) {
+    console.error(error);
+    return;
+  }
 
-    if (error) {
-      console.error(error);
-      return;
-    }
-
-    const key = getSensorUniqueId(sensor);
-    const points = normalizeDataPoints(data ?? []);
+  const responseData = data ?? [];
+  responseData.forEach((sensorData) => {
+    const key = `${sensorData.deviceId}-${sensorData.sensorTag}`;
+    const points = normalizeDataPoints(sensorData.dataPoints ?? []);
 
     if (isRealtimeSamplingMode.value) {
       seedRealtimeState(key, points);
@@ -1137,8 +1143,6 @@ async function getDataPoints() {
       dataPoints.set(key, points);
     }
   });
-
-  await Promise.all(promises);
 
   realtimeStateReady.value = isRealtimeSamplingMode.value;
   if (isConnected.value) {
@@ -1148,11 +1152,12 @@ async function getDataPoints() {
 }
 
 async function refresh() {
-  const shouldEmitParentRefresh = !canRefreshFromRealtime();
   timeRangeSelectRef.value?.updateTimeRange();
-  if (shouldEmitParentRefresh) {
-    emit('refresh');
-  }
+}
+
+async function refreshFromApi() {
+  shouldForceApiOnNextTimeRangeUpdate.value = true;
+  timeRangeSelectRef.value?.updateTimeRange();
 }
 
 function roundNumber(num: number | undefined | null, decimals: number) {

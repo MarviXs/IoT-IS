@@ -89,18 +89,63 @@ public static class GetSensorDataPoints
                         "Get stored data points for a sensor within a specified time range. Optionally downsample the data or group it into time buckets.";
                     return o;
                 });
+
+            app.MapPost(
+                    "data/graph",
+                    async Task<Results<Ok<List<GraphResponse>>, NotFound, ForbidHttpResult>> (
+                        IMediator mediator,
+                        ClaimsPrincipal user,
+                        GraphRequest request
+                    ) =>
+                    {
+                        var query = new GraphQuery(user, request);
+                        var result = await mediator.Send(query);
+
+                        if (result.HasError<NotFoundError>())
+                        {
+                            return TypedResults.NotFound();
+                        }
+
+                        if (result.HasError<ForbiddenError>())
+                        {
+                            return TypedResults.Forbid();
+                        }
+
+                        return TypedResults.Ok(result.Value);
+                    }
+                )
+                .WithName(nameof(GetGraphDataPoints))
+                .WithTags(nameof(DataPoint))
+                .WithOpenApi(o =>
+                {
+                    o.Summary = "Get stored graph data points for multiple sensors";
+                    o.Description =
+                        "Get stored graph data points for multiple sensors in one request. Supports raw, downsampled, and time bucket data.";
+                    return o;
+                });
         }
     }
 
     public record Query(QueryParameters Parameters, Guid DeviceId, string SensorTag, ClaimsPrincipal User) : IRequest<Result<List<Response>>>;
+    public record GraphQuery(ClaimsPrincipal User, GraphRequest Request) : IRequest<Result<List<GraphResponse>>>;
+    public record GraphRequest(QueryParameters Parameters, List<GraphSensorRequest> Sensors);
+    public record GraphSensorRequest(Guid DeviceId, string SensorTag);
+    public record GraphResponse(Guid DeviceId, string SensorTag, List<Response> DataPoints);
 
-    public sealed class Handler(AppDbContext appContext, TimeScaleDbContext timescaleContext) : IRequestHandler<Query, Result<List<Response>>>
+    private sealed class GetGraphDataPoints;
+
+    public sealed class Handler(AppDbContext appContext, TimeScaleDbContext timescaleContext)
+        : IRequestHandler<Query, Result<List<Response>>>,
+            IRequestHandler<GraphQuery, Result<List<GraphResponse>>>
     {
         public async Task<Result<List<Response>>> Handle(Query message, CancellationToken cancellationToken)
         {
             var parameters = message.Parameters;
 
-            var device = appContext.Devices.Where(d => d.Id == message.DeviceId).Include(d => d.SharedWithUsers).FirstOrDefault();
+            var device = await appContext
+                .Devices.Where(d => d.Id == message.DeviceId)
+                .Include(d => d.SharedWithUsers)
+                .FirstOrDefaultAsync(cancellationToken);
             if (device == null)
             {
                 return Result.Fail(new NotFoundError());
@@ -110,38 +155,75 @@ public static class GetSensorDataPoints
                 return Result.Fail(new ForbiddenError());
             }
 
+            var response = await BuildDataPointQuery(message).ToListAsync(cancellationToken);
+
+            return Result.Ok(response);
+        }
+
+        public async Task<Result<List<GraphResponse>>> Handle(GraphQuery message, CancellationToken cancellationToken)
+        {
+            var sensors = message.Request.Sensors.DistinctBy(sensor => new { sensor.DeviceId, sensor.SensorTag }).ToList();
+
+            if (sensors.Count == 0)
+            {
+                return Result.Ok(new List<GraphResponse>());
+            }
+
+            var deviceIds = sensors.Select(sensor => sensor.DeviceId).Distinct().ToList();
+            var devices = await appContext
+                .Devices.Where(device => deviceIds.Contains(device.Id))
+                .Include(device => device.SharedWithUsers)
+                .ToListAsync(cancellationToken);
+
+            if (devices.Count != deviceIds.Count)
+            {
+                return Result.Fail(new NotFoundError());
+            }
+
+            if (devices.Any(device => !device.CanView(message.User)))
+            {
+                return Result.Fail(new ForbiddenError());
+            }
+
+            var response = new List<GraphResponse>(sensors.Count);
+            foreach (var sensor in sensors)
+            {
+                var sensorQuery = new Query(message.Request.Parameters, sensor.DeviceId, sensor.SensorTag, message.User);
+                var dataPoints = await BuildDataPointQuery(sensorQuery).ToListAsync(cancellationToken);
+                response.Add(new GraphResponse(sensor.DeviceId, sensor.SensorTag, dataPoints));
+            }
+
+            return Result.Ok(response);
+        }
+
+        private IQueryable<Response> BuildDataPointQuery(Query message)
+        {
+            var parameters = message.Parameters;
             var from = parameters.From ?? DateTimeOffset.MinValue;
             var to = parameters.To ?? DateTimeOffset.UtcNow;
 
-            IQueryable<Response> query;
-
             if (parameters.Downsample.HasValue)
             {
-                query = GetQueryBasedOnDownsample(message);
+                return GetQueryBasedOnDownsample(message);
             }
-            else if (parameters.TimeBucket.HasValue)
+
+            if (parameters.TimeBucket.HasValue)
             {
-                query = GetQueryBasedOnTimeBucket(message);
+                return GetQueryBasedOnTimeBucket(message);
             }
-            else
+
+            var baseQuery = timescaleContext
+                .DataPoints.Where(d => d.SensorTag == message.SensorTag && d.DeviceId == message.DeviceId)
+                .Where(d => d.TimeStamp >= from && d.TimeStamp <= to);
+
+            if (parameters.OnlyWithLocation == true)
             {
-                var baseQuery = timescaleContext
-                    .DataPoints.Where(d => d.SensorTag == message.SensorTag && d.DeviceId == message.DeviceId)
-                    .Where(d => d.TimeStamp >= from && d.TimeStamp <= to);
-
-                if (parameters.OnlyWithLocation == true)
-                {
-                    baseQuery = baseQuery.Where(d => d.Latitude != null && d.Longitude != null);
-                }
-
-                query = baseQuery
-                    .OrderByDescending(d => d.TimeStamp)
-                    .Select(d => new Response(d.TimeStamp, d.Value, d.Latitude, d.Longitude, d.GridX, d.GridY));
+                baseQuery = baseQuery.Where(d => d.Latitude != null && d.Longitude != null);
             }
 
-            var response = await query.ToListAsync(cancellationToken);
-
-            return Result.Ok(response);
+            return baseQuery
+                .OrderByDescending(d => d.TimeStamp)
+                .Select(d => new Response(d.TimeStamp, d.Value, d.Latitude, d.Longitude, d.GridX, d.GridY));
         }
 
         private IQueryable<Response> GetQueryBasedOnDownsample(Query message)
@@ -157,7 +239,13 @@ public static class GetSensorDataPoints
                 case DownsampleMethod.Asap:
                     queryString =
                         $@"
-                        SELECT time as ""TimeStamp"", value as ""Value"" 
+                        SELECT
+                            time as ""TimeStamp"",
+                            value as ""Value"",
+                            NULL::double precision as ""Latitude"",
+                            NULL::double precision as ""Longitude"",
+                            NULL::integer as ""GridX"",
+                            NULL::integer as ""GridY""
                         FROM unnest(
                             (
                                 SELECT asap_smooth(""TimeStamp"", ""Value"", {parameters.Downsample}) 
@@ -172,7 +260,13 @@ public static class GetSensorDataPoints
                 default:
                     queryString =
                         $@"
-                        SELECT time as ""TimeStamp"", value as ""Value"" 
+                        SELECT
+                            time as ""TimeStamp"",
+                            value as ""Value"",
+                            NULL::double precision as ""Latitude"",
+                            NULL::double precision as ""Longitude"",
+                            NULL::integer as ""GridX"",
+                            NULL::integer as ""GridY""
                         FROM unnest(
                             (
                                 SELECT lttb(""TimeStamp"", ""Value"", {parameters.Downsample}) 
