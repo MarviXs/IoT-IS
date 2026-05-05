@@ -126,7 +126,7 @@ public static class ExportDeviceTemplate
                         .Steps?.OrderBy(step => step.Order)
                         .Select(
                             step =>
-                                new ImportDeviceTemplate.RecipeStepRequest(null, step.Subrecipe?.Name, step.Cycles, step.Order)
+                                new ImportDeviceTemplate.RecipeStepRequest(step.Command?.Name, step.Subrecipe?.Name, step.Cycles, step.Order)
                                 {
                                     CommandId = step.CommandId
                                 }

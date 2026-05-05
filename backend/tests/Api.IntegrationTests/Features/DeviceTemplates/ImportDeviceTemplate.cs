@@ -171,7 +171,7 @@ public class ImportDeviceTemplateTests(IntegrationTestWebAppFactory factory) : B
         body!.TemplateData.Commands.Select(command => command.Id).Should().BeEquivalentTo([firstCommand.Id, secondCommand.Id]);
         var steps = body!.TemplateData.Recipes!.Single().Steps!;
         steps.Select(step => step.CommandId).Should().Equal(firstCommand.Id, secondCommand.Id);
-        steps.Select(step => step.CommandName).Should().OnlyContain(commandName => commandName == null);
+        steps.Select(step => step.CommandName).Should().Equal("protocolCommand", "protocolCommand");
         steps.Select(step => step.CommandDisplayName).Should().OnlyContain(commandDisplayName => commandDisplayName == null);
         steps.Select(step => step.CommandParams).Should().OnlyContain(commandParams => commandParams == null);
     }

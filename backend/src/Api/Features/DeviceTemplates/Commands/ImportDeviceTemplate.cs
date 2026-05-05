@@ -234,19 +234,13 @@ public static class ImportDeviceTemplate
                         Guid? commandId = null;
                         if (stepRequest.CommandId.HasValue)
                         {
-                            if (!importedCommandsByPayloadId.TryGetValue(stepRequest.CommandId.Value, out var command))
+                            if (importedCommandsByPayloadId.TryGetValue(stepRequest.CommandId.Value, out var command))
                             {
-                                return Result.Fail(
-                                    new ValidationError(
-                                        nameof(RecipeStepRequest.CommandId),
-                                        $"Command ID '{stepRequest.CommandId}' must be defined in the template commands"
-                                    )
-                                );
+                                commandId = command.Id;
                             }
-
-                            commandId = command.Id;
                         }
-                        else if (!string.IsNullOrWhiteSpace(commandName))
+
+                        if (commandId == null && !string.IsNullOrWhiteSpace(commandName))
                         {
                             var matchingCommands = importedCommands
                                 .Where(command => string.Equals(command.Name, commandName, StringComparison.OrdinalIgnoreCase))
@@ -290,6 +284,15 @@ public static class ImportDeviceTemplate
                             }
 
                             commandId = matchingCommands[0].Id;
+                        }
+                        else if (commandId == null && stepRequest.CommandId.HasValue)
+                        {
+                            return Result.Fail(
+                                new ValidationError(
+                                    nameof(RecipeStepRequest.CommandId),
+                                    $"Command ID '{stepRequest.CommandId}' must be defined in the template commands"
+                                )
+                            );
                         }
 
                         Guid? subrecipeId = null;
