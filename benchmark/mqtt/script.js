@@ -1,6 +1,6 @@
 import { check, fail } from "k6";
 import exec from "k6/execution";
-import { Counter } from "k6/metrics";
+import { Counter, Trend } from "k6/metrics";
 import { Client } from "k6/x/mqtt";
 
 import { createDataPointFlatBuffer } from "../core/flatbuffers.js";
@@ -20,21 +20,26 @@ const MQTT_PORT = "1883";
 const USERNAME = "stress@gmail.com";
 const PASSWORD = "stress";
 const DEVICE_COUNT = 1;
-const SENSORS_PER_DEVICE = 5;
+const SENSORS_PER_DEVICE = 1;
 const DURATION = "30s";
 const CONNECT_TIMEOUT_MS = 2000;
 const CONNECT_READY_TIMEOUT_MS = 5000;
-const MQTT_QOS = 0;
+const MQTT_QOS = 2;
 const MQTT_RETAIN = false;
+const MQTT_KEEPALIVE_SECONDS = 60;
+const ENQUEUE_BATCH_SIZE = 128;
+const ENQUEUE_INTERVAL_MS = 0;
+const MAX_PENDING_PUBLISHES = 64;
+const DRAIN_TIMEOUT_MS = 5000;
 const PUBLISH_OPTIONS = Object.freeze({
   qos: MQTT_QOS,
   retain: MQTT_RETAIN,
 });
 const mqttPublishBatches = new Counter("mqtt_publish_batches");
 const mqttDatapointsSent = new Counter("mqtt_datapoints_sent");
+const mqttDatapointsAcked = new Counter("mqtt_datapoints_acked");
 const mqttPublishFailures = new Counter("mqtt_publish_failures");
-
-let batchSequence = 0;
+const mqttPublishLatency = new Trend("mqtt_publish_latency", true);
 
 export const options = {
   setupTimeout: "15m",
@@ -48,6 +53,7 @@ export const options = {
   },
   thresholds: {
     checks: ["rate>0.99"],
+    mqtt_publish_latency: ["p(95)<1000"],
   },
 };
 
@@ -104,15 +110,23 @@ export function setup() {
 export default function (data) {
   const device = getAssignedDevice(data.devices);
   const client = new Client({
-    client_id: `k6-mqtt-${device.accessToken}-${exec.vu.idInTest}`,
+    client_id: device.accessToken,
     username: device.accessToken,
     password: "",
   });
 
-  let isConnected = false;
+  const state = {
+    isConnected: false,
+    isEnding: false,
+    isEnded: false,
+    pendingPublishes: 0,
+    sequence: 0,
+    sensorIndex: 0,
+    drainDeadline: 0,
+  };
 
   const connectTimeout = setTimeout(() => {
-    if (isConnected) {
+    if (state.isConnected) {
       return;
     }
 
@@ -121,23 +135,32 @@ export default function (data) {
   }, CONNECT_READY_TIMEOUT_MS);
 
   client.on("connect", () => {
-    isConnected = true;
+    state.isConnected = true;
     clearTimeout(connectTimeout);
 
     check(client, {
       "mqtt publisher is connected": (currentClient) => currentClient.connected,
     });
 
-    publishBatch(client, device.topic, data.sensorTags);
+    pumpPublishQueue(client, device.topic, data.sensorTags, state);
   });
 
   client.on("end", () => {
     clearTimeout(connectTimeout);
+    state.isConnected = false;
+    state.isEnding = true;
+  });
+
+  client.on("error", () => {
+    clearTimeout(connectTimeout);
+    state.isConnected = false;
+    state.isEnding = true;
   });
 
   client.connect(`mqtt://${MQTT_HOST}:${MQTT_PORT}`, {
     connect_timeout: CONNECT_TIMEOUT_MS,
     clean_session: false,
+    keepalive: MQTT_KEEPALIVE_SECONDS,
   });
 }
 
@@ -192,59 +215,136 @@ function validateConfig() {
   if (!Number.isInteger(SENSORS_PER_DEVICE) || SENSORS_PER_DEVICE <= 0) {
     fail("SENSORS_PER_DEVICE must be a positive integer.");
   }
+
+  if (!Number.isInteger(MQTT_QOS) || MQTT_QOS < 0 || MQTT_QOS > 2) {
+    fail("MQTT_QOS must be 0, 1, or 2.");
+  }
+
+  if (!Number.isInteger(ENQUEUE_BATCH_SIZE) || ENQUEUE_BATCH_SIZE <= 0) {
+    fail("ENQUEUE_BATCH_SIZE must be a positive integer.");
+  }
+
+  if (!Number.isInteger(MAX_PENDING_PUBLISHES) || MAX_PENDING_PUBLISHES <= 0) {
+    fail("MAX_PENDING_PUBLISHES must be a positive integer.");
+  }
 }
 
-function buildSensorValue(sensorIndex) {
-  const iteration = batchSequence;
+function buildSensorValue(sensorIndex, sequence) {
   const vuId = exec.vu.idInTest;
 
-  return sensorIndex + iteration + vuId / 1000;
+  return sensorIndex + sequence + vuId / 1000;
 }
 
-function publishBatch(client, topic, sensorTags) {
-  if (!client.connected || exec.scenario.progress >= 1) {
-    endClient(client);
+function pumpPublishQueue(client, topic, sensorTags, state) {
+  if (!client.connected) {
+    state.isConnected = false;
+    endClient(client, state);
     return;
   }
 
-  const timestamp = Date.now();
-  let publishError;
-
-  for (let sensorIndex = 0; sensorIndex < sensorTags.length; sensorIndex += 1) {
-    const payload = createDataPointFlatBuffer(
-      sensorTags[sensorIndex],
-      buildSensorValue(sensorIndex),
-      timestamp
-    );
-
-    try {
-      client.publish(topic, payload, PUBLISH_OPTIONS);
-      mqttDatapointsSent.add(1);
-    } catch (error) {
-      publishError = error;
-      mqttPublishFailures.add(1);
-      break;
-    }
-  }
-
-  batchSequence += 1;
-
-  check(publishError, {
-    "mqtt datapoint publish succeeded": (error) => error === undefined,
-  });
-
-  if (publishError) {
-    endClient(client);
+  if (state.isEnding || state.isEnded) {
     return;
   }
 
-  mqttPublishBatches.add(1);
+  if (exec.scenario.progress >= 1) {
+    drainAndEndClient(client, state);
+    return;
+  }
+
+  let enqueued = 0;
+  while (enqueued < ENQUEUE_BATCH_SIZE && state.pendingPublishes < MAX_PENDING_PUBLISHES) {
+    enqueuePublish(client, topic, sensorTags, state);
+    enqueued += 1;
+  }
+
+  if (enqueued > 0) {
+    mqttPublishBatches.add(1);
+  }
+
+  const nextInterval = enqueued === 0 ? Math.max(ENQUEUE_INTERVAL_MS, 1) : ENQUEUE_INTERVAL_MS;
   setTimeout(() => {
-    publishBatch(client, topic, sensorTags);
-  }, 0);
+    pumpPublishQueue(client, topic, sensorTags, state);
+  }, nextInterval);
 }
 
-function endClient(client) {
+function enqueuePublish(client, topic, sensorTags, state) {
+  const sensorIndex = state.sensorIndex;
+  const payload = createDataPointFlatBuffer(
+    sensorTags[sensorIndex],
+    buildSensorValue(sensorIndex, state.sequence),
+    Date.now()
+  );
+
+  state.sensorIndex = (state.sensorIndex + 1) % sensorTags.length;
+  if (state.sensorIndex === 0) {
+    state.sequence += 1;
+  }
+
+  try {
+    state.pendingPublishes += 1;
+    mqttDatapointsSent.add(1);
+    const publishStartedAt = Date.now();
+    client.publishAsync(topic, payload, PUBLISH_OPTIONS).then(
+      () => {
+        state.pendingPublishes -= 1;
+        mqttPublishLatency.add(Date.now() - publishStartedAt);
+        mqttDatapointsAcked.add(1);
+        endClientWhenDrained(client, state);
+      },
+      () => {
+        state.pendingPublishes -= 1;
+        mqttPublishLatency.add(Date.now() - publishStartedAt);
+        mqttPublishFailures.add(1);
+        state.isConnected = false;
+        state.isEnding = true;
+        endClientWhenDrained(client, state);
+      }
+    );
+  } catch (_) {
+    state.pendingPublishes -= 1;
+    mqttPublishFailures.add(1);
+    state.isConnected = false;
+    state.isEnding = true;
+    endClientWhenDrained(client, state);
+  }
+}
+
+function drainAndEndClient(client, state) {
+  if (state.isEnding) {
+    endClientWhenDrained(client, state);
+    return;
+  }
+
+  state.isEnding = true;
+  state.drainDeadline = Date.now() + DRAIN_TIMEOUT_MS;
+  endClientWhenDrained(client, state);
+}
+
+function endClientWhenDrained(client, state) {
+  if (!state.isEnding) {
+    return;
+  }
+
+  if (state.pendingPublishes <= 0 || Date.now() >= state.drainDeadline) {
+    endClient(client, state);
+    return;
+  }
+
+  setTimeout(() => {
+    endClientWhenDrained(client, state);
+  }, 10);
+}
+
+function endClient(client, state) {
+  if (state && state.isEnded) {
+    return;
+  }
+
+  if (state) {
+    state.isEnding = true;
+    state.isEnded = true;
+  }
+
   try {
     client.end();
   } catch (_) {
