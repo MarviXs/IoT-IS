@@ -24,7 +24,7 @@ const SENSORS_PER_DEVICE = 1;
 const DURATION = "30s";
 const CONNECT_TIMEOUT_MS = 2000;
 const CONNECT_READY_TIMEOUT_MS = 5000;
-const MQTT_QOS = 2;
+const MQTT_QOS = 1;
 const MQTT_RETAIN = false;
 const MQTT_KEEPALIVE_SECONDS = 60;
 const ENQUEUE_BATCH_SIZE = 128;
@@ -159,7 +159,7 @@ export default function (data) {
 
   client.connect(`mqtt://${MQTT_HOST}:${MQTT_PORT}`, {
     connect_timeout: CONNECT_TIMEOUT_MS,
-    clean_session: false,
+    clean_session: true,
     keepalive: MQTT_KEEPALIVE_SECONDS,
   });
 }
