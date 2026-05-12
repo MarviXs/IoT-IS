@@ -12,12 +12,15 @@ import {
   replaceDeviceTemplateSensors,
 } from "../core/devices.js";
 import { buildUrl } from "../core/http.js";
+import { createScene, deleteScene } from "../core/scenes.js";
 
 const BASE_URL = "http://localhost:9001/api";
 const USERNAME = "stress@gmail.com";
 const PASSWORD = "stress";
 const DEVICE_COUNT = 1;
 const SENSORS_PER_DEVICE = 5;
+const CREATE_SCENES_WITH_DEVICES = true;
+const CREATE_SCENE_NOTIFICATIONS = false;
 const VUS = 100;
 const DURATION = "30s";
 
@@ -44,6 +47,7 @@ export function setup() {
   const session = login(BASE_URL, USERNAME, PASSWORD);
   const sensorRequests = buildSensorRequests(SENSORS_PER_DEVICE);
   const createdDeviceIds = [];
+  const createdSceneIds = [];
   let templateId = null;
 
   try {
@@ -74,14 +78,25 @@ export function setup() {
       };
     });
 
+    if (CREATE_SCENES_WITH_DEVICES) {
+      for (const [index, device] of devices.entries()) {
+        const sceneId = createScene(
+          session,
+          buildComplexSceneRequest(runId, index + 1, device.id, sensorRequests)
+        );
+        createdSceneIds.push(sceneId);
+      }
+    }
+
     return {
       session,
       templateId,
       devices,
+      sceneIds: createdSceneIds,
       sensorTags: sensorRequests.map((sensor) => sensor.tag),
     };
   } catch (error) {
-    cleanupResources(session, createdDeviceIds, templateId);
+    cleanupResources(session, createdSceneIds, createdDeviceIds, templateId);
     throw error;
   }
 }
@@ -114,10 +129,23 @@ export default function (data) {
 }
 
 export function teardown(data) {
-  cleanupResources(data.session, data.devices.map((device) => device.id), data.templateId);
+  cleanupResources(
+    data.session,
+    data.sceneIds || [],
+    data.devices.map((device) => device.id),
+    data.templateId
+  );
 }
 
-function cleanupResources(session, deviceIds, templateId) {
+function cleanupResources(session, sceneIds, deviceIds, templateId) {
+  for (const sceneId of sceneIds) {
+    try {
+      deleteScene(session, sceneId);
+    } catch (error) {
+      console.error(`Cleanup failed for scene ${sceneId}: ${error.message}`);
+    }
+  }
+
   for (const deviceId of deviceIds) {
     try {
       deleteDevice(session, deviceId);
@@ -151,6 +179,12 @@ function validateConfig() {
   if (!Number.isInteger(SENSORS_PER_DEVICE) || SENSORS_PER_DEVICE <= 0) {
     fail("SENSORS_PER_DEVICE must be a positive integer.");
   }
+  if (typeof CREATE_SCENES_WITH_DEVICES !== "boolean") {
+    fail("CREATE_SCENES_WITH_DEVICES must be a boolean.");
+  }
+  if (typeof CREATE_SCENE_NOTIFICATIONS !== "boolean") {
+    fail("CREATE_SCENE_NOTIFICATIONS must be a boolean.");
+  }
   if (!Number.isInteger(VUS) || VUS <= 0) {
     fail("VUS must be a positive integer.");
   }
@@ -161,4 +195,72 @@ function buildSensorValue(sensorIndex) {
   const vuId = exec.vu.idInTest;
 
   return sensorIndex + iteration + vuId / 1000;
+}
+
+function buildComplexSceneRequest(runId, sceneNumber, deviceId, sensors) {
+  return {
+    name: `${runId}-scene-${sceneNumber}`,
+    description: `Nested benchmark scene for device ${sceneNumber}`,
+    isEnabled: true,
+    condition: JSON.stringify(buildNestedCondition(deviceId, sensors)),
+    actions: CREATE_SCENE_NOTIFICATIONS
+      ? [
+          {
+            type: "NOTIFICATION",
+            deviceId: null,
+            recipeId: null,
+            notificationSeverity: "Info",
+            notificationMessage: `Benchmark scene ${sceneNumber} triggered`,
+            discordWebhookUrl: null,
+            includeSensorValues: false,
+          },
+        ]
+      : [],
+    cooldownAfterTriggerTime: 0,
+  };
+}
+
+function buildNestedCondition(deviceId, sensors) {
+  const comparisons = sensors.map((sensor, index) => {
+    const sensorVar = { var: `device.${deviceId}.${sensor.tag}` };
+    const operators = [
+      [">", -1000000],
+      ["<", 1000000],
+      [">=", -1000000],
+      ["!=", -1000000],
+      ["<=", 1000000],
+    ];
+    const [operator, value] = operators[index % operators.length];
+
+    return { [operator]: [sensorVar, value] };
+  });
+
+  if (comparisons.length === 1) {
+    return comparisons[0];
+  }
+
+  if (comparisons.length === 2) {
+    return {
+      and: [
+        comparisons[0],
+        {
+          or: [comparisons[1]],
+        },
+      ],
+    };
+  }
+
+  return {
+    and: [
+      comparisons[0],
+      {
+        or: [
+          comparisons[1],
+          {
+            and: comparisons.slice(2),
+          },
+        ],
+      },
+    ],
+  };
 }
