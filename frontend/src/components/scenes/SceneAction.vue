@@ -36,9 +36,12 @@
         v-model="action.deviceId"
         label="Device"
         outlined
-        :options="deviceOptions"
+        :options="filteredDeviceOptions"
         emit-value
         map-options
+        use-input
+        input-debounce="0"
+        @filter="filterDevices"
         style="min-width: 150px"
         :rules="deviceRules"
         class="q-mr-sm"
@@ -106,6 +109,7 @@ const props = defineProps({
   devices: { type: Array as PropType<SceneDevice>, required: true },
 });
 const action = defineModel<SceneAction>({ required: true });
+const deviceSearch = ref('');
 
 const actionTypeOptions = ref([
   { label: 'Notification', value: 'NOTIFICATION' },
@@ -125,6 +129,16 @@ const deviceOptions = computed(() => {
     label: device.name,
     value: device.id,
   }));
+});
+
+const filteredDeviceOptions = computed(() => {
+  const search = normalizeSearch(deviceSearch.value);
+
+  if (!search) {
+    return deviceOptions.value;
+  }
+
+  return deviceOptions.value.filter((device) => normalizeSearch(device.label).includes(search));
 });
 
 const recipeOptions = computed(() => {
@@ -199,6 +213,16 @@ watch(
   },
   { immediate: true },
 );
+
+function filterDevices(value: string, update: (callbackFn: () => void) => void) {
+  update(() => {
+    deviceSearch.value = value;
+  });
+}
+
+function normalizeSearch(value: string) {
+  return value.trim().toLocaleLowerCase();
+}
 </script>
 
 <style scoped lang="scss"></style>

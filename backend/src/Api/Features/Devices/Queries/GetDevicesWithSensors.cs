@@ -61,9 +61,7 @@ public static class GetDevicesWithSensors
                 .ThenInclude(dt => dt.Recipes)
                 .Sort(deviceParameters.SortBy ?? nameof(Device.UpdatedAt), deviceParameters.Descending);
 
-            var totalCount = await query.CountAsync(cancellationToken);
-
-            var devices = await query.Paginate(deviceParameters).ToListAsync(cancellationToken);
+            var devices = await query.ToListAsync(cancellationToken);
 
             var responseDevices = devices
                 .Select(d => new Response(
