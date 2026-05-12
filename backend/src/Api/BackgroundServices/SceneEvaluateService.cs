@@ -125,9 +125,11 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
         CancellationToken cancellationToken
     )
     {
+        var dbContext = serviceScope.ServiceProvider.GetRequiredService<AppDbContext>();
         var redis = serviceScope.ServiceProvider.GetRequiredService<RedisService>();
         var timescale = serviceScope.ServiceProvider.GetRequiredService<TimeScaleDbContext>();
         var resolvedDataPoints = new Dictionary<(Guid DeviceId, string SensorTag), DataPoint?>();
+        var pendingNotifications = new List<SceneNotification>();
         var nowUtc = DateTimeOffset.UtcNow;
 
         foreach (var scene in scenes)
@@ -179,7 +181,7 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
 
                     if (result is JsonValue booleanResult && booleanResult.TryGetValue<bool>(out var isTriggered) && isTriggered)
                     {
-                        await HandleTriggeredScene(scene, sensorValues, serviceScope, cancellationToken);
+                        await HandleTriggeredScene(scene, sensorValues, pendingNotifications, serviceScope, cancellationToken);
                     }
                 }
             }
@@ -187,6 +189,16 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
             {
                 logger.LogError($"Error evaluating scene: {scene.Id}, Exception: {ex.Message}");
             }
+        }
+
+        if (dbContext.ChangeTracker.HasChanges())
+        {
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+
+        if (pendingNotifications.Count != 0)
+        {
+            await dbContext.BulkInsertAsync(pendingNotifications, cancellationToken: cancellationToken);
         }
     }
 
@@ -278,11 +290,11 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
     private async Task HandleTriggeredScene(
         Scene scene,
         Dictionary<(Guid DeviceId, string SensorTag), double?> sensorValues,
+        List<SceneNotification> pendingNotifications,
         IServiceScope serviceScope,
         CancellationToken cancellationToken
     )
     {
-        var dbContext = serviceScope.ServiceProvider.GetRequiredService<AppDbContext>();
         var jobService = serviceScope.ServiceProvider.GetRequiredService<JobService>();
         var discordNotificationService = serviceScope.ServiceProvider.GetRequiredService<IDiscordNotificationService>();
 
@@ -297,11 +309,12 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
                 var message = string.IsNullOrWhiteSpace(action.NotificationMessage) ? "Scene triggered" : action.NotificationMessage!;
                 var notification = new SceneNotification
                 {
+                    Id = Guid.NewGuid(),
                     SceneId = scene.Id,
                     Message = message,
                     Severity = action.NotificationSeverity
                 };
-                dbContext.SceneNotifications.Add(notification);
+                pendingNotifications.Add(notification);
             }
             else if (action.Type == SceneActionType.DISCORD_NOTIFICATION)
             {
@@ -348,8 +361,6 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
                 await jobService.CreateJobFromRecipe(action.DeviceId.Value, action.RecipeId.Value, 1, false, cancellationToken);
             }
         }
-
-        await dbContext.SaveChangesAsync(cancellationToken);
     }
 
     private static async Task<DataPoint?> GetDataPointFromCache(SceneSensorTrigger trigger, RedisService redis)
