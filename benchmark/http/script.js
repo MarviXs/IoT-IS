@@ -17,10 +17,11 @@ import { createScene, deleteScene } from "../core/scenes.js";
 const BASE_URL = "http://localhost:9001/api";
 const USERNAME = "stress@gmail.com";
 const PASSWORD = "stress";
-const DEVICE_COUNT = 1;
+const DEVICE_COUNT = 100;
 const SENSORS_PER_DEVICE = 5;
 const CREATE_SCENES_WITH_DEVICES = true;
-const CREATE_SCENE_NOTIFICATIONS = false;
+const CREATE_SCENE_NOTIFICATIONS = true;
+const DISTRIBUTE_SCENE_DEVICES_BETWEEN_SCENES = false;
 const VUS = 100;
 const DURATION = "30s";
 
@@ -79,10 +80,19 @@ export function setup() {
     });
 
     if (CREATE_SCENES_WITH_DEVICES) {
+      if (DISTRIBUTE_SCENE_DEVICES_BETWEEN_SCENES) {
+        seedLatestDataPoints(devices, sensorRequests);
+      }
+
       for (const [index, device] of devices.entries()) {
         const sceneId = createScene(
           session,
-          buildComplexSceneRequest(runId, index + 1, device.id, sensorRequests)
+          buildComplexSceneRequest(
+            runId,
+            index + 1,
+            getSceneDevices(devices, index),
+            sensorRequests
+          )
         );
         createdSceneIds.push(sceneId);
       }
@@ -185,6 +195,15 @@ function validateConfig() {
   if (typeof CREATE_SCENE_NOTIFICATIONS !== "boolean") {
     fail("CREATE_SCENE_NOTIFICATIONS must be a boolean.");
   }
+  if (CREATE_SCENE_NOTIFICATIONS && !CREATE_SCENES_WITH_DEVICES) {
+    fail("CREATE_SCENE_NOTIFICATIONS requires CREATE_SCENES_WITH_DEVICES.");
+  }
+  if (typeof DISTRIBUTE_SCENE_DEVICES_BETWEEN_SCENES !== "boolean") {
+    fail("DISTRIBUTE_SCENE_DEVICES_BETWEEN_SCENES must be a boolean.");
+  }
+  if (DISTRIBUTE_SCENE_DEVICES_BETWEEN_SCENES && DEVICE_COUNT < 2) {
+    fail("DISTRIBUTE_SCENE_DEVICES_BETWEEN_SCENES requires at least 2 devices.");
+  }
   if (!Number.isInteger(VUS) || VUS <= 0) {
     fail("VUS must be a positive integer.");
   }
@@ -197,12 +216,12 @@ function buildSensorValue(sensorIndex) {
   return sensorIndex + iteration + vuId / 1000;
 }
 
-function buildComplexSceneRequest(runId, sceneNumber, deviceId, sensors) {
+function buildComplexSceneRequest(runId, sceneNumber, sceneDevices, sensors) {
   return {
     name: `${runId}-scene-${sceneNumber}`,
-    description: `Nested benchmark scene for device ${sceneNumber}`,
+    description: `Nested benchmark scene ${sceneNumber}`,
     isEnabled: true,
-    condition: JSON.stringify(buildNestedCondition(deviceId, sensors)),
+    condition: JSON.stringify(buildNestedCondition(sceneDevices, sensors)),
     actions: CREATE_SCENE_NOTIFICATIONS
       ? [
           {
@@ -220,20 +239,20 @@ function buildComplexSceneRequest(runId, sceneNumber, deviceId, sensors) {
   };
 }
 
-function buildNestedCondition(deviceId, sensors) {
-  const comparisons = sensors.map((sensor, index) => {
-    const sensorVar = { var: `device.${deviceId}.${sensor.tag}` };
-    const operators = [
-      [">", -1000000],
-      ["<", 1000000],
-      [">=", -1000000],
-      ["!=", -1000000],
-      ["<=", 1000000],
-    ];
-    const [operator, value] = operators[index % operators.length];
+function getSceneDevices(devices, sceneIndex) {
+  if (!DISTRIBUTE_SCENE_DEVICES_BETWEEN_SCENES) {
+    return [devices[sceneIndex]];
+  }
 
-    return { [operator]: [sensorVar, value] };
-  });
+  return [devices[sceneIndex], devices[(sceneIndex + 1) % devices.length]];
+}
+
+function buildNestedCondition(sceneDevices, sensors) {
+  const comparisons = sceneDevices.flatMap((device) =>
+    sensors.map((sensor) => ({
+      ">": [{ var: `device.${device.id}.${sensor.tag}` }, -1],
+    }))
+  );
 
   if (comparisons.length === 1) {
     return comparisons[0];
@@ -263,4 +282,31 @@ function buildNestedCondition(deviceId, sensors) {
       },
     ],
   };
+}
+
+function seedLatestDataPoints(devices, sensors) {
+  for (const device of devices) {
+    const now = Date.now();
+    const payload = sensors.map((sensor, index) => ({
+      tag: sensor.tag,
+      value: index + 1,
+      timeStamp: now,
+    }));
+
+    const response = http.post(
+      buildUrl(BASE_URL, `/devices/${device.accessToken}/data`),
+      JSON.stringify(payload),
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        tags: { name: "SeedLatestDataPoints" },
+      }
+    );
+
+    if (response.status !== 204) {
+      fail(`Seeding latest datapoints failed for device ${device.id}.`);
+    }
+  }
 }

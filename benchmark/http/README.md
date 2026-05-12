@@ -20,7 +20,8 @@ The script reads these values directly from the constants at the top of `script.
 - `DEVICE_COUNT`
 - `SENSORS_PER_DEVICE`
 - `CREATE_SCENES_WITH_DEVICES` - when `true`, setup creates one enabled scene per device with a nested JSON-logic condition referencing that device's sensors
-- `CREATE_SCENE_NOTIFICATIONS` - when `true`, each generated scene includes a `NOTIFICATION` action so triggered scenes create scene notifications
+- `CREATE_SCENE_NOTIFICATIONS` - when `true`, each generated scene includes a zero-cooldown `NOTIFICATION` action; requires `CREATE_SCENES_WITH_DEVICES=true`, and every benchmark datapoint request targets at least one always-true scene so it creates a notification
+- `DISTRIBUTE_SCENE_DEVICES_BETWEEN_SCENES` - when `true`, each generated scene references a rotating pair of devices; setup seeds latest datapoints first so cross-device scene checks hit Redis and still trigger
 - `VUS`
 - `DURATION`
 
