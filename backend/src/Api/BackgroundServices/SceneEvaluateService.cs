@@ -91,9 +91,14 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
                         }
 
                         var scenes = await dbContext
-                            .Scenes.Where(s => s.SensorTriggers.Any(st => deviceIds.Contains(st.DeviceId) && sensorTags.Contains(st.SensorTag)))
+                            .Scenes.Where(
+                                s =>
+                                    s.IsEnabled
+                                    && s.SensorTriggers.Any(st => deviceIds.Contains(st.DeviceId) && sensorTags.Contains(st.SensorTag))
+                            )
                             .Include(s => s.SensorTriggers)
                             .Include(s => s.Actions)
+                            .AsSplitQuery()
                             .ToListAsync(cancellationToken);
 
                         scenes = scenes
@@ -128,48 +133,41 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
         var dbContext = serviceScope.ServiceProvider.GetRequiredService<AppDbContext>();
         var redis = serviceScope.ServiceProvider.GetRequiredService<RedisService>();
         var timescale = serviceScope.ServiceProvider.GetRequiredService<TimeScaleDbContext>();
-        var resolvedDataPoints = new Dictionary<(Guid DeviceId, string SensorTag), DataPoint?>();
         var pendingNotifications = new List<SceneNotification>();
         var nowUtc = DateTimeOffset.UtcNow;
+        var evaluableScenes = scenes.Where(scene => CanEvaluateScene(scene, nowUtc)).ToList();
+        var resolvedDataPoints = await ResolveMissingDataPointsAsync(
+            incomingDataPoints,
+            evaluableScenes,
+            redis,
+            timescale,
+            cancellationToken
+        );
 
-        foreach (var scene in scenes)
+        foreach (var scene in evaluableScenes)
         {
-            // Check if the scene is enabled
-            if (!scene.IsEnabled)
-            {
-                continue;
-            }
-
-            // Check if the scene has a cooldown period
-            if (scene.LastTriggeredAt.HasValue && scene.CooldownAfterTriggerTime > 0)
-            {
-                var cooldownEnd = scene.LastTriggeredAt.Value.AddSeconds(scene.CooldownAfterTriggerTime);
-                if (nowUtc < cooldownEnd)
-                {
-                    continue;
-                }
-            }
-
             var data = new JsonObject();
             var sensorValues = new Dictionary<(Guid DeviceId, string SensorTag), double?>();
             foreach (var trigger in scene.SensorTriggers)
             {
                 var key = (trigger.DeviceId, trigger.SensorTag);
 
-                if (!incomingDataPoints.TryGetValue(key, out var dataPoint) && !resolvedDataPoints.TryGetValue(key, out dataPoint))
+                if (!incomingDataPoints.TryGetValue(key, out var dataPoint))
                 {
-                    dataPoint = await GetDataPointFromCache(trigger, redis);
-                    dataPoint ??= await GetDataPointFromDb(trigger, timescale, cancellationToken);
-                    resolvedDataPoints[key] = dataPoint;
+                    resolvedDataPoints.TryGetValue(key, out dataPoint);
                 }
 
                 sensorValues[key] = dataPoint?.Value;
 
                 if (dataPoint != null)
                 {
-                    data["device"] ??= new JsonObject();
-                    data["device"][dataPoint.DeviceId.ToString()] ??= new JsonObject();
-                    data["device"][dataPoint.DeviceId.ToString()][dataPoint.SensorTag.ToString()] = dataPoint.Value;
+                    var devices = data["device"] as JsonObject ?? new JsonObject();
+                    data["device"] = devices;
+
+                    var deviceId = dataPoint.DeviceId.ToString();
+                    var deviceSensors = devices[deviceId] as JsonObject ?? new JsonObject();
+                    devices[deviceId] = deviceSensors;
+                    deviceSensors[dataPoint.SensorTag] = dataPoint.Value;
                 }
             }
             try
@@ -200,6 +198,67 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
         {
             await dbContext.BulkInsertAsync(pendingNotifications, cancellationToken: cancellationToken);
         }
+    }
+
+    private static bool CanEvaluateScene(Scene scene, DateTimeOffset nowUtc)
+    {
+        if (!scene.IsEnabled)
+        {
+            return false;
+        }
+
+        if (!scene.LastTriggeredAt.HasValue || scene.CooldownAfterTriggerTime <= 0)
+        {
+            return true;
+        }
+
+        return nowUtc >= scene.LastTriggeredAt.Value.AddSeconds(scene.CooldownAfterTriggerTime);
+    }
+
+    private static async Task<Dictionary<(Guid DeviceId, string SensorTag), DataPoint?>> ResolveMissingDataPointsAsync(
+        IReadOnlyDictionary<(Guid DeviceId, string SensorTag), DataPoint> incomingDataPoints,
+        IReadOnlyCollection<Scene> scenes,
+        RedisService redis,
+        TimeScaleDbContext timescale,
+        CancellationToken cancellationToken
+    )
+    {
+        var unresolvedKeys = scenes
+            .SelectMany(scene => scene.SensorTriggers)
+            .Select(trigger => (trigger.DeviceId, trigger.SensorTag))
+            .Where(key => !incomingDataPoints.ContainsKey(key))
+            .Distinct()
+            .ToArray();
+
+        var resolvedDataPoints = new Dictionary<(Guid DeviceId, string SensorTag), DataPoint?>(unresolvedKeys.Length);
+        if (unresolvedKeys.Length == 0)
+        {
+            return resolvedDataPoints;
+        }
+
+        var redisKeys = unresolvedKeys.Select(static key => (RedisKey)GetLatestDataPointCacheKey(key.DeviceId, key.SensorTag)).ToArray();
+        var cachedValues = await redis.Db.StringGetAsync(redisKeys);
+        var dbFallbackKeys = new List<(Guid DeviceId, string SensorTag)>();
+
+        for (var i = 0; i < unresolvedKeys.Length; i++)
+        {
+            var key = unresolvedKeys[i];
+            var cachedDataPoint = TryCreateDataPointFromCacheValue(key.DeviceId, key.SensorTag, cachedValues[i]);
+            if (cachedDataPoint != null)
+            {
+                resolvedDataPoints[key] = cachedDataPoint;
+                continue;
+            }
+
+            dbFallbackKeys.Add(key);
+        }
+
+        foreach (var key in dbFallbackKeys)
+        {
+            resolvedDataPoints[key] = await GetDataPointFromDb(key.DeviceId, key.SensorTag, timescale, cancellationToken);
+        }
+
+        return resolvedDataPoints;
     }
 
     private static bool TryParseDataPoint(StreamEntry entry, out DataPoint dataPoint)
@@ -363,9 +422,8 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
         }
     }
 
-    private static async Task<DataPoint?> GetDataPointFromCache(SceneSensorTrigger trigger, RedisService redis)
+    private static DataPoint? TryCreateDataPointFromCacheValue(Guid deviceId, string sensorTag, RedisValue cacheResult)
     {
-        var cacheResult = await redis.Db.StringGetAsync($"device:{trigger.DeviceId}:{trigger.SensorTag}:last");
         if (!cacheResult.HasValue)
         {
             return null;
@@ -379,8 +437,8 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
 
         return new DataPoint
         {
-            DeviceId = trigger.DeviceId,
-            SensorTag = trigger.SensorTag,
+            DeviceId = deviceId,
+            SensorTag = sensorTag,
             TimeStamp = latestDataPoint.Ts ?? DateTimeOffset.UtcNow,
             Value = latestDataPoint.Value.Value,
             Latitude = latestDataPoint.Latitude,
@@ -390,16 +448,19 @@ public class SceneEvaluateService(IServiceProvider serviceProvider, ILogger<Scen
         };
     }
 
+    private static string GetLatestDataPointCacheKey(Guid deviceId, string sensorTag) => $"device:{deviceId}:{sensorTag}:last";
+
     private static async Task<DataPoint?> GetDataPointFromDb(
-        SceneSensorTrigger trigger,
+        Guid deviceId,
+        string sensorTag,
         TimeScaleDbContext timescale,
         CancellationToken cancellationToken
     )
     {
         return await LatestDataPointReader.GetLatestAsync(
             timescale,
-            trigger.DeviceId,
-            trigger.SensorTag,
+            deviceId,
+            sensorTag,
             null,
             null,
             cancellationToken
