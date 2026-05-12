@@ -11,7 +11,7 @@ import {
   createDeviceTemplate,
   deleteDevice,
   deleteDeviceTemplate,
-  replaceDeviceTemplateSensors,
+  replaceDeviceTemplateSensors
 } from "../core/devices.js";
 
 const BASE_URL = "http://localhost:9001/api";
@@ -21,15 +21,15 @@ const USERNAME = "stress@gmail.com";
 const PASSWORD = "stress";
 const DEVICE_COUNT = 1;
 const SENSORS_PER_DEVICE = 1;
-const DURATION = "30s";
+const DURATION = "10s";
 const CONNECT_TIMEOUT_MS = 2000;
 const CONNECT_READY_TIMEOUT_MS = 5000;
 const MQTT_QOS = 1;
 const MQTT_RETAIN = false;
 const MQTT_KEEPALIVE_SECONDS = 60;
-const ENQUEUE_BATCH_SIZE = 128;
+const ENQUEUE_BATCH_SIZE = 64;
 const ENQUEUE_INTERVAL_MS = 0;
-const MAX_PENDING_PUBLISHES = 64;
+const MAX_PENDING_PUBLISHES = 32;
 const DRAIN_TIMEOUT_MS = 5000;
 const PUBLISH_OPTIONS = Object.freeze({
   qos: MQTT_QOS,

@@ -16,7 +16,7 @@ import { buildUrl } from "../core/http.js";
 const BASE_URL = "http://localhost:9001/api";
 const USERNAME = "stress@gmail.com";
 const PASSWORD = "stress";
-const DEVICE_COUNT = 50;
+const DEVICE_COUNT = 1;
 const SENSORS_PER_DEVICE = 5;
 const VUS = 100;
 const DURATION = "30s";
