@@ -55,6 +55,11 @@
             :min="0"
             :step="1"
           />
+          <q-toggle
+            v-model="options.removeOutliers"
+            :label="t('datapoints.map.options.remove_outliers')"
+            color="primary"
+          />
         </div>
       </div>
     </q-card-section>
@@ -77,6 +82,7 @@ export type MapOptions = {
   markerFillOpacity: number;
   heatRadius: number;
   heatBlur: number;
+  removeOutliers: boolean;
 };
 
 const { t } = useI18n();

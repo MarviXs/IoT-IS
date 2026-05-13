@@ -925,6 +925,7 @@
         "heatmap_section": "Štýl mapy tepla",
         "heat_radius": "Polomer mapy tepla",
         "heat_blur": "Rozmazanie mapy tepla",
+        "remove_outliers": "Odstrániť odľahlé hodnoty",
         "heat_max_zoom": "Maximálne priblíženie mapy tepla"
       }
     }

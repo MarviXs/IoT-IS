@@ -135,7 +135,11 @@ const mapOptions = useStorage<MapOptions>('mapOptions', {
   markerFillOpacity: 0.7,
   heatRadius: 25,
   heatBlur: 15,
+  removeOutliers: true,
 });
+if (mapOptions.value.removeOutliers === undefined) {
+  mapOptions.value.removeOutliers = true;
+}
 
 function getSensorUniqueId(sensor: SensorData) {
   return `${sensor.deviceId}-${sensor.tag}`;
@@ -190,6 +194,10 @@ const heatLayerOptions = computed<HeatMapOptions>(() => ({
   radius: mapOptions.value.heatRadius,
   blur: mapOptions.value.heatBlur,
 }));
+const heatScalePercentiles = {
+  lower: 0.05,
+  upper: 0.95,
+};
 const heatScaleRange = computed(() => {
   const sensor = selectedSensor.value;
   if (!sensor) {
@@ -201,9 +209,14 @@ const heatScaleRange = computed(() => {
   if (numericValues.length === 0) {
     return { min: 0, max: 1 };
   }
-  const max = Math.max(...numericValues, 1);
-  const min = Math.min(...numericValues);
-  return { min, max };
+
+  const sortedValues = [...numericValues].sort((a, b) => a - b);
+  const min = mapOptions.value.removeOutliers ? percentile(sortedValues, heatScalePercentiles.lower) : sortedValues[0];
+  const max = mapOptions.value.removeOutliers
+    ? percentile(sortedValues, heatScalePercentiles.upper)
+    : sortedValues[sortedValues.length - 1];
+
+  return { min: min ?? 0, max: max ?? 1 };
 });
 const heatScaleTickLabels = computed(() => {
   const { min, max } = heatScaleRange.value;
@@ -291,7 +304,7 @@ function updateMapVisualization() {
     if (layer) {
       const heatPoints: HeatLatLngTuple[] = sensor
         ? pointsWithCoords.map((dp) => {
-            const intensity = typeof dp.value === 'number' ? Math.max(0.1, Math.abs(dp.value)) : 0.5;
+            const intensity = normalizeHeatIntensity(dp.value);
             return [dp.latitude, dp.longitude, intensity];
           })
         : [];
@@ -304,6 +317,42 @@ function updateMapVisualization() {
     const bounds = L.latLngBounds(latlngs);
     mapInstance.fitBounds(bounds, { padding: [30, 30] });
   }
+}
+
+function normalizeHeatIntensity(value: number | null | undefined) {
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    return 0.5;
+  }
+
+  const { min, max } = heatScaleRange.value;
+  if (max <= min) {
+    return 1;
+  }
+
+  const normalized = (Math.abs(value) - min) / (max - min);
+  return clamp(normalized, 0, 1);
+}
+
+function percentile(sortedValues: number[], percentileValue: number) {
+  if (sortedValues.length === 0) {
+    return 0;
+  }
+
+  const index = clamp(percentileValue, 0, 1) * (sortedValues.length - 1);
+  const lowerIndex = Math.floor(index);
+  const upperIndex = Math.ceil(index);
+
+  if (lowerIndex === upperIndex) {
+    return sortedValues[lowerIndex] ?? 0;
+  }
+
+  const lowerValue = sortedValues[lowerIndex] ?? 0;
+  const upperValue = sortedValues[upperIndex] ?? lowerValue;
+  return lowerValue + (upperValue - lowerValue) * (index - lowerIndex);
+}
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max);
 }
 
 onMounted(() => {

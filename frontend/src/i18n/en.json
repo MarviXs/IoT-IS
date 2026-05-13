@@ -980,6 +980,7 @@
         "heatmap_section": "Heatmap Style",
         "heat_radius": "Heat radius",
         "heat_blur": "Heat blur",
+        "remove_outliers": "Remove Outliers",
         "heat_max_zoom": "Heat max zoom"
       }
     }
