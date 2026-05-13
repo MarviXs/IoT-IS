@@ -169,7 +169,18 @@ async function getDataPoints() {
     return;
   }
 
-  dataPoints.value = data ?? [];
+  dataPoints.value = (data ?? []).filter(hasUsableCoordinates);
+}
+
+function hasUsableCoordinates(dataPoint: DataPoint) {
+  if (dataPoint.latitude === null || dataPoint.latitude === undefined) {
+    return false;
+  }
+  if (dataPoint.longitude === null || dataPoint.longitude === undefined) {
+    return false;
+  }
+
+  return dataPoint.latitude !== 0 || dataPoint.longitude !== 0;
 }
 
 async function updateTimeRange(timeRange: TimeRange) {
