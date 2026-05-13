@@ -7,6 +7,13 @@
       </q-card-section>
       <q-separator />
       <q-card-section class="column q-gutter-sm">
+        <div class="text-subtitle1">v1.7.2</div>
+        <ul class="q-pl-md q-my-none">
+          <li>Fixed map heatmap showing incorrect values</li>
+        </ul>
+      </q-card-section>
+      <q-separator spaced inset />
+      <q-card-section class="column q-gutter-sm">
         <div class="text-subtitle1">v1.7.1</div>
         <ul class="q-pl-md q-my-none">
           <li>Fixed the missing time range selector on the device map page</li>

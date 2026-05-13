@@ -135,10 +135,10 @@ const mapOptions = useStorage<MapOptions>('mapOptions', {
   markerFillOpacity: 0.7,
   heatRadius: 25,
   heatBlur: 15,
-  removeOutliers: true,
+  removeOutliers: false,
 });
 if (mapOptions.value.removeOutliers === undefined) {
-  mapOptions.value.removeOutliers = true;
+  mapOptions.value.removeOutliers = false;
 }
 
 function getSensorUniqueId(sensor: SensorData) {
